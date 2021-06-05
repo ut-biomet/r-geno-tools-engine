@@ -17,3 +17,92 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 The goal of GWAS-Engine is to provide simple "input/output" style code for GWAS analysis in order to be used inside an API.
+
+
+# How to use GWAS-Engine
+
+
+## Dependencies
+
+```{r dep}
+# required packages
+library(gaston) # for many functions
+library(rjson) # manage json format
+library(manhattanly) # manhattan plot using plotly
+```
+
+## Load R scripts
+
+Load all `.R` files in folder `src`.
+ 
+```{r source}
+invisible(
+  sapply(FUN = source,
+         X = list.files("src", pattern = ".R$",full.names = T))
+)
+```
+
+
+## Load data
+
+Example data are stored in the `data` folder.
+
+```{r loadDta}
+gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
+pDta <- readPhenoData("data/pheno/testPhenoData01.csv")
+```
+
+For online data, they can be loaded using:
+
+```{r downloadDta, eval=FALSE}
+gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
+pDta <- readPhenoData("data/pheno/testPhenoData01.csv")
+```
+
+
+## GWAS
+
+To run a GWAS analysis you should first process the data using `prepareData` and then call the `gwas` function.
+
+```{r}
+data <- prepareData(gDta=gDta, pDta = pDta)
+
+gwasRes <- gwas(data = data,
+                trait = "Panicle.length",
+                test = "score",
+                fixed = 0,
+                response = "quantitative",
+                thresh_maf = 0.05,
+                thresh_callrate = 0.95)
+head(gwasRes)
+```
+
+## Manhattan plot
+
+```{r}
+#* Manhattan plot (type 2)
+#* @tag Plots
+#* @param modelS3Path url of the model data file (rds file)
+#* @param adj_method either bonferroni or FDR
+#* @param thresh_p
+#* @param chr names of the chromosomes to show separated using comma. Show all chromosomes if nothing is specified.
+#* @serializer htmlwidget
+#* @get /manplot
+# function(res, modelS3Path, adj_method, thresh_p = 0.05, chr = NA){
+```
+
+
+
+## LD PLot
+
+```{r}
+#* LD plot
+#* @tag Plots
+#* @param geno_url url of the markers data file (.vcf.gz file)
+#* @param from (total number of SNP should be < 50)
+#* @param to (total number of SNP should be < 50)
+#* @serializer png
+#* @get /LDplot
+# function(res, geno_url, from, to){
+```
+
