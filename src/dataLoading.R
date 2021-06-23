@@ -254,15 +254,29 @@ readGWAS <- function(file) {
   gwasRes <- readLines(file)
   logger$log("Read model file DONE ")
   logger$log("Convert Json to data.frame ... ")
-  gwasRes <- fromJSON(gwasRes)
-  gwasRes$gwas <- as.data.frame(gwasRes$gwas)
+  gwasRes <- jsonlite::fromJSON(gwasRes)
   logger$log("Convert Json to data.frame DONE ")
 
   logger$log("DONE, return output.")
   gwasRes
 }
 
+#' saveGWAS save gwas result in a temporary file
+#'
+#' @param gwas data.frame return by `gwas` function
+#'
+#' @return path of the created file
+#' @export
+#'
+#' @examples
+saveGWAS <- function(gwas) {
+  logger <- logger$new("r-saveGWAS()")
 
+  file <- tempfile(fileext = ".json")
+  writeLines(jsonlite::toJSON(gwas, dataframe = "rows", pretty = T),
+             con = file)
+  return(file)
+}
 
 #' Filter individuals and calculate genetic relatinoal matrix
 #'
