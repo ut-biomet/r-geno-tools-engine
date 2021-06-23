@@ -19,19 +19,14 @@ downloadGenoData <- function(url) {
   logger$log("Download geno file ...")
 
   # download data file:
-  tryCatch({
-    download.file(url, localFile)
-  }, error = function(err) {
-    logger$log("Download geno file FAILED.\n\tURL is:", url,
-               "\nError message is:\n\t", err$message,
-               redis = TRUE,
-               status = "FAILED",
-               action_type = "GET_MARKER_DTA")
-    return(NULL)
-  })
-
+  logger$log("Download genotypic file ... ")
+  download.file(url, localFile)
+  logger$log("Download genotypic file DONE")
+  logger$log("Read genotypic file ...")
   dta <- readGenoData(localFile)
+  logger$log("Read genotypic file DONE")
 
+  logger$log("DONE, return output.")
   dta
 }
 
@@ -41,7 +36,7 @@ downloadGenoData <- function(url) {
 #'
 #' @return `data.frame`
 downloadPhenoData <- function(url){
-  logger <- logger$new("r-getPhenoData()")
+  logger <- logger$new("r-downloadPhenoData()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "pheno",
                         tmpdir = tempdir(),
@@ -49,18 +44,11 @@ downloadPhenoData <- function(url){
 
   # download data file:
   logger$log("Download phenotypic file ... ")
-  tryCatch({
-    download.file(url, localFile)
-  }, error = function(err) {
-    logger$log("Download geno file FAILED.\n\tURL is:", url,
-               "\nError message is:\n\t", err$message,
-               redis = TRUE,
-               status = "FAILED",
-               action_type = "GET_PHENO_DTA")
-    return(NULL)
-  })
-
+  download.file(url, localFile)
+  logger$log("Download phenotypic file DONE")
+  logger$log("Read phenotypic file ...")
   dta <- readPhenoData(localFile)
+  logger$log("Read phenotypic file DONE")
 
   logger$log("DONE, return output.")
   dta
@@ -68,14 +56,14 @@ downloadPhenoData <- function(url){
 
 
 
-#' Download data for GWAS model
+#' Download and prepare data for GWAS analysis
 #'
 #' @param genoUrl
 #' @param phenoUrl
 #'
 #' @return List
 downloadData <- function(genoUrl, phenoUrl){
-  logger <- logger$new("r-loadData()")
+  logger <- logger$new("r-downloadData()")
   logger$log("get geno data ...")
   mDta <- downloadGenoData(genoUrl)
   logger$log("get geno data DONE")
@@ -84,56 +72,35 @@ downloadData <- function(genoUrl, phenoUrl){
   pDta <- downloadPhenoData(phenoUrl)
   logger$log("get pheno data DONE")
 
-
-  # Remove from geno data individuals that are not in phenotypic data-set
-  logger$log("Remove from geno data individuals that are not in phenotypic data-set ...")
-  mDta <- select.inds(mDta, id %in% rownames(pDta))
-  logger$log("Remove from geno data individuals that are not in phenotypic data-set DONE")
-
-
-  # reorder phenotypic data with id in bed matrix
-  logger$log("reorder matrix ...")
-  pDta <- pDta[mDta@ped$id,]
-  logger$log("reorder matrix DONE")
-
-
-  # remove monomorphic geno
-  logger$log("remove monomorphic geno ...")
-  mDta <- select.snps(mDta, maf > 0)
-  logger$log("remove monomorphic geno DONE")
-
-
-  # calculate genetic relational matrix
-  logger$log("calculate genetic relatinoal matrix ...")
-  grm <- GRM(mDta)
-  logger$log("calculate genetic relatinoal matrix DONE")
+  logger$log("prepare data ...")
+  dta <- prepareData(mDta, pDta)
+  logger$log("prepare data DONE")
 
   logger$log("DONE, return output.")
 
-  list(genoData = mDta, phenoData = pDta, grMatrix = grm)
+  dta
 }
 
 
 #' Download a gwas reults
 #'
-#' @param url url of the model data file (json file)
+#' @param url url of the result data file (json file)
 #'
 #' @return `data.frame`
 downloadGWAS <- function(url){
-  logger <- logger$new("r-loadModel()")
+  logger <- logger$new("r-downloadGWAS()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedModel",
+  localFile <- tempfile(pattern = "downloadedResult",
                         tmpdir = tempdir(),
                         fileext = ".json")
-  logger$log("Download model file ... ")
+  logger$log("Download result file ... ")
   download.file(url, localFile)
 
-  logger$log("Read model file ... ")
+  logger$log("Read result file ... ")
   gwasRes <- readLines(localFile)
-  logger$log("Read model file DONE ")
+  logger$log("Read result file DONE ")
   logger$log("Convert Json to data.frame ... ")
   gwasRes <- fromJSON(gwasRes)
-  gwasRes$gwas <- as.data.frame(gwasRes$gwas)
   logger$log("Convert Json to data.frame DONE ")
 
   logger$log("DONE, return output.")
@@ -151,7 +118,6 @@ downloadGWAS <- function(url){
 #' @return `gaston::bed.matrix`
 readGenoData <- function(file) {
   logger <- logger$new("r-readGenoData()")
-
   logger$log("Check file extention ... ")
   ext <- tools::file_ext(file)
   if (identical(ext, "gz")) {
@@ -196,7 +162,7 @@ readPhenoData <- function(file, row.names = 1, ...) {
 }
 
 
-#' Download data for GWAS model
+#' Download and prepare data for GWAS result
 #'
 #' @param genoFile
 #' @param phenoFile
@@ -205,40 +171,20 @@ readPhenoData <- function(file, row.names = 1, ...) {
 readData <- function(genoFile, phenoFile){
   logger <- logger$new("r-readData()")
   logger$log("get geno data ...")
-  mDta <- getGenoData(genoFile)
+  mDta <- readGenoData(genoFile)
   logger$log("get geno data DONE")
 
   logger$log("get pheno data ...")
   pDta <- readPhenoData(phenoFile)
   logger$log("get pheno data DONE")
 
-
-  # Remove from geno data individuals that are not in phenotypic data-set
-  logger$log("Remove from geno data individuals that are not in phenotypic data-set ...")
-  mDta <- select.inds(mDta, id %in% rownames(pDta))
-  logger$log("Remove from geno data individuals that are not in phenotypic data-set DONE")
-
-
-  # reorder phenotypic data with id in bed matrix
-  logger$log("reorder matrix ...")
-  pDta <- pDta[mDta@ped$id,]
-  logger$log("reorder matrix DONE")
-
-
-  # remove monomorphic geno
-  logger$log("remove monomorphic geno ...")
-  mDta <- select.snps(mDta, maf > 0)
-  logger$log("remove monomorphic geno DONE")
-
-
-  # calculate genetic relational matrix
-  logger$log("calculate genetic relatinoal matrix ...")
-  grm <- GRM(mDta)
-  logger$log("calculate genetic relatinoal matrix DONE")
+  logger$log("prepare data ...")
+  dta <- prepareData(mDta, pDta)
+  logger$log("prepare data DONE")
 
   logger$log("DONE, return output.")
 
-  list(genoData = mDta, phenoData = pDta, grMatrix = grm)
+  dta
 }
 
 
@@ -250,9 +196,9 @@ readData <- function(genoFile, phenoFile){
 readGWAS <- function(file) {
   logger <- logger$new("r-readGWAS()")
 
-  logger$log("Read model file ... ")
+  logger$log("Read result file ... ")
   gwasRes <- readLines(file)
-  logger$log("Read model file DONE ")
+  logger$log("Read result file DONE ")
   logger$log("Convert Json to data.frame ... ")
   gwasRes <- jsonlite::fromJSON(gwasRes)
   logger$log("Convert Json to data.frame DONE ")
@@ -288,7 +234,7 @@ prepareData <- function(gDta, pDta) {
   logger <- logger$new("r-prepareData()")
   # Remove from geno data individuals that are not in phenotypic data-set
   logger$log("Remove from geno data individuals that are not in phenotypic data-set ...")
-  gDta <- select.inds(gDta, id %in% rownames(pDta))
+  gDta <- gaston::select.inds(gDta, id %in% rownames(pDta))
   logger$log("Remove from geno data individuals that are not in phenotypic data-set DONE")
 
 
@@ -300,13 +246,13 @@ prepareData <- function(gDta, pDta) {
 
   # remove monomorphic geno
   logger$log("remove monomorphic geno ...")
-  gDta <- select.snps(gDta, maf > 0)
+  gDta <- gaston::select.snps(gDta, maf > 0)
   logger$log("remove monomorphic geno DONE")
 
 
   # calculate genetic relational matrix
   logger$log("calculate genetic relatinoal matrix ...")
-  grm <- GRM(gDta)
+  grm <- gaston::GRM(gDta)
   logger$log("calculate genetic relatinoal matrix DONE")
 
   logger$log("DONE, return output.")
