@@ -1,0 +1,58 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Data
+
+This folder contain example data to run this engine.
+
+## `markers/`
+
+Genetic data.
+
+The `.vcf` files are not gitted.
+
+```{r}
+list.files("markers")
+```
+
+```{r}
+cat(paste(readLines("markers/testMarkerData01.vcf", n=20), collapse = "\n"))
+```
+
+
+## `pheno/`
+
+Phenotypic data.
+
+```{r}
+list.files("pheno")
+```
+
+```{r}
+cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
+```
+
+
+## `models/`
+
+To store the models created by the engine.
+
+
+```{r}
+cat(paste(readLines("models/gwasResult.json", n=30), collapse = "\n"))
+```
+
+
+
+
