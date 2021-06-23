@@ -25,10 +25,11 @@ The goal of GWAS-Engine is to provide simple "input/output" style code for GWAS 
 ## Dependencies
 
 ```{r dep}
-# required packages
+# required packages for using GWAS-Engine:
 library(gaston) # for many functions
-library(rjson) # manage json format
+library(jsonlite) # manage json format
 library(manhattanly) # manhattan plot using plotly
+library(R6) # R object oriented
 ```
 
 ## Load R scripts
@@ -55,14 +56,17 @@ pDta <- readPhenoData("data/pheno/testPhenoData01.csv")
 For online data, they can be loaded using:
 
 ```{r downloadDta, eval=FALSE}
-gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
-pDta <- readPhenoData("data/pheno/testPhenoData01.csv")
+gDta <- downloadGenoData("url/to/geno_data.vcf")
+pDta <- downloadPhenoData("url/to/pheno_data.csv")
+dta <- downloadData("url/to/geno_data.vcf", "url/to/pheno_data.csv")
 ```
 
 
 ## GWAS
 
 To run a GWAS analysis you should first process the data using `prepareData` and then call the `gwas` function.
+
+The `gwas` function return a `data.frame`.
 
 ```{r}
 data <- prepareData(gDta=gDta, pDta = pDta)
@@ -77,32 +81,41 @@ gwasRes <- gwas(data = data,
 head(gwasRes)
 ```
 
-## Manhattan plot
+
+Save GWAS result in a `.json` file.
 
 ```{r}
-#* Manhattan plot (type 2)
-#* @tag Plots
-#* @param modelS3Path url of the model data file (rds file)
-#* @param adj_method either bonferroni or FDR
-#* @param thresh_p
-#* @param chr names of the chromosomes to show separated using comma. Show all chromosomes if nothing is specified.
-#* @serializer htmlwidget
-#* @get /manplot
-# function(res, modelS3Path, adj_method, thresh_p = 0.05, chr = NA){
+(file <- saveGWAS(gwasRes))
+cat(paste(readLines(file, n=20), collapse = "\n"))
 ```
+
+## Manhattan plot
+
+This function generates a "plotly" graph.
+
+```{r eval=FALSE}
+manPlot(gwas = gwasRes,
+        adj_method = "bonferroni",
+        thresh_p = 0.05,
+        chr = NA,
+        title = "Readme Example")
+```
+![screenshot of the plotly graph](README_files/manPlot.png)
+
 
 
 
 ## LD PLot
 
+Compute $r^2$ Linkage Disequilibrium (LD) between given SNPs and save a plot in a temporary PNG file.
+
 ```{r}
-#* LD plot
-#* @tag Plots
-#* @param geno_url url of the markers data file (.vcf.gz file)
-#* @param from (total number of SNP should be < 50)
-#* @param to (total number of SNP should be < 50)
-#* @serializer png
-#* @get /LDplot
-# function(res, geno_url, from, to){
+(imgFile <- LDplot(gDta, 1, 20, write = TRUE))
 ```
 
+
+```{r}
+library(png)
+img <- readPNG(imgFile)
+grid::grid.raster(img)
+```
