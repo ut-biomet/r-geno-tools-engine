@@ -26,8 +26,7 @@ logger <- R6::R6Class(
     log = function(...,
                    time = TRUE,
                    context = TRUE,
-                   status = NULL,
-                   action_type = self$context){
+                   status = NULL){
       if (time) {
         time <- as.character(Sys.time())
       } else {

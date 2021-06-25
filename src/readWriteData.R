@@ -210,15 +210,24 @@ readGWAS <- function(file) {
 #' saveGWAS save gwas result in a temporary file
 #'
 #' @param gwas data.frame return by `gwas` function
+#' @param dir directory where to save the data,
+#' by default it is a temporary directory
 #'
 #' @return path of the created file
 #' @export
 #'
 #' @examples
-saveGWAS <- function(gwas) {
+saveGWAS <- function(gwas, dir = tempdir()) {
   logger <- logger$new("r-saveGWAS()")
 
-  file <- tempfile(fileext = ".json")
+  logger$log('Check dir ...')
+  if (!dir.exists(dir)) {
+    logger$log('Error: "dir" directory should exists')
+    stop('Error: "dir" directory should exists')
+  }
+  logger$log('Check dir DONE')
+
+  file <- tempfile(fileext = ".json", tmpdir = dir)
   writeLines(jsonlite::toJSON(gwas, dataframe = "rows", pretty = T),
              con = file)
   return(file)
