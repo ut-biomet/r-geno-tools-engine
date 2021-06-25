@@ -222,7 +222,7 @@ gwas <- function(data,
   ### FILTER SAMPLES ----
   # remove samples with missing phenotypic values
   logger$log("remove samples with missing phenotypic values ...")
-  bm <- select.inds(bm, !is.na(pheno))
+  bm <- gaston::select.inds(bm, !is.na(pheno))
   K <- K[bm@ped$id, bm@ped$id]
   logger$log("remove samples with missing phenotypic values DONE")
 
@@ -231,15 +231,15 @@ gwas <- function(data,
   # keep marker with a large enough MAF (>0.05)
   # and low missing rate (callrate>0.9)
   logger$log("filter SNPs ...")
-  bm <- select.snps(bm, maf > thresh_maf)
-  bm <- select.snps(bm, callrate > thresh_callrate)
+  bm <- gaston::select.snps(bm, maf > thresh_maf)
+  bm <- gaston::select.snps(bm, callrate > thresh_callrate)
   logger$log("filter SNPs DONE")
 
   ### FIT MODEL ----
 
   logger$log("fit model ...")
   if (test != "score") {
-    gwa <- association.test(
+    gwa <- gaston::association.test(
       bm,
       method = "lmm",
       response = response,
@@ -248,7 +248,7 @@ gwas <- function(data,
       p = fixed
     )
   } else {
-    gwa <- association.test(
+    gwa <- gaston::association.test(
       bm,
       method = "lmm",
       response = response,
@@ -262,4 +262,66 @@ gwas <- function(data,
 
   return(gwa)
 
+}
+
+
+
+#' Title
+#'
+#' @param vector of p-values
+#' @param adj_method  correction method: "holm", "hochberg",
+#' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
+#' @param thresh_p optional value of the threshold
+#'
+#' @details The method "hommel" is not implemented because it is too long to calculate.
+#' @return list of two elements: "p_adj" vector of adjusted p values, "thresh_adj" the adjusted threshold (if thresh_p is preovided, NULL if not)
+adjustPval <- function(p, adj_method, thresh_p = NULL){
+  logger <- logger$new("r-adjustPval()")
+
+  # check adjMethod
+  logger$log("Check adj_method ...")
+  if (!adj_method %in%
+      c("holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none")) {
+    logger$log('Error: "adj_method" shoule be one of: "holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none"')
+    stop('Error: "adj_method" shoule be one of: "holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none"')
+  }
+  logger$log("Check adj_method DONE")
+
+
+  # P-Values adjustment
+  logger$log("Adjust p-values ...")
+  p_adj <- p.adjust(p,
+                         method = adj_method,
+                         n = length(p))
+  logger$log("Adjust p-values DONE")
+
+  if (!is.null(thresh_p)) {
+    if (!adj_method == "none") {
+    # get adjusted threshold
+    logger$log("Adjust threshold ...")
+    if (thresh_p > 1 | thresh_p < 0) {
+      stop('Error: "thresh_p" should be between 0 and 1.')
+    }
+    thresh_adj <- uniroot(
+      function(log10p){
+        # accuracy is bad if we don't transform with log10
+        x <- 10^(log10p)
+        p.adjust(c(x, p),
+                 method = adj_method,
+                 n = length(p) + 1)[1] - thresh_p
+      },
+      c(log10(2e-12), log10(1))
+    )
+    thresh_adj <- 10^(thresh_adj$root)
+    logger$log("Adjust threshold DONE")
+    } else {
+      thresh_adj <- thresh_p
+    }
+  } else {
+    thresh_adj <- NULL
+  }
+  logger$log("DONE, return output")
+
+  list("p_adj" = p_adj,
+       "thresh_adj" = thresh_adj)
 }
