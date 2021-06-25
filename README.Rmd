@@ -19,6 +19,8 @@ knitr::opts_chunk$set(
 The goal of GWAS-Engine is to provide simple "input/output" style code for GWAS analysis in order to be used inside an API.
 
 
+
+
 # How to use GWAS-Engine
 
 
@@ -26,6 +28,18 @@ The goal of GWAS-Engine is to provide simple "input/output" style code for GWAS 
 
 ```{r dep}
 # required packages for using GWAS-Engine:
+stopifnot(
+  compareVersion("1.5.7", as.character(packageVersion("gaston"))) != 1
+  )
+stopifnot(
+  compareVersion("1.7.2", as.character(packageVersion("jsonlite"))) != 1
+  )
+stopifnot(
+  compareVersion("0.3.0", as.character(packageVersion("manhattanly"))) != 1
+  )
+stopifnot(
+  compareVersion("2.5.0", as.character(packageVersion("R6"))) != 1
+  )
 library(gaston) # for many functions
 library(jsonlite) # manage json format
 library(manhattanly) # manhattan plot using plotly
@@ -106,8 +120,8 @@ manPlot(gwas = gwasRes,
 Compute $r^2$ Linkage Disequilibrium (LD) between given SNPs and save a plot in a temporary PNG file.
 
 ```{r}
-gDta <- readGenoData("data/markers/testMarkerData01.vcf")
-(imgFile <- LDplot(gDta, 1, 20, write = TRUE))
+gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
+(imgFile <- LDplot(gDta, 1, 20, write = TRUE, dir = tempdir()))
 ```
 
 
@@ -115,4 +129,15 @@ gDta <- readGenoData("data/markers/testMarkerData01.vcf")
 library(png)
 img <- readPNG(imgFile)
 grid::grid.raster(img)
+```
+
+
+
+# Tests
+
+The R package `testthat` is needed to run the unit tests.
+To run the unit tests of this engine you can use the command:
+
+```sh
+Rscript ./tests/testthat.R
 ```
