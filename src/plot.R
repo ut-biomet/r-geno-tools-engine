@@ -60,18 +60,16 @@ manPlot <- function(gwas,
 #' `downloadGenoData`.
 #' @param from lower bound of the range of SNPs for which the LD is computed
 #' @param to upper bound of the range of SNPs for which the LD is computed
-#' @param write should the function write the plot in a png file.
-#'  Default: `FALSE`
-#' @param dir if write is TRUE, path of the directory where to save the file, by default dir is set to a temporary directory.
+#' @param dir path of the directory where to save the file, by default dir is set to a temporary directory, if null, the plot will be displayed.
 #'  the image will be written in a temporary dir. Default: `NULL`
 #'
 #' @details `from` should be lower than `to`, and the maximum ranger size is 50.
 #' (In order to get a readable image). If write is `TRUE`, the function will write the plot in a png file, else it will plot it.
-#' @return null if `write` is false, else the path of the png file.
+#' @return null if `dir` is NULL, else the path of the png file.
 #' @export
 #'
 #' @examples
-LDplot <- function(geno, from, to, write = FALSE, dir = tempdir()) {
+LDplot <- function(geno, from, to, dir = tempdir()) {
   logger <- logger$new("r-LDplot()")
 
   logger$log('Check "from" < "to"...')
@@ -89,14 +87,7 @@ LDplot <- function(geno, from, to, write = FALSE, dir = tempdir()) {
   }
   logger$log('Check number of SNP < 50 DONE')
 
-  logger$log('Check write ...')
-  if (!is.logical(write)) {
-    logger$log('Error: "write" should be a boolean')
-    stop('Error: "write" should be a boolean')
-  }
-  logger$log('Check write DONE')
-
-  if (write) {
+  if (!is.null(dir)) {
     logger$log('Check dir ...')
     if (!dir.exists(dir)) {
       logger$log('Error: "dir" directory should exists')
@@ -113,19 +104,19 @@ LDplot <- function(geno, from, to, write = FALSE, dir = tempdir()) {
   logger$log("Compute LD DONE")
 
   logger$log("Create LD plot ...")
-  if (write) {
+  if (!is.null(dir)) {
     imgFile <- tempfile(fileext = ".png", tmpdir = dir)
     png(imgFile, width = 2400, height = 1600)
     logger$log("Create create file:", imgFile)
   }
   gaston::LD.plot(ld, snp.positions = geno@snps$pos[from:to])
-  if (write) {
+  if (!is.null(dir)) {
     dev.off()
   }
   logger$log("Create LD plot DONE")
 
   logger$log("DONE, return output")
-  if (write) {
-  return(imgFile)
+  if (!is.null(dir)) {
+    return(imgFile)
   } else {return(NULL)}
 }

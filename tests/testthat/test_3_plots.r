@@ -8,24 +8,24 @@ capture_output({
   test_that("LD plot", {
     gDta <- readGenoData("../../data/markers/testMarkerData01.vcf")
     expect_error({
-      imgFile <- LDplot(gDta, 1, 20, write = FALSE)
+      imgFile <- LDplot(gDta, 1, 20, dir = NULL)
     }, NA)
     expect_error({
-      imgFile <- LDplot(gDta, 42, 72, write = TRUE)
+      imgFile <- LDplot(gDta, 42, 72, dir = tempdir())
     }, NA)
     expect_error({
-      imgFile <- LDplot(gDta, 1024, 1074, write = TRUE, dir = "testOutput")
+      imgFile <- LDplot(gDta, 1024, 1074, dir = "testOutput")
     }, NA)
     file.remove(imgFile)
 
     expect_error({
-      imgFile <- LDplot(gDta, 20, 2, write = FALSE)
+      imgFile <- LDplot(gDta, 20, 2, dir = NULL)
     }, '"from" should be lower than "to"')
     expect_error({
-      imgFile <- LDplot(gDta, 20, 200, write = FALSE)
+      imgFile <- LDplot(gDta, 20, 200, dir = NULL)
     }, 'range size \\("to" - "from"\\) should be lower or equal than 50')
     expect_error({
-      imgFile <- LDplot(gDta, 1024, 1074, write = TRUE, dir = "doNotExists")
+      imgFile <- LDplot(gDta, 1024, 1074, dir = "doNotExists")
     }, 'Error: "dir" directory should exists')
   })
 
