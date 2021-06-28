@@ -4,7 +4,6 @@
 # Description:
 # unit test for gwas analysis
 
-i <- 1
 capture.output({
   files <- list(c(g = "../../data/markers/testMarkerData01.vcf",
                   p = "../../data/pheno/testPhenoData01.csv"))
