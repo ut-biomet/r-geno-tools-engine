@@ -10,3 +10,7 @@ invisible(
 test_dir("tests/testthat",
          stop_on_failure = TRUE,
          stop_on_warning = TRUE)
+
+# clean testOutput dir
+f <- list.files("tests/testthat/testOutput/", full.names = TRUE)
+lapply(f, file.remove)

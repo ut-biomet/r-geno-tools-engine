@@ -46,6 +46,7 @@ library(manhattanly) # manhattan plot using plotly
 library(R6) # R object oriented
 ```
 
+
 ## Load R scripts
 
 Load all `.R` files in folder `src`.
@@ -56,6 +57,59 @@ invisible(
          X = list.files("src", pattern = ".R$",full.names = T))
 )
 ```
+
+## Main functions
+
+There is the list of some main function that GWAS-engine can run.
+
+### Run GWAS
+
+```{r runGWAS}
+gwas_results <- run_gwas(genoFile = "data/markers/testMarkerData01.vcf.gz",
+                         phenoFile = "data/pheno/testPhenoData01.csv",
+                         genoUrl = NULL,
+                         phenoUrl = NULL,
+                         trait = "Flowering.time.at.Arkansas",
+                         test = "score",
+                         fixed = 0,
+                         response = "quantitative",
+                         thresh_maf = 0.05,
+                         thresh_callrate = 0.95,
+                         dir = tempdir())
+gwas_results$file
+substr(gwas_results$gwasRes, start=1, stop=500)
+```
+
+
+### Draw Manhattan Plot
+
+```{r draw_manhattanPlot}
+p <- draw_manhattanPlot(gwasFile = gwas_results$file,
+                        gwasUrl = NULL,
+                        adj_method = "bonferroni",
+                        thresh_p = 0.05,
+                        chr = NA,
+                        title = "Example of Manhattan Plot")
+```
+
+![screenshot of the plotly graph](README_files/manPlot.png)
+
+### Draw LD plot
+
+```{r draw_ldPlot}
+imgFile <- draw_ldPlot(genoFile = "data/markers/testMarkerData01.vcf.gz",
+                       genoUrl = NULL,
+                       from = 42,
+                       to = 62,
+                       dir = tempdir()) 
+```
+
+```{r}
+library(png)
+img <- readPNG(imgFile)
+grid::grid.raster(img)
+```
+
 
 
 ## Load data
@@ -82,7 +136,7 @@ The `gwas` function return a `data.frame`.
 
 ```{r}
 gwasRes <- gwas(data = data,
-                trait = "Panicle.length",
+                trait = "Flowering.time.at.Arkansas",
                 test = "score",
                 fixed = 0,
                 response = "quantitative",
@@ -103,12 +157,12 @@ cat(paste(readLines(file, n=20), collapse = "\n"))
 
 This function generates a "plotly" graph.
 
-```{r eval=FALSE}
-manPlot(gwas = gwasRes,
-        adj_method = "bonferroni",
-        thresh_p = 0.05,
-        chr = NA,
-        title = "Readme Example")
+```{r manPlot}
+p <- manPlot(gwas = gwasRes,
+             adj_method = "bonferroni",
+             thresh_p = 0.05,
+             chr = NA,
+             title = "Readme Example")
 ```
 ![screenshot of the plotly graph](README_files/manPlot.png)
 
@@ -121,12 +175,14 @@ Compute $r^2$ Linkage Disequilibrium (LD) between given SNPs and save a plot in 
 
 ```{r}
 gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
-(imgFile <- LDplot(gDta, 1, 20, write = TRUE, dir = tempdir()))
+(imgFile <- LDplot(geno = gDta,
+                   from = 1,
+                   to = 20,
+                   dir = tempdir()))
 ```
 
 
 ```{r}
-library(png)
 img <- readPNG(imgFile)
 grid::grid.raster(img)
 ```

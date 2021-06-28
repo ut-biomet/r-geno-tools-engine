@@ -61,6 +61,212 @@ invisible(
 )
 ```
 
+## Main functions
+
+There is the list of some main function that GWAS-engine can run.
+
+### Run GWAS
+
+``` r
+gwas_results <- run_gwas(genoFile = "data/markers/testMarkerData01.vcf.gz",
+                         phenoFile = "data/pheno/testPhenoData01.csv",
+                         genoUrl = NULL,
+                         phenoUrl = NULL,
+                         trait = "Flowering.time.at.Arkansas",
+                         test = "score",
+                         fixed = 0,
+                         response = "quantitative",
+                         thresh_maf = 0.05,
+                         thresh_callrate = 0.95,
+                         dir = tempdir())
+#> 2021-06-28 17:01:02 - r-run_gwas(): Get data ...
+#> 2021-06-28 17:01:02 - r-readData(): get geno data ...
+#> 2021-06-28 17:01:02 - r-readGenoData(): Check file extention ... 
+#> 2021-06-28 17:01:02 - r-readGenoData(): Read geno file ... 
+#> ped stats and snps stats have been set. 
+#> 'p' has been set. 
+#> 'mu' and 'sigma' have been set.
+#> 2021-06-28 17:01:04 - r-readGenoData(): Read geno file DONE 
+#> 2021-06-28 17:01:04 - r-readGenoData(): DONE, return output.
+#> 2021-06-28 17:01:04 - r-readData(): get geno data DONE
+#> 2021-06-28 17:01:04 - r-readData(): get pheno data ...
+#> 2021-06-28 17:01:04 - r-readPhenoData(): Read phenotypic file ... 
+#> 2021-06-28 17:01:04 - r-readPhenoData(): Read phenotypic file DONE 
+#> 2021-06-28 17:01:04 - r-readPhenoData(): DONE, return output.
+#> 2021-06-28 17:01:04 - r-readData(): get pheno data DONE
+#> 2021-06-28 17:01:04 - r-readData(): prepare data ...
+#> 2021-06-28 17:01:04 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
+#> 2021-06-28 17:01:04 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
+#> 2021-06-28 17:01:04 - r-prepareData(): reorder matrix ...
+#> 2021-06-28 17:01:04 - r-prepareData(): reorder matrix DONE
+#> 2021-06-28 17:01:04 - r-prepareData(): remove monomorphic geno ...
+#> 2021-06-28 17:01:05 - r-prepareData(): remove monomorphic geno DONE
+#> 2021-06-28 17:01:05 - r-prepareData(): calculate genetic relatinoal matrix ...
+#> 2021-06-28 17:01:05 - r-prepareData(): calculate genetic relatinoal matrix DONE
+#> 2021-06-28 17:01:05 - r-prepareData(): DONE, return output.
+#> 2021-06-28 17:01:05 - r-readData(): prepare data DONE
+#> 2021-06-28 17:01:05 - r-readData(): DONE, return output.
+#> 2021-06-28 17:01:05 - r-run_gwas(): Get data DONE
+#> 2021-06-28 17:01:05 - r-run_gwas(): GWAS analysis ...
+#> 2021-06-28 17:01:05 - r-gwas(): Check inputs ...
+#> 2021-06-28 17:01:05 - r-gwas(): Check inputs DONE
+#> 2021-06-28 17:01:05 - r-gwas(): aggregate data in bed matrix ...
+#> 2021-06-28 17:01:05 - r-gwas(): aggregate data in bed matrix DONE
+#> 2021-06-28 17:01:05 - r-gwas(): remove samples with missing phenotypic values ...
+#> 2021-06-28 17:01:06 - r-gwas(): remove samples with missing phenotypic values DONE
+#> 2021-06-28 17:01:06 - r-gwas(): filter SNPs ...
+#> 2021-06-28 17:01:06 - r-gwas(): filter SNPs DONE
+#> 2021-06-28 17:01:06 - r-gwas(): fit model ...
+#> [Iteration 1] theta = 78.0648 39.8994
+#> [Iteration 1] log L = -1000.94
+#> [Iteration 1] AI-REML update
+#> [Iteration 1] ||gradient|| = 0.403712
+#> [Iteration 2] theta = 19.3246 82.1856
+#> [Iteration 2] log L = -991.683
+#> [Iteration 2] AI-REML update
+#> [Iteration 2] ||gradient|| = 1.19647
+#> [Iteration 3] theta = 25.9636 94.4356
+#> [Iteration 3] log L = -985.452
+#> [Iteration 3] AI-REML update
+#> [Iteration 3] ||gradient|| = 0.200589
+#> [Iteration 4] theta = 29.0151 95.1048
+#> [Iteration 4] log L = -985.125
+#> [Iteration 4] AI-REML update
+#> [Iteration 4] ||gradient|| = 0.0176334
+#> [Iteration 5] theta = 29.5482 94.4091
+#> [Iteration 5] log L = -985.121
+#> [Iteration 5] AI-REML update
+#> [Iteration 5] ||gradient|| = 0.00136692
+#> [Iteration 6] theta = 29.6081 94.2814
+#> [Iteration 6] log L = -985.12
+#> [Iteration 6] AI-REML update
+#> [Iteration 6] ||gradient|| = 0.000156203
+#> [Iteration 7] theta = 29.6153 94.2652
+#> [Iteration 7] log L = -985.12
+#> [Iteration 7] AI-REML update
+#> [Iteration 7] ||gradient|| = 1.89617e-05
+#> [Iteration 8] theta = 29.6162 94.2632
+#> [Iteration 8] log L = -985.12
+#> [Iteration 8] AI-REML update
+#> [Iteration 8] ||gradient|| = 2.3173e-06
+#> 2021-06-28 17:01:06 - r-gwas(): fit model DONE
+#> 2021-06-28 17:01:06 - r-gwas(): DONE, return output.
+#> 2021-06-28 17:01:06 - r-run_gwas(): GWAS analysis DONE
+#> 2021-06-28 17:01:06 - r-run_gwas(): Save results ...
+#> 2021-06-28 17:01:06 - r-saveGWAS(): Check dir ...
+#> 2021-06-28 17:01:06 - r-saveGWAS(): Check dir DONE
+#> 2021-06-28 17:01:07 - r-run_gwas(): Save results DONE
+gwas_results$file
+#> [1] "/tmp/Rtmpdvvycd/file50a1869baab2d.json"
+substr(gwas_results$gwasRes, start=1, stop=500)
+#> [
+#>   {
+#>     "chr": "1",
+#>     "pos": 9563,
+#>     "id": "SNP-1.8562.",
+#>     "A1": "A",
+#>     "A2": "T",
+#>     "freqA2": 0.1359,
+#>     "score": 3.6664,
+#>     "p": 0.0555
+#>   },
+#>   {
+#>     "chr": "1",
+#>     "pos": 25922,
+#>     "id": "SNP-1.24921.",
+#>     "A1": "C",
+#>     "A2": "T",
+#>     "freqA2": 0.1254,
+#>     "score": 1.3876,
+#>     "p": 0.2388
+#>   },
+#>   {
+#>     "chr": "1",
+#>     "pos": 26254,
+#>     "id": "SNP-1.25253.",
+#>     "A1": "A",
+#>     "A2": "T",
+#>     "freqA2": 0.2935,
+#>     "score": 2.9466,
+#>     "p": 0.0861
+#>   },
+#>   {
+#>     "chr": "1",
+#>     "p
+```
+
+### Draw Manhattan Plot
+
+``` r
+p <- draw_manhattanPlot(gwasFile = gwas_results$file,
+                        gwasUrl = NULL,
+                        adj_method = "bonferroni",
+                        thresh_p = 0.05,
+                        chr = NA,
+                        title = "Example of Manhattan Plot")
+#> 2021-06-28 17:01:07 - r-draw_manhattanPlot(): Get data ...
+#> 2021-06-28 17:01:07 - r-readGWAS(): Read result file ... 
+#> 2021-06-28 17:01:07 - r-readGWAS(): Read result file DONE 
+#> 2021-06-28 17:01:07 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-06-28 17:01:08 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-06-28 17:01:08 - r-readGWAS(): DONE, return output.
+#> 2021-06-28 17:01:08 - r-draw_manhattanPlot(): Get data DONE
+#> 2021-06-28 17:01:08 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
+#> 2021-06-28 17:01:08 - r-adjustPval(): Check adj_method ...
+#> 2021-06-28 17:01:08 - r-adjustPval(): Check adj_method DONE
+#> 2021-06-28 17:01:08 - r-adjustPval(): Adjust p-values ...
+#> 2021-06-28 17:01:08 - r-adjustPval(): Adjust p-values DONE
+#> 2021-06-28 17:01:08 - r-adjustPval(): Adjust threshold ...
+#> 2021-06-28 17:01:08 - r-adjustPval(): Adjust threshold DONE
+#> 2021-06-28 17:01:08 - r-adjustPval(): DONE, return output
+#> 2021-06-28 17:01:08 - r-manPlot(): Adjust p-values threshold DONE
+#> 2021-06-28 17:01:09 - r-manPlot(): DONE, return output
+#> 2021-06-28 17:01:09 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
+```
+
+![screenshot of the plotly graph](README_files/manPlot.png)
+
+### Draw LD plot
+
+``` r
+imgFile <- draw_ldPlot(genoFile = "data/markers/testMarkerData01.vcf.gz",
+                       genoUrl = NULL,
+                       from = 42,
+                       to = 62,
+                       dir = tempdir()) 
+#> 2021-06-28 17:01:09 - r-draw_ldPlot(): Get data ...
+#> 2021-06-28 17:01:09 - r-readGenoData(): Check file extention ... 
+#> 2021-06-28 17:01:09 - r-readGenoData(): Read geno file ... 
+#> ped stats and snps stats have been set. 
+#> 'p' has been set. 
+#> 'mu' and 'sigma' have been set.
+#> 2021-06-28 17:01:10 - r-readGenoData(): Read geno file DONE 
+#> 2021-06-28 17:01:10 - r-readGenoData(): DONE, return output.
+#> 2021-06-28 17:01:10 - r-draw_ldPlot(): Get data DONE
+#> 2021-06-28 17:01:10 - r-draw_ldPlot(): Draw LD Plot ...
+#> 2021-06-28 17:01:10 - r-LDplot(): Check "from" < "to"...
+#> 2021-06-28 17:01:10 - r-LDplot(): Check "from" < "to" DONE
+#> 2021-06-28 17:01:10 - r-LDplot(): Check number of SNP < 50...
+#> 2021-06-28 17:01:10 - r-LDplot(): Check number of SNP < 50 DONE
+#> 2021-06-28 17:01:10 - r-LDplot(): Check dir ...
+#> 2021-06-28 17:01:10 - r-LDplot(): Check dir DONE
+#> 2021-06-28 17:01:10 - r-LDplot(): Compute LD ...
+#> 2021-06-28 17:01:10 - r-LDplot(): Compute LD DONE
+#> 2021-06-28 17:01:10 - r-LDplot(): Create LD plot ...
+#> 2021-06-28 17:01:10 - r-LDplot(): Create create file: /tmp/Rtmpdvvycd/file50a1849c8a004.png
+#> 2021-06-28 17:01:10 - r-LDplot(): Create LD plot DONE
+#> 2021-06-28 17:01:10 - r-LDplot(): DONE, return output
+#> 2021-06-28 17:01:10 - r-draw_ldPlot(): Draw LD Plot DONE
+```
+
+``` r
+library(png)
+img <- readPNG(imgFile)
+grid::grid.raster(img)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
 ## Load data
 
 Example data are stored in the `data` folder.
@@ -70,32 +276,32 @@ Example data are stored in the `data` folder.
 ``` r
 data <- readData(genoFile = "data/markers/testMarkerData01.vcf",
                  phenoFile = "data/pheno/testPhenoData01.csv")
-#> 2021-06-25 11:19:54 - r-readData(): get geno data ...
-#> 2021-06-25 11:19:54 - r-readGenoData(): Check file extention ... 
-#> 2021-06-25 11:19:54 - r-readGenoData(): Read geno file ... 
+#> 2021-06-28 17:01:12 - r-readData(): get geno data ...
+#> 2021-06-28 17:01:12 - r-readGenoData(): Check file extention ... 
+#> 2021-06-28 17:01:12 - r-readGenoData(): Read geno file ... 
 #> ped stats and snps stats have been set. 
 #> 'p' has been set. 
 #> 'mu' and 'sigma' have been set.
-#> 2021-06-25 11:19:54 - r-readGenoData(): Read geno file DONE 
-#> 2021-06-25 11:19:54 - r-readGenoData(): DONE, return output.
-#> 2021-06-25 11:19:54 - r-readData(): get geno data DONE
-#> 2021-06-25 11:19:54 - r-readData(): get pheno data ...
-#> 2021-06-25 11:19:54 - r-readPhenoData(): Read phenotypic file ... 
-#> 2021-06-25 11:19:54 - r-readPhenoData(): Read phenotypic file DONE 
-#> 2021-06-25 11:19:54 - r-readPhenoData(): DONE, return output.
-#> 2021-06-25 11:19:54 - r-readData(): get pheno data DONE
-#> 2021-06-25 11:19:54 - r-readData(): prepare data ...
-#> 2021-06-25 11:19:54 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
-#> 2021-06-25 11:19:55 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
-#> 2021-06-25 11:19:55 - r-prepareData(): reorder matrix ...
-#> 2021-06-25 11:19:55 - r-prepareData(): reorder matrix DONE
-#> 2021-06-25 11:19:55 - r-prepareData(): remove monomorphic geno ...
-#> 2021-06-25 11:19:55 - r-prepareData(): remove monomorphic geno DONE
-#> 2021-06-25 11:19:55 - r-prepareData(): calculate genetic relatinoal matrix ...
-#> 2021-06-25 11:19:55 - r-prepareData(): calculate genetic relatinoal matrix DONE
-#> 2021-06-25 11:19:55 - r-prepareData(): DONE, return output.
-#> 2021-06-25 11:19:55 - r-readData(): prepare data DONE
-#> 2021-06-25 11:19:55 - r-readData(): DONE, return output.
+#> 2021-06-28 17:01:13 - r-readGenoData(): Read geno file DONE 
+#> 2021-06-28 17:01:13 - r-readGenoData(): DONE, return output.
+#> 2021-06-28 17:01:13 - r-readData(): get geno data DONE
+#> 2021-06-28 17:01:13 - r-readData(): get pheno data ...
+#> 2021-06-28 17:01:13 - r-readPhenoData(): Read phenotypic file ... 
+#> 2021-06-28 17:01:13 - r-readPhenoData(): Read phenotypic file DONE 
+#> 2021-06-28 17:01:13 - r-readPhenoData(): DONE, return output.
+#> 2021-06-28 17:01:13 - r-readData(): get pheno data DONE
+#> 2021-06-28 17:01:13 - r-readData(): prepare data ...
+#> 2021-06-28 17:01:13 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
+#> 2021-06-28 17:01:14 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
+#> 2021-06-28 17:01:14 - r-prepareData(): reorder matrix ...
+#> 2021-06-28 17:01:14 - r-prepareData(): reorder matrix DONE
+#> 2021-06-28 17:01:14 - r-prepareData(): remove monomorphic geno ...
+#> 2021-06-28 17:01:14 - r-prepareData(): remove monomorphic geno DONE
+#> 2021-06-28 17:01:14 - r-prepareData(): calculate genetic relatinoal matrix ...
+#> 2021-06-28 17:01:14 - r-prepareData(): calculate genetic relatinoal matrix DONE
+#> 2021-06-28 17:01:14 - r-prepareData(): DONE, return output.
+#> 2021-06-28 17:01:14 - r-readData(): prepare data DONE
+#> 2021-06-28 17:01:14 - r-readData(): DONE, return output.
 ```
 
 For online data, they can be loaded using:
@@ -111,84 +317,72 @@ The `gwas` function return a `data.frame`.
 
 ``` r
 gwasRes <- gwas(data = data,
-                trait = "Panicle.length",
+                trait = "Flowering.time.at.Arkansas",
                 test = "score",
                 fixed = 0,
                 response = "quantitative",
                 thresh_maf = 0.05,
                 thresh_callrate = 0.95)
-#> 2021-06-25 11:19:55 - r-gwas(): Check inputs ...
-#> 2021-06-25 11:19:55 - r-gwas(): Check inputs DONE
-#> 2021-06-25 11:19:55 - r-gwas(): aggregate data in bed matrix ...
-#> 2021-06-25 11:19:55 - r-gwas(): aggregate data in bed matrix DONE
-#> 2021-06-25 11:19:55 - r-gwas(): remove samples with missing phenotypic values ...
-#> 2021-06-25 11:19:55 - r-gwas(): remove samples with missing phenotypic values DONE
-#> 2021-06-25 11:19:55 - r-gwas(): filter SNPs ...
-#> 2021-06-25 11:19:55 - r-gwas(): filter SNPs DONE
-#> 2021-06-25 11:19:55 - r-gwas(): fit model ...
-#> [Iteration 1] theta = 6.11889 3.12119
-#> [Iteration 1] log L = -545.19
+#> 2021-06-28 17:01:14 - r-gwas(): Check inputs ...
+#> 2021-06-28 17:01:14 - r-gwas(): Check inputs DONE
+#> 2021-06-28 17:01:14 - r-gwas(): aggregate data in bed matrix ...
+#> 2021-06-28 17:01:14 - r-gwas(): aggregate data in bed matrix DONE
+#> 2021-06-28 17:01:14 - r-gwas(): remove samples with missing phenotypic values ...
+#> 2021-06-28 17:01:15 - r-gwas(): remove samples with missing phenotypic values DONE
+#> 2021-06-28 17:01:15 - r-gwas(): filter SNPs ...
+#> 2021-06-28 17:01:15 - r-gwas(): filter SNPs DONE
+#> 2021-06-28 17:01:15 - r-gwas(): fit model ...
+#> [Iteration 1] theta = 78.0648 39.8994
+#> [Iteration 1] log L = -1000.94
 #> [Iteration 1] AI-REML update
-#> [Iteration 1] ||gradient|| = 4.44999
-#> [Iteration 2] theta = 2.40542 5.61424
-#> [Iteration 2] log L = -536.314
+#> [Iteration 1] ||gradient|| = 0.403712
+#> [Iteration 2] theta = 19.3245 82.1856
+#> [Iteration 2] log L = -991.683
 #> [Iteration 2] AI-REML update
-#> [Iteration 2] ||gradient|| = 5.68179
-#> [Iteration 3] theta = 2.61762 6.58783
-#> [Iteration 3] log L = -534.365
+#> [Iteration 2] ||gradient|| = 1.19647
+#> [Iteration 3] theta = 25.9636 94.4355
+#> [Iteration 3] log L = -985.452
 #> [Iteration 3] AI-REML update
-#> [Iteration 3] ||gradient|| = 0.538839
-#> [Iteration 4] theta = 2.60701 6.83005
-#> [Iteration 4] log L = -534.325
+#> [Iteration 3] ||gradient|| = 0.20059
+#> [Iteration 4] theta = 29.0151 95.1047
+#> [Iteration 4] log L = -985.125
 #> [Iteration 4] AI-REML update
-#> [Iteration 4] ||gradient|| = 0.0362744
-#> [Iteration 5] theta = 2.59177  6.8679
-#> [Iteration 5] log L = -534.324
+#> [Iteration 4] ||gradient|| = 0.0176337
+#> [Iteration 5] theta = 29.5482  94.409
+#> [Iteration 5] log L = -985.121
 #> [Iteration 5] AI-REML update
-#> [Iteration 5] ||gradient|| = 0.0110444
-#> [Iteration 6] theta = 2.58772 6.87672
-#> [Iteration 6] log L = -534.324
+#> [Iteration 5] ||gradient|| = 0.00136694
+#> [Iteration 6] theta = 29.6082 94.2812
+#> [Iteration 6] log L = -985.12
 #> [Iteration 6] AI-REML update
-#> [Iteration 6] ||gradient|| = 0.0027932
-#> [Iteration 7] theta = 2.58671 6.87891
-#> [Iteration 7] log L = -534.324
+#> [Iteration 6] ||gradient|| = 0.000156205
+#> [Iteration 7] theta = 29.6154  94.265
+#> [Iteration 7] log L = -985.12
 #> [Iteration 7] AI-REML update
-#> [Iteration 7] ||gradient|| = 0.000699998
-#> [Iteration 8] theta = 2.58646 6.87946
-#> [Iteration 8] log L = -534.324
+#> [Iteration 7] ||gradient|| = 1.89618e-05
+#> [Iteration 8] theta = 29.6163  94.263
+#> [Iteration 8] log L = -985.12
 #> [Iteration 8] AI-REML update
-#> [Iteration 8] ||gradient|| = 0.000175041
-#> [Iteration 9] theta = 2.58639 6.87959
-#> [Iteration 9] log L = -534.324
-#> [Iteration 9] AI-REML update
-#> [Iteration 9] ||gradient|| = 4.37465e-05
-#> [Iteration 10] theta = 2.58638 6.87963
-#> [Iteration 10] log L = -534.324
-#> [Iteration 10] AI-REML update
-#> [Iteration 10] ||gradient|| = 1.09317e-05
-#> [Iteration 11] theta = 2.58637 6.87964
-#> [Iteration 11] log L = -534.324
-#> [Iteration 11] AI-REML update
-#> [Iteration 11] ||gradient|| = 2.73161e-06
-#> 2021-06-25 11:19:56 - r-gwas(): fit model DONE
-#> 2021-06-25 11:19:56 - r-gwas(): DONE, return output.
+#> [Iteration 8] ||gradient|| = 2.3173e-06
+#> 2021-06-28 17:01:16 - r-gwas(): fit model DONE
+#> 2021-06-28 17:01:16 - r-gwas(): DONE, return output.
 head(gwasRes)
-#>   chr   pos           id A1 A2    freqA2      score         p
-#> 1   1  9563  SNP-1.8562.  A  T 0.1382682 1.45574345 0.2276086
-#> 2   1 25922 SNP-1.24921.  C  T 0.1278090 0.36309965 0.5467898
-#> 3   1 26254 SNP-1.25253.  A  T 0.2955182 0.02865000 0.8655897
-#> 4   1 30214 SNP-1.29213.  T  A 0.1344538 0.51074279 0.4748175
-#> 5   1 31478 SNP-1.30477.  C  T 0.2262570 0.21536170 0.6425970
-#> 6   1 32733 SNP-1.31732.  T  G 0.3011204 0.05018308 0.8227450
+#>   chr   pos           id A1 A2    freqA2    score          p
+#> 1   1  9563  SNP-1.8562.  A  T 0.1358543 3.666415 0.05551948
+#> 2   1 25922 SNP-1.24921.  C  T 0.1253521 1.387580 0.23881415
+#> 3   1 26254 SNP-1.25253.  A  T 0.2935393 2.946596 0.08605867
+#> 4   1 30214 SNP-1.29213.  T  A 0.1320225 2.189355 0.13896751
+#> 5   1 31478 SNP-1.30477.  C  T 0.2268908 1.373043 0.24128979
+#> 6   1 32733 SNP-1.31732.  T  G 0.2991573 3.335748 0.06778957
 ```
 
 Save GWAS result in a `.json` file.
 
 ``` r
 (file <- saveGWAS(gwasRes))
-#> 2021-06-25 11:19:56 - r-saveGWAS(): Check dir ...
-#> 2021-06-25 11:19:56 - r-saveGWAS(): Check dir DONE
-#> [1] "/tmp/RtmpzuT96w/file1472d34966744.json"
+#> 2021-06-28 17:01:16 - r-saveGWAS(): Check dir ...
+#> 2021-06-28 17:01:16 - r-saveGWAS(): Check dir DONE
+#> [1] "/tmp/Rtmpdvvycd/file50a18564e0cc9.json"
 cat(paste(readLines(file, n=20), collapse = "\n"))
 #> [
 #>   {
@@ -197,9 +391,9 @@ cat(paste(readLines(file, n=20), collapse = "\n"))
 #>     "id": "SNP-1.8562.",
 #>     "A1": "A",
 #>     "A2": "T",
-#>     "freqA2": 0.1383,
-#>     "score": 1.4557,
-#>     "p": 0.2276
+#>     "freqA2": 0.1359,
+#>     "score": 3.6664,
+#>     "p": 0.0555
 #>   },
 #>   {
 #>     "chr": "1",
@@ -207,9 +401,9 @@ cat(paste(readLines(file, n=20), collapse = "\n"))
 #>     "id": "SNP-1.24921.",
 #>     "A1": "C",
 #>     "A2": "T",
-#>     "freqA2": 0.1278,
-#>     "score": 0.3631,
-#>     "p": 0.5468
+#>     "freqA2": 0.1254,
+#>     "score": 1.3876,
+#>     "p": 0.2388
 ```
 
 ## Manhattan plot
@@ -217,11 +411,20 @@ cat(paste(readLines(file, n=20), collapse = "\n"))
 This function generates a “plotly” graph.
 
 ``` r
-manPlot(gwas = gwasRes,
-        adj_method = "bonferroni",
-        thresh_p = 0.05,
-        chr = NA,
-        title = "Readme Example")
+p <- manPlot(gwas = gwasRes,
+             adj_method = "bonferroni",
+             thresh_p = 0.05,
+             chr = NA,
+             title = "Readme Example")
+#> 2021-06-28 17:01:16 - r-adjustPval(): Check adj_method ...
+#> 2021-06-28 17:01:16 - r-adjustPval(): Check adj_method DONE
+#> 2021-06-28 17:01:16 - r-adjustPval(): Adjust p-values ...
+#> 2021-06-28 17:01:16 - r-adjustPval(): Adjust p-values DONE
+#> 2021-06-28 17:01:16 - r-adjustPval(): Adjust threshold ...
+#> 2021-06-28 17:01:16 - r-adjustPval(): Adjust threshold DONE
+#> 2021-06-28 17:01:16 - r-adjustPval(): DONE, return output
+#> 2021-06-28 17:01:16 - r-manPlot(): Adjust p-values threshold DONE
+#> 2021-06-28 17:01:16 - r-manPlot(): DONE, return output
 ```
 
 ![screenshot of the plotly graph](README_files/manPlot.png)
@@ -233,33 +436,33 @@ and save a plot in a temporary PNG file.
 
 ``` r
 gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
-#> 2021-06-25 11:19:56 - r-readGenoData(): Check file extention ... 
-#> 2021-06-25 11:19:56 - r-readGenoData(): Read geno file ... 
+#> 2021-06-28 17:01:16 - r-readGenoData(): Check file extention ... 
+#> 2021-06-28 17:01:16 - r-readGenoData(): Read geno file ... 
 #> ped stats and snps stats have been set. 
 #> 'p' has been set. 
 #> 'mu' and 'sigma' have been set.
-#> 2021-06-25 11:19:57 - r-readGenoData(): Read geno file DONE 
-#> 2021-06-25 11:19:57 - r-readGenoData(): DONE, return output.
-(imgFile <- LDplot(gDta, 1, 20, write = TRUE, dir = tempdir()))
-#> 2021-06-25 11:19:57 - r-LDplot(): Check "from" < "to"...
-#> 2021-06-25 11:19:57 - r-LDplot(): Check "from" < "to" DONE
-#> 2021-06-25 11:19:57 - r-LDplot(): Check number of SNP < 50...
-#> 2021-06-25 11:19:57 - r-LDplot(): Check number of SNP < 50 DONE
-#> 2021-06-25 11:19:57 - r-LDplot(): Check write ...
-#> 2021-06-25 11:19:57 - r-LDplot(): Check write DONE
-#> 2021-06-25 11:19:57 - r-LDplot(): Check dir ...
-#> 2021-06-25 11:19:57 - r-LDplot(): Check dir DONE
-#> 2021-06-25 11:19:57 - r-LDplot(): Compute LD ...
-#> 2021-06-25 11:19:57 - r-LDplot(): Compute LD DONE
-#> 2021-06-25 11:19:57 - r-LDplot(): Create LD plot ...
-#> 2021-06-25 11:19:57 - r-LDplot(): Create create file: /tmp/RtmpzuT96w/file1472d551c2b9.png
-#> 2021-06-25 11:19:57 - r-LDplot(): Create LD plot DONE
-#> 2021-06-25 11:19:57 - r-LDplot(): DONE, return output
-#> [1] "/tmp/RtmpzuT96w/file1472d551c2b9.png"
+#> 2021-06-28 17:01:17 - r-readGenoData(): Read geno file DONE 
+#> 2021-06-28 17:01:17 - r-readGenoData(): DONE, return output.
+(imgFile <- LDplot(geno = gDta,
+                   from = 1,
+                   to = 20,
+                   dir = tempdir()))
+#> 2021-06-28 17:01:17 - r-LDplot(): Check "from" < "to"...
+#> 2021-06-28 17:01:17 - r-LDplot(): Check "from" < "to" DONE
+#> 2021-06-28 17:01:17 - r-LDplot(): Check number of SNP < 50...
+#> 2021-06-28 17:01:17 - r-LDplot(): Check number of SNP < 50 DONE
+#> 2021-06-28 17:01:17 - r-LDplot(): Check dir ...
+#> 2021-06-28 17:01:17 - r-LDplot(): Check dir DONE
+#> 2021-06-28 17:01:17 - r-LDplot(): Compute LD ...
+#> 2021-06-28 17:01:17 - r-LDplot(): Compute LD DONE
+#> 2021-06-28 17:01:17 - r-LDplot(): Create LD plot ...
+#> 2021-06-28 17:01:17 - r-LDplot(): Create create file: /tmp/Rtmpdvvycd/file50a1858887f20.png
+#> 2021-06-28 17:01:18 - r-LDplot(): Create LD plot DONE
+#> 2021-06-28 17:01:18 - r-LDplot(): DONE, return output
+#> [1] "/tmp/Rtmpdvvycd/file50a1858887f20.png"
 ```
 
 ``` r
-library(png)
 img <- readPNG(imgFile)
 grid::grid.raster(img)
 ```

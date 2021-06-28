@@ -1,6 +1,12 @@
-#' R6 class use to log messages
+# Author: Julien Diot juliendiot@ut-biomet.org
+# 2021 The University of Tokyo
+#
+# Description:
+# Utilities function of this engine
+
+
+#' R6 class use to log messages in this engine's function
 #'
-#' @import R6
 logger <- R6::R6Class(
   "logger",
   lock_objects = FALSE,
@@ -25,8 +31,7 @@ logger <- R6::R6Class(
     #' @param context [bool] display context in log message
     log = function(...,
                    time = TRUE,
-                   context = TRUE,
-                   status = NULL){
+                   context = TRUE){
       if (time) {
         time <- as.character(Sys.time())
       } else {
