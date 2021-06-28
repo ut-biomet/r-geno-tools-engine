@@ -2,8 +2,8 @@
 #' @param gwas [data.frame] output of the gwas function
 #' @param adj_method correction method: "holm", "hochberg",
 #' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
-#' @param thresh_p significant threshold (default 0.05)
-#' @param chr [char] filter to show only some chromosomes (show all if NA)
+#' @param thresh_p p value significant threshold (default 0.05)
+#' @param chr [char] name of the chromosome to show (show all if NA)
 #' @param title [char] Title of the plot. Default is "Manhattan Plot"
 #'
 #' @return plotly graph
@@ -66,9 +66,6 @@ manPlot <- function(gwas,
 #' @details `from` should be lower than `to`, and the maximum ranger size is 50.
 #' (In order to get a readable image). If write is `TRUE`, the function will write the plot in a png file, else it will plot it.
 #' @return null if `dir` is NULL, else the path of the png file.
-#' @export
-#'
-#' @examples
 LDplot <- function(geno, from, to, dir = tempdir()) {
   logger <- logger$new("r-LDplot()")
 

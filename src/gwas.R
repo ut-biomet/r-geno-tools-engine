@@ -266,12 +266,12 @@ gwas <- function(data,
 
 
 
-#' Title
+#' Adjust P-values for Multiple Comparisons
 #'
 #' @param vector of p-values
 #' @param adj_method  correction method: "holm", "hochberg",
 #' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
-#' @param thresh_p optional value of the threshold
+#' @param thresh_p optional value of the p value significant threshold (default NULL)
 #'
 #' @details The method "hommel" is not implemented because it is too long to calculate.
 #' @return list of two elements: "p_adj" vector of adjusted p values, "thresh_adj" the adjusted threshold (if thresh_p is preovided, NULL if not)

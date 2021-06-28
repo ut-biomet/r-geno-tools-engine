@@ -145,9 +145,9 @@ draw_ldPlot <- function(genoFile = NULL,
 
   logger$log("Get data ...")
   if (!is.null(genoFile) &&  is.null(genoUrl)) {
-    geno <- readGWAS(genoFile)
+    geno <- readGenoData(genoFile)
   } else if (!is.null(genoUrl) && is.null(genoFile)) {
-    geno <- downloadGWAS(genoUrl)
+    geno <- downloadGenoData(genoUrl)
   } else {
     stop("Error: either genoFile or genoUrl should be provided")
   }

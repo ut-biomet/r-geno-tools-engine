@@ -48,3 +48,47 @@ logger <- R6::R6Class(
     }
   )
 )
+
+
+
+#' Write engine documentation
+#'
+#' @param srcDir path of R sources folder (default "./src")
+#' @param docDir path of documentation folder (default "./doc")
+#'
+#' @return NULL
+#' @details Write engine's functions documentation in a README.md file located in `docDir`.
+writeDoc <- function(srcDir = "./src",
+                     docDir = "./doc"){
+  stopifnot(dir.exists(srcDir))
+  stopifnot(dir.exists(docDir))
+  tmpDir <- file.path(docDir, ".tmp")
+  dir.create(tmpDir)
+
+  outFile <- file.path(docDir, "README.md")
+  file.remove(outFile)
+  file.create(outFile)
+
+  sourcefiles <- list.files(srcDir, pattern = ".R$", full.names = TRUE)
+  for (sourcefile in sourcefiles) {
+    source_env = roxygen2::env_file(sourcefile)
+    source(sourcefile, local = source_env)
+    rd_blocks = roxygen2::parse_file(sourcefile, env = source_env)
+    help_topics = roxygen2::roclet_process(roxygen2::rd_roclet(),
+                                           rd_blocks,
+                                           env = source_env,
+                                           # env = NULL,
+                                           dirname(sourcefile))
+    rd_code = lapply(help_topics, format)
+
+    for (funName in names(rd_code)) {
+      writeLines(rd_code[[funName]],
+                 con = file.path(tmpDir, funName))
+      Rd2md::Rd2markdown(file.path(tmpDir, funName), outFile, append = TRUE)
+      file.remove(file.path(tmpDir, funName))
+    }
+  }
+  file.remove(tmpDir)
+
+  NULL
+}

@@ -188,6 +188,14 @@ grid::grid.raster(img)
 ```
 
 
+# Functions documentation
+
+All the functions of this engine use `roxygen2` for documentation. You can generate a markdown documentation located in `./doc/README.md` using the function `writeDoc` (defined in `./src/utils.R`):
+
+```{r eval=FALSE}
+writeDoc()
+```
+
 
 # Tests
 
