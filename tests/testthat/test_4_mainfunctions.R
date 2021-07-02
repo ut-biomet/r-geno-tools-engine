@@ -47,4 +47,16 @@ capture.output({
                              dir = tempdir())
     },NA)
   })
+
+
+
+  test_that("GWAS Results adjust p-values", {
+    expect_error({
+      gwasAdjResults <- run_resAdjustment(gwasFile = "../../data/models/gwasResult.json",
+                                          gwasUrl = NULL,
+                                          adj_method = "bonferroni",
+                                          dir = tempdir())
+    }, NA)
+  })
+
 })

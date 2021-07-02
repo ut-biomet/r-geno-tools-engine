@@ -13,4 +13,4 @@ test_dir("tests/testthat",
 
 # clean testOutput dir
 f <- list.files("tests/testthat/testOutput/", full.names = TRUE)
-lapply(f, file.remove)
+invisible(lapply(f, file.remove))

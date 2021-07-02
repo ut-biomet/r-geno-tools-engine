@@ -94,6 +94,17 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
 
 ![screenshot of the plotly graph](README_files/manPlot.png)
 
+### Adjust p-values
+
+```{r adj_pvals}
+gwas_adj <- run_resAdjustment(gwasFile = gwas_results$file,
+                              gwasUrl = NULL,
+                              adj_method = "bonferroni",
+                              dir = tempdir())
+substr(gwas_adj$gwasAdjusted, start=1, stop=500)
+```
+
+
 ### Draw LD plot
 
 ```{r draw_ldPlot}

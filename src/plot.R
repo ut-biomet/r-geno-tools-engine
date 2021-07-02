@@ -17,10 +17,11 @@ manPlot <- function(gwas,
 
 
   # P-Values adjustment
+  logger$log("Adjust p-values ...")
   adj <- adjustPval(gwas$p, adj_method, thresh_p)
   gwas$p_adj <- adj$p_adj
   thresh_pAdj <- adj$thresh_adj
-  logger$log("Adjust p-values threshold DONE")
+  logger$log("Adjust p-values DONE")
 
   # filter according to "chr"
   if (!is.na(chr)) {

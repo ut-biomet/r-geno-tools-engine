@@ -74,8 +74,6 @@ run_gwas <- function(genoFile = NULL,
   logger$log("Save results DONE")
   } else {file <- NULL}
 
-  gwasRes <-
-
   return(list(
     "gwasRes" = jsonlite::toJSON(gwasRes, dataframe = "rows", pretty = T),
     "file" = file
@@ -161,4 +159,50 @@ draw_ldPlot <- function(genoFile = NULL,
   logger$log("Draw LD Plot DONE")
 
   imgFile
+}
+
+
+
+#' Adjust GWAS p-values
+#'
+#' @param gwasFile path of the gwas result data file (json file)
+#' @param gwasUrl url of the gwas result data file (json file)
+#' @param adj_method correction method: "holm", "hochberg",
+#' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
+#' @param  dir directory where to save the data,
+#' by default it is a temporary directory
+#'
+#' @return list with 2 elements `gwasAdjusted` for the results of the gwas analysis in json with adjusted p-values and `file` path of the json file containing the results (if `dir` is not `NULL`)
+run_resAdjustment <- function(gwasFile = NULL,
+                              gwasUrl = NULL,
+                              adj_method = "bonferroni",
+                              dir = tempdir()) {
+  logger <- logger$new("r-run_resAdjustment()")
+
+  logger$log("Get data ...")
+  if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
+    gwas <- readGWAS(gwasFile)
+  } else if (!is.null(gwasUrl) && is.null(gwasFile)) {
+    gwas <- downloadGWAS(gwasUrl)
+  } else {
+    stop("Error: either gwasFile or gwasUrl should be provided")
+  }
+  logger$log("Get data DONE")
+
+  # P-Values adjustment
+  logger$log("Adjust p-values ...")
+  adj <- adjustPval(gwas$p, adj_method)
+  gwas$p_adj <- adj$p_adj
+  logger$log("Adjust p-values DONE")
+
+  if (!is.null(dir)) {
+    logger$log("Save results ...")
+    file <- saveGWAS(gwas = gwas, dir = dir)
+    logger$log("Save results DONE")
+  } else {file <- NULL}
+
+  return(list(
+    "gwasAdjusted" = jsonlite::toJSON(gwas, dataframe = "rows", pretty = T),
+    "file" = file
+  ))
 }
