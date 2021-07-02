@@ -20,7 +20,7 @@ downloadGenoData <- function(url) {
 
   # download data file:
   logger$log("Download genotypic file ... ")
-  download.file(url, localFile)
+  download.file(url, localFile, quiet = TRUE)
   logger$log("Download genotypic file DONE")
   logger$log("Read genotypic file ...")
   dta <- readGenoData(localFile)
@@ -44,7 +44,7 @@ downloadPhenoData <- function(url){
 
   # download data file:
   logger$log("Download phenotypic file ... ")
-  download.file(url, localFile)
+  download.file(url, localFile, quiet = TRUE)
   logger$log("Download phenotypic file DONE")
   logger$log("Read phenotypic file ...")
   dta <- readPhenoData(localFile)
@@ -94,14 +94,11 @@ downloadGWAS <- function(url){
                         tmpdir = tempdir(),
                         fileext = ".json")
   logger$log("Download result file ... ")
-  download.file(url, localFile)
+  download.file(url, localFile, quiet = TRUE)
 
   logger$log("Read result file ... ")
-  gwasRes <- readLines(localFile)
+  gwasRes <- readGWAS(localFile)
   logger$log("Read result file DONE ")
-  logger$log("Convert Json to data.frame ... ")
-  gwasRes <- fromJSON(gwasRes)
-  logger$log("Convert Json to data.frame DONE ")
 
   logger$log("DONE, return output.")
   gwasRes

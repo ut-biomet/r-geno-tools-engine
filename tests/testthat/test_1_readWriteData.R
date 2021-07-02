@@ -19,6 +19,18 @@ capture_output({
     }
   })
 
+  test_that("downloadGenoData", {
+    files <- c("../../data/markers/testMarkerData01.vcf",
+               "../../data/markers/testMarkerData01.vcf.gz")
+    files <- normalizePath(files)
+    files <- paste0("file://", files)
+    for (file in files) {
+      expect_error({
+        gDta <- downloadGenoData(file)
+      }, NA)
+      expect_true(class(gDta) == "bed.matrix")
+    }
+  })
 
   test_that("readPhenoData", {
     files <- c("../../data/pheno/testPhenoData01.csv")
@@ -26,6 +38,19 @@ capture_output({
     for (file in files) {
       expect_error({
         pDta <- readPhenoData(file)
+      }, NA)
+      expect_true(class(pDta) == "data.frame")
+    }
+  })
+
+
+  test_that("downloadPhenoData", {
+    files <- c("../../data/pheno/testPhenoData01.csv")
+    files <- normalizePath(files)
+    files <- paste0("file://", files)
+    for (file in files) {
+      expect_error({
+        pDta <- downloadPhenoData(file)
       }, NA)
       expect_true(class(pDta) == "data.frame")
     }
@@ -68,4 +93,56 @@ capture_output({
       }
     }
   })
+
+
+  test_that("downloadData", {
+    genoFiles <- c("../../data/markers/testMarkerData01.vcf")
+    phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
+
+    genoFiles <- normalizePath(genoFiles)
+    genoFiles <- paste0("file://", genoFiles)
+
+    phenoFiles <- normalizePath(phenoFiles)
+    phenoFiles <- paste0("file://", phenoFiles)
+
+    for (phenfile in phenoFiles) {
+      for (genfile in genoFiles) {
+        expect_error({
+          dta <- downloadData(genfile,phenfile)
+        }, NA)
+        expect_true(class(dta$genoData) == "bed.matrix")
+        expect_true(class(dta$phenoData) == "data.frame")
+        expect_true(is.matrix(dta$grMatrix))
+        expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
+      }
+    }
+  })
+
+
+  test_that("readGWAS", {
+    files <- c("../../data/models/gwasResult.json")
+
+    for (file in files) {
+      expect_error({
+        gwas <- readGWAS(file)
+      }, NA)
+      expect_true(class(gwas) == "data.frame")
+    }
+  })
+
+
+  test_that("downloadGWAS", {
+    files <- c("../../data/models/gwasResult.json")
+    files <- normalizePath(files)
+    files <- paste0("file://", files)
+    for (file in files) {
+      expect_error({
+        gwas <- downloadGWAS(file)
+      }, NA)
+      expect_true(class(gwas) == "data.frame")
+    }
+  })
+
+
+
 })

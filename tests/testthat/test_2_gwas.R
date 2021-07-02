@@ -48,8 +48,9 @@ capture.output({
               file <- saveGWAS(gwas = resGwas)
             }, NA)
             expect_error({
-              file <- saveGWAS(gwas = resGwas, dir = "testOutput")
+              gwas <- readGWAS(file)
             }, NA)
+            expect_true(class(gwas) == "data.frame")
             file.remove(file)
             expect_error({
               file <- saveGWAS(gwas = resGwas, dir = "doNotExists")

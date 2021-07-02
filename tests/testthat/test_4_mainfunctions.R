@@ -19,6 +19,12 @@ capture.output({
                                thresh_callrate = 0.95,
                                dir = tempdir())
     },NA)
+    expect_true(class(gwas_results$gwasRes) == "json")
+    expect_error({
+      gwas <- readGWAS(gwas_results$file)
+    }, NA)
+    expect_true(class(gwas) == "data.frame")
+
   })
 
 
@@ -32,6 +38,7 @@ capture.output({
                               chr = NA,
                               title = "Example of Manhattan Plot")
     },NA)
+    expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
   })
 
 
@@ -57,6 +64,11 @@ capture.output({
                                           adj_method = "bonferroni",
                                           dir = tempdir())
     }, NA)
+    expect_true(class(gwasAdjResults$gwasAdjusted) == "json")
+    expect_error({
+      gwas <- readGWAS(gwasAdjResults$file)
+    }, NA)
+    expect_true(class(gwas) == "data.frame")
   })
 
 })
