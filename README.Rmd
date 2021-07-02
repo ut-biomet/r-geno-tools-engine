@@ -88,8 +88,10 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         gwasUrl = NULL,
                         adj_method = "bonferroni",
                         thresh_p = 0.05,
-                        chr = NA,
-                        title = "Example of Manhattan Plot")
+                        chr = NA)
+```
+```{r eval=FALSE, include=FALSE}
+p
 ```
 
 ![screenshot of the plotly graph](README_files/manPlot.png)
@@ -160,7 +162,7 @@ head(gwasRes)
 Save GWAS result in a `.json` file.
 
 ```{r}
-(file <- saveGWAS(gwasRes))
+(file <- saveGWAS(gwasRes, metadata = "README"))
 cat(paste(readLines(file, n=20), collapse = "\n"))
 ```
 
@@ -175,8 +177,11 @@ p <- manPlot(gwas = gwasRes,
              chr = NA,
              title = "Readme Example")
 ```
-![screenshot of the plotly graph](README_files/manPlot.png)
+![screenshot of the plotly graph](README_files/manPlot2.png)
 
+```{r eval=FALSE, include=FALSE}
+p
+```
 
 
 
@@ -204,7 +209,8 @@ grid::grid.raster(img)
 All the functions of this engine use `roxygen2` for documentation. You can generate a markdown documentation located in `./doc/README.md` using the function `writeDoc` (defined in `./src/utils.R`):
 
 ```{r eval=FALSE}
-writeDoc()
+writeDoc(srcDir = "src",
+         docDir = "doc")
 ```
 
 

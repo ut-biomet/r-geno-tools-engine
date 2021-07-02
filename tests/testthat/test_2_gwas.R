@@ -46,11 +46,15 @@ capture.output({
                          resCols[[test]])
             expect_error({
               file <- saveGWAS(gwas = resGwas)
+            }, "\"metadata\" is missing")
+            expect_error({
+              file <- saveGWAS(gwas = resGwas, metadata = list())
             }, NA)
             expect_error({
               gwas <- readGWAS(file)
             }, NA)
-            expect_true(class(gwas) == "data.frame")
+            expect_true(class(gwas$gwas) == "data.frame")
+            expect_true(all.equal(gwas$gwas, resGwas))
             file.remove(file)
             expect_error({
               file <- saveGWAS(gwas = resGwas, dir = "doNotExists")

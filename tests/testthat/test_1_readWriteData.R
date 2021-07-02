@@ -126,7 +126,21 @@ capture_output({
       expect_error({
         gwas <- readGWAS(file)
       }, NA)
-      expect_true(class(gwas) == "data.frame")
+      expect_true(class(gwas) == "list")
+      expect_true(all.equal(names(gwas),  c("gwasRes", "metadata")))
+      expect_true(class(gwas$gwasRes) == "data.frame")
+      expect_true(class(gwas$metadata) == "list")
+      expect_true(
+        all.equal(names(gwas$metadata), c("genoFP",
+                                          "phenoFP",
+                                          "trait",
+                                          "test",
+                                          "fixed",
+                                          "response",
+                                          "thresh_maf",
+                                          "thresh_callrate",
+                                          "date"))
+      )
     }
   })
 
@@ -139,7 +153,21 @@ capture_output({
       expect_error({
         gwas <- downloadGWAS(file)
       }, NA)
-      expect_true(class(gwas) == "data.frame")
+      expect_true(class(gwas) == "list")
+      expect_true(all.equal(names(gwas), c("gwasRes", "metadata")))
+      expect_true(class(gwas$gwasRes) == "data.frame")
+      expect_true(class(gwas$metadata) == "list")
+      expect_true(
+        all.equal(names(gwas$metadata), c("genoFP",
+                                          "phenoFP",
+                                          "trait",
+                                          "test",
+                                          "fixed",
+                                          "response",
+                                          "thresh_maf",
+                                          "thresh_callrate",
+                                          "date"))
+      )
     }
   })
 

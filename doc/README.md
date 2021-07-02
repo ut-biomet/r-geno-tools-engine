@@ -125,7 +125,7 @@ Argument      |Description
 
 ## Value
 
-list with 2 elements `gwasRes` for the results of the gwas analysis in json and `file` path of the json file containing the results (id `dir` is not `NULL`)
+list with 3 elements `gwasRes` for the results of the gwas analysis in json, `metadata` a list of metadata of these analysis and `file` path of the json file containing the results (id `dir` is not `NULL`)
 
 
 # `draw_manhattanPlot`
@@ -146,8 +146,7 @@ draw_manhattanPlot(
   gwasUrl = NULL,
   adj_method = "bonferroni",
   thresh_p = 0.05,
-  chr = NA,
-  title = "Manhattan Plot"
+  chr = NA
 )
 ```
 
@@ -161,7 +160,6 @@ Argument      |Description
 `adj_method`     |     correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     name of the chromosome to show (show all if NA)
-`title`     |     Title of the plot. Default is "Manhattan Plot"
 
 
 ## Value
@@ -200,6 +198,43 @@ Argument      |Description
 ## Value
 
 path of the created file (or NULL if `dir` is NULL)
+
+
+# `run_resAdjustment`
+
+Adjust GWAS p-values
+
+
+## Description
+
+Adjust GWAS p-values
+
+
+## Usage
+
+```r
+run_resAdjustment(
+  gwasFile = NULL,
+  gwasUrl = NULL,
+  adj_method = "bonferroni",
+  dir = tempdir()
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`gwasFile`     |     path of the gwas result data file (json file)
+`gwasUrl`     |     url of the gwas result data file (json file)
+`adj_method`     |     correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
+`dir`     |     directory where to save the data, by default it is a temporary directory
+
+
+## Value
+
+list with 3 elements `gwasAdjusted` for the results of the gwas analysis in json with adjusted p-values, `metadata` a list of metadata of the gwas analysis in json with adjusted p-values, and `file` path of the json file containing the results (if `dir` is not `NULL`)
 
 
 # `manPlot`
@@ -506,7 +541,7 @@ Argument      |Description
 
 ## Value
 
-`data.frame`
+`list` of 2 elements
 
 
 # `saveGWAS`
@@ -522,7 +557,7 @@ saveGWAS save gwas result in a temporary file
 ## Usage
 
 ```r
-saveGWAS(gwas, dir = tempdir())
+saveGWAS(gwas, metadata, dir = tempdir())
 ```
 
 
@@ -531,6 +566,7 @@ saveGWAS(gwas, dir = tempdir())
 Argument      |Description
 ------------- |----------------
 `gwas`     |     data.frame return by `gwas` function
+`metadata`     |     list of metadata of the gwas results
 `dir`     |     directory where to save the data, by default it is a temporary directory
 
 

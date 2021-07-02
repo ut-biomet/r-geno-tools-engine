@@ -19,11 +19,25 @@ capture.output({
                                thresh_callrate = 0.95,
                                dir = tempdir())
     },NA)
-    expect_true(class(gwas_results$gwasRes) == "json")
     expect_error({
       gwas <- readGWAS(gwas_results$file)
     }, NA)
-    expect_true(class(gwas) == "data.frame")
+    expect_true(class(gwas) == "list")
+    expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
+    expect_true(class(gwas_results$gwas) == "json")
+    expect_true(class(gwas$gwas) == "data.frame")
+    expect_true(class(gwas$metadata) == "list")
+    expect_true(
+      all.equal(names(gwas$metadata), c("genoFP",
+                                        "phenoFP",
+                                        "trait",
+                                        "test",
+                                        "fixed",
+                                        "response",
+                                        "thresh_maf",
+                                        "thresh_callrate",
+                                        "date"))
+    )
 
   })
 
@@ -37,7 +51,14 @@ capture.output({
                               thresh_p = 0.05,
                               chr = NA,
                               title = "Example of Manhattan Plot")
-    },NA)
+    }, "unused argument \\(title")
+    expect_error({
+      p <- draw_manhattanPlot(gwasFile = "../../data/models/gwasResult.json",
+                              gwasUrl = NULL,
+                              adj_method = "bonferroni",
+                              thresh_p = 0.05,
+                              chr = NA)
+    }, NA)
     expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
   })
 
@@ -68,7 +89,22 @@ capture.output({
     expect_error({
       gwas <- readGWAS(gwasAdjResults$file)
     }, NA)
-    expect_true(class(gwas) == "data.frame")
+    expect_true(class(gwas) == "list")
+    expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
+    expect_true(class(gwas$gwas) == "data.frame")
+    expect_true(class(gwas$metadata) == "list")
+    expect_true(
+      all.equal(names(gwas$metadata), c("genoFP",
+                                        "phenoFP",
+                                        "trait",
+                                        "test",
+                                        "fixed",
+                                        "response",
+                                        "thresh_maf",
+                                        "thresh_callrate",
+                                        "date",
+                                        "adj_method"))
+    )
   })
 
 })
