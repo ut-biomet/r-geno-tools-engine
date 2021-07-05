@@ -7,30 +7,33 @@
 
 capture_output({
 
-  test_that("readGenoData", {
-    files <- c("../../data/markers/testMarkerData01.vcf",
-               "../../data/markers/testMarkerData01.vcf.gz")
+  genoFiles <- c("../../data/markers/testMarkerData01.vcf",
+                 "../../data/markers/testMarkerData01.vcf.gz")
 
-    for (file in files) {
+  for (file in genoFiles) {
+    test_that(paste("readGenoData", tools::file_ext(file)), {
+      if (!file.exists(file)) {
+        skip(paste("File", file, "not found. Skip test for this file"))
+      }
       expect_error({
         gDta <- readGenoData(file)
       }, NA)
       expect_true(class(gDta) == "bed.matrix")
-    }
-  })
+    })
 
-  test_that("downloadGenoData", {
-    files <- c("../../data/markers/testMarkerData01.vcf",
-               "../../data/markers/testMarkerData01.vcf.gz")
-    files <- normalizePath(files)
-    files <- paste0("file://", files)
-    for (file in files) {
+    test_that(paste("downloadGenoData", tools::file_ext(file)), {
+      if (!file.exists(file)) {
+        skip(paste("File", file, "not found. Skip test for this file"))
+      }
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
       expect_error({
         gDta <- downloadGenoData(file)
       }, NA)
       expect_true(class(gDta) == "bed.matrix")
-    }
-  })
+    })
+  }
+
 
   test_that("readPhenoData", {
     files <- c("../../data/pheno/testPhenoData01.csv")
@@ -58,7 +61,7 @@ capture_output({
 
 
   test_that("prepareData", {
-    genoFiles <- c("../../data/markers/testMarkerData01.vcf")
+    genoFiles <- c("../../data/markers/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
 
     for (phenfile in phenoFiles) {
@@ -78,7 +81,7 @@ capture_output({
 
 
   test_that("readData", {
-    genoFiles <- c("../../data/markers/testMarkerData01.vcf")
+    genoFiles <- c("../../data/markers/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
 
     for (phenfile in phenoFiles) {
@@ -96,7 +99,7 @@ capture_output({
 
 
   test_that("downloadData", {
-    genoFiles <- c("../../data/markers/testMarkerData01.vcf")
+    genoFiles <- c("../../data/markers/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
 
     genoFiles <- normalizePath(genoFiles)

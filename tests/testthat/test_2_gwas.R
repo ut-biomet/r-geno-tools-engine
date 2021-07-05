@@ -5,7 +5,7 @@
 # unit test for gwas analysis
 
 capture.output({
-  files <- list(c(g = "../../data/markers/testMarkerData01.vcf",
+  files <- list(c(g = "../../data/markers/testMarkerData01.vcf.gz",
                   p = "../../data/pheno/testPhenoData01.csv"))
   resCols <- list("score" = c("chr", "pos", "id", "A1", "A2",
                               "freqA2", "score", "p"),
@@ -67,7 +67,7 @@ capture.output({
 
 
 
-  s <- list(c(g = "../../data/markers/testMarkerData01.vcf",
+  s <- list(c(g = "../../data/markers/testMarkerData01.vcf.gz",
               p = "../../data/pheno/testPhenoData01.csv"))
   for (file in files) {
     dta <- readData(file["g"], file["p"])
