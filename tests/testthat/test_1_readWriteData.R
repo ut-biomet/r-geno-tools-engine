@@ -7,8 +7,8 @@
 
 capture_output({
 
-  genoFiles <- c("../../data/markers/testMarkerData01.vcf",
-                 "../../data/markers/testMarkerData01.vcf.gz")
+  genoFiles <- c("../../data/geno/testMarkerData01.vcf",
+                 "../../data/geno/testMarkerData01.vcf.gz")
 
   for (file in genoFiles) {
     test_that(paste("readGenoData", tools::file_ext(file)), {
@@ -61,7 +61,7 @@ capture_output({
 
 
   test_that("prepareData", {
-    genoFiles <- c("../../data/markers/testMarkerData01.vcf.gz")
+    genoFiles <- c("../../data/geno/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
 
     for (phenfile in phenoFiles) {
@@ -81,7 +81,7 @@ capture_output({
 
 
   test_that("readData", {
-    genoFiles <- c("../../data/markers/testMarkerData01.vcf.gz")
+    genoFiles <- c("../../data/geno/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
 
     for (phenfile in phenoFiles) {
@@ -99,7 +99,7 @@ capture_output({
 
 
   test_that("downloadData", {
-    genoFiles <- c("../../data/markers/testMarkerData01.vcf.gz")
+    genoFiles <- c("../../data/geno/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
 
     genoFiles <- normalizePath(genoFiles)
@@ -123,7 +123,7 @@ capture_output({
 
 
   test_that("readGWAS", {
-    files <- c("../../data/models/gwasResult.json")
+    files <- c("../../data/results/gwasResult.json")
 
     for (file in files) {
       expect_error({
@@ -149,7 +149,7 @@ capture_output({
 
 
   test_that("downloadGWAS", {
-    files <- c("../../data/models/gwasResult.json")
+    files <- c("../../data/results/gwasResult.json")
     files <- normalizePath(files)
     files <- paste0("file://", files)
     for (file in files) {

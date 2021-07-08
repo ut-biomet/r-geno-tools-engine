@@ -16,18 +16,18 @@ knitr::opts_chunk$set(
 
 This folder contain example data to run this engine.
 
-## `markers/`
+## `geno/`
 
 Genetic data.
 
 The `.vcf` files are not gitted.
 
 ```{r}
-list.files("markers")
+list.files("geno")
 ```
 
 ```{r}
-cat(paste(readLines("markers/testMarkerData01.vcf", n=20), collapse = "\n"))
+cat(paste(readLines("geno/testMarkerData01.vcf", n=20), collapse = "\n"))
 ```
 
 
@@ -44,13 +44,13 @@ cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
 ```
 
 
-## `models/`
+## `results/`
 
-To store the models created by the engine.
+To store the example of results created by the engine.
 
 
 ```{r}
-cat(paste(readLines("models/gwasResult.json", n=30), collapse = "\n"))
+cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 ```
 
 

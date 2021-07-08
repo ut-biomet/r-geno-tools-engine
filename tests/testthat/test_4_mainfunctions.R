@@ -7,7 +7,7 @@
 capture.output({
   test_that("Run GWAS", {
     expect_error({
-      gwas_results <- run_gwas(genoFile = "../../data/markers/testMarkerData01.vcf.gz",
+      gwas_results <- run_gwas(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
                                phenoFile = "../../data/pheno/testPhenoData01.csv",
                                genoUrl = NULL,
                                phenoUrl = NULL,
@@ -45,7 +45,7 @@ capture.output({
 
   test_that("Draw Manhattan Plot", {
     expect_error({
-      p <- draw_manhattanPlot(gwasFile = "../../data/models/gwasResult.json",
+      p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
@@ -53,7 +53,7 @@ capture.output({
                               title = "Example of Manhattan Plot")
     }, "unused argument \\(title")
     expect_error({
-      p <- draw_manhattanPlot(gwasFile = "../../data/models/gwasResult.json",
+      p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
@@ -68,7 +68,7 @@ capture.output({
 
   test_that("Draw LD plot", {
     expect_error({
-      imgFile <- draw_ldPlot(genoFile = "../../data/markers/testMarkerData01.vcf.gz",
+      imgFile <- draw_ldPlot(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
                              genoUrl = NULL,
                              from = 42,
                              to = 62,
@@ -80,7 +80,7 @@ capture.output({
 
   test_that("GWAS Results adjust p-values", {
     expect_error({
-      gwasAdjResults <- run_resAdjustment(gwasFile = "../../data/models/gwasResult.json",
+      gwasAdjResults <- run_resAdjustment(gwasFile = "../../data/results/gwasResult.json",
                                           gwasUrl = NULL,
                                           adj_method = "bonferroni",
                                           dir = tempdir())

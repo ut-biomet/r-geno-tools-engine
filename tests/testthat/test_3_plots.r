@@ -6,7 +6,7 @@
 
 capture_output({
   test_that("LD plot", {
-    gDta <- readGenoData("../../data/markers/testMarkerData01.vcf.gz")
+    gDta <- readGenoData("../../data/geno/testMarkerData01.vcf.gz")
     expect_error({
       imgFile <- LDplot(gDta, 1, 20, dir = NULL)
     }, NA)
@@ -30,7 +30,7 @@ capture_output({
   })
 
 
-  files <- list(c(g = "../../data/markers/testMarkerData01.vcf.gz",
+  files <- list(c(g = "../../data/geno/testMarkerData01.vcf.gz",
                   p = "../../data/pheno/testPhenoData01.csv"))
   for (file in files) {
     dta <- readData(file["g"], file["p"])

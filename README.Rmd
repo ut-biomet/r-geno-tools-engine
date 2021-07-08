@@ -65,7 +65,7 @@ There is the list of some main function that GWAS-engine can run.
 ### Run GWAS
 
 ```{r runGWAS}
-gwas_results <- run_gwas(genoFile = "data/markers/testMarkerData01.vcf.gz",
+gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
                          phenoFile = "data/pheno/testPhenoData01.csv",
                          genoUrl = NULL,
                          phenoUrl = NULL,
@@ -110,7 +110,7 @@ substr(gwas_adj$gwasAdjusted, start=1, stop=500)
 ### Draw LD plot
 
 ```{r draw_ldPlot}
-imgFile <- draw_ldPlot(genoFile = "data/markers/testMarkerData01.vcf.gz",
+imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
                        genoUrl = NULL,
                        from = 42,
                        to = 62,
@@ -131,7 +131,7 @@ Example data are stored in the `data` folder.
 
 `readData` read and prepare the data for GWAS analysis
 ```{r loadDta}
-data <- readData(genoFile = "data/markers/testMarkerData01.vcf",
+data <- readData(genoFile = "data/geno/testMarkerData01.vcf",
                  phenoFile = "data/pheno/testPhenoData01.csv")
 ```
 
@@ -190,7 +190,7 @@ p
 Compute $r^2$ Linkage Disequilibrium (LD) between given SNPs and save a plot in a temporary PNG file.
 
 ```{r}
-gDta <- readGenoData("data/markers/testMarkerData01.vcf.gz")
+gDta <- readGenoData("data/geno/testMarkerData01.vcf.gz")
 (imgFile <- LDplot(geno = gDta,
                    from = 1,
                    to = 20,

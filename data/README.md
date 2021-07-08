@@ -5,19 +5,19 @@
 
 This folder contain example data to run this engine.
 
-## `markers/`
+## `geno/`
 
 Genetic data.
 
 The `.vcf` files are not gitted.
 
 ``` r
-list.files("markers")
+list.files("geno")
 #> [1] "testMarkerData01.vcf"    "testMarkerData01.vcf.gz"
 ```
 
 ``` r
-cat(paste(readLines("markers/testMarkerData01.vcf", n=20), collapse = "\n"))
+cat(paste(readLines("geno/testMarkerData01.vcf", n=20), collapse = "\n"))
 #> ##fileformat=VCFv4.2
 #> ##fileDate=20160228
 #> ##source=PLINKv1.90
@@ -63,40 +63,40 @@ cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
 #> NSFTV10@2e1c9c87.0,89,55,74,1.202702703,0.743243243,3,NA,27.9,1,1,3.650658241,83,22.16666667,10.33333333,4.110873864,4.733270189,0.537,7.859,3.23325,2.265360786,3.729249146,5.088266667,2.937733333,3.309969856,5.9129,2.431,1.732,0,0,3.33,2,15.09666667,7,9.5,89,NA
 ```
 
-## `models/`
+## `results/`
 
-To store the models created by the engine.
+To store the example of results created by the engine.
 
 ``` r
-cat(paste(readLines("models/gwasResult.json", n=30), collapse = "\n"))
-#> [
-#>   {
-#>     "chr": "1",
-#>     "pos": 9563,
-#>     "id": "SNP-1.8562.",
-#>     "A1": "A",
-#>     "A2": "T",
-#>     "freqA2": 0.1383,
-#>     "score": 1.4557,
-#>     "p": 0.2276
-#>   },
-#>   {
-#>     "chr": "1",
-#>     "pos": 25922,
-#>     "id": "SNP-1.24921.",
-#>     "A1": "C",
-#>     "A2": "T",
-#>     "freqA2": 0.1278,
-#>     "score": 0.3631,
-#>     "p": 0.5468
-#>   },
-#>   {
-#>     "chr": "1",
-#>     "pos": 26254,
-#>     "id": "SNP-1.25253.",
-#>     "A1": "A",
-#>     "A2": "T",
-#>     "freqA2": 0.2955,
-#>     "score": 0.0286,
-#>     "p": 0.8656
+cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
+#> {
+#>   "gwasRes": [
+#>     {
+#>       "chr": "1",
+#>       "pos": 9563,
+#>       "id": "SNP-1.8562.",
+#>       "A1": "A",
+#>       "A2": "T",
+#>       "freqA2": 0.1359,
+#>       "score": 3.6664,
+#>       "p": 0.0555
+#>     },
+#>     {
+#>       "chr": "1",
+#>       "pos": 25922,
+#>       "id": "SNP-1.24921.",
+#>       "A1": "C",
+#>       "A2": "T",
+#>       "freqA2": 0.1254,
+#>       "score": 1.3876,
+#>       "p": 0.2388
+#>     },
+#>     {
+#>       "chr": "1",
+#>       "pos": 26254,
+#>       "id": "SNP-1.25253.",
+#>       "A1": "A",
+#>       "A2": "T",
+#>       "freqA2": 0.2935,
+#>       "score": 2.9466,
 ```
