@@ -5,6 +5,8 @@
 # unit test of main function
 
 capture.output({
+
+  # run GWAS ---
   test_that("Run GWAS", {
     expect_error({
       gwas_results <- run_gwas(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
@@ -38,11 +40,58 @@ capture.output({
                                         "thresh_callrate",
                                         "date"))
     )
-
   })
 
 
+  # Test run_gwas() with wrong parameters:
+  goodParams <- list(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
+                     phenoFile = "../../data/pheno/testPhenoData01.csv",
+                     genoUrl = NULL,
+                     phenoUrl = NULL,
+                     trait = "Flowering.time.at.Arkansas",
+                     test = "wald",
+                     fixed = 0,
+                     response = "quantitative",
+                     thresh_maf = 0.00,
+                     thresh_callrate = 0.99,
+                     dir = tempdir())
 
+  wrongParamsL <- list(genoFile = "/geno-do-not-exist",
+                       phenoFile = "/pheno-do-not-exist",
+                       trait = list("Trait.that.do.not.exist", c("a", "b")),
+                       test = list("not.a.test", c("c", "d")),
+                       fixed = list(-1, 1.5, "1", c(0,1)),
+                       response = list("wrong resp", c("e", "f")),
+                       thresh_maf = list(-0.06, 0.55, "0.1", c(0, 0.1)),
+                       thresh_callrate = list(-0.02, 1.42, "0.21", c(0.85, 0.2)),
+                       dir = "/do-not-exist")
+
+  for (p in names(goodParams)) {
+    wrongParams <- wrongParamsL[[p]]
+    i <- 0
+    for (wrongP in wrongParams) {
+      i <- i+1
+      params <- goodParams
+      params[[p]] <- wrongP
+      testName <- paste("run_gwas, WrongParams", p, i, sep = "-")
+      test_that(testName, {
+        expect_error({
+          run_gwas(genoFile = params[["genoFile"]],
+                   phenoFile = params[["phenoFile"]],
+                   trait = params[["trait"]],
+                   test = params[["test"]],
+                   fixed = params[["fixed"]],
+                   response = params[["response"]],
+                   thresh_maf = params[["thresh_maf"]],
+                   thresh_callrate = params[["thresh_callrate"]],
+                   dir = params[["dir"]])
+        })
+      })
+    }
+  }
+
+
+    # draw_manhattanPlot ---
   test_that("Draw Manhattan Plot", {
     expect_error({
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
@@ -64,20 +113,86 @@ capture.output({
 
 
 
+  # Test draw_manhattanPlot() with wrong parameters:
+  goodParams <- list(gwasFile = "../../data/results/gwasResult.json",
+                     gwasUrl = NULL,
+                     adj_method = "bonferroni",
+                     thresh_p = 0.05,
+                     chr = NA,
+                     title = "Example of Manhattan Plot")
 
+  wrongParamsL <- list(gwasFile = "doNotExist",
+                       gwasUrl = "doNotExist",
+                       adj_method = "doNotExist",
+                       thresh_p = list(-1, 1.02),
+                       chr = c("doNotExist", 50))
 
+  for (p in names(goodParams)) {
+    wrongParams <- wrongParamsL[[p]]
+    i <- 0
+    for (wrongP in wrongParams) {
+      i <- i+1
+      params <- goodParams
+      params[[p]] <- wrongP
+      testName <- paste("draw_manhattanPlot, WrongParams", p, i, sep = "-")
+      test_that(testName, {
+        expect_error({
+          draw_manhattanPlot(gwasFile = params[["gwasFile"]],
+                             gwasUrl = params[["gwasUrl"]],
+                             adj_method = params[["adj_method"]],
+                             thresh_p = params[["thresh_p"]],
+                             chr = params[["chr"]])
+        })
+      })
+    }
+  }
+
+  # Draw LD plot ----
   test_that("Draw LD plot", {
     expect_error({
       imgFile <- draw_ldPlot(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
-                             genoUrl = NULL,
-                             from = 42,
-                             to = 62,
-                             dir = tempdir())
+      genoUrl = NULL,
+      from = 42,
+      to = 62,
+      dir = tempdir())
     },NA)
   })
 
 
+  # Test draw_ldPlot() with wrong parameters:
+  goodParams <- list(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
+                     genoUrl = NULL,
+                     from = 42,
+                     to = 62,
+                     dir = tempdir())
 
+  wrongParamsL <- list(genoFile = "doNotExist",
+                       genoUrl =  "doNotExist",
+                       from = c("42", 42.1),
+                       to = c("50", 52.1),
+                       dir = "doNotExist")
+
+  for (p in names(goodParams)) {
+    wrongParams <- wrongParamsL[[p]]
+    i <- 0
+    for (wrongP in wrongParams) {
+      i <- i+1
+      params <- goodParams
+      params[[p]] <- wrongP
+      testName <- paste("draw_ldPlot, WrongParams", p, i, sep = "-")
+      test_that(testName, {
+        expect_error({
+          draw_ldPlot(genoFile = params[["genoFile"]],
+                      genoUrl = params[["genoUrl"]],
+                      from = params[["from"]],
+                      to = params[["to"]],
+                      dir = params[["dir"]])
+        })
+      })
+    }
+  }
+
+  # adjust p-values ----
   test_that("GWAS Results adjust p-values", {
     expect_error({
       gwasAdjResults <- run_resAdjustment(gwasFile = "../../data/results/gwasResult.json",
@@ -107,4 +222,33 @@ capture.output({
     )
   })
 
+  # Test run_resAdjustment() with wrong parameters:
+  goodParams <- list(gwasFile = "../../data/results/gwasResult.json",
+                     gwasUrl = NULL,
+                     adj_method = "bonferroni",
+                     dir = tempdir())
+
+  wrongParamsL <- list(gwasFile = "doNotExist",
+                       gwasUrl = "doNotExist",
+                       adj_method = "doNotExist",
+                       dir = "doNotExist")
+
+  for (p in names(goodParams)) {
+    wrongParams <- wrongParamsL[[p]]
+    i <- 0
+    for (wrongP in wrongParams) {
+      i <- i+1
+      params <- goodParams
+      params[[p]] <- wrongP
+      testName <- paste("run_resAdjustment, WrongParams", p, i, sep = "-")
+      test_that(testName, {
+        expect_error({
+          run_resAdjustment(gwasFile = params[["gwasFile"]],
+                            gwasUrl = params[["gwasUrl"]],
+                            adj_method = params[["adj_method"]],
+                            dir = params[["dir"]])
+        })
+      })
+    }
+  }
 })

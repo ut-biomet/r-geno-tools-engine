@@ -5,6 +5,8 @@
 # Unit test for LD plots
 
 capture_output({
+
+  # LDplot
   test_that("LD plot", {
     gDta <- readGenoData("../../data/geno/testMarkerData01.vcf.gz")
     expect_error({
@@ -18,6 +20,20 @@ capture_output({
     }, NA)
     file.remove(imgFile)
 
+    # errors
+    expect_error({
+      imgFile <- LDplot(gDta, 1.5, 20, dir = NULL)
+    },'`from` should be an positive integer of length 1' )
+    expect_error({
+      imgFile <- LDplot(gDta, 1, 20.1, dir = NULL)
+    },'`to` should be an positive integer of length 1' )
+    expect_error({
+      imgFile <- LDplot(gDta, "2", 20, dir = NULL)
+    }, '`from` should be an positive integer of length 1')
+    expect_error({
+      imgFile <- LDplot(gDta, 2, "20", dir = NULL)
+    }, '`to` should be an positive integer of length 1')
+
     expect_error({
       imgFile <- LDplot(gDta, 20, 2, dir = NULL)
     }, '"from" should be lower than "to"')
@@ -29,7 +45,7 @@ capture_output({
     }, 'Error: "dir" directory should exists')
   })
 
-
+  # manPlot
   files <- list(c(g = "../../data/geno/testMarkerData01.vcf.gz",
                   p = "../../data/pheno/testPhenoData01.csv"))
   for (file in files) {
@@ -67,4 +83,42 @@ capture_output({
       }
     }
   }
+
+  # Test manPlot() with wrong parameters:
+  resGwas <- gwas(dta,
+                  trait = "Flowering.time.at.Arkansas",
+                  test = "score",
+                  fixed = 0,
+                  response = "quantitative",
+                  thresh_maf = 0.05,
+                  thresh_callrate = 0.95)
+  goodParams <- list(gwas = resGwas,
+                     adj_method = "bonferroni",
+                     thresh_p = 0.05,
+                     chr = unique(resGwas$chr)[1])
+
+  wrongParamsL <- list(p = list(c(runif(100, 0, 1), -0.1, 0.00015)),
+                       adj_method = "do not exists",
+                       thresh_p = list(-1, 1.02),
+                       chr = c("doNotExists", 29))
+
+  for (p in names(goodParams)) {
+    wrongParams <- wrongParamsL[[p]]
+    i <- 0
+    for (wrongP in wrongParams) {
+      i <- i+1
+      params <- goodParams
+      params[[p]] <- wrongP
+      testName <- paste("manPlot WrongParams", p, i, sep = "-")
+      test_that(testName, {
+        expect_error({
+          manPlot(gwas = params[["gwas"]],
+                  adj_method = params[["adj_method"]],
+                  thresh_p = params[["thresh_p"]],
+                  chr = params[["chr"]])
+        })
+      })
+    }
+  }
+
 })

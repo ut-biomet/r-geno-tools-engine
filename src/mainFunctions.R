@@ -84,7 +84,7 @@ run_gwas <- function(genoFile = NULL,
 
   if (!is.null(dir)) {
     logger$log("Save results ...")
-    file <- saveGWAS(gwas = gwasRes, metadata = metadata, dir = dir)
+    file <- saveGWAS(gwasRes = gwasRes, metadata = metadata, dir = dir)
   logger$log("Save results DONE")
   } else {file <- NULL}
 
@@ -215,7 +215,7 @@ run_resAdjustment <- function(gwasFile = NULL,
 
   if (!is.null(dir)) {
     logger$log("Save results ...")
-    file <- saveGWAS(gwas = gwas$gwasRes, metadata = metadata, dir = dir)
+    file <- saveGWAS(gwasRes = gwas$gwasRes, metadata = metadata, dir = dir)
     logger$log("Save results DONE")
   } else {file <- NULL}
 

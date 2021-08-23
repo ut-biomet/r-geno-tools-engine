@@ -116,6 +116,11 @@ downloadGWAS <- function(url){
 readGenoData <- function(file) {
   logger <- logger$new("r-readGenoData()")
   logger$log("Check file extention ... ")
+
+  if (!file.exists(file)) {
+    stop("File do not exists") 
+  }
+
   ext <- tools::file_ext(file)
   if (identical(ext, "gz")) {
     ext <- paste0(
@@ -149,6 +154,9 @@ readGenoData <- function(file) {
 readPhenoData <- function(file, row.names = 1, ...) {
   logger <- logger$new("r-readPhenoData()")
   # read data file:
+  if (!file.exists(file)) {
+    stop("File do not exists") 
+  }
   logger$log("Read phenotypic file ... ")
   dta <- read.csv(file,
                   row.names = row.names,
@@ -194,6 +202,9 @@ readGWAS <- function(file) {
   logger <- logger$new("r-readGWAS()")
 
   logger$log("Read result file ... ")
+  if (!file.exists(file)) {
+    stop("File do not exists") 
+  }
   gwasRes <- readLines(file)
   logger$log("Read result file DONE ")
   logger$log("Convert Json to data.frame ... ")
@@ -206,13 +217,13 @@ readGWAS <- function(file) {
 
 #' saveGWAS save gwas result in a temporary file
 #'
-#' @param gwas data.frame return by `gwas` function
+#' @param gwasRes data.frame return by `gwas` function
 #' @param metadata list of metadata of the gwas results
 #' @param dir directory where to save the data,
 #' by default it is a temporary directory
 #'
 #' @return path of the created filed
-saveGWAS <- function(gwas, metadata, dir = tempdir()) {
+saveGWAS <- function(gwasRes, metadata, dir = tempdir()) {
   logger <- logger$new("r-saveGWAS()")
 
   logger$log('Check dir ...')
@@ -222,14 +233,15 @@ saveGWAS <- function(gwas, metadata, dir = tempdir()) {
   }
   logger$log('Check dir DONE')
 
-  gwasList <- list(gwas = gwas,
+  gwasList <- list(gwas = gwasRes,
                    metadata = metadata)
 
   file <- tempfile(fileext = ".json", tmpdir = dir)
   writeLines(jsonlite::toJSON(gwasList,
                               complex = "list",
                               pretty = T,
-                              digits = NA),
+                              digits = NA,
+                              na = 'string'),
              con = file)
   return(file)
 }

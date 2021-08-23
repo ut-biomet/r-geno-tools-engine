@@ -16,6 +16,15 @@ manPlot <- function(gwas,
   logger <- logger$new("r-manPlot()")
 
 
+  # Check chromosome name
+  logger$log("Check chromosome name ...")
+  if (!is.na(chr)) {
+    if (!chr %in% unique(gwas$chr)) {
+      stop("`chr` should match the chromosome names of `gwas`")
+    }
+  }
+  logger$log("Check chromosome name DONE")
+
   # P-Values adjustment
   logger$log("Adjust p-values ...")
   adj <- adjustPval(gwas$p, adj_method, thresh_p)
@@ -70,6 +79,51 @@ manPlot <- function(gwas,
 LDplot <- function(geno, from, to, dir = tempdir()) {
   logger <- logger$new("r-LDplot()")
 
+  # Checks:
+  logger$log('Check "from" and "to" format ...')
+  if (length(from) != 1) {
+    stop(
+         "`from` should be an positive integer of length 1 ",
+         "It's length is \"",
+         length(from),
+         "\""
+    )
+  }
+  if (!is.numeric(from) || from < 0 || from%%1!=0) {
+    stop("`from` should be an positive integer of length 1 ",
+         "It is \"",
+         class(from),
+         "\"")
+  }
+  if (from < 0 || from%%1!=0) {
+    stop("`from` should be an positive integer of length 1 ",
+         "It's value is \"",
+         from,
+         "\"")
+  }
+
+  if (length(to) != 1) {
+    stop(
+         "`to` should be an positive integer of length 1 ",
+         "It's length is \"",
+         length(to),
+         "\""
+    )
+  }
+  if (!is.numeric(to) || to < 0 || to%%1!=0) {
+    stop("`to` should be an positive integer of length 1 ",
+         "It is \"",
+         class(to),
+         "\"")
+  }
+  if (to < 0 || to%%1!=0) {
+    stop("`to` should be an positive integer of length 1 ",
+         "It's value is \"",
+         to,
+         "\"")
+  }
+  logger$log('Check "from" and "to" format DONE')
+
   logger$log('Check "from" < "to"...')
   if (from >= to) {
     logger$log('Error: "from" greater than "to".')
@@ -96,7 +150,7 @@ LDplot <- function(geno, from, to, dir = tempdir()) {
 
 
 
-  # COMPUTE LD
+  # COMPUTE LD:
   logger$log("Compute LD ...")
   ld <- gaston::LD(geno, c(from, to), measure = "r2")
   logger$log("Compute LD DONE")

@@ -133,19 +133,25 @@ gwas <- function(data,
 
   ### `fixed`
   if (test %in% c("wald", "lrt")) {
-    if (!is.numeric(fixed)) {
-      stop("`fixed` should be a numeric value of length 1 ",
-           "It is \"",
-           class(fixed),
-           "\"")
-    }
     if (length(fixed) != 1) {
       stop(
-        "`fixed` should be a numeric value of length 1 ",
+        "`fixed` should be an positive integer of length 1 ",
         "It's length is \"",
         length(fixed),
         "\""
       )
+    }
+    if (!is.numeric(fixed) || fixed < 0 || fixed%%1!=0) {
+      stop("`fixed` should be an positive integer of length 1 ",
+           "It is \"",
+           class(fixed),
+           "\"")
+    }
+    if (fixed < 0 || fixed%%1!=0) {
+      stop("`fixed` should be an positive integer of length 1 ",
+           "It's value is \"",
+           fixed,
+           "\"")
     }
   }
 
@@ -175,17 +181,25 @@ gwas <- function(data,
   }
 
   ### `thresh_maf`
+    if (length(thresh_maf) != 1) {
+      stop(
+        "`thresh_maf` should be a numeric value between 0 and 0.5 of length 1 ",
+        "It's length is \"",
+        length(thresh_maf),
+        "\""
+      )
+    }
   if (!is.numeric(thresh_maf)) {
     stop(
-      "`thresh_maf` should be a numeric value between 0 and 1 of length 1 ",
+      "`thresh_maf` should be a numeric value between 0 and 0.5 of length 1 ",
       "It is \"",
       class(thresh_maf),
       "\""
     )
   }
-  if (thresh_maf < 0 || thresh_maf > 1) {
+  if (thresh_maf < 0 || thresh_maf > 0.5) {
     stop(
-      "`thresh_maf` should be a numeric value between 0 and 1 of length 1 ",
+      "`thresh_maf` should be a numeric value between 0 and 0.5 of length 1 ",
       "It's value is \"",
       thresh_maf,
       "\""
@@ -193,6 +207,14 @@ gwas <- function(data,
   }
 
   ### `thresh_callrate`
+    if (length(thresh_callrate) != 1) {
+      stop(
+        "`thresh_callrate` should be a numeric value between 0 and 1 of length 1 ",
+        "It's length is \"",
+        length(thresh_callrate),
+        "\""
+      )
+    }
   if (!is.numeric(thresh_callrate)) {
     stop(
       "`thresh_callrate` should be a numeric value between 0 and 1 of length 1 ",
@@ -219,10 +241,16 @@ gwas <- function(data,
   K <- data$grMatrix
   logger$log("aggregate data in bed matrix DONE")
 
-  ### FILTER SAMPLES ----
-  # remove samples with missing phenotypic values
-  logger$log("remove samples with missing phenotypic values ...")
+  ### FILTER INDS  ----
+  empty <- FALSE
+
+  # remove individuals with missing phenotypic values
+  logger$log("remove individuals with missing phenotypic values ...")
   bm <- gaston::select.inds(bm, !is.na(pheno))
+  if (nrow(bm) == 0) {
+    warning("No individuals remain after filtering")
+    empty <- TRUE
+  }
   K <- K[bm@ped$id, bm@ped$id]
   logger$log("remove samples with missing phenotypic values DONE")
 
@@ -233,10 +261,28 @@ gwas <- function(data,
   logger$log("filter SNPs ...")
   bm <- gaston::select.snps(bm, maf > thresh_maf)
   bm <- gaston::select.snps(bm, callrate > thresh_callrate)
+  if (ncol(bm) == 0) {
+    warning("No markers remain after filtering")
+    empty <- TRUE
+  }
   logger$log("filter SNPs DONE")
 
-  ### FIT MODEL ----
+  ### FAST RETURN ----
+  if (empty) {
+    resCols <- list("score" = c("chr", "pos", "id", "A1", "A2",
+                                "freqA2", "score", "p"),
+                    "wald" = c("chr", "pos", "id", "A1", "A2",
+                               "freqA2", "h2", "beta", "sd","p"),
+                    "lrt" = c("chr", "pos", "id", "A1", "A2",
+                              "freqA2", "h2", "LRT", "p"))
+    logger$log("DONE, return output.")
+    gwa <- data.frame(matrix(ncol = length(resCols[[test]]), nrow = 0))
+    colnames(gwa) <- resCols[[test]]
+    gwa[1,] <- NA
+    return(gwa)
+  }
 
+  ### FIT MODEL ----
   logger$log("fit model ...")
   if (test != "score") {
     gwa <- gaston::association.test(
@@ -257,7 +303,6 @@ gwas <- function(data,
     )
   }
   logger$log("fit model DONE")
-
   logger$log("DONE, return output.")
 
   return(gwa)
@@ -283,16 +328,23 @@ adjustPval <- function(p, adj_method, thresh_p = NULL){
   if (!adj_method %in%
       c("holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none")) {
     logger$log('Error: "adj_method" shoule be one of: "holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none"')
-    stop('Error: "adj_method" shoule be one of: "holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none"')
+    stop('Error: "adj_method" should be one of: "holm", "hochberg","bonferroni", "BH", "BY", "fdr", "none"')
   }
   logger$log("Check adj_method DONE")
 
+  # check p
+  logger$log("Check p values ...")
+  if (any(p < 0) || any(p > 1)) {
+    logger$log('Error: p values should be between 0 and 1')
+    stop('Error: p values should be between 0 and 1')
+  }
+  logger$log("Check p values DONE")
 
   # P-Values adjustment
   logger$log("Adjust p-values ...")
   p_adj <- p.adjust(p,
-                         method = adj_method,
-                         n = length(p))
+                    method = adj_method,
+                    n = length(p))
   logger$log("Adjust p-values DONE")
 
   if (!is.null(thresh_p)) {

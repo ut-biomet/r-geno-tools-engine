@@ -19,6 +19,11 @@ capture_output({
         gDta <- readGenoData(file)
       }, NA)
       expect_true(class(gDta) == "bed.matrix")
+
+      # error
+      expect_error({
+        dta <- readGenoData("doNotExist")
+      }, "File do not exists")
     })
 
     test_that(paste("downloadGenoData", tools::file_ext(file)), {
@@ -31,6 +36,11 @@ capture_output({
         gDta <- downloadGenoData(file)
       }, NA)
       expect_true(class(gDta) == "bed.matrix")
+
+      # # error
+      # expect_error({
+      #   dta <- downloadGenoData("doNotExist")
+      # })
     })
   }
 
@@ -44,6 +54,11 @@ capture_output({
       }, NA)
       expect_true(class(pDta) == "data.frame")
     }
+
+    # error
+    expect_error({
+      dta <- readPhenoData("doNotExist")
+    }, "File do not exists")
   })
 
 
@@ -57,6 +72,11 @@ capture_output({
       }, NA)
       expect_true(class(pDta) == "data.frame")
     }
+
+    # # error
+    # expect_error({
+    #   dta <- downloadPhenoData("doNotExist")
+    # })
   })
 
 
@@ -77,6 +97,14 @@ capture_output({
         expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
       }
     }
+
+    # error
+    expect_error({
+      dta <- readData("doNotExist", phenfile)
+    }, "File do not exists")
+    expect_error({
+      dta <- readData(genfile, "doNotExist")
+    }, "File do not exists")
   })
 
 
@@ -87,7 +115,7 @@ capture_output({
     for (phenfile in phenoFiles) {
       for (genfile in genoFiles) {
         expect_error({
-          dta <- readData(genfile,phenfile)
+          dta <- readData(genfile, phenfile)
         }, NA)
         expect_true(class(dta$genoData) == "bed.matrix")
         expect_true(class(dta$phenoData) == "data.frame")
@@ -95,6 +123,14 @@ capture_output({
         expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
       }
     }
+
+    # error
+    expect_error({
+      dta <- readData("doNotExist", phenfile)
+    }, "File do not exists")
+    expect_error({
+      dta <- readData(genfile, "doNotExist")
+    }, "File do not exists")
   })
 
 
@@ -111,7 +147,7 @@ capture_output({
     for (phenfile in phenoFiles) {
       for (genfile in genoFiles) {
         expect_error({
-          dta <- downloadData(genfile,phenfile)
+          dta <- downloadData(genfile, phenfile)
         }, NA)
         expect_true(class(dta$genoData) == "bed.matrix")
         expect_true(class(dta$phenoData) == "data.frame")
@@ -119,6 +155,14 @@ capture_output({
         expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
       }
     }
+
+    # # error
+    # expect_error({
+    #   dta <- downloadData("doNotExist", phenfile)
+    # })
+    # expect_error({
+    #   dta <- downloadData(genfile, "doNotExist")
+    # })
   })
 
 
@@ -145,6 +189,11 @@ capture_output({
                                           "date"))
       )
     }
+
+    # error
+    expect_error({
+      dta <- readGWAS("doNotExist")
+    }, "File do not exists")
   })
 
 
@@ -172,8 +221,30 @@ capture_output({
                                           "date"))
       )
     }
+
+    # # error
+    # expect_error({
+    #   dta <- downloadGWAS("doNotExist")
+    # })
   })
 
 
+  test_that("saveGWAS", {
+    file <- c(g = "../../data/geno/testMarkerData01.vcf.gz",
+              p = "../../data/pheno/testPhenoData01.csv")
+    dta <- readData(file["g"], file["p"])
+    resGwas <- gwas(dta,
+                    trait = "Flowering.time.at.Arkansas",
+                    test = "score",
+                    fixed = 0,
+                    response = "quantitative",
+                    thresh_maf = 0.05,
+                    thresh_callrate = 0.95)
+    # this function is tested in tests/testthat/test_2_gwas.R
 
+    # error
+    expect_error({
+      file <- saveGWAS(gwasRes = resGwas, dir = "doNotExists")
+    }, 'Error: "dir" directory should exists')
+  })
 })
