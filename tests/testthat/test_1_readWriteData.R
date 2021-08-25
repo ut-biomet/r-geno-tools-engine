@@ -240,11 +240,17 @@ capture_output({
                     response = "quantitative",
                     thresh_maf = 0.05,
                     thresh_callrate = 0.95)
-    # this function is tested in tests/testthat/test_2_gwas.R
+    # this function is also tested in tests/testthat/test_2_gwas.R
+    resfile <- tempfile()
+    outfile <- saveGWAS(gwasRes = resGwas, metadata = "test", file = resfile)
+    expect_equal(outfile, resfile)
 
     # error
     expect_error({
       file <- saveGWAS(gwasRes = resGwas, dir = "doNotExists")
     }, 'Error: "dir" directory should exists')
+    expect_error({
+      file <- saveGWAS(gwasRes = resGwas,  file = c(tempfile(), tempfile()))
+    }, 'Error: only one file name should be provided')
   })
 })

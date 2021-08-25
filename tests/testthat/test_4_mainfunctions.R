@@ -2,7 +2,7 @@
 # 2021 The University of Tokyo
 #
 # Description:
-# unit test of main function
+# unit test of main functions
 
 capture.output({
 
@@ -19,7 +19,7 @@ capture.output({
                                response = "quantitative",
                                thresh_maf = 0.05,
                                thresh_callrate = 0.95,
-                               dir = tempdir())
+                               outFile = tempfile(fileext = ".json"))
     },NA)
     expect_error({
       gwas <- readGWAS(gwas_results$file)
@@ -54,17 +54,17 @@ capture.output({
                      response = "quantitative",
                      thresh_maf = 0.00,
                      thresh_callrate = 0.99,
-                     dir = tempdir())
+                     outFile = NULL)
 
-  wrongParamsL <- list(genoFile = "/geno-do-not-exist",
-                       phenoFile = "/pheno-do-not-exist",
-                       trait = list("Trait.that.do.not.exist", c("a", "b")),
-                       test = list("not.a.test", c("c", "d")),
+  wrongParamsL <- list(genoFile = c("/geno-do-not-exist", NA),
+                       phenoFile = c("/pheno-do-not-exist", NA),
+                       trait = list("Trait.that.do.not.exist", c("a", "b"), NA),
+                       test = list("not.a.test", c("c", "d"), NA),
                        fixed = list(-1, 1.5, "1", c(0,1)),
                        response = list("wrong resp", c("e", "f")),
-                       thresh_maf = list(-0.06, 0.55, "0.1", c(0, 0.1)),
-                       thresh_callrate = list(-0.02, 1.42, "0.21", c(0.85, 0.2)),
-                       dir = "/do-not-exist")
+                       thresh_maf = list(-0.06, 0.55, "0.1", c(0, 0.1), NA),
+                       thresh_callrate = list(-0.02, 1.42, "0.21", c(0.85, 0.2), NA),
+                       outFile = list(c("f1", "f2")))
 
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
@@ -84,7 +84,7 @@ capture.output({
                    response = params[["response"]],
                    thresh_maf = params[["thresh_maf"]],
                    thresh_callrate = params[["thresh_callrate"]],
-                   dir = params[["dir"]])
+                   outFile = params[["outFile"]])
         })
       })
     }
@@ -109,6 +109,14 @@ capture.output({
                               chr = NA)
     }, NA)
     expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
+    expect_error({
+      p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
+                              gwasUrl = NULL,
+                              adj_method = "bonferroni",
+                              thresh_p = 0.05,
+                              chr = NA,
+                              outFile = tempfile(fileext = ".html"))
+    }, NA)
   })
 
 
@@ -119,13 +127,14 @@ capture.output({
                      adj_method = "bonferroni",
                      thresh_p = 0.05,
                      chr = NA,
-                     title = "Example of Manhattan Plot")
+                     outFile = NULL)
 
-  wrongParamsL <- list(gwasFile = "doNotExist",
-                       gwasUrl = "doNotExist",
-                       adj_method = "doNotExist",
+  wrongParamsL <- list(gwasFile = c("doNotExist", NA),
+                       gwasUrl = c("doNotExist", NA),
+                       adj_method = c("doNotExist", NA),
                        thresh_p = list(-1, 1.02),
-                       chr = c("doNotExist", 50))
+                       chr = c("doNotExist", 50),
+                       outFile = list(c("f1", "f2")))
 
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
@@ -141,7 +150,8 @@ capture.output({
                              gwasUrl = params[["gwasUrl"]],
                              adj_method = params[["adj_method"]],
                              thresh_p = params[["thresh_p"]],
-                             chr = params[["chr"]])
+                             chr = params[["chr"]],
+                             outFile = params[["outFile"]])
         })
       })
     }
@@ -151,10 +161,10 @@ capture.output({
   test_that("Draw LD plot", {
     expect_error({
       imgFile <- draw_ldPlot(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
-      genoUrl = NULL,
-      from = 42,
-      to = 62,
-      dir = tempdir())
+                             genoUrl = NULL,
+                             from = 42,
+                             to = 62,
+                             outFile = tempfile(fileext = ".png"))
     },NA)
   })
 
@@ -164,13 +174,13 @@ capture.output({
                      genoUrl = NULL,
                      from = 42,
                      to = 62,
-                     dir = tempdir())
+                     outFile = tempfile(fileext = ".png"))
 
-  wrongParamsL <- list(genoFile = "doNotExist",
-                       genoUrl =  "doNotExist",
+  wrongParamsL <- list(genoFile = c("doNotExist", NA),
+                       genoUrl =  c("doNotExist", NA),
                        from = c("42", 42.1),
                        to = c("50", 52.1),
-                       dir = "doNotExist")
+                       outFile = list(c("f1", "f2")))
 
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
@@ -186,7 +196,7 @@ capture.output({
                       genoUrl = params[["genoUrl"]],
                       from = params[["from"]],
                       to = params[["to"]],
-                      dir = params[["dir"]])
+                      outFile = params[["outFile"]])
         })
       })
     }
@@ -198,7 +208,7 @@ capture.output({
       gwasAdjResults <- run_resAdjustment(gwasFile = "../../data/results/gwasResult.json",
                                           gwasUrl = NULL,
                                           adj_method = "bonferroni",
-                                          dir = tempdir())
+                                          outFile = tempfile())
     }, NA)
     expect_true(class(gwasAdjResults$gwasAdjusted) == "json")
     expect_error({
@@ -226,12 +236,13 @@ capture.output({
   goodParams <- list(gwasFile = "../../data/results/gwasResult.json",
                      gwasUrl = NULL,
                      adj_method = "bonferroni",
-                     dir = tempdir())
+                     outFile = NULL)
 
-  wrongParamsL <- list(gwasFile = "doNotExist",
-                       gwasUrl = "doNotExist",
-                       adj_method = "doNotExist",
-                       dir = "doNotExist")
+  wrongParamsL <- list(gwasFile = c("doNotExist", NA),
+                       gwasUrl = c("doNotExist", NA),
+                       adj_method = c("doNotExist", NA),
+                       outFile = list(c("f1", "f2")))
+
 
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
@@ -246,7 +257,7 @@ capture.output({
           run_resAdjustment(gwasFile = params[["gwasFile"]],
                             gwasUrl = params[["gwasUrl"]],
                             adj_method = params[["adj_method"]],
-                            dir = params[["dir"]])
+                            outFile = params[["outFile"]])
         })
       })
     }

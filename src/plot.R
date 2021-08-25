@@ -70,13 +70,13 @@ manPlot <- function(gwas,
 #' `downloadGenoData`.
 #' @param from lower bound of the range of SNPs for which the LD is computed
 #' @param to upper bound of the range of SNPs for which the LD is computed
-#' @param dir path of the directory where to save the file, by default dir is set to a temporary directory, if null, the plot will be displayed.
-#'  the image will be written in a temporary dir. Default: `NULL`
+#' @param file path of the png file to save the plot. If `NULL`, the image file will not be
+#' created. By default write in an tempoary `.png` file.
 #'
 #' @details `from` should be lower than `to`, and the maximum ranger size is 50.
 #' (In order to get a readable image). If write is `TRUE`, the function will write the plot in a png file, else it will plot it.
 #' @return null if `dir` is NULL, else the path of the png file.
-LDplot <- function(geno, from, to, dir = tempdir()) {
+LDplot <- function(geno, from, to, file = tempfile(fileext = ".png")) {
   logger <- logger$new("r-LDplot()")
 
   # Checks:
@@ -139,36 +139,37 @@ LDplot <- function(geno, from, to, dir = tempdir()) {
   }
   logger$log('Check number of SNP < 50 DONE')
 
-  if (!is.null(dir)) {
-    logger$log('Check dir ...')
-    if (!dir.exists(dir)) {
-      logger$log('Error: "dir" directory should exists')
-      stop('Error: "dir" directory should exists')
+  if (!is.null(file)) {
+    logger$log('Check file ...')
+    if (length(file) != 1) {
+      logger$log('Error: only one file name should be provided')
+      stop('Error: only one file name should be provided')
     }
-    logger$log('Check dir DONE')
+    if (file.exists(file)) {
+      logger$log('Warning: "file" directory already exists. This file will be overwritten.')
+    } else {
+      file.create(file)
+    }
+    logger$log('Check file DONE')
   }
-
-
 
   # COMPUTE LD:
   logger$log("Compute LD ...")
   ld <- gaston::LD(geno, c(from, to), measure = "r2")
   logger$log("Compute LD DONE")
-
   logger$log("Create LD plot ...")
-  if (!is.null(dir)) {
-    imgFile <- tempfile(fileext = ".png", tmpdir = dir)
-    png(imgFile, width = 2400, height = 1600)
-    logger$log("Create create file:", imgFile)
+  if (!is.null(file)) {
+    png(file, width = 2400, height = 1600)
+    logger$log("Create create file:", file)
   }
   gaston::LD.plot(ld, snp.positions = geno@snps$pos[from:to])
-  if (!is.null(dir)) {
+  if (!is.null(file)) {
     dev.off()
   }
   logger$log("Create LD plot DONE")
 
   logger$log("DONE, return output")
-  if (!is.null(dir)) {
-    return(imgFile)
+  if (!is.null(file)) {
+    return(file)
   } else {return(NULL)}
 }

@@ -79,12 +79,12 @@ list of two elements: "p_adj" vector of adjusted p values, "thresh_adj" the adju
 
 # `run_gwas`
 
-Title
+Run GWAS analysis
 
 
 ## Description
 
-Title
+Run GWAS analysis
 
 
 ## Usage
@@ -101,7 +101,7 @@ run_gwas(
   response = "quantitative",
   thresh_maf,
   thresh_callrate,
-  dir = tempdir()
+  outFile = tempfile(fileext = ".json")
 )
 ```
 
@@ -114,13 +114,13 @@ Argument      |Description
 `phenoFile`     |     path of the phenotypic data file (`csv` file)
 `genoUrl`     |     url of the geno data file (`.vcf` or `.vcf.gz` file)
 `phenoUrl`     |     url of the phenotypic data file (`csv` file)
-`trait`     |     Chraracter of length 1, name of the trait to analyze. Could be a column name of the phenotypic file
+`trait`     |     Chraracter of length 1, name of the trait to analyze. Must be a column name of the phenotypic file.
 `test`     |     Which test to use. Either `"score"`,  `"wald"` or `"lrt"`. For binary phenotypes, test = `"score"` is mandatory. For more information about this parameters see: `??gaston::association.test`
 `fixed`     |     Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is 0. For more information about this parameters see: `??gaston::association.test`
 `response`     |     Character of length 1, Either "quantitative" or "binary". Is the trait a quantitative or a binary phenotype? Default value is "quantitative"
 `thresh_maf`     |     Threshold for filtering markers. Only markers with minor allele frequency > `thresh_maf` will be kept.
 `thresh_callrate`     |     Threshold for filtering markers. Only markers with a callrate > `thresh_callrate` will be kept.
-`dir`     |     directory where to save the data, by default it is a temporary directory
+`outFile`     |     path of the output file. If `NULL`, the output will not be written in any file. By default write in an tempoary `.json` file.
 
 
 ## Value
@@ -146,7 +146,8 @@ draw_manhattanPlot(
   gwasUrl = NULL,
   adj_method = "bonferroni",
   thresh_p = 0.05,
-  chr = NA
+  chr = NA,
+  outFile = tempfile(fileext = ".html")
 )
 ```
 
@@ -160,6 +161,7 @@ Argument      |Description
 `adj_method`     |     correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     name of the chromosome to show (show all if NA)
+`outFile`     |     path of the `.html` file containing the plot. If `NULL`, the output will not be written in any file. By default write in an tempoary `.html` file.
 
 
 ## Value
@@ -180,7 +182,13 @@ Draw an LD Plot
 ## Usage
 
 ```r
-draw_ldPlot(genoFile = NULL, genoUrl = NULL, from, to, dir = tempdir())
+draw_ldPlot(
+  genoFile = NULL,
+  genoUrl = NULL,
+  from,
+  to,
+  outFile = tempfile(fileext = ".png")
+)
 ```
 
 
@@ -191,13 +199,13 @@ Argument      |Description
 `genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
 `from`     |     lower bound of the range of SNPs for which the LD is computed
 `to`     |     upper bound of the range of SNPs for which the LD is computed
-`dir`     |     path of the directory where to save the file, by default dir is set to a temporary directory, if null, the plot will be displayed.
+`outFile`     |     path of the png file to save the plot. If `NULL`, the image file will not be created. By default write in an tempoary `.png` file.
 `phenoFile`     |     path of the phenotypic data file (`csv` file)
 
 
 ## Value
 
-path of the created file (or NULL if `dir` is NULL)
+path of the created file (or NULL if `file` is NULL)
 
 
 # `run_resAdjustment`
@@ -217,7 +225,7 @@ run_resAdjustment(
   gwasFile = NULL,
   gwasUrl = NULL,
   adj_method = "bonferroni",
-  dir = tempdir()
+  outFile = tempfile(fileext = ".json")
 )
 ```
 
@@ -229,7 +237,7 @@ Argument      |Description
 `gwasFile`     |     path of the gwas result data file (json file)
 `gwasUrl`     |     url of the gwas result data file (json file)
 `adj_method`     |     correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
-`dir`     |     directory where to save the data, by default it is a temporary directory
+`outFile`     |     path of the output file. If `NULL`, the output will not be written in any file. By default write in an tempoary `.json` file.
 
 
 ## Value
@@ -283,7 +291,7 @@ writeLDplot Compute r2 Linkage Disequilibrium (LD) between given SNPs and return
 ## Usage
 
 ```r
-LDplot(geno, from, to, dir = tempdir())
+LDplot(geno, from, to, file = tempfile(fileext = ".png"))
 ```
 
 
@@ -294,7 +302,7 @@ Argument      |Description
 `geno`     |     [bed.matrix] geno data return by function `readGenoData` or `downloadGenoData`.
 `from`     |     lower bound of the range of SNPs for which the LD is computed
 `to`     |     upper bound of the range of SNPs for which the LD is computed
-`dir`     |     path of the directory where to save the file, by default dir is set to a temporary directory, if null, the plot will be displayed. the image will be written in a temporary dir. Default: `NULL`
+`file`     |     path of the png file to save the plot. If `NULL`, the image file will not be created. By default write in an tempoary `.png` file.
 
 
 ## Details
@@ -541,7 +549,7 @@ Argument      |Description
 
 ## Value
 
-`list` of 2 elements
+`list` of 2 elements `gwas` (data.frame) and `metadata` (list)
 
 
 # `saveGWAS`
@@ -557,7 +565,7 @@ saveGWAS save gwas result in a temporary file
 ## Usage
 
 ```r
-saveGWAS(gwas, metadata, dir = tempdir())
+saveGWAS(gwasRes, metadata, dir = NULL, file = NULL)
 ```
 
 
@@ -565,9 +573,10 @@ saveGWAS(gwas, metadata, dir = tempdir())
 
 Argument      |Description
 ------------- |----------------
-`gwas`     |     data.frame return by `gwas` function
+`gwasRes`     |     data.frame return by `gwas` function
 `metadata`     |     list of metadata of the gwas results
-`dir`     |     directory where to save the data, by default it is a temporary directory
+`dir`     |     if `filename` is NULL, directory where to save the data, by default it is a temporary directory
+`file`     |     file path where to save the data. If the file already exists, it will be overwritten. Default NULL
 
 
 ## Value

@@ -10,39 +10,36 @@ capture_output({
   test_that("LD plot", {
     gDta <- readGenoData("../../data/geno/testMarkerData01.vcf.gz")
     expect_error({
-      imgFile <- LDplot(gDta, 1, 20, dir = NULL)
+      imgFile <- LDplot(gDta, 1, 20, file = NULL)
     }, NA)
     expect_error({
-      imgFile <- LDplot(gDta, 42, 72, dir = tempdir())
+      imgFile <- LDplot(gDta, 42, 72, file = tempfile())
     }, NA)
     expect_error({
-      imgFile <- LDplot(gDta, 1024, 1074, dir = "testOutput")
+      imgFile <- LDplot(gDta, 1024, 1074, file = "testOutput/plot.png")
     }, NA)
     file.remove(imgFile)
 
     # errors
     expect_error({
-      imgFile <- LDplot(gDta, 1.5, 20, dir = NULL)
+      imgFile <- LDplot(gDta, 1.5, 20, file = NULL)
     },'`from` should be an positive integer of length 1' )
     expect_error({
-      imgFile <- LDplot(gDta, 1, 20.1, dir = NULL)
+      imgFile <- LDplot(gDta, 1, 20.1, file = NULL)
     },'`to` should be an positive integer of length 1' )
     expect_error({
-      imgFile <- LDplot(gDta, "2", 20, dir = NULL)
+      imgFile <- LDplot(gDta, "2", 20, file = NULL)
     }, '`from` should be an positive integer of length 1')
     expect_error({
-      imgFile <- LDplot(gDta, 2, "20", dir = NULL)
+      imgFile <- LDplot(gDta, 2, "20", file = NULL)
     }, '`to` should be an positive integer of length 1')
 
     expect_error({
-      imgFile <- LDplot(gDta, 20, 2, dir = NULL)
+      imgFile <- LDplot(gDta, 20, 2, file = NULL)
     }, '"from" should be lower than "to"')
     expect_error({
-      imgFile <- LDplot(gDta, 20, 200, dir = NULL)
+      imgFile <- LDplot(gDta, 20, 200, file = NULL)
     }, 'range size \\("to" - "from"\\) should be lower or equal than 50')
-    expect_error({
-      imgFile <- LDplot(gDta, 1024, 1074, dir = "doNotExists")
-    }, 'Error: "dir" directory should exists')
   })
 
   # manPlot

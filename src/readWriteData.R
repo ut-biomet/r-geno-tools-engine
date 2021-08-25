@@ -219,24 +219,42 @@ readGWAS <- function(file) {
 #'
 #' @param gwasRes data.frame return by `gwas` function
 #' @param metadata list of metadata of the gwas results
-#' @param dir directory where to save the data,
+#' @param dir  if `filename` is NULL, directory where to save the data,
 #' by default it is a temporary directory
+#' @param file file path where to save the data. If the file already exists, it
+#' will be overwritten. Default NULL
 #'
 #' @return path of the created filed
-saveGWAS <- function(gwasRes, metadata, dir = tempdir()) {
+saveGWAS <- function(gwasRes, metadata, dir = NULL, file = NULL) {
   logger <- logger$new("r-saveGWAS()")
+  if (is.null(file)) {
+    if (is.null(dir)) {
+       dir <- tempdir()
+    }
+    logger$log('Check dir ...')
+    if (!dir.exists(dir)) {
+      logger$log('Error: "dir" directory should exists')
+      stop('Error: "dir" directory should exists')
+    }
+    logger$log('Check dir DONE')
+    file <- tempfile(fileext = ".json", tmpdir = dir)
 
-  logger$log('Check dir ...')
-  if (!dir.exists(dir)) {
-    logger$log('Error: "dir" directory should exists')
-    stop('Error: "dir" directory should exists')
+  } else {
+    logger$log('Check file ...')
+    if (length(file) != 1) {
+      logger$log('Error: only one file name should be provided')
+      stop('Error: only one file name should be provided')
+    }
+    if (file.exists(file)) {
+      logger$log('Warning: "file" directory already exists. This file will be overwritten.')
+    } else {
+      file.create(file)
+    }
+    logger$log('Check file DONE')
   }
-  logger$log('Check dir DONE')
 
   gwasList <- list(gwas = gwasRes,
                    metadata = metadata)
-
-  file <- tempfile(fileext = ".json", tmpdir = dir)
   writeLines(jsonlite::toJSON(gwasList,
                               complex = "list",
                               pretty = T,

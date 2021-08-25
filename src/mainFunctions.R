@@ -4,14 +4,14 @@
 # Description:
 # main function of the GWAS engnine
 
-#' Title
+#' Run GWAS analysis
 #'
 #' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
 #' @param phenoFile path of the phenotypic data file (`csv` file)
 #' @param genoUrl url of the geno data file (`.vcf` or `.vcf.gz` file)
 #' @param phenoUrl url of the phenotypic data file (`csv` file)
-#' @param trait Chraracter of length 1, name of the trait to analyze. Could be a
-#'   column name of the phenotypic file
+#' @param trait Chraracter of length 1, name of the trait to analyze. Must be a
+#'   column name of the phenotypic file.
 #' @param test Which test to use. Either `"score"`,  `"wald"` or `"lrt"`. For
 #'   binary phenotypes, test = `"score"` is mandatory. For more information
 #'   about this parameters see: `??gaston::association.test`
@@ -25,8 +25,8 @@
 #'   allele frequency > `thresh_maf` will be kept.
 #' @param thresh_callrate Threshold for filtering markers. Only markers with a
 #'   callrate > `thresh_callrate` will be kept.
-#' @param  dir directory where to save the data,
-#' by default it is a temporary directory
+#' @param outFile path of the output file. If `NULL`, the output will not be
+#' written in any file. By default write in an tempoary `.json` file.
 #'
 #' @return list with 3 elements `gwasRes` for the results of the gwas analysis in json, `metadata` a list of metadata of these analysis and `file` path of the json file containing the results (id `dir` is not `NULL`)
 run_gwas <- function(genoFile = NULL,
@@ -39,7 +39,7 @@ run_gwas <- function(genoFile = NULL,
                      response = "quantitative",
                      thresh_maf,
                      thresh_callrate,
-                     dir = tempdir()){
+                     outFile = tempfile(fileext = ".json")){
 
   logger <- logger$new("r-run_gwas()")
 
@@ -82,11 +82,11 @@ run_gwas <- function(genoFile = NULL,
   logger$log("Save metadata DONE")
 
 
-  if (!is.null(dir)) {
+  if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- saveGWAS(gwasRes = gwasRes, metadata = metadata, dir = dir)
-  logger$log("Save results DONE")
-  } else {file <- NULL}
+    file <- saveGWAS(gwasRes = gwasRes, metadata = metadata, file = outFile)
+    logger$log("Save results DONE")
+  }
 
   return(list(
     "gwasRes" = jsonlite::toJSON(gwasRes, complex = "list", pretty = T),
@@ -105,13 +105,17 @@ run_gwas <- function(genoFile = NULL,
 #' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
 #' @param thresh_p p value significant threshold (default 0.05)
 #' @param chr name of the chromosome to show (show all if NA)
+#' @param outFile path of the `.html` file containing the plot. If `NULL`, the
+#' output will not be written in any file. By default write in an tempoary
+#' `.html` file.
 #'
 #' @return plotly graph
 draw_manhattanPlot <- function(gwasFile = NULL,
                                gwasUrl = NULL,
                                adj_method = "bonferroni",
                                thresh_p = 0.05,
-                               chr = NA) {
+                               chr = NA,
+                               outFile = tempfile(fileext = ".html")) {
   logger <- logger$new("r-draw_manhattanPlot()")
 
   logger$log("Get data ...")
@@ -134,6 +138,11 @@ draw_manhattanPlot <- function(gwasFile = NULL,
                              thresh_p, sep = " - "))
   logger$log("Draw Manhattan Plot DONE")
 
+  if (!is.null(outFile)) {
+    logger$log("Save results ...")
+    htmlwidgets::saveWidget(plotly::partial_bundle(p), outFile, selfcontained = TRUE)
+    logger$log("Save results DONE")
+  }
   p
 }
 
@@ -146,14 +155,15 @@ draw_manhattanPlot <- function(gwasFile = NULL,
 #' @param phenoFile path of the phenotypic data file (`csv` file)
 #' @param from lower bound of the range of SNPs for which the LD is computed
 #' @param to upper bound of the range of SNPs for which the LD is computed
-#' @param dir path of the directory where to save the file, by default dir is set to a temporary directory, if null, the plot will be displayed.
+#' @param outFile path of the png file to save the plot. If `NULL`, the image file will not be
+#' created. By default write in an tempoary `.png` file.
 #'
-#' @return path of the created file (or NULL if `dir` is NULL)
+#' @return path of the created file (or NULL if `file` is NULL)
 draw_ldPlot <- function(genoFile = NULL,
                         genoUrl = NULL,
                         from,
                         to,
-                        dir = tempdir()) {
+                        outFile = tempfile(fileext = ".png")) {
   logger <- logger$new("r-draw_ldPlot()")
 
   logger$log("Get data ...")
@@ -170,7 +180,7 @@ draw_ldPlot <- function(genoFile = NULL,
   imgFile <- LDplot(geno = geno,
                     from = from,
                     to = to,
-                    dir = dir)
+                    file = outFile)
   logger$log("Draw LD Plot DONE")
 
   imgFile
@@ -184,14 +194,14 @@ draw_ldPlot <- function(genoFile = NULL,
 #' @param gwasUrl url of the gwas result data file (json file)
 #' @param adj_method correction method: "holm", "hochberg",
 #' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
-#' @param  dir directory where to save the data,
-#' by default it is a temporary directory
+#' @param outFile path of the output file. If `NULL`, the output will not be
+#' written in any file. By default write in an tempoary `.json` file.
 #'
 #' @return list with 3 elements `gwasAdjusted` for the results of the gwas analysis in json with adjusted p-values, `metadata` a list of metadata of the gwas analysis in json with adjusted p-values, and `file` path of the json file containing the results (if `dir` is not `NULL`)
 run_resAdjustment <- function(gwasFile = NULL,
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
-                              dir = tempdir()) {
+                              outFile = tempfile(fileext = ".json")){
   logger <- logger$new("r-run_resAdjustment()")
 
   logger$log("Get data ...")
@@ -213,11 +223,11 @@ run_resAdjustment <- function(gwasFile = NULL,
   metadata <- gwas$metadata
   metadata$adj_method <- adj_method
 
-  if (!is.null(dir)) {
+  if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- saveGWAS(gwasRes = gwas$gwasRes, metadata = metadata, dir = dir)
+    file <- saveGWAS(gwasRes = gwas$gwasRes, metadata = metadata, file = outFile)
     logger$log("Save results DONE")
-  } else {file <- NULL}
+  }
 
   return(list(
     "gwasAdjusted" = jsonlite::toJSON(gwas$gwasRes, dataframe = "rows", pretty = T),
