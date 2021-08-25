@@ -3,6 +3,7 @@ LABEL maintainer="Julien Diot <juliendiot@ut-biomet.org>"
 
 WORKDIR /GWAS-Engine
 
+# install dependencies ----
 RUN apt-get update --allow-releaseinfo-change && apt-get install -y \
     libssl-dev \
     gcc-8-base \
@@ -15,9 +16,9 @@ RUN apt-get update --allow-releaseinfo-change && apt-get install -y \
     libhiredis-dev \
     libpng-dev
 
-# install dependencies
-# install renv package 
-ENV RENV_VERSION 0.13.2
+# install R packages dependencies ---
+# install renv package
+ENV RENV_VERSION 0.14.0
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
 # install deps using renv
