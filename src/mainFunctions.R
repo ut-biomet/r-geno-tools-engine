@@ -216,8 +216,8 @@ run_resAdjustment <- function(gwasFile = NULL,
 
   # P-Values adjustment
   logger$log("Adjust p-values ...")
-  adj <- adjustPval(gwas$gwasRes$p, adj_method)
-  gwas$gwasRes$p_adj <- adj$p_adj
+  adj <- adjustPval(gwas$gwas$p, adj_method)
+  gwas$gwas$p_adj <- adj$p_adj
   logger$log("Adjust p-values DONE")
 
   metadata <- gwas$metadata
@@ -225,12 +225,11 @@ run_resAdjustment <- function(gwasFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- saveGWAS(gwasRes = gwas$gwasRes, metadata = metadata, file = outFile)
+    file <- saveGWAS(gwasRes = gwas$gwas, metadata = metadata, file = outFile)
     logger$log("Save results DONE")
   }
-
   return(list(
-    "gwasAdjusted" = jsonlite::toJSON(gwas$gwasRes, dataframe = "rows", pretty = T),
+    "gwasAdjusted" = jsonlite::toJSON(gwas$gwas, dataframe = "rows", pretty = T),
     "metadata" = metadata,
     "file" = file
   ))

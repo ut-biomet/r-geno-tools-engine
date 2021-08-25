@@ -174,8 +174,8 @@ capture_output({
         gwas <- readGWAS(file)
       }, NA)
       expect_true(class(gwas) == "list")
-      expect_true(all.equal(names(gwas),  c("gwasRes", "metadata")))
-      expect_true(class(gwas$gwasRes) == "data.frame")
+      expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
+      expect_true(class(gwas$gwas) == "data.frame")
       expect_true(class(gwas$metadata) == "list")
       expect_true(
         all.equal(names(gwas$metadata), c("genoFP",
@@ -206,8 +206,8 @@ capture_output({
         gwas <- downloadGWAS(file)
       }, NA)
       expect_true(class(gwas) == "list")
-      expect_true(all.equal(names(gwas), c("gwasRes", "metadata")))
-      expect_true(class(gwas$gwasRes) == "data.frame")
+      expect_true(all.equal(names(gwas), c("gwas", "metadata")))
+      expect_true(class(gwas$gwas) == "data.frame")
       expect_true(class(gwas$metadata) == "list")
       expect_true(
         all.equal(names(gwas$metadata), c("genoFP",
@@ -244,6 +244,10 @@ capture_output({
     resfile <- tempfile()
     outfile <- saveGWAS(gwasRes = resGwas, metadata = "test", file = resfile)
     expect_equal(outfile, resfile)
+    gwas <- readGWAS(outfile)
+    expect_true(class(gwas) == "list")
+    expect_true(all.equal(names(gwas), c("gwas", "metadata")))
+    expect_true(class(gwas$gwas) == "data.frame")
 
     # error
     expect_error({

@@ -25,7 +25,7 @@ capture.output({
       gwas <- readGWAS(gwas_results$file)
     }, NA)
     expect_true(class(gwas) == "list")
-    expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
+    expect_true(all.equal(names(gwas), c("gwas", "metadata")))
     expect_true(class(gwas_results$gwas) == "json")
     expect_true(class(gwas$gwas) == "data.frame")
     expect_true(class(gwas$metadata) == "list")
@@ -217,6 +217,9 @@ capture.output({
     expect_true(class(gwas) == "list")
     expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
     expect_true(class(gwas$gwas) == "data.frame")
+    origGWAS <- readGWAS("../../data/results/gwasResult.json")
+    expect_equal(nrow(gwas$gwas), nrow(origGWAS$gwas))
+    expect_equal(ncol(gwas$gwas), ncol(origGWAS$gwas)+1)
     expect_true(class(gwas$metadata) == "list")
     expect_true(
       all.equal(names(gwas$metadata), c("genoFP",
