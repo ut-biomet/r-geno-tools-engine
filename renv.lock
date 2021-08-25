@@ -72,6 +72,13 @@
       "Repository": "CRAN",
       "Hash": "d157e0ee1a93c257d9ee0f3fe918c1b4"
     },
+    "argparser": {
+      "Package": "argparser",
+      "Version": "0.7.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ef22bb1e708cb17be24197f9d85ff481"
+    },
     "askpass": {
       "Package": "askpass",
       "Version": "1.1",

@@ -9,6 +9,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+dir.create("readmeTemp")
 ```
 
 # GWAS-Engine
@@ -26,20 +27,11 @@ The goal of GWAS-Engine is to provide simple "input/output" style code for GWAS 
 
 ## Dependencies
 
+Package dependencies are managed using [Renv](https://rstudio.github.io/renv/articles/renv.html). To install dependencies do in R console: `renv::restore()`.
+
+
 ```{r dep}
 # required packages for using GWAS-Engine:
-stopifnot(
-  compareVersion("1.5.7", as.character(packageVersion("gaston"))) != 1
-  )
-stopifnot(
-  compareVersion("1.7.2", as.character(packageVersion("jsonlite"))) != 1
-  )
-stopifnot(
-  compareVersion("0.3.0", as.character(packageVersion("manhattanly"))) != 1
-  )
-stopifnot(
-  compareVersion("2.5.0", as.character(packageVersion("R6"))) != 1
-  )
 library(gaston) # for many functions
 library(jsonlite) # manage json format
 library(manhattanly) # manhattan plot using plotly
@@ -64,6 +56,10 @@ There is the list of some main function that GWAS-engine can run.
 
 ### Run GWAS
 
+```{sh}
+Rscript ./gwas-engine.R gwas --genoFile "data/geno/testMarkerData01.vcf.gz" --phenoFile "data/pheno/testPhenoData01.csv" --trait "Flowering.time.at.Arkansas" --test "score" --fixed 0 --response "quantitative" --thresh_maf 0.05 --thresh_callrate 0.95 --outFile readmeTemp/gwasRes.json
+```
+
 ```{r runGWAS}
 gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
                          phenoFile = "data/pheno/testPhenoData01.csv",
@@ -75,7 +71,7 @@ gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
                          response = "quantitative",
                          thresh_maf = 0.05,
                          thresh_callrate = 0.95,
-                         dir = tempdir())
+                         outFile = tempfile(fileext = ".json"))
 gwas_results$file
 substr(gwas_results$gwasRes, start=1, stop=500)
 ```
@@ -83,12 +79,18 @@ substr(gwas_results$gwasRes, start=1, stop=500)
 
 ### Draw Manhattan Plot
 
+```{sh}
+Rscript ./gwas-engine.R manplot --gwasFile readmeTemp/gwasRes.json --adj_method "bonferroni" --thresh_p 0.05 --outFile readmeTemp/manPlot.html
+```
+
+
 ```{r draw_manhattanPlot}
 p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         gwasUrl = NULL,
                         adj_method = "bonferroni",
                         thresh_p = 0.05,
-                        chr = NA)
+                        chr = NA,
+                        outFile = tempfile(fileext = ".html"))
 ```
 ```{r eval=FALSE, include=FALSE}
 p
@@ -98,23 +100,32 @@ p
 
 ### Adjust p-values
 
+```{sh}
+Rscript ./gwas-engine.R adjresults --gwasFile readmeTemp/gwasRes.json --adj_method "bonferroni" --outFile readmeTemp/adjRes.json
+```
+
 ```{r adj_pvals}
 gwas_adj <- run_resAdjustment(gwasFile = gwas_results$file,
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
-                              dir = tempdir())
+                              outFile = tempfile(fileext = ".json"))
 substr(gwas_adj$gwasAdjusted, start=1, stop=500)
 ```
 
 
 ### Draw LD plot
 
+```{sh}
+Rscript ./gwas-engine.R ldplot --genoFile "data/geno/testMarkerData01.vcf.gz" --from 42 --to 62 --outFile readmeTemp/ldplot.png
+```
+
+
 ```{r draw_ldPlot}
 imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
                        genoUrl = NULL,
                        from = 42,
                        to = 62,
-                       dir = tempdir()) 
+                       outFile = tempfile(fileext = ".png")) 
 ```
 
 ```{r}
@@ -194,7 +205,7 @@ gDta <- readGenoData("data/geno/testMarkerData01.vcf.gz")
 (imgFile <- LDplot(geno = gDta,
                    from = 1,
                    to = 20,
-                   dir = tempdir()))
+                   file = tempfile(fileext = ".png")))
 ```
 
 
@@ -229,3 +240,8 @@ Rscript ./tests/testthat.R
 The genotypic and phenotypic data used as example come from:
 
 Keyan Zhao, Chih-Wei Tung, Georgia C. Eizenga, Mark H. Wright, M. Liakat Ali, Adam H. Price, Gareth J. Norton, M. Rafiqul Islam, Andy Reynolds, Jason Mezey, Anna M. McClung, Carlos D. Bustamante & Susan R. McCouch (2011). [Genome-wide association mapping reveals a rich genetic architecture of complex traits in *Oryza sativa*.](http://www.nature.com/ncomms/journal/v2/n9/full/ncomms1467.html) Nat Comm 2:467 | DOI: 10.1038/ncomms1467, Published Online 13 Sep 2011.
+
+```{r, include = FALSE}
+# remove temp dir
+unlink("readmeTemp", recursive = TRUE)
+```
