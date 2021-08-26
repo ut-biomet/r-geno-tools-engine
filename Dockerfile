@@ -29,5 +29,6 @@ RUN R -e 'renv::init()'
 # get application code
 COPY . .
 
-CMD ["R"]
+ENTRYPOINT ["Rscript", "/GWAS-Engine/gwas-engine.R"]
+CMD ["--help"]
 

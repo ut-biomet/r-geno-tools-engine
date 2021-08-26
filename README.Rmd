@@ -20,10 +20,114 @@ dir.create("readmeTemp")
 The goal of GWAS-Engine is to provide simple "input/output" style code for GWAS analysis in order to be used inside an API.
 
 
+# Introduction
 
+TODO: GWAS descrtiption
+
+# Build GWAS-Engine
+
+The easiest way to use GWAS-Engine is to use the [Docker](https://www.docker.com/) image. To build the docker image simply do:
+
+```sh
+git clone https://github.com/ut-biomet/GWAS-Engine
+cd GWAS-Engine
+docker build -t gwasengine ./
+```
+
+## Test the image
+
+You can test that the image is build correctly by running:
+
+```sh
+docker run --entrypoint="Rscript" gwasengine ./tests/testthat.R
+```
+
+All tests should pass.
 
 # How to use GWAS-Engine
 
+### Get help
+
+To get the help about all the parameters you can use with GWAS-Engine you can simply run:
+
+```sh
+docker run gwasengine
+```
+
+<details><summary>Click to expand</summary>
+
+```{sh}
+docker run gwasengine
+```
+
+</details>
+
+### Run GWAS
+
+```{sh}
+docker run -v "$PWD"/data/geno/:/geno \
+    -v "$PWD"/data/pheno/:/pheno \
+    -v "$PWD"/readmeTemp:/out gwasengine \
+    gwas \
+    --genoFile "/geno/testMarkerData01.vcf.gz" \
+    --phenoFile "/pheno/testPhenoData01.csv" \
+    --trait "Flowering.time.at.Arkansas" \
+    --test "score" \
+    --fixed 0 \
+    --response "quantitative" \
+    --thresh_maf 0.05 \
+    --thresh_callrate 0.95 \
+    --outFile "/out/gwasRes.json"
+```
+
+
+### Draw Manhattan Plot
+
+```{sh}
+docker run -v "$PWD"/readmeTemp:/files gwasengine \
+    manplot \
+    --gwasFile "/files/gwasRes.json" \
+    --adj_method "bonferroni" \
+    --thresh_p 0.05 \
+    --outFile "/files/manPlot.html"
+```
+
+![screenshot of the plotly graph](README_files/manPlot.png)
+
+### Adjust p-values
+
+
+```{sh}
+docker run -v "$PWD"/readmeTemp:/files gwasengine \
+    adjresults \
+    --gwasFile "/files/gwasRes.json" \
+    --adj_method "bonferroni" \
+    --outFile "/files/adjRes.json"
+```
+
+
+
+
+### Draw LD plot
+
+```{sh}
+docker run -v "$PWD"/data/geno/:/geno \
+    -v "$PWD"/readmeTemp:/out gwasengine \
+    ldplot \
+    --genoFile "/geno/testMarkerData01.vcf.gz" \
+    --from 42 \
+    --to 62 \
+    --outFile "/out/ldplot.png"
+```
+
+```{r}
+library(png)
+img <- readPNG("readmeTemp/ldplot.png")
+grid::grid.raster(img)
+```
+
+
+# For developpers:
 
 ## Dependencies
 
@@ -50,15 +154,11 @@ invisible(
 )
 ```
 
+
 ## Main functions
 
+
 There is the list of some main function that GWAS-engine can run.
-
-### Run GWAS
-
-```{sh}
-Rscript ./gwas-engine.R gwas --genoFile "data/geno/testMarkerData01.vcf.gz" --phenoFile "data/pheno/testPhenoData01.csv" --trait "Flowering.time.at.Arkansas" --test "score" --fixed 0 --response "quantitative" --thresh_maf 0.05 --thresh_callrate 0.95 --outFile readmeTemp/gwasRes.json
-```
 
 ```{r runGWAS}
 gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
@@ -77,13 +177,6 @@ substr(gwas_results$gwasRes, start=1, stop=500)
 ```
 
 
-### Draw Manhattan Plot
-
-```{sh}
-Rscript ./gwas-engine.R manplot --gwasFile readmeTemp/gwasRes.json --adj_method "bonferroni" --thresh_p 0.05 --outFile readmeTemp/manPlot.html
-```
-
-
 ```{r draw_manhattanPlot}
 p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         gwasUrl = NULL,
@@ -96,13 +189,6 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
 p
 ```
 
-![screenshot of the plotly graph](README_files/manPlot.png)
-
-### Adjust p-values
-
-```{sh}
-Rscript ./gwas-engine.R adjresults --gwasFile readmeTemp/gwasRes.json --adj_method "bonferroni" --outFile readmeTemp/adjRes.json
-```
 
 ```{r adj_pvals}
 gwas_adj <- run_resAdjustment(gwasFile = gwas_results$file,
@@ -113,13 +199,6 @@ substr(gwas_adj$gwasAdjusted, start=1, stop=500)
 ```
 
 
-### Draw LD plot
-
-```{sh}
-Rscript ./gwas-engine.R ldplot --genoFile "data/geno/testMarkerData01.vcf.gz" --from 42 --to 62 --outFile readmeTemp/ldplot.png
-```
-
-
 ```{r draw_ldPlot}
 imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
                        genoUrl = NULL,
@@ -127,13 +206,6 @@ imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
                        to = 62,
                        outFile = tempfile(fileext = ".png")) 
 ```
-
-```{r}
-library(png)
-img <- readPNG(imgFile)
-grid::grid.raster(img)
-```
-
 
 
 ## Load data

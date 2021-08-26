@@ -1,3 +1,5 @@
+#! /usr/bin/Rscript
+
 # Author: Julien Diot juliendiot@ut-biomet.org
 # Tue 24 Aug 2021 The University of Tokyo
 #
@@ -5,11 +7,11 @@
 # Main script for using GWAS-Engine
 
 # Create a parser
-library(argparser, quietly=TRUE)
+suppressPackageStartupMessages(library(argparser, quietly=TRUE))
+
 
 p <- arg_parser(paste0(
-  "Run GWAS-Engine's tools.\n",
-  "lorem ipsum"))
+  "Run GWAS-Engine's tools"))
 
 # Add command line arguments
 p <- add_argument(p, "fun", help="GWAS-Engine's function you want to run: `gwas`, `manplot`, `ldplot` or `adjresults`", type = "character")
@@ -40,14 +42,16 @@ p <- add_argument(p, "--to", help="[`ldplot`] upper bound of the range of SNPs f
 args <- parse_args(p)
 
 if (!args$fun %in% c('gwas', 'manplot', 'ldplot', 'adjresults')) {
-  stop("`fun` should be one of 'gwas', 'manplot', 'ldplot', 'adjresults'") 
+  stop("`fun` should be one of 'gwas', 'manplot', 'ldplot', 'adjresults'")
 }
 
 # load R packages:
-library(gaston) # for many functions
-library(jsonlite) # manage json format
-library(manhattanly) # manhattan plot using plotly
-library(R6) # R object oriented
+suppressPackageStartupMessages({
+  library(gaston) # for many functions
+  library(jsonlite) # manage json format
+  library(manhattanly) # manhattan plot using plotly
+  library(R6) # R object oriented
+})
 
 # source R functions:
 invisible(
