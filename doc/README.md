@@ -633,7 +633,6 @@ R6 class use to log messages in this engine's function
 ## Method `logger$new`
 ## ------------------------------------------------
 
-# create specie:
 mylogger <- logger$new(context = NULL)
 ```
 

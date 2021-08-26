@@ -20,7 +20,6 @@ logger <- R6::R6Class(
     #' @param context [char] context of the log, (eg. inside which function)
     #' @return A new `logger` object.
     #' @examples
-    #' # create specie:
     #' mylogger <- logger$new(context = NULL)
     initialize = function(context = NULL){
       self$context <- context

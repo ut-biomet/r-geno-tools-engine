@@ -48,6 +48,9 @@ cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
 
 To store the example of results created by the engine.
 
+```{r}
+list.files("results")
+```
 
 ```{r}
 cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))

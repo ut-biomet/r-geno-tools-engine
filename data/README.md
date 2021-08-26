@@ -68,18 +68,23 @@ cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
 To store the example of results created by the engine.
 
 ``` r
+list.files("results")
+#> [1] "ajdResults.json" "gwasResult.json" "ldplot.png"      "manplot.html"
+```
+
+``` r
 cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 #> {
-#>   "gwasRes": [
+#>   "gwas": [
 #>     {
 #>       "chr": "1",
 #>       "pos": 9563,
 #>       "id": "SNP-1.8562.",
 #>       "A1": "A",
 #>       "A2": "T",
-#>       "freqA2": 0.1359,
-#>       "score": 3.6664,
-#>       "p": 0.0555
+#>       "freqA2": 0.135854341736695,
+#>       "score": 3.66642796432577,
+#>       "p": 0.0555190497516824
 #>     },
 #>     {
 #>       "chr": "1",
@@ -87,9 +92,9 @@ cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 #>       "id": "SNP-1.24921.",
 #>       "A1": "C",
 #>       "A2": "T",
-#>       "freqA2": 0.1254,
-#>       "score": 1.3876,
-#>       "p": 0.2388
+#>       "freqA2": 0.125352112676056,
+#>       "score": 1.38758004558367,
+#>       "p": 0.238814197426304
 #>     },
 #>     {
 #>       "chr": "1",
@@ -97,8 +102,8 @@ cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 #>       "id": "SNP-1.25253.",
 #>       "A1": "A",
 #>       "A2": "T",
-#>       "freqA2": 0.2935,
-#>       "score": 2.9466,
+#>       "freqA2": 0.293539325842697,
+#>       "score": 2.9465842988601,
 ```
 
 # Reference
