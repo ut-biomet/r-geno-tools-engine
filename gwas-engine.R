@@ -41,6 +41,13 @@ p <- add_argument(p, "--to", help="[`ldplot`] upper bound of the range of SNPs f
 # Parse the command line arguments
 args <- parse_args(p)
 
+
+# log input parameters
+time <- as.character(Sys.time())
+inArgs <- args[seq_len(length(args) - 1) + 1]
+cat(time, 'call to GWAS-Engine.R:\n', paste0('\t', names(inArgs), ' = ', inArgs, '\n'))
+
+
 if (!args$fun %in% c('gwas', 'manplot', 'ldplot', 'adjresults')) {
   stop("`fun` should be one of 'gwas', 'manplot', 'ldplot', 'adjresults'")
 }
