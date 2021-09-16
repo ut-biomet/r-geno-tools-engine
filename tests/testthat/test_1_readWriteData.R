@@ -93,8 +93,6 @@ capture_output({
         }, NA)
         expect_true(class(dta$genoData) == "bed.matrix")
         expect_true(class(dta$phenoData) == "data.frame")
-        expect_true(is.matrix(dta$grMatrix))
-        expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
       }
     }
 
@@ -119,8 +117,6 @@ capture_output({
         }, NA)
         expect_true(class(dta$genoData) == "bed.matrix")
         expect_true(class(dta$phenoData) == "data.frame")
-        expect_true(is.matrix(dta$grMatrix))
-        expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
       }
     }
 
@@ -151,8 +147,6 @@ capture_output({
         }, NA)
         expect_true(class(dta$genoData) == "bed.matrix")
         expect_true(class(dta$phenoData) == "data.frame")
-        expect_true(is.matrix(dta$grMatrix))
-        expect_true(nrow(dta$phenoData) == nrow(dta$grMatrix))
       }
     }
 
