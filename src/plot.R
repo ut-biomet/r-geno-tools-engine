@@ -39,7 +39,7 @@ manPlot <- function(gwas,
 
   # manage duplicate in SNP's ID
   if (anyDuplicated(gwas$id) != 0) {
-    gwas$id <- paste0(gwas$chr, gwas$pos)
+    gwas$id <- paste0(gwas$chr, "@", gwas$pos)
     if (anyDuplicated(gwas$id) != 0) {
       highlightSinif <- FALSE
     } else  highlightSinif <- TRUE
