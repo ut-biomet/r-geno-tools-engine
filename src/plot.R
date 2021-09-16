@@ -37,11 +37,21 @@ manPlot <- function(gwas,
     gwas <- gwas[as.character(gwas$chr) %in% chr,]
   }
 
+  # manage duplicate in SNP's ID
+  if (anyDuplicated(gwas$id) != 0) {
+    gwas$id <- paste0(gwas$chr, gwas$pos)
+    if (anyDuplicated(gwas$id) != 0) {
+      highlightSinif <- FALSE
+    } else  highlightSinif <- TRUE
+  } else  highlightSinif <- TRUE
+
   # get significant SNP
-  significantSNP <- gwas[gwas$p_adj <= thresh_p, "id"]
-  if (length(significantSNP) == 0) {
-    significantSNP <- NULL
-  }
+  if (highlightSinif) {
+    significantSNP <- gwas[gwas$p_adj <= thresh_p, "id"]
+    if (length(significantSNP) == 0) {
+      significantSNP <- NULL
+    }
+  } else significantSNP <- NULL
 
   p <- manhattanly::manhattanly(
     data.frame(CHR = as.numeric(factor(gwas$chr,
