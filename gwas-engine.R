@@ -23,6 +23,8 @@ p <- add_argument(p, "--outFile", help="[`gwas`, `manplot`, `ldplot`, `adjresult
 
 p <- add_argument(p, "--trait", help="[`gwas`] name of the trait to analyze. Must be a column name of the phenotypic file.", type = "character")
 p <- add_argument(p, "--chr", help="[`manplot`] name of the chromosome to show (show all by default)", type = "character", default = NA)
+p <- add_argument(p, "--interactive", help="[`manplot`] should the plot be interactive: TRUE or FALSE (the default is TRUE)", type = "logical", default = TRUE)
+
 
 p <- add_argument(p, "--test", help='[`gwas`] Which test to use. Either `"score"`, `"wald"` or `"lrt"`. For binary phenotypes, test = `"score"` is mandatory. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test' , type = "character")
 p <- add_argument(p, "--fixed", help='[`gwas`] Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is 0. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test', type = "integer", default = 0)
@@ -84,6 +86,7 @@ if (args$fun == "gwas") {
                           adj_method = args$adj_method,
                           thresh_p = args$thresh_p,
                           chr = args$chr,
+                          interactive = args$interactive,
                           outFile = args$outFile)
   quit(save = "no", status = 0)
 

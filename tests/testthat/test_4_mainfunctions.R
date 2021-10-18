@@ -110,13 +110,29 @@ capture.output({
     }, NA)
     expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
     expect_error({
+      tmpF <- tempfile(fileext = ".html")
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
                               chr = NA,
-                              outFile = tempfile(fileext = ".html"))
+                              outFile = tmpF)
     }, NA)
+    expect_true(file.exists(tmpF))
+    expect_true(file.info(tmpF)$size > 0)
+
+    expect_error({
+      tmpF <- tempfile(fileext = ".png")
+      p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
+                              gwasUrl = NULL,
+                              adj_method = "bonferroni",
+                              thresh_p = 0.05,
+                              chr = NA,
+                              interactive = FALSE,
+                              outFile = tmpF)
+    }, NA)
+    expect_true(file.exists(tmpF))
+    expect_true(file.info(tmpF)$size > 0)
   })
 
 
@@ -127,6 +143,7 @@ capture.output({
                      adj_method = "bonferroni",
                      thresh_p = 0.05,
                      chr = NA,
+                     interactive = TRUE,
                      outFile = NULL)
 
   wrongParamsL <- list(gwasFile = c("doNotExist", NA),
@@ -134,8 +151,8 @@ capture.output({
                        adj_method = c("doNotExist", NA),
                        thresh_p = list(-1, 1.02),
                        chr = c("doNotExist", 50),
+                       interactive = c('t'),
                        outFile = list(c("f1", "f2")))
-
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
     i <- 0
@@ -151,6 +168,7 @@ capture.output({
                              adj_method = params[["adj_method"]],
                              thresh_p = params[["thresh_p"]],
                              chr = params[["chr"]],
+                             interactive = params[["interactive"]],
                              outFile = params[["outFile"]])
         })
       })

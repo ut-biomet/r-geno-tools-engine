@@ -15,7 +15,7 @@
 #' @param test Which test to use. Either `"score"`,  `"wald"` or `"lrt"`. For
 #'   binary phenotypes, test = `"score"` is mandatory. For more information
 #'   about this parameters see: `??gaston::association.test`
-#' @param  fixed Number of Principal Components to include in the model with
+#' @param fixed Number of Principal Components to include in the model with
 #'   fixed effect (for test = `"wald"` or `"lrt"`). Default value is 0. For more
 #'   information about this parameters see: `??gaston::association.test`
 #' @param response Character of length 1, Either "quantitative" or "binary". Is
@@ -97,7 +97,7 @@ run_gwas <- function(genoFile = NULL,
 
 
 
-#' Draw an interactive Manhattan Plot
+#' Draw a Manhattan Plot
 #'
 #' @param gwasFile path of the gwas result data file (json file)
 #' @param gwasUrl url of the gwas result data file (json file)
@@ -105,9 +105,10 @@ run_gwas <- function(genoFile = NULL,
 #' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
 #' @param thresh_p p value significant threshold (default 0.05)
 #' @param chr name of the chromosome to show (show all if NA)
-#' @param outFile path of the `.html` file containing the plot. If `NULL`, the
+#' @param interactive [bool] should the plot be interactive (the default)
+#' @param outFile path of the file containing the plot. If `NULL`, the
 #' output will not be written in any file. By default write in an tempoary
-#' `.html` file.
+#' file.
 #'
 #' @return plotly graph
 draw_manhattanPlot <- function(gwasFile = NULL,
@@ -115,8 +116,24 @@ draw_manhattanPlot <- function(gwasFile = NULL,
                                adj_method = "bonferroni",
                                thresh_p = 0.05,
                                chr = NA,
-                               outFile = tempfile(fileext = ".html")) {
+                               interactive = TRUE,
+                               outFile = tempfile()) {
   logger <- logger$new("r-draw_manhattanPlot()")
+
+  logger$log("Check outFile ...")
+  if (!is.null(outFile)) {
+    if (length(outFile) != 1) {
+      stop("Error: `outFile` must be of length 1.")
+    }
+    if (tools::file_ext(outFile) == '') {
+      if (interactive) {
+        outFile <- paste0(outFile, '.html')
+      } else {
+        outFile <- paste0(outFile, '.png')
+      }
+    }
+  }
+  logger$log("Check outFile DONE")
 
   logger$log("Get data ...")
   if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
@@ -128,11 +145,24 @@ draw_manhattanPlot <- function(gwasFile = NULL,
   }
   logger$log("Get data DONE")
 
+  if (!interactive && !is.null(outFile)) {
+    logger$log("Open connexion to draw the png plot ...")
+    png(filename = outFile,
+        width = 40,
+        height = 30,
+        units = 'cm',
+        res = 177,
+        pointsize = 18,
+        type = "cairo")
+    logger$log("Open connexion to draw the png plot DONE")
+  }
+
   logger$log("Draw Manhattan Plot ...")
   p <- manPlot(gwas = gwas$gwas,
                adj_method = adj_method,
                thresh_p = thresh_p,
                chr = chr,
+               interactive = interactive,
                title = paste(gwas$metadata$trait,
                              adj_method,
                              thresh_p, sep = " - "))
@@ -140,7 +170,12 @@ draw_manhattanPlot <- function(gwasFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    htmlwidgets::saveWidget(plotly::partial_bundle(p), outFile, selfcontained = TRUE)
+    if (interactive) {
+      htmlwidgets::saveWidget(plotly::partial_bundle(p),
+                              outFile, selfcontained = TRUE)
+    } else {
+      dev.off()
+    }
     logger$log("Save results DONE")
   }
   p

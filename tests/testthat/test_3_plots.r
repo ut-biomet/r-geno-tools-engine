@@ -65,17 +65,25 @@ capture_output({
                         thresh_maf = 0.05,
                         thresh_callrate = 0.95)
         for (chr in c(NA, unique(resGwas$chr))) {
-          testName <- paste("manPlot", resp, test, paste0("chr:", chr),  sep = "-")
-          test_that(testName,{
-            expect_error({
-              mP <- manPlot(gwas = resGwas,
-                            adj_method = "bonferroni",
-                            thresh_p = 0.5,
-                            chr = chr,
-                            title = "test manPlot")
-            }, NA)
-            expect_true(all.equal(class(mP), c("plotly", "htmlwidget")))
-          })
+          for (interactive in c(TRUE, FALSE)) {
+            testName <- paste("manPlot", resp, test, paste0("chr:", chr),  sep = "-")
+            test_that(testName,{
+              expect_error({
+                mP <- manPlot(gwas = resGwas,
+                              adj_method = "bonferroni",
+                              thresh_p = 0.5,
+                              chr = chr,
+                              interactive = interactive,
+                              title = "test manPlot")
+              }, NA)
+              if (interactive) {
+                expect_true(all.equal(class(mP), c("plotly", "htmlwidget")))
+              } else {
+                expect_true(is.null(mP))
+              }
+            })
+
+          }
         }
       }
     }

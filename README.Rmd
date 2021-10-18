@@ -144,10 +144,13 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --gwasFile "/files/gwasRes.json" \
     --adj_method "bonferroni" \
     --thresh_p 0.05 \
+    --interactive TRUE \
     --outFile "/files/manPlot.html"
 ```
 
 <details><summary>Click to see outputs</summary>
+
+**Interactive plot**
 
 ```{sh}
 docker run -v "$PWD"/readmeTemp:/files gwasengine \
@@ -155,10 +158,34 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --gwasFile "/files/gwasRes.json" \
     --adj_method "bonferroni" \
     --thresh_p 0.05 \
+    --interactive TRUE \
     --outFile "/files/manPlot.html"
 ```
 
 ![screenshot of the plotly graph](README_files/manPlot.png)
+
+**Static plot**
+
+```{sh}
+docker run -v "$PWD"/readmeTemp:/files gwasengine \
+    manplot \
+    --gwasFile "/files/gwasRes.json" \
+    --adj_method "bonferroni" \
+    --thresh_p 0.05 \
+    --interactive FALSE \
+    --outFile "/files/manPlot.png"
+```
+
+
+```{r include=FALSE}
+file.copy('readmeTemp/manPlot.png', 'README_files/manPlotStatic_1.png', overwrite = TRUE)
+```
+
+
+```{r echo=FALSE}
+knitr::include_graphics('README_files/manPlotStatic_1.png')
+```
+
 
 </details>
 
@@ -240,6 +267,19 @@ Rscript ./gwas-engine.R \
     --outFile "readmeTemp/gwasRes.json"
 ```
 
+
+```sh
+Rscript ./gwas-engine.R \
+    manplot \
+    --gwasFile "data/results/gwasResult.json" \
+    --adj_method "bonferroni" \
+    --thresh_p 0.05 \
+    --interactive FALSE \
+    --outFile "readmeTemp/manplot.png"
+```
+
+
+
 ## Dependencies
 
 Package dependencies are managed using [Renv](https://rstudio.github.io/renv/articles/renv.html). To install dependencies do in a R console: `renv::restore()`. (you need `/path/to/GWAS-Engine` as working directory).
@@ -301,11 +341,34 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         adj_method = "bonferroni",
                         thresh_p = 0.05,
                         chr = NA,
+                        interactive = TRUE,
                         outFile = tempfile(fileext = ".html"))
 ```
 ```{r eval=FALSE, include=FALSE}
 p
 ```
+
+
+
+```{r draw_manhattanPlot2}
+manPlotFile <- tempfile(fileext = ".png")
+p <- draw_manhattanPlot(gwasFile = gwas_results$file,
+                        gwasUrl = NULL,
+                        adj_method = "bonferroni",
+                        thresh_p = 0.05,
+                        chr = NA,
+                        interactive = FALSE,
+                        outFile = manPlotFile)
+```
+
+```{r include=FALSE}
+file.copy(manPlotFile, 'README_files/manPlotStatic_2.png', overwrite = TRUE)
+```
+
+```{r echo=FALSE}
+knitr::include_graphics('README_files/manPlotStatic_2.png')
+```
+
 
 ```{r adj_pvals}
 gwas_adj <- run_resAdjustment(gwasFile = gwas_results$file,

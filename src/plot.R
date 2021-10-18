@@ -5,13 +5,16 @@
 #' @param thresh_p p value significant threshold (default 0.05)
 #' @param chr [char] name of the chromosome to show (show all if NA)
 #' @param title [char] Title of the plot. Default is "Manhattan Plot"
+#' @param interactive [bool] should the plot be interactive (the default)
+#'   or not.
 #'
-#' @return plotly graph
+#' @return plotly graph if interactive is TRUE, or a
 manPlot <- function(gwas,
                     adj_method,
                     thresh_p = 0.05,
                     chr = NA,
-                    title = "Manhattan Plot") {
+                    title = "Manhattan Plot",
+                    interactive = TRUE) {
 
   logger <- logger$new("r-manPlot()")
 
@@ -37,36 +40,68 @@ manPlot <- function(gwas,
     gwas <- gwas[as.character(gwas$chr) %in% chr,]
   }
 
+  # plot functions require chr as numeric values:
+  chrlabels <- unique(gwas$chr)
+  gwas$chr <- as.numeric(factor(gwas$chr,
+                                levels = chrlabels))
+
   # manage duplicate in SNP's ID
+  logger$log("Check duplicated SNP ID ...")
   if (anyDuplicated(gwas$id) != 0) {
+    warning("Duplicated in SNP's ID detected, replacing SNP ID by: CHR@POS.")
     gwas$id <- paste0(gwas$chr, "@", gwas$pos)
     if (anyDuplicated(gwas$id) != 0) {
+      warning("After eplacing SNP ID by: CHR@POS,",
+              "there is still some duplicates. No SNP will be highlighted.")
       highlightSinif <- FALSE
     } else  highlightSinif <- TRUE
   } else  highlightSinif <- TRUE
+  logger$log("Check duplicated SNP ID DONE")
 
   # get significant SNP
   if (highlightSinif) {
+    logger$log("Extract significant SNP ...")
     significantSNP <- gwas[gwas$p_adj <= thresh_p, "id"]
     if (length(significantSNP) == 0) {
       significantSNP <- NULL
     }
+    logger$log("Extract significant SNP DONE")
   } else significantSNP <- NULL
 
+  logger$log("Draw plot ...")
+  if (interactive) {
   p <- manhattanly::manhattanly(
-    data.frame(CHR = as.numeric(factor(gwas$chr,
-                                       levels = unique(gwas$chr))),
+    data.frame(CHR = gwas$chr,
                BP = gwas$pos,
                SNP = gwas$id,
                P = gwas$p),
     snp = "SNP",
-    labelChr = unique(gwas$chr),
+    labelChr = chrlabels,
     highlight = significantSNP,
     genomewideline = -log10(thresh_pAdj),
     suggestiveline = FALSE,
     title = title
   )
+  logger$log("Draw plot DONE")
   logger$log("DONE, return output")
+  } else {
+    if (length(chrlabels) == 1) {
+      # qqman::manhattan raise error if there is only one chromosome in the data
+      # and chrlabs is defined
+      chrlabels <- NULL
+    }
+    qqman::manhattan(x = gwas,
+                     chr = 'chr',
+                     bp = 'pos',
+                     p = 'p',
+                     snp = 'id',
+                     chrlabs = chrlabels,
+                     suggestiveline = FALSE,
+                     genomewideline = -log10(thresh_pAdj),
+                     annotatePval = -log10(thresh_pAdj),
+                     main = title)
+    p <- NULL
+  }
   p
 }
 
