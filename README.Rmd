@@ -284,16 +284,6 @@ Rscript ./gwas-engine.R \
 
 Package dependencies are managed using [Renv](https://rstudio.github.io/renv/articles/renv.html). To install dependencies do in a R console: `renv::restore()`. (you need `/path/to/GWAS-Engine` as working directory).
 
-
-```{r dep, results='hide'}
-# required packages for using GWAS-Engine:
-library(argparser) # Command-Line Argument Parser
-library(gaston) # for many functions
-library(jsonlite) # manage json format
-library(manhattanly) # manhattan plot using plotly
-library(R6) # R object oriented
-```
-
 ## GWAS-Engine as a R library
 
 It is possible to use GWAS-Engine as a library to be used in other R projects.
@@ -310,6 +300,16 @@ invisible(
   sapply(FUN = source,
          X = list.files("src", pattern = ".R$",full.names = T))
 )
+```
+
+
+### Function documantation
+
+All the functions of this engine use `roxygen2` for documentation. You can generate a **markdown documentation located in [`./doc/README.md`](doc/README.md)** using the function `writeDoc` (defined in [`./src/utils.R`](src/utils.R)):
+
+```{r eval=FALSE}
+writeDoc(srcDir = "src",
+         docDir = "doc")
 ```
 
 
@@ -478,14 +478,6 @@ grid::grid.raster(img)
 ```
 
 
-### Functions documentations
-
-All the functions of this engine use `roxygen2` for documentation. You can generate a markdown documentation located in [`./doc/README.md`](doc/README.md) using the function `writeDoc` (defined in [`./src/utils.R`](src/utils.R)):
-
-```{r eval=FALSE}
-writeDoc(srcDir = "src",
-         docDir = "doc")
-```
 
 
 # Tests

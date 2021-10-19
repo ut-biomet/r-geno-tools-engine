@@ -8,7 +8,7 @@
 #' @param interactive [bool] should the plot be interactive (the default)
 #'   or not.
 #'
-#' @return plotly graph if interactive is TRUE, or a
+#' @return plotly graph if interactive is TRUE, or NULL if not.
 manPlot <- function(gwas,
                     adj_method,
                     thresh_p = 0.05,

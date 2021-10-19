@@ -36,6 +36,11 @@ Argument      |Description
 `thresh_callrate`     |     Threshold for filtering markers. Only markers with a callrate > `thresh_callrate` will be kept.
 
 
+## Details
+
+For the calculation, the genetic relationship matrix need to be calculated. This is done based on the genetic matrix standardized by the the genetic mean "mu" and the genetic variance "sigma", after having filtering according to the `thresh_maf` and `thresh_callrate`.
+
+
 ## Value
 
 `data.frame`
@@ -130,12 +135,12 @@ list with 3 elements `gwasRes` for the results of the gwas analysis in json, `me
 
 # `draw_manhattanPlot`
 
-Draw an interactive Manhattan Plot
+Draw a Manhattan Plot
 
 
 ## Description
 
-Draw an interactive Manhattan Plot
+Draw a Manhattan Plot
 
 
 ## Usage
@@ -147,7 +152,8 @@ draw_manhattanPlot(
   adj_method = "bonferroni",
   thresh_p = 0.05,
   chr = NA,
-  outFile = tempfile(fileext = ".html")
+  interactive = TRUE,
+  outFile = tempfile()
 )
 ```
 
@@ -161,7 +167,8 @@ Argument      |Description
 `adj_method`     |     correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     name of the chromosome to show (show all if NA)
-`outFile`     |     path of the `.html` file containing the plot. If `NULL`, the output will not be written in any file. By default write in an tempoary `.html` file.
+`interactive`     |     [bool] should the plot be interactive (the default)
+`outFile`     |     path of the file containing the plot. If `NULL`, the output will not be written in any file. By default write in an tempoary file.
 
 
 ## Value
@@ -258,7 +265,14 @@ create manhatan plot
 ## Usage
 
 ```r
-manPlot(gwas, adj_method, thresh_p = 0.05, chr = NA, title = "Manhattan Plot")
+manPlot(
+  gwas,
+  adj_method,
+  thresh_p = 0.05,
+  chr = NA,
+  title = "Manhattan Plot",
+  interactive = TRUE
+)
 ```
 
 
@@ -271,11 +285,12 @@ Argument      |Description
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     [char] name of the chromosome to show (show all if NA)
 `title`     |     [char] Title of the plot. Default is "Manhattan Plot"
+`interactive`     |     [bool] should the plot be interactive (the default) or not.
 
 
 ## Value
 
-plotly graph
+plotly graph if interactive is TRUE, or NULL if not.
 
 
 # `LDplot`
@@ -586,12 +601,12 @@ path of the created filed
 
 # `prepareData`
 
-Filter individuals and calculate genetic relatinoal matrix
+Filter individuals and remove monomorphic markers
 
 
 ## Description
 
-Filter individuals and calculate genetic relatinoal matrix
+Filter individuals and remove monomorphic markers
 
 
 ## Usage
@@ -609,9 +624,14 @@ Argument      |Description
 `pDta`     |     output of `downloadPhenoData` or `readPhenoData` functions
 
 
+## Details
+
+The function remove the monomorphic markers and
+
+
 ## Value
 
-List of 3 elements: `genoData`, `phenoData`, `grMatrix`
+List of 2 elements: `genoData` (a bed matrix), `phenoData` (a data.frame)
 
 
 # `logger`
