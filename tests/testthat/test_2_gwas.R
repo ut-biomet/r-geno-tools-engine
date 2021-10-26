@@ -149,11 +149,17 @@ capture.output({
                           "fdr",
                           "none")) {
           for (thresh_p in c(NULL, 0.1, 0.05, 0.01)) {
-
-            testName <- paste("adjustPval", resp, test, adjMeth, thresh_p, sep = "-")
+            for (empty in c(TRUE, FALSE)) {
+            testName <- paste("adjustPval", resp, test, adjMeth, thresh_p,
+                              empty, sep = "-")
             test_that(testName,{
               expect_error({
-                adj <- adjustPval(p = resGwas$p,
+                if(empty){
+                  p <- numeric()
+                } else {
+                  p <- resGwas$p
+                }
+                adj <- adjustPval(p = p,
                                   adj_method = adjMeth,
                                   thresh_p = thresh_p)
               }, NA)
@@ -163,6 +169,8 @@ capture.output({
                 expect_equal(thresh_p, adj$thresh_adj)
               }
             })
+
+            }
           }
         }
       }

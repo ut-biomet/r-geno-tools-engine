@@ -238,7 +238,7 @@ gwas <- function(data,
   logger$log("remove individuals with missing phenotypic values ...")
   bm <- gaston::select.inds(bm, !is.na(pheno))
   if (nrow(bm) == 0) {
-    warning("No individuals remain after filtering")
+    warning('Filtering process removed all the individuals.')
     empty <- TRUE
   }
   logger$log("remove samples with missing phenotypic values DONE")
@@ -251,7 +251,7 @@ gwas <- function(data,
   bm <- gaston::select.snps(bm, maf > thresh_maf)
   bm <- gaston::select.snps(bm, callrate > thresh_callrate)
   if (ncol(bm) == 0) {
-    warning("No markers remain after filtering")
+    warning('Filtering process removed all the SNPs.')
     empty <- TRUE
   }
   logger$log("filter SNPs DONE")
@@ -267,6 +267,9 @@ gwas <- function(data,
     logger$log("DONE, return output.")
     gwa <- data.frame(matrix(ncol = length(resCols[[test]]), nrow = 0))
     colnames(gwa) <- resCols[[test]]
+    # need to add one line with NA, in order to let `saveGWAS` and `readGWAS`
+    # save and read the object as a data.frame. If not, readGWAS will consider
+    # an empty list instead
     gwa[1,] <- NA
     return(gwa)
   }

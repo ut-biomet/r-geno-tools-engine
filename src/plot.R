@@ -41,12 +41,20 @@ manPlot <- function(gwas,
   }
   logger$log("Check chromosome name DONE")
 
+  logger$log("Remove NAs ...")
+  # remove NA lines form data (important for cases where all the data had
+  # been removed at the gaws step)
+  allNaLines <- apply(gwas, 1, function(x){all(is.na(x))})
+  gwas <- gwas[!allNaLines,]
+  logger$log("Remove NAs DONE")
+
   # P-Values adjustment ----
   logger$log("Adjust p-values ...")
   adj <- adjustPval(gwas$p, adj_method, thresh_p)
   gwas$p_adj <- adj$p_adj
   thresh_pAdj <- adj$thresh_adj
   logger$log("Adjust p-values DONE")
+
 
   # filter according to "chr" ----
   if (!is.na(chr)) {

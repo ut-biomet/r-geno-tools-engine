@@ -86,7 +86,6 @@ capture_output({
                 expect_true(is.null(mP))
               }
             })
-
           }
         }
       }
@@ -94,6 +93,30 @@ capture_output({
   }
 
   # Test manPlot warnings: ----
+  expect_warning({
+  emptyResGwas <- gwas(dta,
+                       trait,
+                       test,
+                       fixed = 0,
+                       response = resp,
+                       thresh_maf = 0.5,
+                       thresh_callrate = 0.95)
+  })
+  test_that('manPlot warning, empty data', {
+    expect_warning({
+      mP <- manPlot(gwas = emptyResGwas,
+                    adj_method = "bonferroni",
+                    thresh_p = 0.05,
+                    chr = NA,
+                    interactive = TRUE,
+                    filter_pAdj = 1,
+                    filter_nPoints = Inf,
+                    filter_quant = 0,
+                    title = "test manPlot")
+    }, 'There is no points to display')
+  })
+
+
   for (inter in c(TRUE, FALSE)) {
     testName <- paste("manPlot warnings, interactive:", inter)
     test_that(testName, {
