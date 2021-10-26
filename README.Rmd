@@ -145,6 +145,7 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --adj_method "bonferroni" \
     --thresh_p 0.05 \
     --interactive TRUE \
+    --filter_nPoints 3000 \
     --outFile "/files/manPlot.html"
 ```
 
@@ -159,6 +160,7 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --adj_method "bonferroni" \
     --thresh_p 0.05 \
     --interactive TRUE \
+    --filter_nPoints 3000 \
     --outFile "/files/manPlot.html"
 ```
 
@@ -303,7 +305,7 @@ invisible(
 ```
 
 
-### Function documantation
+### Function documentation
 
 All the functions of this engine use `roxygen2` for documentation. You can generate a **markdown documentation located in [`./doc/README.md`](doc/README.md)** using the function `writeDoc` (defined in [`./src/utils.R`](src/utils.R)):
 
@@ -342,6 +344,9 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         thresh_p = 0.05,
                         chr = NA,
                         interactive = TRUE,
+                        # filter_pAdj = 1,
+                        # filter_nPoints = Inf,
+                        filter_quant = 0.1,
                         outFile = tempfile(fileext = ".html"))
 ```
 ```{r eval=FALSE, include=FALSE}
@@ -449,6 +454,10 @@ p <- manPlot(gwas = gwasRes,
              adj_method = "bonferroni",
              thresh_p = 0.05,
              chr = NA,
+             interactive = TRUE,
+             filter_pAdj = 1,
+             filter_nPoints = Inf,
+             filter_quant = 0,
              title = "Readme Example")
 ```
 <!-- ![screenshot of the plotly graph](README_files/manPlot2.png) -->

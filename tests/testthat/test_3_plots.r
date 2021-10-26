@@ -6,7 +6,7 @@
 
 capture_output({
 
-  # LDplot
+  # LDplot ----
   test_that("LD plot", {
     gDta <- readGenoData("../../data/geno/testMarkerData01.vcf.gz")
     expect_error({
@@ -42,7 +42,7 @@ capture_output({
     }, 'range size \\("to" - "from"\\) should be lower or equal than 50')
   })
 
-  # manPlot
+  # manPlot ----
   files <- list(c(g = "../../data/geno/testMarkerData01.vcf.gz",
                   p = "../../data/pheno/testPhenoData01.csv"))
   for (file in files) {
@@ -64,16 +64,20 @@ capture_output({
                         response = resp,
                         thresh_maf = 0.05,
                         thresh_callrate = 0.95)
-        for (chr in c(NA, unique(resGwas$chr))) {
+        for (chr in c(NA, sample(2, unique(resGwas$chr)))) {
           for (interactive in c(TRUE, FALSE)) {
-            testName <- paste("manPlot", resp, test, paste0("chr:", chr),  sep = "-")
-            test_that(testName,{
+            testName <- paste("manPlot", resp, test, paste0("chr:", chr),
+                              paste0('inter:', interactive), sep = "-")
+            test_that(testName, {
               expect_error({
                 mP <- manPlot(gwas = resGwas,
                               adj_method = "bonferroni",
-                              thresh_p = 0.5,
+                              thresh_p = 0.05,
                               chr = chr,
                               interactive = interactive,
+                              filter_pAdj = 1,
+                              filter_nPoints = Inf,
+                              filter_quant = 1,
                               title = "test manPlot")
               }, NA)
               if (interactive) {
@@ -89,7 +93,24 @@ capture_output({
     }
   }
 
-  # Test manPlot() with wrong parameters:
+  # Test manPlot warnings: ----
+  for (inter in c(TRUE, FALSE)) {
+    testName <- paste("manPlot warnings, interactive:", inter)
+    test_that(testName, {
+                expect_warning({
+                  mP <- manPlot(gwas = resGwas,
+                      adj_method = "bonferroni",
+                      thresh_p = 0.05,
+                      chr = NA,
+                      interactive = inter,
+                      filter_pAdj = 10^-9,
+                      title = "test manPlot")
+      })
+    })
+  }
+
+
+  # Test manPlot() with wrong parameters: ----
   resGwas <- gwas(dta,
                   trait = "Flowering.time.at.Arkansas",
                   test = "score",
@@ -100,18 +121,26 @@ capture_output({
   goodParams <- list(gwas = resGwas,
                      adj_method = "bonferroni",
                      thresh_p = 0.05,
+                     interactive = TRUE,
+                     filter_pAdj = 1,
+                     filter_nPoints = Inf,
+                     filter_quant = 0,
                      chr = unique(resGwas$chr)[1])
 
   wrongParamsL <- list(p = list(c(runif(100, 0, 1), -0.1, 0.00015)),
                        adj_method = "do not exists",
                        thresh_p = list(-1, 1.02),
+                       interactive = c('t'),
+                       filter_pAdj = c(-1, 2),
+                       filter_nPoints = -4,
+                       filter_quant = c(-1, 1.1),
                        chr = c("doNotExists", 29))
 
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
     i <- 0
     for (wrongP in wrongParams) {
-      i <- i+1
+      i <- i + 1
       params <- goodParams
       params[[p]] <- wrongP
       testName <- paste("manPlot WrongParams", p, i, sep = "-")
@@ -120,7 +149,11 @@ capture_output({
           manPlot(gwas = params[["gwas"]],
                   adj_method = params[["adj_method"]],
                   thresh_p = params[["thresh_p"]],
-                  chr = params[["chr"]])
+                  chr = params[["chr"]],
+                  interactive = params[["interactive"]],
+                  filter_pAdj = params[['filter_pAdj']],
+                  filter_quant = params[['filter_quant']],
+                  filter_nPoints = params[['filter_nPoints']])
         })
       })
     }

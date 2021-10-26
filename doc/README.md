@@ -153,6 +153,9 @@ draw_manhattanPlot(
   thresh_p = 0.05,
   chr = NA,
   interactive = TRUE,
+  filter_pAdj = 1,
+  filter_nPoints = Inf,
+  filter_quant = 0,
   outFile = tempfile()
 )
 ```
@@ -168,12 +171,24 @@ Argument      |Description
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     name of the chromosome to show (show all if NA)
 `interactive`     |     [bool] should the plot be interactive (the default)
+`filter_pAdj`     |     [numeric] threshold to remove points with pAdj > filter_pAdj from the plot (default no filtering)
+`filter_nPoints`     |     [numeric] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)
+`filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
 `outFile`     |     path of the file containing the plot. If `NULL`, the output will not be written in any file. By default write in an tempoary file.
+
+
+## Details
+
+If several filtering rules are given, the filtering process apply
+ the filtering process sequentially (this lead to having the same result
+ that if only the strongest rules were given).
+ Moreover, the number of points kept for the plot will be display
+ in the plot title.
 
 
 ## Value
 
-plotly graph
+plotly graph if interactive is TRUE, or NULL if not.
 
 
 # `draw_ldPlot`
@@ -271,6 +286,9 @@ manPlot(
   thresh_p = 0.05,
   chr = NA,
   title = "Manhattan Plot",
+  filter_pAdj = 1,
+  filter_nPoints = Inf,
+  filter_quant = 0,
   interactive = TRUE
 )
 ```
@@ -285,7 +303,19 @@ Argument      |Description
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     [char] name of the chromosome to show (show all if NA)
 `title`     |     [char] Title of the plot. Default is "Manhattan Plot"
-`interactive`     |     [bool] should the plot be interactive (the default) or not.
+`filter_pAdj`     |     [numeric] threshold to remove points with pAdj > filter_pAdj from the plot (default no filtering)
+`filter_nPoints`     |     [numeric] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)
+`filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
+`interactive`     |     [bool] should the plot be interactive (the default) or not
+
+
+## Details
+
+If several filtering rules are given, the filtering process apply
+ the filtering process sequentially (this lead to having the same result
+ that if only the strongest rules were given).
+ Moreover, the number of points kept for the plot will be display
+ in the plot title.
 
 
 ## Value

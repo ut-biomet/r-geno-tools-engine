@@ -106,17 +106,31 @@ run_gwas <- function(genoFile = NULL,
 #' @param thresh_p p value significant threshold (default 0.05)
 #' @param chr name of the chromosome to show (show all if NA)
 #' @param interactive [bool] should the plot be interactive (the default)
+#' @param filter_pAdj [numeric] threshold to remove points
+#' with pAdj > filter_pAdj from the plot (default no filtering)
+#' @param filter_nPoints [numeric] threshold to keep only the filter_nPoints
+#' with the lowest p-values for the plot (default no filtering)
+#' @param filter_quant [numeric] threshold to keep only the filter_quant*100 %
+#' of the points with the lowest p-values for the plot (default no filtering)
 #' @param outFile path of the file containing the plot. If `NULL`, the
 #' output will not be written in any file. By default write in an tempoary
 #' file.
 #'
-#' @return plotly graph
+#' @details If several filtering rules are given, the filtering process apply
+#' the filtering process sequentially (this lead to having the same result
+#' that if only the strongest rules were given).
+#' Moreover, the number of points kept for the plot will be display
+#' in the plot title.
+#' @return plotly graph if interactive is TRUE, or NULL if not.
 draw_manhattanPlot <- function(gwasFile = NULL,
                                gwasUrl = NULL,
                                adj_method = "bonferroni",
                                thresh_p = 0.05,
                                chr = NA,
                                interactive = TRUE,
+                               filter_pAdj = 1,
+                               filter_nPoints = Inf,
+                               filter_quant = 0,
                                outFile = tempfile()) {
   logger <- logger$new("r-draw_manhattanPlot()")
 
@@ -165,7 +179,10 @@ draw_manhattanPlot <- function(gwasFile = NULL,
                interactive = interactive,
                title = paste(gwas$metadata$trait,
                              adj_method,
-                             thresh_p, sep = " - "))
+                             thresh_p, sep = " - "),
+               filter_pAdj = filter_pAdj,
+               filter_quant = filter_quant,
+               filter_nPoints = filter_nPoints)
   logger$log("Draw Manhattan Plot DONE")
 
   if (!is.null(outFile)) {

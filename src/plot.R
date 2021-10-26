@@ -5,21 +5,34 @@
 #' @param thresh_p p value significant threshold (default 0.05)
 #' @param chr [char] name of the chromosome to show (show all if NA)
 #' @param title [char] Title of the plot. Default is "Manhattan Plot"
-#' @param interactive [bool] should the plot be interactive (the default)
-#'   or not.
+#' @param interactive [bool] should the plot be interactive (the default) or not
+#' @param filter_pAdj [numeric] threshold to remove points
+#' with pAdj > filter_pAdj from the plot (default no filtering)
+#' @param filter_nPoints [numeric] threshold to keep only the filter_nPoints
+#' with the lowest p-values for the plot (default no filtering)
+#' @param filter_quant [numeric] threshold to keep only the filter_quant*100 %
+#' of the points with the lowest p-values for the plot (default no filtering)
 #'
+#' @details If several filtering rules are given, the filtering process apply
+#' the filtering process sequentially (this lead to having the same result
+#' that if only the strongest rules were given).
+#' Moreover, the number of points kept for the plot will be display
+#' in the plot title.
 #' @return plotly graph if interactive is TRUE, or NULL if not.
 manPlot <- function(gwas,
                     adj_method,
                     thresh_p = 0.05,
                     chr = NA,
                     title = "Manhattan Plot",
+                    filter_pAdj = 1,
+                    filter_nPoints = Inf,
+                    filter_quant = 0,
                     interactive = TRUE) {
 
   logger <- logger$new("r-manPlot()")
 
 
-  # Check chromosome name
+  # Check chromosome name ----
   logger$log("Check chromosome name ...")
   if (!is.na(chr)) {
     if (!chr %in% unique(gwas$chr)) {
@@ -28,14 +41,14 @@ manPlot <- function(gwas,
   }
   logger$log("Check chromosome name DONE")
 
-  # P-Values adjustment
+  # P-Values adjustment ----
   logger$log("Adjust p-values ...")
   adj <- adjustPval(gwas$p, adj_method, thresh_p)
   gwas$p_adj <- adj$p_adj
   thresh_pAdj <- adj$thresh_adj
   logger$log("Adjust p-values DONE")
 
-  # filter according to "chr"
+  # filter according to "chr" ----
   if (!is.na(chr)) {
     gwas <- gwas[as.character(gwas$chr) %in% chr,]
   }
@@ -45,7 +58,7 @@ manPlot <- function(gwas,
   gwas$chr <- as.numeric(factor(gwas$chr,
                                 levels = chrlabels))
 
-  # manage duplicate in SNP's ID
+  # manage duplicate in SNP's ID ----
   logger$log("Check duplicated SNP ID ...")
   if (anyDuplicated(gwas$id) != 0) {
     warning("Duplicated in SNP's ID detected, replacing SNP ID by: CHR@POS.")
@@ -58,7 +71,7 @@ manPlot <- function(gwas,
   } else  highlightSinif <- TRUE
   logger$log("Check duplicated SNP ID DONE")
 
-  # get significant SNP
+  # get significant SNP ----
   if (highlightSinif) {
     logger$log("Extract significant SNP ...")
     significantSNP <- gwas[gwas$p_adj <= thresh_p, "id"]
@@ -68,40 +81,134 @@ manPlot <- function(gwas,
     logger$log("Extract significant SNP DONE")
   } else significantSNP <- NULL
 
+
+  # filter results ----
+  logger$log("Filter points ...")
+  nTotalSnp <- nrow(gwas)
+  # filter according to a threshold on pAdj
+  if (nrow(gwas) != 0 && filter_pAdj != 1) {
+    if (filter_pAdj <= 0 || filter_pAdj > 1) {
+      stop('filter_pAdj should be between 0 (excluded) and 1')
+    }
+    gwas <- gwas[gwas$p_adj <= filter_pAdj,]
+    if (nrow(gwas) == 0) {
+      warning('filter_pAdj removed all the points of the graph')
+    }
+  } else {
+    logger$log('skip filter_pAdj')
+  }
+
+  # filter according to quantile
+  if (nrow(gwas) != 0 && filter_quant != 0) {
+    if (filter_quant <= 0 || filter_quant > 1) {
+      stop('filter_quant should be between 0 (excluded) and 1')
+    }
+    gwas <- gwas[order(gwas$p),]
+    gwas <- gwas[seq_len(min(nrow(gwas),
+                             floor(nTotalSnp*filter_quant))),]
+    if (nrow(gwas) == 0) {
+      warning('filter_quant removed all the points of the graph')
+    }
+  } else {
+    logger$log('skip filter_quant')
+  }
+
+  # filter according to a fixed number of point
+  if (nrow(gwas) != 0 && filter_nPoints < nrow(gwas)) {
+    if (filter_nPoints <= 0) {
+      stop('filter_nPoints should be a strictly positive number')
+    }
+    gwas <- gwas[order(gwas$p),]
+    gwas <- gwas[seq_len(min(nrow(gwas), filter_nPoints)),]
+    if (nrow(gwas) == 0) {
+      warning('filter_nPoints removed all the points of the graph')
+    }
+  } else {
+    logger$log('skip filter_nPoints')
+  }
+
+  # update plot title to give filtering feed back to the user
+  remainPoints <- nrow(gwas)
+  if (nTotalSnp != 0) {
+    remainPercent <- round(remainPoints/nTotalSnp, digits = 3) * 100
+    if (remainPoints != nTotalSnp && remainPercent != 0) {
+      title <- paste(title,
+                     paste0(remainPoints, ' points ~', remainPercent, '%)'),
+                     sep = '\n(')
+    } else if (remainPercent == 0) {
+      title <- paste(title,
+                     'filtering process removed all the points',
+                     sep = '\n')
+    }
+  } else {
+      warning('There is no points to display')
+      title <- paste(title,
+                     'no point to display',
+                     sep = '\n')
+  }
+  logger$log("Filter points DONE")
+
+  # Draw plot ----
   logger$log("Draw plot ...")
   if (interactive) {
-  p <- manhattanly::manhattanly(
-    data.frame(CHR = gwas$chr,
-               BP = gwas$pos,
-               SNP = gwas$id,
-               P = gwas$p),
-    snp = "SNP",
-    labelChr = chrlabels,
-    highlight = significantSNP,
-    genomewideline = -log10(thresh_pAdj),
-    suggestiveline = FALSE,
-    title = title
-  )
+    if (remainPoints == 0) {
+      # manhattanly::manhattanly can't handle empty data
+      p <- plotly::plot_ly(type = "scatter",
+                           mode = "lines+markers") %>%
+        plotly::layout(title = title,
+                       xaxis = list(title = 'Chromosome',
+                                    zerolinecolor = '#ffff',
+                                    gridcolor = 'ffff',
+                                    showticklabels=FALSE),
+                       yaxis = list(title = '-log10(p)',
+                                    # zerolinecolor = '#ffff',
+                                    # gridcolor = 'ffff',
+                                    showticklabels=FALSE))
+    } else {
+      p <- manhattanly::manhattanly(
+        data.frame(CHR = gwas$chr,
+                   BP = gwas$pos,
+                   SNP = gwas$id,
+                   P = gwas$p),
+        snp = "SNP",
+        labelChr = chrlabels,
+        highlight = significantSNP,
+        genomewideline = -log10(thresh_pAdj),
+        suggestiveline = FALSE,
+        title = title)
+    }
+  } else {
+    if (remainPoints == 0) {
+      # qqman::manhattan can't handle empty data
+      plot(1, type = "n",
+           xlab = "Chromosome",
+           ylab = expression(-log[10](italic(p))),
+           xlim = c(0, length(chrlabels)),
+           xaxt = 'n',
+           yaxt = 'n',
+           main = title)
+      p <- NULL
+    } else {
+      if (length(chrlabels) == 1) {
+        # qqman::manhattan raise error if there is only one chromosome
+        # in the data and chrlabs is defined
+        chrlabels <- NULL
+      }
+      qqman::manhattan(x = gwas,
+                       chr = 'chr',
+                       bp = 'pos',
+                       p = 'p',
+                       snp = 'id',
+                       chrlabs = chrlabels,
+                       suggestiveline = FALSE,
+                       genomewideline = -log10(thresh_pAdj),
+                       annotatePval = -log10(thresh_pAdj),
+                       main = title)
+      p <- NULL
+    }
+  }
   logger$log("Draw plot DONE")
   logger$log("DONE, return output")
-  } else {
-    if (length(chrlabels) == 1) {
-      # qqman::manhattan raise error if there is only one chromosome in the data
-      # and chrlabs is defined
-      chrlabels <- NULL
-    }
-    qqman::manhattan(x = gwas,
-                     chr = 'chr',
-                     bp = 'pos',
-                     p = 'p',
-                     snp = 'id',
-                     chrlabs = chrlabels,
-                     suggestiveline = FALSE,
-                     genomewideline = -log10(thresh_pAdj),
-                     annotatePval = -log10(thresh_pAdj),
-                     main = title)
-    p <- NULL
-  }
   p
 }
 

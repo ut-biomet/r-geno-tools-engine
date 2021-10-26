@@ -11,7 +11,7 @@
 -   [For `R` developpers:](#for-r-developpers)
     -   [Dependencies](#dependencies)
     -   [GWAS-Engine as a R library](#gwas-engine-as-a-r-library)
-        -   [Function documantation](#function-documantation)
+        -   [Function documentation](#function-documentation)
         -   [Main functions](#main-functions)
         -   [Other functions](#other-functions)
 -   [Tests](#tests)
@@ -135,11 +135,12 @@ docker run gwasengine
 #> Project requested R version '4.1.1' but '4.0.5' is currently being used 
 #> usage: gwas-engine.R [--] [--help] [--opts OPTS] [--genoFile GENOFILE]
 #>        [--phenoFile PHENOFILE] [--gwasFile GWASFILE] [--outFile
-#>        OUTFILE] [--trait TRAIT] [--chr CHR] [--interactive INTERACTIVE]
-#>        [--test TEST] [--fixed FIXED] [--response RESPONSE]
-#>        [--adj_method ADJ_METHOD] [--thresh_maf THRESH_MAF]
-#>        [--thresh_callrate THRESH_CALLRATE] [--thresh_p THRESH_P]
-#>        [--from FROM] [--to TO] fun
+#>        OUTFILE] [--adj_method ADJ_METHOD] [--thresh_p THRESH_P] [--test
+#>        TEST] [--fixed FIXED] [--response RESPONSE] [--trait TRAIT]
+#>        [--thresh_maf THRESH_MAF] [--thresh_callrate THRESH_CALLRATE]
+#>        [--chr CHR] [--interactive INTERACTIVE] [--filter_pAdj
+#>        FILTER_PADJ] [--filter_nPoints FILTER_NPOINTS] [--filter_quant
+#>        FILTER_QUANT] [--from FROM] [--to TO] fun
 #> 
 #> Run GWAS-Engine's tools
 #> 
@@ -160,12 +161,13 @@ docker run gwasengine
 #>                      data file (json file)
 #>   -o, --outFile      [`gwas`, `manplot`, `ldplot`, `adjresults`] file
 #>                      where to save the results,
-#>   -t, --trait        [`gwas`] name of the trait to analyze. Must be a
-#>                      column name of the phenotypic file.
-#>   -c, --chr          [`manplot`] name of the chromosome to show (show
-#>                      all by default)
-#>   -i, --interactive  [`manplot`] should the plot be interactive: TRUE
-#>                      or FALSE (the default is TRUE) [default: TRUE]
+#>   -a, --adj_method   [`manplot`, `adjresults`] p-value correction
+#>                      method: "holm", "hochberg", "bonferroni", "BH",
+#>                      "BY", "fdr", "none". Default: "bonferroni". (see
+#>                      https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust
+#>                      for more details) [default: bonferroni]
+#>   -t, --thresh_p     [`manplot`, `adjresults`] p value significant
+#>                      threshold (default 0.05) [default: 0.05]
 #>   --test             [`gwas`] Which test to use. Either `"score"`,
 #>                      `"wald"` or `"lrt"`. For binary phenotypes, test =
 #>                      `"score"` is mandatory. For more information about
@@ -181,19 +183,28 @@ docker run gwasengine
 #>                      trait a quantitative or a binary phenotype?
 #>                      Default value is "quantitative" [default:
 #>                      quantitative]
-#>   -a, --adj_method   [`manplot`, `adjresults`] p-value correction
-#>                      method: "holm", "hochberg", "bonferroni", "BH",
-#>                      "BY", "fdr", "none". Default: "bonferroni". (see
-#>                      https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust
-#>                      for more details) [default: bonferroni]
+#>   --trait            [`gwas`] name of the trait to analyze. Must be a
+#>                      column name of the phenotypic file.
 #>   --thresh_maf       [`gwas`] Threshold for filtering markers. Only
 #>                      markers with minor allele frequency > `thresh_maf`
 #>                      will be kept.
 #>   --thresh_callrate  [`gwas`] Threshold for filtering markers. Only
 #>                      markers with a callrate > `thresh_callrate` will
 #>                      be kept.
-#>   --thresh_p         [`manplot`, `adjresults`] p value significant
-#>                      threshold (default 0.05) [default: 0.05]
+#>   -c, --chr          [`manplot`] name of the chromosome to show (show
+#>                      all by default)
+#>   -i, --interactive  [`manplot`] should the plot be interactive: TRUE
+#>                      or FALSE (the default is TRUE) [default: TRUE]
+#>   --filter_pAdj      [`manplot`] threshold to remove points with pAdj >
+#>                      filter_pAdj from the plot (default no filtering)
+#>                      [default: 1]
+#>   --filter_nPoints   [`manplot`] threshold to keep only the
+#>                      filter_nPoints with the lowest p-values for the
+#>                      plot (default no filtering) [default: Inf]
+#>   --filter_quant     [`manplot`] threshold to keep only the
+#>                      filter_quant*100 % of the points with the lowest
+#>                      p-values for the plot (default no filtering)
+#>                      [default: 0]
 #>   --from             [`ldplot`] lower bound of the range of SNPs for
 #>                      which the LD is computed (`from` must be lower
 #>                      than `to`)
@@ -248,101 +259,104 @@ docker run -v "$PWD"/data/geno/:/geno \
     --outFile "/out/gwasRes.json"
 #> Warning message:
 #> Project requested R version '4.1.1' but '4.0.5' is currently being used 
-#> 2021-10-19 00:43:51 call to GWAS-Engine.R:
+#> 2021-10-26 05:28:37 call to GWAS-Engine.R:
 #>      help = FALSE
 #>      opts = NA
 #>      genoFile = /geno/testMarkerData01.vcf.gz
 #>      phenoFile = /pheno/testPhenoData01.csv
 #>      gwasFile = NA
 #>      outFile = /out/gwasRes.json
-#>      trait = Flowering.time.at.Arkansas
-#>      chr = NA
-#>      interactive = TRUE
+#>      adj_method = bonferroni
+#>      thresh_p = 0.05
 #>      test = score
 #>      fixed = 0
 #>      response = quantitative
-#>      adj_method = bonferroni
+#>      trait = Flowering.time.at.Arkansas
 #>      thresh_maf = 0.05
 #>      thresh_callrate = 0.95
-#>      thresh_p = 0.05
+#>      chr = NA
+#>      interactive = TRUE
+#>      filter_pAdj = 1
+#>      filter_nPoints = Inf
+#>      filter_quant = 0
 #>      from = NA
 #>      to = NA
 #>      fun = gwas
-#> 2021-10-19 00:43:51 - r-run_gwas(): Get data ...
-#> 2021-10-19 00:43:51 - r-readData(): get geno data ...
-#> 2021-10-19 00:43:51 - r-readGenoData(): Check file extention ... 
-#> 2021-10-19 00:43:51 - r-readGenoData(): Read geno file ... 
+#> 2021-10-26 05:28:37 - r-run_gwas(): Get data ...
+#> 2021-10-26 05:28:37 - r-readData(): get geno data ...
+#> 2021-10-26 05:28:37 - r-readGenoData(): Check file extention ... 
+#> 2021-10-26 05:28:37 - r-readGenoData(): Read geno file ... 
 #> ped stats and snps stats have been set. 
 #> 'p' has been set. 
 #> 'mu' and 'sigma' have been set.
-#> 2021-10-19 00:43:52 - r-readGenoData(): Read geno file DONE 
-#> 2021-10-19 00:43:52 - r-readGenoData(): DONE, return output.
-#> 2021-10-19 00:43:52 - r-readData(): get geno data DONE
-#> 2021-10-19 00:43:52 - r-readData(): get pheno data ...
-#> 2021-10-19 00:43:52 - r-readPhenoData(): Read phenotypic file ... 
-#> 2021-10-19 00:43:52 - r-readPhenoData(): Read phenotypic file DONE 
-#> 2021-10-19 00:43:52 - r-readPhenoData(): DONE, return output.
-#> 2021-10-19 00:43:52 - r-readData(): get pheno data DONE
-#> 2021-10-19 00:43:52 - r-readData(): prepare data ...
-#> 2021-10-19 00:43:52 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
-#> 2021-10-19 00:43:53 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
-#> 2021-10-19 00:43:53 - r-prepareData(): reorder matrix ...
-#> 2021-10-19 00:43:53 - r-prepareData(): reorder matrix DONE
-#> 2021-10-19 00:43:53 - r-prepareData(): remove monomorphic markers ...
-#> 2021-10-19 00:43:53 - r-prepareData(): remove monomorphic markers DONE
-#> 2021-10-19 00:43:53 - r-prepareData(): DONE, return output.
-#> 2021-10-19 00:43:53 - r-readData(): prepare data DONE
-#> 2021-10-19 00:43:53 - r-readData(): DONE, return output.
-#> 2021-10-19 00:43:53 - r-run_gwas(): Get data DONE
-#> 2021-10-19 00:43:53 - r-run_gwas(): GWAS analysis ...
-#> 2021-10-19 00:43:53 - r-gwas(): Check inputs ...
-#> 2021-10-19 00:43:53 - r-gwas(): Check inputs DONE
-#> 2021-10-19 00:43:53 - r-gwas(): aggregate data in bed matrix ...
-#> 2021-10-19 00:43:53 - r-gwas(): aggregate data in bed matrix DONE
-#> 2021-10-19 00:43:53 - r-gwas(): remove individuals with missing phenotypic values ...
-#> 2021-10-19 00:43:53 - r-gwas(): remove samples with missing phenotypic values DONE
-#> 2021-10-19 00:43:53 - r-gwas(): filter SNPs ...
-#> 2021-10-19 00:43:53 - r-gwas(): filter SNPs DONE
-#> 2021-10-19 00:43:53 - r-gwas(): calculate genetic relatinoal matrix ...
-#> 2021-10-19 00:43:53 - r-gwas(): calculate genetic relatinoal matrix DONE
-#> 2021-10-19 00:43:53 - r-gwas(): fit model ...
-#> [Iteration 1] theta = 78.0648  78.282
+#> 2021-10-26 05:28:38 - r-readGenoData(): Read geno file DONE 
+#> 2021-10-26 05:28:38 - r-readGenoData(): DONE, return output.
+#> 2021-10-26 05:28:38 - r-readData(): get geno data DONE
+#> 2021-10-26 05:28:38 - r-readData(): get pheno data ...
+#> 2021-10-26 05:28:38 - r-readPhenoData(): Read phenotypic file ... 
+#> 2021-10-26 05:28:38 - r-readPhenoData(): Read phenotypic file DONE 
+#> 2021-10-26 05:28:38 - r-readPhenoData(): DONE, return output.
+#> 2021-10-26 05:28:38 - r-readData(): get pheno data DONE
+#> 2021-10-26 05:28:38 - r-readData(): prepare data ...
+#> 2021-10-26 05:28:38 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
+#> 2021-10-26 05:28:39 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
+#> 2021-10-26 05:28:39 - r-prepareData(): reorder matrix ...
+#> 2021-10-26 05:28:39 - r-prepareData(): reorder matrix DONE
+#> 2021-10-26 05:28:39 - r-prepareData(): remove monomorphic markers ...
+#> 2021-10-26 05:28:39 - r-prepareData(): remove monomorphic markers DONE
+#> 2021-10-26 05:28:39 - r-prepareData(): DONE, return output.
+#> 2021-10-26 05:28:39 - r-readData(): prepare data DONE
+#> 2021-10-26 05:28:39 - r-readData(): DONE, return output.
+#> 2021-10-26 05:28:39 - r-run_gwas(): Get data DONE
+#> 2021-10-26 05:28:39 - r-run_gwas(): GWAS analysis ...
+#> 2021-10-26 05:28:39 - r-gwas(): Check inputs ...
+#> 2021-10-26 05:28:39 - r-gwas(): Check inputs DONE
+#> 2021-10-26 05:28:39 - r-gwas(): aggregate data in bed matrix ...
+#> 2021-10-26 05:28:39 - r-gwas(): aggregate data in bed matrix DONE
+#> 2021-10-26 05:28:39 - r-gwas(): remove individuals with missing phenotypic values ...
+#> 2021-10-26 05:28:39 - r-gwas(): remove samples with missing phenotypic values DONE
+#> 2021-10-26 05:28:39 - r-gwas(): filter SNPs ...
+#> 2021-10-26 05:28:39 - r-gwas(): filter SNPs DONE
+#> 2021-10-26 05:28:39 - r-gwas(): calculate genetic relatinoal matrix ...
+#> 2021-10-26 05:28:39 - r-gwas(): calculate genetic relatinoal matrix DONE
+#> 2021-10-26 05:28:39 - r-gwas(): fit model ...
+#> [Iteration 1] theta = 78.0648 78.2819
 #> [Iteration 1] log L = -1002.17
 #> [Iteration 1] AI-REML update
-#> [Iteration 1] ||gradient|| = 0.344543
-#> [Iteration 2] theta = 22.5611 163.026
+#> [Iteration 1] ||gradient|| = 0.344544
+#> [Iteration 2] theta = 22.5608 163.026
 #> [Iteration 2] log L = -990.943
 #> [Iteration 2] AI-REML update
-#> [Iteration 2] ||gradient|| = 0.798816
-#> [Iteration 3] theta = 27.7201 190.624
-#> [Iteration 3] log L = -986.65
+#> [Iteration 2] ||gradient|| = 0.79883
+#> [Iteration 3] theta = 27.7198 190.625
+#> [Iteration 3] log L = -986.649
 #> [Iteration 3] AI-REML update
-#> [Iteration 3] ||gradient|| = 0.113945
-#> [Iteration 4] theta = 29.2503 195.436
-#> [Iteration 4] log L = -986.514
+#> [Iteration 3] ||gradient|| = 0.113948
+#> [Iteration 4] theta = 29.2501 195.436
+#> [Iteration 4] log L = -986.513
 #> [Iteration 4] AI-REML update
-#> [Iteration 4] ||gradient|| = 0.00580942
-#> [Iteration 5] theta = 29.4021 195.213
+#> [Iteration 4] ||gradient|| = 0.00580972
+#> [Iteration 5] theta =  29.402 195.213
 #> [Iteration 5] log L = -986.513
 #> [Iteration 5] AI-REML update
-#> [Iteration 5] ||gradient|| = 0.000323297
-#> [Iteration 6] theta = 29.4178 195.142
+#> [Iteration 5] ||gradient|| = 0.000323319
+#> [Iteration 6] theta = 29.4176 195.143
 #> [Iteration 6] log L = -986.513
 #> [Iteration 6] AI-REML update
-#> [Iteration 6] ||gradient|| = 4.32637e-05
-#> [Iteration 7] theta =   29.42 195.132
+#> [Iteration 6] ||gradient|| = 4.32664e-05
+#> [Iteration 7] theta = 29.4198 195.133
 #> [Iteration 7] log L = -986.513
 #> [Iteration 7] AI-REML update
-#> [Iteration 7] ||gradient|| = 5.95139e-06
-#> 2021-10-19 00:43:54 - r-gwas(): fit model DONE
-#> 2021-10-19 00:43:54 - r-gwas(): DONE, return output.
-#> 2021-10-19 00:43:54 - r-run_gwas(): GWAS analysis DONE
-#> 2021-10-19 00:43:54 - r-run_gwas(): Save metadata ...
-#> 2021-10-19 00:43:54 - r-run_gwas(): Save metadata DONE
-#> 2021-10-19 00:43:54 - r-run_gwas(): Save results ...
-#> 2021-10-19 00:43:54 - r-saveGWAS(): Check file ...
-#> 2021-10-19 00:43:54 - r-saveGWAS(): Check file DONE
-#> 2021-10-19 00:43:54 - r-run_gwas(): Save results DONE
+#> [Iteration 7] ||gradient|| = 5.95174e-06
+#> 2021-10-26 05:28:40 - r-gwas(): fit model DONE
+#> 2021-10-26 05:28:40 - r-gwas(): DONE, return output.
+#> 2021-10-26 05:28:40 - r-run_gwas(): GWAS analysis DONE
+#> 2021-10-26 05:28:40 - r-run_gwas(): Save metadata ...
+#> 2021-10-26 05:28:40 - r-run_gwas(): Save metadata DONE
+#> 2021-10-26 05:28:40 - r-run_gwas(): Save results ...
+#> 2021-10-26 05:28:40 - r-saveGWAS(): Check file ...
+#> 2021-10-26 05:28:40 - r-saveGWAS(): Check file DONE
+#> 2021-10-26 05:28:40 - r-run_gwas(): Save results DONE
 ```
 
 </details>
@@ -356,6 +370,7 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --adj_method "bonferroni" \
     --thresh_p 0.05 \
     --interactive TRUE \
+    --filter_nPoints 3000 \
     --outFile "/files/manPlot.html"
 ```
 
@@ -373,62 +388,70 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --adj_method "bonferroni" \
     --thresh_p 0.05 \
     --interactive TRUE \
+    --filter_nPoints 3000 \
     --outFile "/files/manPlot.html"
 #> Warning message:
 #> Project requested R version '4.1.1' but '4.0.5' is currently being used 
-#> 2021-10-19 00:43:57 call to GWAS-Engine.R:
+#> 2021-10-26 05:28:43 call to GWAS-Engine.R:
 #>      help = FALSE
 #>      opts = NA
 #>      genoFile = NA
 #>      phenoFile = NA
 #>      gwasFile = /files/gwasRes.json
 #>      outFile = /files/manPlot.html
-#>      trait = NA
-#>      chr = NA
-#>      interactive = TRUE
+#>      adj_method = bonferroni
+#>      thresh_p = 0.05
 #>      test = NA
 #>      fixed = 0
 #>      response = quantitative
-#>      adj_method = bonferroni
+#>      trait = NA
 #>      thresh_maf = NA
 #>      thresh_callrate = NA
-#>      thresh_p = 0.05
+#>      chr = NA
+#>      interactive = TRUE
+#>      filter_pAdj = 1
+#>      filter_nPoints = 3000
+#>      filter_quant = 0
 #>      from = NA
 #>      to = NA
 #>      fun = manplot
-#> 2021-10-19 00:43:57 - r-draw_manhattanPlot(): Check outFile ...
-#> 2021-10-19 00:43:57 - r-draw_manhattanPlot(): Check outFile DONE
-#> 2021-10-19 00:43:57 - r-draw_manhattanPlot(): Get data ...
-#> 2021-10-19 00:43:57 - r-readGWAS(): Read result file ... 
-#> 2021-10-19 00:43:57 - r-readGWAS(): Read result file DONE 
-#> 2021-10-19 00:43:57 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2021-10-19 00:43:58 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2021-10-19 00:43:58 - r-readGWAS(): DONE, return output.
-#> 2021-10-19 00:43:58 - r-draw_manhattanPlot(): Get data DONE
-#> 2021-10-19 00:43:58 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
-#> 2021-10-19 00:43:58 - r-manPlot(): Check chromosome name ...
-#> 2021-10-19 00:43:58 - r-manPlot(): Check chromosome name DONE
-#> 2021-10-19 00:43:58 - r-manPlot(): Adjust p-values ...
-#> 2021-10-19 00:43:58 - r-adjustPval(): Check adj_method ...
-#> 2021-10-19 00:43:58 - r-adjustPval(): Check adj_method DONE
-#> 2021-10-19 00:43:58 - r-adjustPval(): Check p values ...
-#> 2021-10-19 00:43:58 - r-adjustPval(): Check p values DONE
-#> 2021-10-19 00:43:58 - r-adjustPval(): Adjust p-values ...
-#> 2021-10-19 00:43:58 - r-adjustPval(): Adjust p-values DONE
-#> 2021-10-19 00:43:58 - r-adjustPval(): Adjust threshold ...
-#> 2021-10-19 00:43:58 - r-adjustPval(): Adjust threshold DONE
-#> 2021-10-19 00:43:58 - r-adjustPval(): DONE, return output
-#> 2021-10-19 00:43:58 - r-manPlot(): Adjust p-values DONE
-#> 2021-10-19 00:43:58 - r-manPlot(): Check duplicated SNP ID ...
-#> 2021-10-19 00:43:58 - r-manPlot(): Check duplicated SNP ID DONE
-#> 2021-10-19 00:43:58 - r-manPlot(): Extract significant SNP ...
-#> 2021-10-19 00:43:58 - r-manPlot(): Extract significant SNP DONE
-#> 2021-10-19 00:43:58 - r-manPlot(): Draw plot ...
-#> 2021-10-19 00:43:59 - r-manPlot(): Draw plot DONE
-#> 2021-10-19 00:43:59 - r-manPlot(): DONE, return output
-#> 2021-10-19 00:43:59 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
-#> 2021-10-19 00:43:59 - r-draw_manhattanPlot(): Save results ...
-#> 2021-10-19 00:44:12 - r-draw_manhattanPlot(): Save results DONE
+#> 2021-10-26 05:28:43 - r-draw_manhattanPlot(): Check outFile ...
+#> 2021-10-26 05:28:43 - r-draw_manhattanPlot(): Check outFile DONE
+#> 2021-10-26 05:28:43 - r-draw_manhattanPlot(): Get data ...
+#> 2021-10-26 05:28:43 - r-readGWAS(): Read result file ... 
+#> 2021-10-26 05:28:43 - r-readGWAS(): Read result file DONE 
+#> 2021-10-26 05:28:43 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-10-26 05:28:44 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-10-26 05:28:44 - r-readGWAS(): DONE, return output.
+#> 2021-10-26 05:28:44 - r-draw_manhattanPlot(): Get data DONE
+#> 2021-10-26 05:28:44 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
+#> 2021-10-26 05:28:44 - r-manPlot(): Check chromosome name ...
+#> 2021-10-26 05:28:44 - r-manPlot(): Check chromosome name DONE
+#> 2021-10-26 05:28:44 - r-manPlot(): Adjust p-values ...
+#> 2021-10-26 05:28:44 - r-adjustPval(): Check adj_method ...
+#> 2021-10-26 05:28:44 - r-adjustPval(): Check adj_method DONE
+#> 2021-10-26 05:28:44 - r-adjustPval(): Check p values ...
+#> 2021-10-26 05:28:44 - r-adjustPval(): Check p values DONE
+#> 2021-10-26 05:28:44 - r-adjustPval(): Adjust p-values ...
+#> 2021-10-26 05:28:44 - r-adjustPval(): Adjust p-values DONE
+#> 2021-10-26 05:28:44 - r-adjustPval(): Adjust threshold ...
+#> 2021-10-26 05:28:44 - r-adjustPval(): Adjust threshold DONE
+#> 2021-10-26 05:28:44 - r-adjustPval(): DONE, return output
+#> 2021-10-26 05:28:44 - r-manPlot(): Adjust p-values DONE
+#> 2021-10-26 05:28:44 - r-manPlot(): Check duplicated SNP ID ...
+#> 2021-10-26 05:28:44 - r-manPlot(): Check duplicated SNP ID DONE
+#> 2021-10-26 05:28:44 - r-manPlot(): Extract significant SNP ...
+#> 2021-10-26 05:28:44 - r-manPlot(): Extract significant SNP DONE
+#> 2021-10-26 05:28:44 - r-manPlot(): Filter points ...
+#> 2021-10-26 05:28:44 - r-manPlot(): skip filter_pAdj
+#> 2021-10-26 05:28:44 - r-manPlot(): skip filter_quant
+#> 2021-10-26 05:28:44 - r-manPlot(): Filter points DONE
+#> 2021-10-26 05:28:44 - r-manPlot(): Draw plot ...
+#> 2021-10-26 05:28:44 - r-manPlot(): Draw plot DONE
+#> 2021-10-26 05:28:44 - r-manPlot(): DONE, return output
+#> 2021-10-26 05:28:44 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
+#> 2021-10-26 05:28:44 - r-draw_manhattanPlot(): Save results ...
+#> 2021-10-26 05:28:46 - r-draw_manhattanPlot(): Save results DONE
 ```
 
 ![screenshot of the plotly graph](README_files/manPlot.png)
@@ -445,59 +468,69 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --outFile "/files/manPlot.png"
 #> Warning message:
 #> Project requested R version '4.1.1' but '4.0.5' is currently being used 
-#> 2021-10-19 00:44:15 call to GWAS-Engine.R:
+#> 2021-10-26 05:28:49 call to GWAS-Engine.R:
 #>      help = FALSE
 #>      opts = NA
 #>      genoFile = NA
 #>      phenoFile = NA
 #>      gwasFile = /files/gwasRes.json
 #>      outFile = /files/manPlot.png
-#>      trait = NA
-#>      chr = NA
-#>      interactive = FALSE
+#>      adj_method = bonferroni
+#>      thresh_p = 0.05
 #>      test = NA
 #>      fixed = 0
 #>      response = quantitative
-#>      adj_method = bonferroni
+#>      trait = NA
 #>      thresh_maf = NA
 #>      thresh_callrate = NA
-#>      thresh_p = 0.05
+#>      chr = NA
+#>      interactive = FALSE
+#>      filter_pAdj = 1
+#>      filter_nPoints = Inf
+#>      filter_quant = 0
 #>      from = NA
 #>      to = NA
 #>      fun = manplot
-#> 2021-10-19 00:44:15 - r-draw_manhattanPlot(): Check outFile ...
-#> 2021-10-19 00:44:15 - r-draw_manhattanPlot(): Check outFile DONE
-#> 2021-10-19 00:44:15 - r-draw_manhattanPlot(): Get data ...
-#> 2021-10-19 00:44:15 - r-readGWAS(): Read result file ... 
-#> 2021-10-19 00:44:15 - r-readGWAS(): Read result file DONE 
-#> 2021-10-19 00:44:15 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2021-10-19 00:44:16 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2021-10-19 00:44:16 - r-readGWAS(): DONE, return output.
-#> 2021-10-19 00:44:16 - r-draw_manhattanPlot(): Get data DONE
-#> 2021-10-19 00:44:16 - r-draw_manhattanPlot(): Open connexion to draw the png plot ...
-#> 2021-10-19 00:44:16 - r-draw_manhattanPlot(): Open connexion to draw the png plot DONE
-#> 2021-10-19 00:44:16 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
-#> 2021-10-19 00:44:16 - r-manPlot(): Check chromosome name ...
-#> 2021-10-19 00:44:16 - r-manPlot(): Check chromosome name DONE
-#> 2021-10-19 00:44:16 - r-manPlot(): Adjust p-values ...
-#> 2021-10-19 00:44:16 - r-adjustPval(): Check adj_method ...
-#> 2021-10-19 00:44:16 - r-adjustPval(): Check adj_method DONE
-#> 2021-10-19 00:44:16 - r-adjustPval(): Check p values ...
-#> 2021-10-19 00:44:16 - r-adjustPval(): Check p values DONE
-#> 2021-10-19 00:44:16 - r-adjustPval(): Adjust p-values ...
-#> 2021-10-19 00:44:16 - r-adjustPval(): Adjust p-values DONE
-#> 2021-10-19 00:44:16 - r-adjustPval(): Adjust threshold ...
-#> 2021-10-19 00:44:16 - r-adjustPval(): Adjust threshold DONE
-#> 2021-10-19 00:44:16 - r-adjustPval(): DONE, return output
-#> 2021-10-19 00:44:16 - r-manPlot(): Adjust p-values DONE
-#> 2021-10-19 00:44:16 - r-manPlot(): Check duplicated SNP ID ...
-#> 2021-10-19 00:44:16 - r-manPlot(): Check duplicated SNP ID DONE
-#> 2021-10-19 00:44:16 - r-manPlot(): Extract significant SNP ...
-#> 2021-10-19 00:44:16 - r-manPlot(): Extract significant SNP DONE
-#> 2021-10-19 00:44:16 - r-manPlot(): Draw plot ...
-#> 2021-10-19 00:44:17 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
-#> 2021-10-19 00:44:17 - r-draw_manhattanPlot(): Save results ...
-#> 2021-10-19 00:44:18 - r-draw_manhattanPlot(): Save results DONE
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Check outFile ...
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Check outFile DONE
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Get data ...
+#> 2021-10-26 05:28:49 - r-readGWAS(): Read result file ... 
+#> 2021-10-26 05:28:49 - r-readGWAS(): Read result file DONE 
+#> 2021-10-26 05:28:49 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-10-26 05:28:49 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-10-26 05:28:49 - r-readGWAS(): DONE, return output.
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Get data DONE
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Open connexion to draw the png plot ...
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Open connexion to draw the png plot DONE
+#> 2021-10-26 05:28:49 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
+#> 2021-10-26 05:28:49 - r-manPlot(): Check chromosome name ...
+#> 2021-10-26 05:28:49 - r-manPlot(): Check chromosome name DONE
+#> 2021-10-26 05:28:49 - r-manPlot(): Adjust p-values ...
+#> 2021-10-26 05:28:49 - r-adjustPval(): Check adj_method ...
+#> 2021-10-26 05:28:49 - r-adjustPval(): Check adj_method DONE
+#> 2021-10-26 05:28:49 - r-adjustPval(): Check p values ...
+#> 2021-10-26 05:28:49 - r-adjustPval(): Check p values DONE
+#> 2021-10-26 05:28:49 - r-adjustPval(): Adjust p-values ...
+#> 2021-10-26 05:28:49 - r-adjustPval(): Adjust p-values DONE
+#> 2021-10-26 05:28:49 - r-adjustPval(): Adjust threshold ...
+#> 2021-10-26 05:28:49 - r-adjustPval(): Adjust threshold DONE
+#> 2021-10-26 05:28:49 - r-adjustPval(): DONE, return output
+#> 2021-10-26 05:28:49 - r-manPlot(): Adjust p-values DONE
+#> 2021-10-26 05:28:49 - r-manPlot(): Check duplicated SNP ID ...
+#> 2021-10-26 05:28:49 - r-manPlot(): Check duplicated SNP ID DONE
+#> 2021-10-26 05:28:49 - r-manPlot(): Extract significant SNP ...
+#> 2021-10-26 05:28:49 - r-manPlot(): Extract significant SNP DONE
+#> 2021-10-26 05:28:49 - r-manPlot(): Filter points ...
+#> 2021-10-26 05:28:49 - r-manPlot(): skip filter_pAdj
+#> 2021-10-26 05:28:49 - r-manPlot(): skip filter_quant
+#> 2021-10-26 05:28:49 - r-manPlot(): skip filter_nPoints
+#> 2021-10-26 05:28:49 - r-manPlot(): Filter points DONE
+#> 2021-10-26 05:28:49 - r-manPlot(): Draw plot ...
+#> 2021-10-26 05:28:50 - r-manPlot(): Draw plot DONE
+#> 2021-10-26 05:28:50 - r-manPlot(): DONE, return output
+#> 2021-10-26 05:28:50 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
+#> 2021-10-26 05:28:50 - r-draw_manhattanPlot(): Save results ...
+#> 2021-10-26 05:28:50 - r-draw_manhattanPlot(): Save results DONE
 ```
 
 ![](README_files/manPlotStatic_1.png)<!-- -->
@@ -527,46 +560,49 @@ docker run -v "$PWD"/readmeTemp:/files gwasengine \
     --outFile "/files/adjRes.json"
 #> Warning message:
 #> Project requested R version '4.1.1' but '4.0.5' is currently being used 
-#> 2021-10-19 00:44:21 call to GWAS-Engine.R:
+#> 2021-10-26 05:28:54 call to GWAS-Engine.R:
 #>      help = FALSE
 #>      opts = NA
 #>      genoFile = NA
 #>      phenoFile = NA
 #>      gwasFile = /files/gwasRes.json
 #>      outFile = /files/adjRes.json
-#>      trait = NA
-#>      chr = NA
-#>      interactive = TRUE
+#>      adj_method = bonferroni
+#>      thresh_p = 0.05
 #>      test = NA
 #>      fixed = 0
 #>      response = quantitative
-#>      adj_method = bonferroni
+#>      trait = NA
 #>      thresh_maf = NA
 #>      thresh_callrate = NA
-#>      thresh_p = 0.05
+#>      chr = NA
+#>      interactive = TRUE
+#>      filter_pAdj = 1
+#>      filter_nPoints = Inf
+#>      filter_quant = 0
 #>      from = NA
 #>      to = NA
 #>      fun = adjresults
-#> 2021-10-19 00:44:21 - r-run_resAdjustment(): Get data ...
-#> 2021-10-19 00:44:21 - r-readGWAS(): Read result file ... 
-#> 2021-10-19 00:44:21 - r-readGWAS(): Read result file DONE 
-#> 2021-10-19 00:44:21 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2021-10-19 00:44:21 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2021-10-19 00:44:21 - r-readGWAS(): DONE, return output.
-#> 2021-10-19 00:44:21 - r-run_resAdjustment(): Get data DONE
-#> 2021-10-19 00:44:21 - r-run_resAdjustment(): Adjust p-values ...
-#> 2021-10-19 00:44:21 - r-adjustPval(): Check adj_method ...
-#> 2021-10-19 00:44:21 - r-adjustPval(): Check adj_method DONE
-#> 2021-10-19 00:44:21 - r-adjustPval(): Check p values ...
-#> 2021-10-19 00:44:21 - r-adjustPval(): Check p values DONE
-#> 2021-10-19 00:44:21 - r-adjustPval(): Adjust p-values ...
-#> 2021-10-19 00:44:21 - r-adjustPval(): Adjust p-values DONE
-#> 2021-10-19 00:44:21 - r-adjustPval(): DONE, return output
-#> 2021-10-19 00:44:21 - r-run_resAdjustment(): Adjust p-values DONE
-#> 2021-10-19 00:44:21 - r-run_resAdjustment(): Save results ...
-#> 2021-10-19 00:44:21 - r-saveGWAS(): Check file ...
-#> 2021-10-19 00:44:21 - r-saveGWAS(): Check file DONE
-#> 2021-10-19 00:44:22 - r-run_resAdjustment(): Save results DONE
+#> 2021-10-26 05:28:54 - r-run_resAdjustment(): Get data ...
+#> 2021-10-26 05:28:54 - r-readGWAS(): Read result file ... 
+#> 2021-10-26 05:28:54 - r-readGWAS(): Read result file DONE 
+#> 2021-10-26 05:28:54 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-10-26 05:28:55 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-10-26 05:28:55 - r-readGWAS(): DONE, return output.
+#> 2021-10-26 05:28:55 - r-run_resAdjustment(): Get data DONE
+#> 2021-10-26 05:28:55 - r-run_resAdjustment(): Adjust p-values ...
+#> 2021-10-26 05:28:55 - r-adjustPval(): Check adj_method ...
+#> 2021-10-26 05:28:55 - r-adjustPval(): Check adj_method DONE
+#> 2021-10-26 05:28:55 - r-adjustPval(): Check p values ...
+#> 2021-10-26 05:28:55 - r-adjustPval(): Check p values DONE
+#> 2021-10-26 05:28:55 - r-adjustPval(): Adjust p-values ...
+#> 2021-10-26 05:28:55 - r-adjustPval(): Adjust p-values DONE
+#> 2021-10-26 05:28:55 - r-adjustPval(): DONE, return output
+#> 2021-10-26 05:28:55 - r-run_resAdjustment(): Adjust p-values DONE
+#> 2021-10-26 05:28:55 - r-run_resAdjustment(): Save results ...
+#> 2021-10-26 05:28:55 - r-saveGWAS(): Check file ...
+#> 2021-10-26 05:28:55 - r-saveGWAS(): Check file DONE
+#> 2021-10-26 05:28:55 - r-run_resAdjustment(): Save results DONE
 ```
 
 </details>
@@ -598,51 +634,54 @@ docker run -v "$PWD"/data/geno/:/geno \
     --outFile "/out/ldplot.png"
 #> Warning message:
 #> Project requested R version '4.1.1' but '4.0.5' is currently being used 
-#> 2021-10-19 00:44:25 call to GWAS-Engine.R:
+#> 2021-10-26 05:28:58 call to GWAS-Engine.R:
 #>      help = FALSE
 #>      opts = NA
 #>      genoFile = /geno/testMarkerData01.vcf.gz
 #>      phenoFile = NA
 #>      gwasFile = NA
 #>      outFile = /out/ldplot.png
-#>      trait = NA
-#>      chr = NA
-#>      interactive = TRUE
+#>      adj_method = bonferroni
+#>      thresh_p = 0.05
 #>      test = NA
 #>      fixed = 0
 #>      response = quantitative
-#>      adj_method = bonferroni
+#>      trait = NA
 #>      thresh_maf = NA
 #>      thresh_callrate = NA
-#>      thresh_p = 0.05
+#>      chr = NA
+#>      interactive = TRUE
+#>      filter_pAdj = 1
+#>      filter_nPoints = Inf
+#>      filter_quant = 0
 #>      from = 42
 #>      to = 62
 #>      fun = ldplot
-#> 2021-10-19 00:44:26 - r-draw_ldPlot(): Get data ...
-#> 2021-10-19 00:44:26 - r-readGenoData(): Check file extention ... 
-#> 2021-10-19 00:44:26 - r-readGenoData(): Read geno file ... 
+#> 2021-10-26 05:28:58 - r-draw_ldPlot(): Get data ...
+#> 2021-10-26 05:28:59 - r-readGenoData(): Check file extention ... 
+#> 2021-10-26 05:28:59 - r-readGenoData(): Read geno file ... 
 #> ped stats and snps stats have been set. 
 #> 'p' has been set. 
 #> 'mu' and 'sigma' have been set.
-#> 2021-10-19 00:44:27 - r-readGenoData(): Read geno file DONE 
-#> 2021-10-19 00:44:27 - r-readGenoData(): DONE, return output.
-#> 2021-10-19 00:44:27 - r-draw_ldPlot(): Get data DONE
-#> 2021-10-19 00:44:27 - r-draw_ldPlot(): Draw LD Plot ...
-#> 2021-10-19 00:44:27 - r-LDplot(): Check "from" and "to" format ...
-#> 2021-10-19 00:44:27 - r-LDplot(): Check "from" and "to" format DONE
-#> 2021-10-19 00:44:27 - r-LDplot(): Check "from" < "to"...
-#> 2021-10-19 00:44:27 - r-LDplot(): Check "from" < "to" DONE
-#> 2021-10-19 00:44:27 - r-LDplot(): Check number of SNP < 50...
-#> 2021-10-19 00:44:27 - r-LDplot(): Check number of SNP < 50 DONE
-#> 2021-10-19 00:44:27 - r-LDplot(): Check file ...
-#> 2021-10-19 00:44:27 - r-LDplot(): Check file DONE
-#> 2021-10-19 00:44:27 - r-LDplot(): Compute LD ...
-#> 2021-10-19 00:44:27 - r-LDplot(): Compute LD DONE
-#> 2021-10-19 00:44:27 - r-LDplot(): Create LD plot ...
-#> 2021-10-19 00:44:27 - r-LDplot(): Create create file: /out/ldplot.png
-#> 2021-10-19 00:44:27 - r-LDplot(): Create LD plot DONE
-#> 2021-10-19 00:44:27 - r-LDplot(): DONE, return output
-#> 2021-10-19 00:44:27 - r-draw_ldPlot(): Draw LD Plot DONE
+#> 2021-10-26 05:28:59 - r-readGenoData(): Read geno file DONE 
+#> 2021-10-26 05:28:59 - r-readGenoData(): DONE, return output.
+#> 2021-10-26 05:28:59 - r-draw_ldPlot(): Get data DONE
+#> 2021-10-26 05:28:59 - r-draw_ldPlot(): Draw LD Plot ...
+#> 2021-10-26 05:28:59 - r-LDplot(): Check "from" and "to" format ...
+#> 2021-10-26 05:28:59 - r-LDplot(): Check "from" and "to" format DONE
+#> 2021-10-26 05:28:59 - r-LDplot(): Check "from" < "to"...
+#> 2021-10-26 05:28:59 - r-LDplot(): Check "from" < "to" DONE
+#> 2021-10-26 05:28:59 - r-LDplot(): Check number of SNP < 50...
+#> 2021-10-26 05:28:59 - r-LDplot(): Check number of SNP < 50 DONE
+#> 2021-10-26 05:28:59 - r-LDplot(): Check file ...
+#> 2021-10-26 05:28:59 - r-LDplot(): Check file DONE
+#> 2021-10-26 05:28:59 - r-LDplot(): Compute LD ...
+#> 2021-10-26 05:28:59 - r-LDplot(): Compute LD DONE
+#> 2021-10-26 05:28:59 - r-LDplot(): Create LD plot ...
+#> 2021-10-26 05:28:59 - r-LDplot(): Create create file: /out/ldplot.png
+#> 2021-10-26 05:29:00 - r-LDplot(): Create LD plot DONE
+#> 2021-10-26 05:29:00 - r-LDplot(): DONE, return output
+#> 2021-10-26 05:29:00 - r-draw_ldPlot(): Draw LD Plot DONE
 ```
 
 ``` r
@@ -707,7 +746,7 @@ sapply(FUN = source,
        X = list.files("/path/to/GWAS-Engine/src", pattern = ".R$", full.names = T))
 ```
 
-### Function documantation
+### Function documentation
 
 All the functions of this engine use `roxygen2` for documentation. You
 can generate a **markdown documentation located in
@@ -739,45 +778,45 @@ gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
                          thresh_maf = 0.05,
                          thresh_callrate = 0.95,
                          outFile = tempfile(fileext = ".json"))
-#> 2021-10-19 09:44:29 - r-run_gwas(): Get data ...
-#> 2021-10-19 09:44:29 - r-readData(): get geno data ...
-#> 2021-10-19 09:44:29 - r-readGenoData(): Check file extention ... 
-#> 2021-10-19 09:44:29 - r-readGenoData(): Read geno file ... 
+#> 2021-10-26 14:29:02 - r-run_gwas(): Get data ...
+#> 2021-10-26 14:29:02 - r-readData(): get geno data ...
+#> 2021-10-26 14:29:02 - r-readGenoData(): Check file extention ... 
+#> 2021-10-26 14:29:02 - r-readGenoData(): Read geno file ... 
 #> ped stats and snps stats have been set. 
 #> 'p' has been set. 
 #> 'mu' and 'sigma' have been set.
-#> 2021-10-19 09:44:30 - r-readGenoData(): Read geno file DONE 
-#> 2021-10-19 09:44:30 - r-readGenoData(): DONE, return output.
-#> 2021-10-19 09:44:30 - r-readData(): get geno data DONE
-#> 2021-10-19 09:44:30 - r-readData(): get pheno data ...
-#> 2021-10-19 09:44:30 - r-readPhenoData(): Read phenotypic file ... 
-#> 2021-10-19 09:44:30 - r-readPhenoData(): Read phenotypic file DONE 
-#> 2021-10-19 09:44:30 - r-readPhenoData(): DONE, return output.
-#> 2021-10-19 09:44:30 - r-readData(): get pheno data DONE
-#> 2021-10-19 09:44:30 - r-readData(): prepare data ...
-#> 2021-10-19 09:44:30 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
-#> 2021-10-19 09:44:30 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
-#> 2021-10-19 09:44:30 - r-prepareData(): reorder matrix ...
-#> 2021-10-19 09:44:30 - r-prepareData(): reorder matrix DONE
-#> 2021-10-19 09:44:30 - r-prepareData(): remove monomorphic markers ...
-#> 2021-10-19 09:44:30 - r-prepareData(): remove monomorphic markers DONE
-#> 2021-10-19 09:44:30 - r-prepareData(): DONE, return output.
-#> 2021-10-19 09:44:30 - r-readData(): prepare data DONE
-#> 2021-10-19 09:44:30 - r-readData(): DONE, return output.
-#> 2021-10-19 09:44:30 - r-run_gwas(): Get data DONE
-#> 2021-10-19 09:44:30 - r-run_gwas(): GWAS analysis ...
-#> 2021-10-19 09:44:30 - r-gwas(): Check inputs ...
-#> 2021-10-19 09:44:30 - r-gwas(): Check inputs DONE
-#> 2021-10-19 09:44:30 - r-gwas(): aggregate data in bed matrix ...
-#> 2021-10-19 09:44:30 - r-gwas(): aggregate data in bed matrix DONE
-#> 2021-10-19 09:44:30 - r-gwas(): remove individuals with missing phenotypic values ...
-#> 2021-10-19 09:44:30 - r-gwas(): remove samples with missing phenotypic values DONE
-#> 2021-10-19 09:44:30 - r-gwas(): filter SNPs ...
-#> 2021-10-19 09:44:30 - r-gwas(): filter SNPs DONE
-#> 2021-10-19 09:44:30 - r-gwas(): calculate genetic relatinoal matrix ...
-#> 2021-10-19 09:44:31 - r-gwas(): calculate genetic relatinoal matrix DONE
-#> 2021-10-19 09:44:31 - r-gwas(): fit model ...
-#> [Iteration 1] theta = 78.0648  78.282
+#> 2021-10-26 14:29:03 - r-readGenoData(): Read geno file DONE 
+#> 2021-10-26 14:29:03 - r-readGenoData(): DONE, return output.
+#> 2021-10-26 14:29:03 - r-readData(): get geno data DONE
+#> 2021-10-26 14:29:03 - r-readData(): get pheno data ...
+#> 2021-10-26 14:29:03 - r-readPhenoData(): Read phenotypic file ... 
+#> 2021-10-26 14:29:03 - r-readPhenoData(): Read phenotypic file DONE 
+#> 2021-10-26 14:29:03 - r-readPhenoData(): DONE, return output.
+#> 2021-10-26 14:29:03 - r-readData(): get pheno data DONE
+#> 2021-10-26 14:29:03 - r-readData(): prepare data ...
+#> 2021-10-26 14:29:03 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
+#> 2021-10-26 14:29:03 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
+#> 2021-10-26 14:29:03 - r-prepareData(): reorder matrix ...
+#> 2021-10-26 14:29:03 - r-prepareData(): reorder matrix DONE
+#> 2021-10-26 14:29:03 - r-prepareData(): remove monomorphic markers ...
+#> 2021-10-26 14:29:03 - r-prepareData(): remove monomorphic markers DONE
+#> 2021-10-26 14:29:03 - r-prepareData(): DONE, return output.
+#> 2021-10-26 14:29:03 - r-readData(): prepare data DONE
+#> 2021-10-26 14:29:03 - r-readData(): DONE, return output.
+#> 2021-10-26 14:29:03 - r-run_gwas(): Get data DONE
+#> 2021-10-26 14:29:03 - r-run_gwas(): GWAS analysis ...
+#> 2021-10-26 14:29:03 - r-gwas(): Check inputs ...
+#> 2021-10-26 14:29:03 - r-gwas(): Check inputs DONE
+#> 2021-10-26 14:29:03 - r-gwas(): aggregate data in bed matrix ...
+#> 2021-10-26 14:29:03 - r-gwas(): aggregate data in bed matrix DONE
+#> 2021-10-26 14:29:03 - r-gwas(): remove individuals with missing phenotypic values ...
+#> 2021-10-26 14:29:03 - r-gwas(): remove samples with missing phenotypic values DONE
+#> 2021-10-26 14:29:03 - r-gwas(): filter SNPs ...
+#> 2021-10-26 14:29:03 - r-gwas(): filter SNPs DONE
+#> 2021-10-26 14:29:03 - r-gwas(): calculate genetic relatinoal matrix ...
+#> 2021-10-26 14:29:03 - r-gwas(): calculate genetic relatinoal matrix DONE
+#> 2021-10-26 14:29:03 - r-gwas(): fit model ...
+#> [Iteration 1] theta = 78.0648 78.2819
 #> [Iteration 1] log L = -1002.17
 #> [Iteration 1] AI-REML update
 #> [Iteration 1] ||gradient|| = 0.344543
@@ -790,32 +829,32 @@ gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
 #> [Iteration 3] AI-REML update
 #> [Iteration 3] ||gradient|| = 0.113945
 #> [Iteration 4] theta = 29.2502 195.436
-#> [Iteration 4] log L = -986.514
+#> [Iteration 4] log L = -986.513
 #> [Iteration 4] AI-REML update
-#> [Iteration 4] ||gradient|| = 0.00580941
+#> [Iteration 4] ||gradient|| = 0.00580942
 #> [Iteration 5] theta = 29.4021 195.213
 #> [Iteration 5] log L = -986.513
 #> [Iteration 5] AI-REML update
-#> [Iteration 5] ||gradient|| = 0.000323293
+#> [Iteration 5] ||gradient|| = 0.000323294
 #> [Iteration 6] theta = 29.4178 195.143
 #> [Iteration 6] log L = -986.513
 #> [Iteration 6] AI-REML update
-#> [Iteration 6] ||gradient|| = 4.32631e-05
+#> [Iteration 6] ||gradient|| = 4.32635e-05
 #> [Iteration 7] theta = 29.4199 195.133
 #> [Iteration 7] log L = -986.513
 #> [Iteration 7] AI-REML update
-#> [Iteration 7] ||gradient|| = 5.95131e-06
-#> 2021-10-19 09:44:31 - r-gwas(): fit model DONE
-#> 2021-10-19 09:44:31 - r-gwas(): DONE, return output.
-#> 2021-10-19 09:44:31 - r-run_gwas(): GWAS analysis DONE
-#> 2021-10-19 09:44:31 - r-run_gwas(): Save metadata ...
-#> 2021-10-19 09:44:31 - r-run_gwas(): Save metadata DONE
-#> 2021-10-19 09:44:31 - r-run_gwas(): Save results ...
-#> 2021-10-19 09:44:31 - r-saveGWAS(): Check file ...
-#> 2021-10-19 09:44:31 - r-saveGWAS(): Check file DONE
-#> 2021-10-19 09:44:31 - r-run_gwas(): Save results DONE
+#> [Iteration 7] ||gradient|| = 5.95139e-06
+#> 2021-10-26 14:29:04 - r-gwas(): fit model DONE
+#> 2021-10-26 14:29:04 - r-gwas(): DONE, return output.
+#> 2021-10-26 14:29:04 - r-run_gwas(): GWAS analysis DONE
+#> 2021-10-26 14:29:04 - r-run_gwas(): Save metadata ...
+#> 2021-10-26 14:29:04 - r-run_gwas(): Save metadata DONE
+#> 2021-10-26 14:29:04 - r-run_gwas(): Save results ...
+#> 2021-10-26 14:29:04 - r-saveGWAS(): Check file ...
+#> 2021-10-26 14:29:04 - r-saveGWAS(): Check file DONE
+#> 2021-10-26 14:29:04 - r-run_gwas(): Save results DONE
 gwas_results$file
-#> [1] "/tmp/RtmpwvyFbo/file4fc86fd9002b.json"
+#> [1] "/tmp/RtmpkVrNfy/file31578681848ad.json"
 substr(gwas_results$gwasRes, start=1, stop=500)
 #> [
 #>   {
@@ -860,40 +899,47 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         thresh_p = 0.05,
                         chr = NA,
                         interactive = TRUE,
+                        # filter_pAdj = 1,
+                        # filter_nPoints = Inf,
+                        filter_quant = 0.1,
                         outFile = tempfile(fileext = ".html"))
-#> 2021-10-19 09:44:32 - r-draw_manhattanPlot(): Check outFile ...
-#> 2021-10-19 09:44:32 - r-draw_manhattanPlot(): Check outFile DONE
-#> 2021-10-19 09:44:32 - r-draw_manhattanPlot(): Get data ...
-#> 2021-10-19 09:44:32 - r-readGWAS(): Read result file ... 
-#> 2021-10-19 09:44:32 - r-readGWAS(): Read result file DONE 
-#> 2021-10-19 09:44:32 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2021-10-19 09:44:32 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2021-10-19 09:44:32 - r-readGWAS(): DONE, return output.
-#> 2021-10-19 09:44:32 - r-draw_manhattanPlot(): Get data DONE
-#> 2021-10-19 09:44:32 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
-#> 2021-10-19 09:44:32 - r-manPlot(): Check chromosome name ...
-#> 2021-10-19 09:44:32 - r-manPlot(): Check chromosome name DONE
-#> 2021-10-19 09:44:32 - r-manPlot(): Adjust p-values ...
-#> 2021-10-19 09:44:32 - r-adjustPval(): Check adj_method ...
-#> 2021-10-19 09:44:32 - r-adjustPval(): Check adj_method DONE
-#> 2021-10-19 09:44:32 - r-adjustPval(): Check p values ...
-#> 2021-10-19 09:44:32 - r-adjustPval(): Check p values DONE
-#> 2021-10-19 09:44:32 - r-adjustPval(): Adjust p-values ...
-#> 2021-10-19 09:44:32 - r-adjustPval(): Adjust p-values DONE
-#> 2021-10-19 09:44:32 - r-adjustPval(): Adjust threshold ...
-#> 2021-10-19 09:44:32 - r-adjustPval(): Adjust threshold DONE
-#> 2021-10-19 09:44:32 - r-adjustPval(): DONE, return output
-#> 2021-10-19 09:44:32 - r-manPlot(): Adjust p-values DONE
-#> 2021-10-19 09:44:32 - r-manPlot(): Check duplicated SNP ID ...
-#> 2021-10-19 09:44:32 - r-manPlot(): Check duplicated SNP ID DONE
-#> 2021-10-19 09:44:32 - r-manPlot(): Extract significant SNP ...
-#> 2021-10-19 09:44:32 - r-manPlot(): Extract significant SNP DONE
-#> 2021-10-19 09:44:32 - r-manPlot(): Draw plot ...
-#> 2021-10-19 09:44:33 - r-manPlot(): Draw plot DONE
-#> 2021-10-19 09:44:33 - r-manPlot(): DONE, return output
-#> 2021-10-19 09:44:33 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
-#> 2021-10-19 09:44:33 - r-draw_manhattanPlot(): Save results ...
-#> 2021-10-19 09:44:38 - r-draw_manhattanPlot(): Save results DONE
+#> 2021-10-26 14:29:04 - r-draw_manhattanPlot(): Check outFile ...
+#> 2021-10-26 14:29:04 - r-draw_manhattanPlot(): Check outFile DONE
+#> 2021-10-26 14:29:04 - r-draw_manhattanPlot(): Get data ...
+#> 2021-10-26 14:29:04 - r-readGWAS(): Read result file ... 
+#> 2021-10-26 14:29:04 - r-readGWAS(): Read result file DONE 
+#> 2021-10-26 14:29:04 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-10-26 14:29:05 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-10-26 14:29:05 - r-readGWAS(): DONE, return output.
+#> 2021-10-26 14:29:05 - r-draw_manhattanPlot(): Get data DONE
+#> 2021-10-26 14:29:05 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
+#> 2021-10-26 14:29:05 - r-manPlot(): Check chromosome name ...
+#> 2021-10-26 14:29:05 - r-manPlot(): Check chromosome name DONE
+#> 2021-10-26 14:29:05 - r-manPlot(): Adjust p-values ...
+#> 2021-10-26 14:29:05 - r-adjustPval(): Check adj_method ...
+#> 2021-10-26 14:29:05 - r-adjustPval(): Check adj_method DONE
+#> 2021-10-26 14:29:05 - r-adjustPval(): Check p values ...
+#> 2021-10-26 14:29:05 - r-adjustPval(): Check p values DONE
+#> 2021-10-26 14:29:05 - r-adjustPval(): Adjust p-values ...
+#> 2021-10-26 14:29:05 - r-adjustPval(): Adjust p-values DONE
+#> 2021-10-26 14:29:05 - r-adjustPval(): Adjust threshold ...
+#> 2021-10-26 14:29:05 - r-adjustPval(): Adjust threshold DONE
+#> 2021-10-26 14:29:05 - r-adjustPval(): DONE, return output
+#> 2021-10-26 14:29:05 - r-manPlot(): Adjust p-values DONE
+#> 2021-10-26 14:29:05 - r-manPlot(): Check duplicated SNP ID ...
+#> 2021-10-26 14:29:05 - r-manPlot(): Check duplicated SNP ID DONE
+#> 2021-10-26 14:29:05 - r-manPlot(): Extract significant SNP ...
+#> 2021-10-26 14:29:05 - r-manPlot(): Extract significant SNP DONE
+#> 2021-10-26 14:29:05 - r-manPlot(): Filter points ...
+#> 2021-10-26 14:29:05 - r-manPlot(): skip filter_pAdj
+#> 2021-10-26 14:29:05 - r-manPlot(): skip filter_nPoints
+#> 2021-10-26 14:29:05 - r-manPlot(): Filter points DONE
+#> 2021-10-26 14:29:05 - r-manPlot(): Draw plot ...
+#> 2021-10-26 14:29:05 - r-manPlot(): Draw plot DONE
+#> 2021-10-26 14:29:05 - r-manPlot(): DONE, return output
+#> 2021-10-26 14:29:05 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
+#> 2021-10-26 14:29:05 - r-draw_manhattanPlot(): Save results ...
+#> 2021-10-26 14:29:06 - r-draw_manhattanPlot(): Save results DONE
 ```
 
 ``` r
@@ -905,39 +951,46 @@ p <- draw_manhattanPlot(gwasFile = gwas_results$file,
                         chr = NA,
                         interactive = FALSE,
                         outFile = manPlotFile)
-#> 2021-10-19 09:44:38 - r-draw_manhattanPlot(): Check outFile ...
-#> 2021-10-19 09:44:38 - r-draw_manhattanPlot(): Check outFile DONE
-#> 2021-10-19 09:44:38 - r-draw_manhattanPlot(): Get data ...
-#> 2021-10-19 09:44:38 - r-readGWAS(): Read result file ... 
-#> 2021-10-19 09:44:39 - r-readGWAS(): Read result file DONE 
-#> 2021-10-19 09:44:39 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2021-10-19 09:44:39 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2021-10-19 09:44:39 - r-readGWAS(): DONE, return output.
-#> 2021-10-19 09:44:39 - r-draw_manhattanPlot(): Get data DONE
-#> 2021-10-19 09:44:39 - r-draw_manhattanPlot(): Open connexion to draw the png plot ...
-#> 2021-10-19 09:44:39 - r-draw_manhattanPlot(): Open connexion to draw the png plot DONE
-#> 2021-10-19 09:44:39 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
-#> 2021-10-19 09:44:39 - r-manPlot(): Check chromosome name ...
-#> 2021-10-19 09:44:39 - r-manPlot(): Check chromosome name DONE
-#> 2021-10-19 09:44:39 - r-manPlot(): Adjust p-values ...
-#> 2021-10-19 09:44:39 - r-adjustPval(): Check adj_method ...
-#> 2021-10-19 09:44:39 - r-adjustPval(): Check adj_method DONE
-#> 2021-10-19 09:44:39 - r-adjustPval(): Check p values ...
-#> 2021-10-19 09:44:39 - r-adjustPval(): Check p values DONE
-#> 2021-10-19 09:44:39 - r-adjustPval(): Adjust p-values ...
-#> 2021-10-19 09:44:39 - r-adjustPval(): Adjust p-values DONE
-#> 2021-10-19 09:44:39 - r-adjustPval(): Adjust threshold ...
-#> 2021-10-19 09:44:39 - r-adjustPval(): Adjust threshold DONE
-#> 2021-10-19 09:44:39 - r-adjustPval(): DONE, return output
-#> 2021-10-19 09:44:39 - r-manPlot(): Adjust p-values DONE
-#> 2021-10-19 09:44:39 - r-manPlot(): Check duplicated SNP ID ...
-#> 2021-10-19 09:44:39 - r-manPlot(): Check duplicated SNP ID DONE
-#> 2021-10-19 09:44:39 - r-manPlot(): Extract significant SNP ...
-#> 2021-10-19 09:44:39 - r-manPlot(): Extract significant SNP DONE
-#> 2021-10-19 09:44:39 - r-manPlot(): Draw plot ...
-#> 2021-10-19 09:44:40 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
-#> 2021-10-19 09:44:40 - r-draw_manhattanPlot(): Save results ...
-#> 2021-10-19 09:44:40 - r-draw_manhattanPlot(): Save results DONE
+#> 2021-10-26 14:29:06 - r-draw_manhattanPlot(): Check outFile ...
+#> 2021-10-26 14:29:06 - r-draw_manhattanPlot(): Check outFile DONE
+#> 2021-10-26 14:29:06 - r-draw_manhattanPlot(): Get data ...
+#> 2021-10-26 14:29:06 - r-readGWAS(): Read result file ... 
+#> 2021-10-26 14:29:06 - r-readGWAS(): Read result file DONE 
+#> 2021-10-26 14:29:06 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-10-26 14:29:07 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-10-26 14:29:07 - r-readGWAS(): DONE, return output.
+#> 2021-10-26 14:29:07 - r-draw_manhattanPlot(): Get data DONE
+#> 2021-10-26 14:29:07 - r-draw_manhattanPlot(): Open connexion to draw the png plot ...
+#> 2021-10-26 14:29:07 - r-draw_manhattanPlot(): Open connexion to draw the png plot DONE
+#> 2021-10-26 14:29:07 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
+#> 2021-10-26 14:29:07 - r-manPlot(): Check chromosome name ...
+#> 2021-10-26 14:29:07 - r-manPlot(): Check chromosome name DONE
+#> 2021-10-26 14:29:07 - r-manPlot(): Adjust p-values ...
+#> 2021-10-26 14:29:07 - r-adjustPval(): Check adj_method ...
+#> 2021-10-26 14:29:07 - r-adjustPval(): Check adj_method DONE
+#> 2021-10-26 14:29:07 - r-adjustPval(): Check p values ...
+#> 2021-10-26 14:29:07 - r-adjustPval(): Check p values DONE
+#> 2021-10-26 14:29:07 - r-adjustPval(): Adjust p-values ...
+#> 2021-10-26 14:29:07 - r-adjustPval(): Adjust p-values DONE
+#> 2021-10-26 14:29:07 - r-adjustPval(): Adjust threshold ...
+#> 2021-10-26 14:29:07 - r-adjustPval(): Adjust threshold DONE
+#> 2021-10-26 14:29:07 - r-adjustPval(): DONE, return output
+#> 2021-10-26 14:29:07 - r-manPlot(): Adjust p-values DONE
+#> 2021-10-26 14:29:07 - r-manPlot(): Check duplicated SNP ID ...
+#> 2021-10-26 14:29:07 - r-manPlot(): Check duplicated SNP ID DONE
+#> 2021-10-26 14:29:07 - r-manPlot(): Extract significant SNP ...
+#> 2021-10-26 14:29:07 - r-manPlot(): Extract significant SNP DONE
+#> 2021-10-26 14:29:07 - r-manPlot(): Filter points ...
+#> 2021-10-26 14:29:07 - r-manPlot(): skip filter_pAdj
+#> 2021-10-26 14:29:07 - r-manPlot(): skip filter_quant
+#> 2021-10-26 14:29:07 - r-manPlot(): skip filter_nPoints
+#> 2021-10-26 14:29:07 - r-manPlot(): Filter points DONE
+#> 2021-10-26 14:29:07 - r-manPlot(): Draw plot ...
+#> 2021-10-26 14:29:08 - r-manPlot(): Draw plot DONE
+#> 2021-10-26 14:29:08 - r-manPlot(): DONE, return output
+#> 2021-10-26 14:29:08 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
+#> 2021-10-26 14:29:08 - r-draw_manhattanPlot(): Save results ...
+#> 2021-10-26 14:29:08 - r-draw_manhattanPlot(): Save results DONE
 ```
 
 ![](README_files/manPlotStatic_2.png)<!-- -->
@@ -947,26 +1000,26 @@ gwas_adj <- run_resAdjustment(gwasFile = gwas_results$file,
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
                               outFile = tempfile(fileext = ".json"))
-#> 2021-10-19 09:44:40 - r-run_resAdjustment(): Get data ...
-#> 2021-10-19 09:44:40 - r-readGWAS(): Read result file ... 
-#> 2021-10-19 09:44:40 - r-readGWAS(): Read result file DONE 
-#> 2021-10-19 09:44:40 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2021-10-19 09:44:41 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2021-10-19 09:44:41 - r-readGWAS(): DONE, return output.
-#> 2021-10-19 09:44:41 - r-run_resAdjustment(): Get data DONE
-#> 2021-10-19 09:44:41 - r-run_resAdjustment(): Adjust p-values ...
-#> 2021-10-19 09:44:41 - r-adjustPval(): Check adj_method ...
-#> 2021-10-19 09:44:41 - r-adjustPval(): Check adj_method DONE
-#> 2021-10-19 09:44:41 - r-adjustPval(): Check p values ...
-#> 2021-10-19 09:44:41 - r-adjustPval(): Check p values DONE
-#> 2021-10-19 09:44:41 - r-adjustPval(): Adjust p-values ...
-#> 2021-10-19 09:44:41 - r-adjustPval(): Adjust p-values DONE
-#> 2021-10-19 09:44:41 - r-adjustPval(): DONE, return output
-#> 2021-10-19 09:44:41 - r-run_resAdjustment(): Adjust p-values DONE
-#> 2021-10-19 09:44:41 - r-run_resAdjustment(): Save results ...
-#> 2021-10-19 09:44:41 - r-saveGWAS(): Check file ...
-#> 2021-10-19 09:44:41 - r-saveGWAS(): Check file DONE
-#> 2021-10-19 09:44:41 - r-run_resAdjustment(): Save results DONE
+#> 2021-10-26 14:29:08 - r-run_resAdjustment(): Get data ...
+#> 2021-10-26 14:29:08 - r-readGWAS(): Read result file ... 
+#> 2021-10-26 14:29:08 - r-readGWAS(): Read result file DONE 
+#> 2021-10-26 14:29:08 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2021-10-26 14:29:08 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2021-10-26 14:29:08 - r-readGWAS(): DONE, return output.
+#> 2021-10-26 14:29:08 - r-run_resAdjustment(): Get data DONE
+#> 2021-10-26 14:29:08 - r-run_resAdjustment(): Adjust p-values ...
+#> 2021-10-26 14:29:08 - r-adjustPval(): Check adj_method ...
+#> 2021-10-26 14:29:08 - r-adjustPval(): Check adj_method DONE
+#> 2021-10-26 14:29:08 - r-adjustPval(): Check p values ...
+#> 2021-10-26 14:29:08 - r-adjustPval(): Check p values DONE
+#> 2021-10-26 14:29:08 - r-adjustPval(): Adjust p-values ...
+#> 2021-10-26 14:29:08 - r-adjustPval(): Adjust p-values DONE
+#> 2021-10-26 14:29:08 - r-adjustPval(): DONE, return output
+#> 2021-10-26 14:29:08 - r-run_resAdjustment(): Adjust p-values DONE
+#> 2021-10-26 14:29:08 - r-run_resAdjustment(): Save results ...
+#> 2021-10-26 14:29:08 - r-saveGWAS(): Check file ...
+#> 2021-10-26 14:29:08 - r-saveGWAS(): Check file DONE
+#> 2021-10-26 14:29:08 - r-run_resAdjustment(): Save results DONE
 substr(gwas_adj$gwasAdjusted, start=1, stop=500)
 #> [
 #>   {
@@ -1009,31 +1062,31 @@ imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
                        from = 42,
                        to = 62,
                        outFile = tempfile(fileext = ".png")) 
-#> 2021-10-19 09:44:41 - r-draw_ldPlot(): Get data ...
-#> 2021-10-19 09:44:41 - r-readGenoData(): Check file extention ... 
-#> 2021-10-19 09:44:41 - r-readGenoData(): Read geno file ... 
+#> 2021-10-26 14:29:09 - r-draw_ldPlot(): Get data ...
+#> 2021-10-26 14:29:09 - r-readGenoData(): Check file extention ... 
+#> 2021-10-26 14:29:09 - r-readGenoData(): Read geno file ... 
 #> ped stats and snps stats have been set. 
 #> 'p' has been set. 
 #> 'mu' and 'sigma' have been set.
-#> 2021-10-19 09:44:42 - r-readGenoData(): Read geno file DONE 
-#> 2021-10-19 09:44:42 - r-readGenoData(): DONE, return output.
-#> 2021-10-19 09:44:42 - r-draw_ldPlot(): Get data DONE
-#> 2021-10-19 09:44:42 - r-draw_ldPlot(): Draw LD Plot ...
-#> 2021-10-19 09:44:42 - r-LDplot(): Check "from" and "to" format ...
-#> 2021-10-19 09:44:42 - r-LDplot(): Check "from" and "to" format DONE
-#> 2021-10-19 09:44:42 - r-LDplot(): Check "from" < "to"...
-#> 2021-10-19 09:44:42 - r-LDplot(): Check "from" < "to" DONE
-#> 2021-10-19 09:44:42 - r-LDplot(): Check number of SNP < 50...
-#> 2021-10-19 09:44:42 - r-LDplot(): Check number of SNP < 50 DONE
-#> 2021-10-19 09:44:42 - r-LDplot(): Check file ...
-#> 2021-10-19 09:44:42 - r-LDplot(): Check file DONE
-#> 2021-10-19 09:44:42 - r-LDplot(): Compute LD ...
-#> 2021-10-19 09:44:42 - r-LDplot(): Compute LD DONE
-#> 2021-10-19 09:44:42 - r-LDplot(): Create LD plot ...
-#> 2021-10-19 09:44:42 - r-LDplot(): Create create file: /tmp/RtmpwvyFbo/file4fc81ee6d340.png
-#> 2021-10-19 09:44:42 - r-LDplot(): Create LD plot DONE
-#> 2021-10-19 09:44:42 - r-LDplot(): DONE, return output
-#> 2021-10-19 09:44:42 - r-draw_ldPlot(): Draw LD Plot DONE
+#> 2021-10-26 14:29:09 - r-readGenoData(): Read geno file DONE 
+#> 2021-10-26 14:29:09 - r-readGenoData(): DONE, return output.
+#> 2021-10-26 14:29:09 - r-draw_ldPlot(): Get data DONE
+#> 2021-10-26 14:29:09 - r-draw_ldPlot(): Draw LD Plot ...
+#> 2021-10-26 14:29:09 - r-LDplot(): Check "from" and "to" format ...
+#> 2021-10-26 14:29:09 - r-LDplot(): Check "from" and "to" format DONE
+#> 2021-10-26 14:29:09 - r-LDplot(): Check "from" < "to"...
+#> 2021-10-26 14:29:09 - r-LDplot(): Check "from" < "to" DONE
+#> 2021-10-26 14:29:09 - r-LDplot(): Check number of SNP < 50...
+#> 2021-10-26 14:29:09 - r-LDplot(): Check number of SNP < 50 DONE
+#> 2021-10-26 14:29:09 - r-LDplot(): Check file ...
+#> 2021-10-26 14:29:09 - r-LDplot(): Check file DONE
+#> 2021-10-26 14:29:09 - r-LDplot(): Compute LD ...
+#> 2021-10-26 14:29:09 - r-LDplot(): Compute LD DONE
+#> 2021-10-26 14:29:09 - r-LDplot(): Create LD plot ...
+#> 2021-10-26 14:29:09 - r-LDplot(): Create create file: /tmp/RtmpkVrNfy/file315784cfd5d9e.png
+#> 2021-10-26 14:29:10 - r-LDplot(): Create LD plot DONE
+#> 2021-10-26 14:29:10 - r-LDplot(): DONE, return output
+#> 2021-10-26 14:29:10 - r-draw_ldPlot(): Draw LD Plot DONE
 ```
 
 > See: [src/mainFunctions.R](src/mainFunctions.R)
@@ -1099,6 +1152,10 @@ p <- manPlot(gwas = gwasRes,
              adj_method = "bonferroni",
              thresh_p = 0.05,
              chr = NA,
+             interactive = TRUE,
+             filter_pAdj = 1,
+             filter_nPoints = Inf,
+             filter_quant = 0,
              title = "Readme Example")
 ```
 

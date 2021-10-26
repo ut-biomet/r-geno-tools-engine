@@ -6,7 +6,7 @@
 
 capture.output({
 
-  # run GWAS ---
+  # run GWAS ----
   test_that("Run GWAS", {
     expect_error({
       gwas_results <- run_gwas(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
@@ -91,7 +91,7 @@ capture.output({
   }
 
 
-    # draw_manhattanPlot ---
+    # draw_manhattanPlot ----
   test_that("Draw Manhattan Plot", {
     expect_error({
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
@@ -106,6 +106,9 @@ capture.output({
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
+                              filter_pAdj = 1,
+                              filter_nPoints = Inf,
+                              filter_quant = 1,
                               chr = NA)
     }, NA)
     expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
@@ -116,6 +119,9 @@ capture.output({
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
                               chr = NA,
+                              filter_pAdj = 1,
+                              filter_nPoints = Inf,
+                              filter_quant = 1,
                               outFile = tmpF)
     }, NA)
     expect_true(file.exists(tmpF))
@@ -128,6 +134,9 @@ capture.output({
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
                               chr = NA,
+                              filter_pAdj = 1,
+                              filter_nPoints = Inf,
+                              filter_quant = 1,
                               interactive = FALSE,
                               outFile = tmpF)
     }, NA)
@@ -143,6 +152,9 @@ capture.output({
                      adj_method = "bonferroni",
                      thresh_p = 0.05,
                      chr = NA,
+                     filter_pAdj = 1,
+                     filter_nPoints = Inf,
+                     filter_quant = 1,
                      interactive = TRUE,
                      outFile = NULL)
 
@@ -151,7 +163,10 @@ capture.output({
                        adj_method = c("doNotExist", NA),
                        thresh_p = list(-1, 1.02),
                        chr = c("doNotExist", 50),
-                       interactive = c('t'),
+                       filter_pAdj = c(-1, 2),
+                       filter_nPoints = -4,
+                       filter_quant = c(-1, 1.1),
+                       interactive = c('f'),
                        outFile = list(c("f1", "f2")))
   for (p in names(goodParams)) {
     wrongParams <- wrongParamsL[[p]]
@@ -168,6 +183,9 @@ capture.output({
                              adj_method = params[["adj_method"]],
                              thresh_p = params[["thresh_p"]],
                              chr = params[["chr"]],
+                             filter_pAdj = params[['filter_pAdj']],
+                             filter_quant = params[['filter_quant']],
+                             filter_nPoints = params[['filter_nPoints']],
                              interactive = params[["interactive"]],
                              outFile = params[["outFile"]])
         })
