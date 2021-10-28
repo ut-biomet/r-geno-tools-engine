@@ -155,7 +155,7 @@ draw_manhattanPlot(
   interactive = TRUE,
   filter_pAdj = 1,
   filter_nPoints = Inf,
-  filter_quant = 0,
+  filter_quant = 1,
   outFile = tempfile()
 )
 ```
@@ -288,7 +288,7 @@ manPlot(
   title = "Manhattan Plot",
   filter_pAdj = 1,
   filter_nPoints = Inf,
-  filter_quant = 0,
+  filter_quant = 1,
   interactive = TRUE
 )
 ```

@@ -41,7 +41,7 @@ p <- add_argument(p, "--chr", help="[`manplot`] name of the chromosome to show (
 p <- add_argument(p, "--interactive", help="[`manplot`] should the plot be interactive: TRUE or FALSE (the default is TRUE)", type = "logical", default = TRUE)
 p <- add_argument(p, "--filter_pAdj", help="[`manplot`] threshold to remove points with pAdj > filter_pAdj from the plot (default no filtering)", type = "numeric", default = 1)
 p <- add_argument(p, "--filter_nPoints", help="[`manplot`] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)", type = "numeric", default = Inf)
-p <- add_argument(p, "--filter_quant", help="[`manplot`] threshold to keep only the filter_quant*100 % of the points with the lowest p-values for the plot (default no filtering)", type = "numeric", default = 0)
+p <- add_argument(p, "--filter_quant", help="[`manplot`] threshold to keep only the filter_quant*100 % of the points with the lowest p-values for the plot (default no filtering)", type = "numeric", default = 1)
 
 
 # ldplot specific parameters:

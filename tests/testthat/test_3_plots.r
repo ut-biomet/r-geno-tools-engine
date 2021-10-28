@@ -120,15 +120,33 @@ capture_output({
   for (inter in c(TRUE, FALSE)) {
     testName <- paste("manPlot warnings, interactive:", inter)
     test_that(testName, {
-                expect_warning({
-                  mP <- manPlot(gwas = resGwas,
+      expect_warning({
+        mP <- manPlot(gwas = resGwas,
                       adj_method = "bonferroni",
                       thresh_p = 0.05,
                       chr = NA,
                       interactive = inter,
                       filter_pAdj = 10^-9,
                       title = "test manPlot")
-      })
+      }, 'removed all the points of the graph')
+      expect_warning({
+        mP <- manPlot(gwas = resGwas,
+                      adj_method = "bonferroni",
+                      thresh_p = 0.05,
+                      chr = NA,
+                      interactive = inter,
+                      filter_quant = 0,
+                      title = "test manPlot")
+      }, 'removed all the points of the graph')
+      expect_warning({
+        mP <- manPlot(gwas = resGwas,
+                      adj_method = "bonferroni",
+                      thresh_p = 0.05,
+                      chr = NA,
+                      interactive = inter,
+                      filter_nPoints = 0,
+                      title = "test manPlot")
+      }, 'removed all the points of the graph')
     })
   }
 
@@ -147,7 +165,7 @@ capture_output({
                      interactive = TRUE,
                      filter_pAdj = 1,
                      filter_nPoints = Inf,
-                     filter_quant = 0,
+                     filter_quant = 1,
                      chr = unique(resGwas$chr)[1])
 
   wrongParamsL <- list(p = list(c(runif(100, 0, 1), -0.1, 0.00015)),

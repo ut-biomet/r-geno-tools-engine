@@ -26,7 +26,7 @@ manPlot <- function(gwas,
                     title = "Manhattan Plot",
                     filter_pAdj = 1,
                     filter_nPoints = Inf,
-                    filter_quant = 0,
+                    filter_quant = 1,
                     interactive = TRUE) {
 
   logger <- logger$new("r-manPlot()")
@@ -95,8 +95,8 @@ manPlot <- function(gwas,
   nTotalSnp <- nrow(gwas)
   # filter according to a threshold on pAdj
   if (nrow(gwas) != 0 && filter_pAdj != 1) {
-    if (filter_pAdj <= 0 || filter_pAdj > 1) {
-      stop('filter_pAdj should be between 0 (excluded) and 1')
+    if (filter_pAdj < 0 || filter_pAdj > 1) {
+      stop('filter_pAdj should be between 0  and 1')
     }
     gwas <- gwas[gwas$p_adj <= filter_pAdj,]
     if (nrow(gwas) == 0) {
@@ -107,9 +107,9 @@ manPlot <- function(gwas,
   }
 
   # filter according to quantile
-  if (nrow(gwas) != 0 && filter_quant != 0) {
-    if (filter_quant <= 0 || filter_quant > 1) {
-      stop('filter_quant should be between 0 (excluded) and 1')
+  if (nrow(gwas) != 0 && filter_quant != 1) {
+    if (filter_quant < 0 || filter_quant > 1) {
+      stop('filter_quant should be between 0  and 1')
     }
     gwas <- gwas[order(gwas$p),]
     gwas <- gwas[seq_len(min(nrow(gwas),
@@ -123,8 +123,8 @@ manPlot <- function(gwas,
 
   # filter according to a fixed number of point
   if (nrow(gwas) != 0 && filter_nPoints < nrow(gwas)) {
-    if (filter_nPoints <= 0) {
-      stop('filter_nPoints should be a strictly positive number')
+    if (filter_nPoints < 0) {
+      stop('filter_nPoints should be a positive number')
     }
     gwas <- gwas[order(gwas$p),]
     gwas <- gwas[seq_len(min(nrow(gwas), filter_nPoints)),]
