@@ -1,4 +1,4 @@
-FROM rstudio/r-base:4.0-focal
+FROM rstudio/r-base:4.1-focal
 LABEL maintainer="Julien Diot <juliendiot@ut-biomet.org>"
 
 WORKDIR /GWAS-Engine
