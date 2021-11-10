@@ -32,6 +32,31 @@ manPlot <- function(gwas,
   logger <- logger$new("r-manPlot()")
 
 
+  # Check parameters
+  logger$log("Check parameters...")
+  if (!is.na(as.numeric(thresh_p))) {
+    thresh_p <- as.numeric(thresh_p)
+  } else {
+    stop('`thresh_p` should be a numeric value')
+  }
+  if (!is.na(as.numeric(filter_pAdj))) {
+    filter_pAdj <- as.numeric(filter_pAdj)
+  } else {
+    stop('`filter_pAdj` should be a numeric value')
+  }
+  if (!is.na(as.numeric(filter_nPoints))) {
+    filter_nPoints <- as.numeric(filter_nPoints)
+  } else {
+    stop('`filter_nPoints` should be a numeric value')
+  }
+  if (!is.na(as.numeric(filter_quant))) {
+    filter_quant <- as.numeric(filter_quant)
+  } else {
+    stop('`thresh_p` should be a numeric value')
+  }
+  logger$log("Check parameters DONE")
+
+
   # Check chromosome name ----
   logger$log("Check chromosome name ...")
   if (!is.na(chr)) {
