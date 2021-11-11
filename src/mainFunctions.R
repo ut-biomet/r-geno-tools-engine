@@ -107,7 +107,7 @@ run_gwas <- function(genoFile = NULL,
 #' @param chr name of the chromosome to show (show all if NA)
 #' @param interactive [bool] should the plot be interactive (the default)
 #' @param filter_pAdj [numeric] threshold to remove points
-#' with pAdj > filter_pAdj from the plot (default no filtering)
+#' with pAdj < filter_pAdj from the plot (default no filtering)
 #' @param filter_nPoints [numeric] threshold to keep only the filter_nPoints
 #' with the lowest p-values for the plot (default no filtering)
 #' @param filter_quant [numeric] threshold to keep only the filter_quant*100 %
@@ -246,6 +246,12 @@ draw_ldPlot <- function(genoFile = NULL,
 #' @param gwasUrl url of the gwas result data file (json file)
 #' @param adj_method correction method: "holm", "hochberg",
 #' "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
+#' @param filter_pAdj [numeric] threshold to remove points
+#' with pAdj < filter_pAdj from the plot (default no filtering)
+#' @param filter_nPoints [numeric] threshold to keep only the filter_nPoints
+#' with the lowest p-values for the plot (default no filtering)
+#' @param filter_quant [numeric] threshold to keep only the filter_quant*100 %
+#' of the points with the lowest p-values for the plot (default no filtering)
 #' @param outFile path of the output file. If `NULL`, the output will not be
 #' written in any file. By default write in an tempoary `.json` file.
 #'
@@ -253,6 +259,9 @@ draw_ldPlot <- function(genoFile = NULL,
 run_resAdjustment <- function(gwasFile = NULL,
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
+                              filter_pAdj = 1,
+                              filter_nPoints = Inf,
+                              filter_quant = 1,
                               outFile = tempfile(fileext = ".json")){
   logger <- logger$new("r-run_resAdjustment()")
 
@@ -271,6 +280,12 @@ run_resAdjustment <- function(gwasFile = NULL,
   adj <- adjustPval(gwas$gwas$p, adj_method)
   gwas$gwas$p_adj <- adj$p_adj
   logger$log("Adjust p-values DONE")
+
+  # filter results
+  gwas$gwas <- filterGWAS(gwas = gwas$gwas,
+                          filter_pAdj = filter_pAdj,
+                          filter_nPoints = filter_nPoints,
+                          filter_quant = filter_quant)
 
   metadata <- gwas$metadata
   metadata$adj_method <- adj_method

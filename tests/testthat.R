@@ -17,10 +17,13 @@ invisible(
 # test_file("tests/testthat/test_2_gwas.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
-# test_file("tests/testthat/test_3_plots.r",
+# test_file("tests/testthat/test_3_filtering.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
-# test_file("tests/testthat/test_4_mainfunctions.R",
+# test_file("tests/testthat/test_4_plots.r",
+#           stop_on_failure = TRUE,
+#           stop_on_warning = FALSE)
+# test_file("tests/testthat/test_5_mainfunctions.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
 

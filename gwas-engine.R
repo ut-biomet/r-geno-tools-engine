@@ -26,6 +26,11 @@ p <- add_argument(p, "--adj_method", help='[`manplot`, `adjresults`] p-value cor
 p <- add_argument(p, "--thresh_p", help="[`manplot`, `adjresults`] p value significant threshold (default 0.05)", type = "numeric", default = 0.05)
 
 
+p <- add_argument(p, "--filter_pAdj", help="[`manplot`] threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)", type = "numeric", default = 1)
+p <- add_argument(p, "--filter_nPoints", help="[`manplot`] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)", type = "numeric", default = Inf)
+p <- add_argument(p, "--filter_quant", help="[`manplot`] threshold to keep only the filter_quant*100 % of the points with the lowest p-values for the plot (default no filtering)", type = "numeric", default = 1)
+
+
 # gwas specific parameters:
 p <- add_argument(p, "--test", help='[`gwas`] Which test to use. Either `"score"`, `"wald"` or `"lrt"`. For binary phenotypes, test = `"score"` is mandatory. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test' , type = "character")
 p <- add_argument(p, "--fixed", help='[`gwas`] Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is 0. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test', type = "integer", default = 0)
@@ -39,9 +44,6 @@ p <- add_argument(p, "--thresh_callrate", help="[`gwas`] Threshold for filtering
 # manplot specific parameters:
 p <- add_argument(p, "--chr", help="[`manplot`] name of the chromosome to show (show all by default)", type = "character", default = NA)
 p <- add_argument(p, "--interactive", help="[`manplot`] should the plot be interactive: TRUE or FALSE (the default is TRUE)", type = "logical", default = TRUE)
-p <- add_argument(p, "--filter_pAdj", help="[`manplot`] threshold to remove points with pAdj > filter_pAdj from the plot (default no filtering)", type = "numeric", default = 1)
-p <- add_argument(p, "--filter_nPoints", help="[`manplot`] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)", type = "numeric", default = Inf)
-p <- add_argument(p, "--filter_quant", help="[`manplot`] threshold to keep only the filter_quant*100 % of the points with the lowest p-values for the plot (default no filtering)", type = "numeric", default = 1)
 
 
 # ldplot specific parameters:
@@ -106,6 +108,9 @@ if (args$fun == "gwas") {
   gwas_adj <- run_resAdjustment(gwasFile = args$gwasFile,
                                 gwasUrl = args$gwasUrl,
                                 adj_method = args$adj_method,
+                                filter_pAdj = args$filter_pAdj,
+                                filter_nPoints = args$filter_nPoints,
+                                filter_quant = args$filter_quant,
                                 outFile = args$outFile)
   quit(save = "no", status = 0)
 

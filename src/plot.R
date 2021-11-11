@@ -7,7 +7,7 @@
 #' @param title [char] Title of the plot. Default is "Manhattan Plot"
 #' @param interactive [bool] should the plot be interactive (the default) or not
 #' @param filter_pAdj [numeric] threshold to remove points
-#' with pAdj > filter_pAdj from the plot (default no filtering)
+#' with pAdj < filter_pAdj from the plot (default no filtering)
 #' @param filter_nPoints [numeric] threshold to keep only the filter_nPoints
 #' with the lowest p-values for the plot (default no filtering)
 #' @param filter_quant [numeric] threshold to keep only the filter_quant*100 %
@@ -36,21 +36,6 @@ manPlot <- function(gwas,
   logger$log("Check parameters...")
   if (!is.na(as.numeric(thresh_p))) {
     thresh_p <- as.numeric(thresh_p)
-  } else {
-    stop('`thresh_p` should be a numeric value')
-  }
-  if (!is.na(as.numeric(filter_pAdj))) {
-    filter_pAdj <- as.numeric(filter_pAdj)
-  } else {
-    stop('`filter_pAdj` should be a numeric value')
-  }
-  if (!is.na(as.numeric(filter_nPoints))) {
-    filter_nPoints <- as.numeric(filter_nPoints)
-  } else {
-    stop('`filter_nPoints` should be a numeric value')
-  }
-  if (!is.na(as.numeric(filter_quant))) {
-    filter_quant <- as.numeric(filter_quant)
   } else {
     stop('`thresh_p` should be a numeric value')
   }
@@ -114,51 +99,12 @@ manPlot <- function(gwas,
     logger$log("Extract significant SNP DONE")
   } else significantSNP <- NULL
 
-
   # filter results ----
-  logger$log("Filter points ...")
   nTotalSnp <- nrow(gwas)
-  # filter according to a threshold on pAdj
-  if (nrow(gwas) != 0 && filter_pAdj != 1) {
-    if (filter_pAdj < 0 || filter_pAdj > 1) {
-      stop('filter_pAdj should be between 0  and 1')
-    }
-    gwas <- gwas[gwas$p_adj <= filter_pAdj,]
-    if (nrow(gwas) == 0) {
-      warning('filter_pAdj removed all the points of the graph')
-    }
-  } else {
-    logger$log('skip filter_pAdj')
-  }
-
-  # filter according to quantile
-  if (nrow(gwas) != 0 && filter_quant != 1) {
-    if (filter_quant < 0 || filter_quant > 1) {
-      stop('filter_quant should be between 0  and 1')
-    }
-    gwas <- gwas[order(gwas$p),]
-    gwas <- gwas[seq_len(min(nrow(gwas),
-                             floor(nTotalSnp*filter_quant))),]
-    if (nrow(gwas) == 0) {
-      warning('filter_quant removed all the points of the graph')
-    }
-  } else {
-    logger$log('skip filter_quant')
-  }
-
-  # filter according to a fixed number of point
-  if (nrow(gwas) != 0 && filter_nPoints < nrow(gwas)) {
-    if (filter_nPoints < 0) {
-      stop('filter_nPoints should be a positive number')
-    }
-    gwas <- gwas[order(gwas$p),]
-    gwas <- gwas[seq_len(min(nrow(gwas), filter_nPoints)),]
-    if (nrow(gwas) == 0) {
-      warning('filter_nPoints removed all the points of the graph')
-    }
-  } else {
-    logger$log('skip filter_nPoints')
-  }
+  gwas <- filterGWAS(gwas = gwas,
+                     filter_pAdj = filter_pAdj,
+                     filter_nPoints = filter_nPoints,
+                     filter_quant = filter_quant)
 
   # update plot title to give filtering feed back to the user
   remainPoints <- nrow(gwas)
@@ -174,12 +120,11 @@ manPlot <- function(gwas,
                      sep = '\n')
     }
   } else {
-      warning('There is no points to display')
-      title <- paste(title,
-                     'no point to display',
-                     sep = '\n')
+    warning('There is no points to display')
+    title <- paste(title,
+                   'no point to display',
+                   sep = '\n')
   }
-  logger$log("Filter points DONE")
 
   # Draw plot ----
   logger$log("Draw plot ...")

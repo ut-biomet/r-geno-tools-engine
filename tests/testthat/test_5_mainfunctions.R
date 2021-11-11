@@ -278,17 +278,11 @@ capture.output({
   goodParams <- list(gwasFile = "../../data/results/gwasResult.json",
                      gwasUrl = NULL,
                      adj_method = "bonferroni",
-                     filter_pAdj = 1,
-                     filter_nPoints = Inf,
-                     filter_quant = 1,
                      outFile = NULL)
 
   wrongParamsL <- list(gwasFile = c("doNotExist", NA),
                        gwasUrl = c("doNotExist", NA),
                        adj_method = c("doNotExist", NA),
-                       filter_pAdj = c(-1, 2),
-                       filter_nPoints = -4,
-                       filter_quant = c(-1, 1.1),
                        outFile = list(c("f1", "f2")))
 
 
@@ -305,9 +299,6 @@ capture.output({
           run_resAdjustment(gwasFile = params[["gwasFile"]],
                             gwasUrl = params[["gwasUrl"]],
                             adj_method = params[["adj_method"]],
-                             filter_pAdj = params[['filter_pAdj']],
-                             filter_quant = params[['filter_quant']],
-                             filter_nPoints = params[['filter_nPoints']],
                             outFile = params[["outFile"]])
         })
       })

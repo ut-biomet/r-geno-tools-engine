@@ -1,3 +1,30 @@
+# `filterGWAS`
+
+Filter gwas results
+
+
+## Description
+
+Filter gwas results
+
+
+## Usage
+
+```r
+filterGWAS(gwas, filter_pAdj = 1, filter_nPoints = Inf, filter_quant = 1)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`gwas`     |     [data.frame] output of the gwas function
+`filter_pAdj`     |     [numeric] threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)
+`filter_nPoints`     |     [numeric] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)
+`filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
+
+
 # `gwas`
 
 perform GWAS analysis
@@ -171,7 +198,7 @@ Argument      |Description
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     name of the chromosome to show (show all if NA)
 `interactive`     |     [bool] should the plot be interactive (the default)
-`filter_pAdj`     |     [numeric] threshold to remove points with pAdj > filter_pAdj from the plot (default no filtering)
+`filter_pAdj`     |     [numeric] threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)
 `filter_nPoints`     |     [numeric] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)
 `filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
 `outFile`     |     path of the file containing the plot. If `NULL`, the output will not be written in any file. By default write in an tempoary file.
@@ -247,6 +274,9 @@ run_resAdjustment(
   gwasFile = NULL,
   gwasUrl = NULL,
   adj_method = "bonferroni",
+  filter_pAdj = 1,
+  filter_nPoints = Inf,
+  filter_quant = 1,
   outFile = tempfile(fileext = ".json")
 )
 ```
@@ -259,6 +289,9 @@ Argument      |Description
 `gwasFile`     |     path of the gwas result data file (json file)
 `gwasUrl`     |     url of the gwas result data file (json file)
 `adj_method`     |     correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none" (see ?p.adjust for more details)
+`filter_pAdj`     |     [numeric] threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)
+`filter_nPoints`     |     [numeric] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)
+`filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
 `outFile`     |     path of the output file. If `NULL`, the output will not be written in any file. By default write in an tempoary `.json` file.
 
 
@@ -303,7 +336,7 @@ Argument      |Description
 `thresh_p`     |     p value significant threshold (default 0.05)
 `chr`     |     [char] name of the chromosome to show (show all if NA)
 `title`     |     [char] Title of the plot. Default is "Manhattan Plot"
-`filter_pAdj`     |     [numeric] threshold to remove points with pAdj > filter_pAdj from the plot (default no filtering)
+`filter_pAdj`     |     [numeric] threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)
 `filter_nPoints`     |     [numeric] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)
 `filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
 `interactive`     |     [bool] should the plot be interactive (the default) or not
