@@ -72,12 +72,12 @@
       "Repository": "CRAN",
       "Hash": "d157e0ee1a93c257d9ee0f3fe918c1b4"
     },
-    "argparser": {
-      "Package": "argparser",
-      "Version": "0.7.1",
+    "argparse": {
+      "Package": "argparse",
+      "Version": "2.1.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "ef22bb1e708cb17be24197f9d85ff481"
+      "Hash": "fe719be1302597d2364a09611bdd5e27"
     },
     "askpass": {
       "Package": "askpass",
@@ -239,6 +239,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "c98eb5133d9cb9e1622b8691487f11bb"
+    },
+    "findpython": {
+      "Package": "findpython",
+      "Version": "1.0.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "73cb09f8220dfed388bd89d180f0b922"
     },
     "gaston": {
       "Package": "gaston",
@@ -461,13 +468,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f6b85d9e4ed88074ea0ede1aa74bb00e"
-    },
-    "png": {
-      "Package": "png",
-      "Version": "0.1-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "03b7076c234cb3331288919983326c55"
     },
     "praise": {
       "Package": "praise",

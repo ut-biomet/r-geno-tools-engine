@@ -201,45 +201,6 @@ draw_manhattanPlot <- function(gwasFile = NULL,
 
 
 
-#' Draw an LD Plot
-#'
-#' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
-#' @param phenoFile path of the phenotypic data file (`csv` file)
-#' @param from lower bound of the range of SNPs for which the LD is computed
-#' @param to upper bound of the range of SNPs for which the LD is computed
-#' @param outFile path of the png file to save the plot. If `NULL`, the image file will not be
-#' created. By default write in an tempoary `.png` file.
-#'
-#' @return path of the created file (or NULL if `file` is NULL)
-draw_ldPlot <- function(genoFile = NULL,
-                        genoUrl = NULL,
-                        from,
-                        to,
-                        outFile = tempfile(fileext = ".png")) {
-  logger <- logger$new("r-draw_ldPlot()")
-
-  logger$log("Get data ...")
-  if (!is.null(genoFile) &&  is.null(genoUrl)) {
-    geno <- readGenoData(genoFile)
-  } else if (!is.null(genoUrl) && is.null(genoFile)) {
-    geno <- downloadGenoData(genoUrl)
-  } else {
-    stop("Error: either genoFile or genoUrl should be provided")
-  }
-  logger$log("Get data DONE")
-
-  logger$log("Draw LD Plot ...")
-  imgFile <- LDplot(geno = geno,
-                    from = from,
-                    to = to,
-                    file = outFile)
-  logger$log("Draw LD Plot DONE")
-
-  imgFile
-}
-
-
-
 #' Adjust GWAS p-values
 #'
 #' @param gwasFile path of the gwas result data file (json file)
@@ -300,4 +261,46 @@ run_resAdjustment <- function(gwasFile = NULL,
     "metadata" = metadata,
     "file" = file
   ))
+}
+
+
+
+
+
+
+#' Draw an LD Plot
+#'
+#' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param phenoFile path of the phenotypic data file (`csv` file)
+#' @param from lower bound of the range of SNPs for which the LD is computed
+#' @param to upper bound of the range of SNPs for which the LD is computed
+#' @param outFile path of the png file to save the plot. If `NULL`, the image file will not be
+#' created. By default write in an tempoary `.png` file.
+#'
+#' @return path of the created file (or NULL if `file` is NULL)
+draw_ldPlot <- function(genoFile = NULL,
+                        genoUrl = NULL,
+                        from,
+                        to,
+                        outFile = tempfile(fileext = ".png")) {
+  logger <- logger$new("r-draw_ldPlot()")
+
+  logger$log("Get data ...")
+  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+    geno <- readGenoData(genoFile)
+  } else if (!is.null(genoUrl) && is.null(genoFile)) {
+    geno <- downloadGenoData(genoUrl)
+  } else {
+    stop("Error: either genoFile or genoUrl should be provided")
+  }
+  logger$log("Get data DONE")
+
+  logger$log("Draw LD Plot ...")
+  imgFile <- LDplot(geno = geno,
+                    from = from,
+                    to = to,
+                    file = outFile)
+  logger$log("Draw LD Plot DONE")
+
+  imgFile
 }

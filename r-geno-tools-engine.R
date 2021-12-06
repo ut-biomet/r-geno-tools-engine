@@ -1,71 +1,175 @@
-#! /usr/bin/Rscript
+#! /usr/local/bin/Rscript --vanilla
 
 # Author: Julien Diot juliendiot@ut-biomet.org
 # Tue 24 Aug 2021 The University of Tokyo
 #
 # Description:
-# Main script for using GWAS-Engine
+# Main script of R-geno-tools-enigne
 
-# Create a parser
-suppressPackageStartupMessages(library(argparser, quietly=TRUE))
+library(argparse)
+
+# Create parser ----
+main_parser = ArgumentParser()
+main_subparsers = main_parser$add_subparsers(title = "Available commands",
+                                             dest = "command")
+
+# load argument descriptions
+source('src/commandArgs.R')
+parserList <- c() # to keep names of subcommands
+
+# GWAS gwas
+gwas_parser = main_subparsers$add_parser("gwas",
+                                         help = "running a gwas analysis",
+                                         description = "Run a GWAS analysis")
+gwas_parser$add_argument(arg$genoFile$flag,
+                         help = arg$genoFile$help,
+                         type = arg$genoFile$type,
+                         required = TRUE)
+gwas_parser$add_argument(arg$phenoFile$flag,
+                         help = arg$phenoFile$help,
+                         type = arg$phenoFile$type,
+                         required = TRUE)
+gwas_parser$add_argument(arg$trait$flag,
+                         help = arg$trait$help,
+                         type = arg$trait$type,
+                         required = TRUE)
+gwas_parser$add_argument(arg$outFile$flag,
+                         help = arg$outFile$help,
+                         type = arg$outFile$type,
+                         required = TRUE)
+gwas_parser$add_argument(arg$test$flag,
+                         help = arg$test$help,
+                         type = arg$test$type,
+                         default = arg$test$default)
+gwas_parser$add_argument(arg$fixed$flag,
+                         help = arg$fixed$help,
+                         type = arg$fixed$type,
+                         default = arg$fixed$default)
+gwas_parser$add_argument(arg$response$flag,
+                         help = arg$response$help,
+                         type = arg$response$type,
+                         default = arg$response$default)
+gwas_parser$add_argument(arg$thresh_maf$flag,
+                         help = arg$thresh_maf$help,
+                         type = arg$thresh_maf$type,
+                         default = arg$thresh_maf$default)
+gwas_parser$add_argument(arg$thresh_callrate$flag,
+                         help = arg$thresh_callrate$help,
+                         type = arg$thresh_callrate$type,
+                         default = arg$thresh_callrate$default)
 
 
-p <- arg_parser(paste0(
-  "Run GWAS-Engine's tools"))
+# GWAS manplot
+manplot_parser = main_subparsers$add_parser("gwas-manplot",
+                                            help = "Draw a Manhattan Plot",
+                                            description = "Draw a Manhattan Plot")
+manplot_parser$add_argument(arg$gwasFile$flag,
+                            help = arg$gwasFile$help,
+                            type = arg$gwasFile$type,
+                         required = TRUE)
+manplot_parser$add_argument(arg$outFile$flag,
+                            help = arg$outFile$help,
+                            type = arg$outFile$type,
+                         required = TRUE)
+manplot_parser$add_argument(arg$adj_method$flag,
+                            help = arg$adj_method$help,
+                            type = arg$adj_method$type,
+                            default = arg$adj_method$default)
+manplot_parser$add_argument(arg$thresh_p$flag,
+                            help = arg$thresh_p$help,
+                            type = arg$thresh_p$type,
+                            default = arg$thresh_p$default)
+manplot_parser$add_argument(arg$chr$flag,
+                            help = arg$chr$help,
+                            type = arg$chr$type,
+                            default = arg$chr$default)
+manplot_parser$add_argument(arg$interactive$flag,
+                            help = arg$interactive$help,
+                            type = arg$interactive$type,
+                            default = arg$interactive$default)
+manplot_parser$add_argument(arg$filter_pAdj$flag,
+                            help = arg$filter_pAdj$help,
+                            type = arg$filter_pAdj$type,
+                            default = arg$filter_pAdj$default)
+manplot_parser$add_argument(arg$filter_nPoints$flag,
+                            help = arg$filter_nPoints$help,
+                            type = arg$filter_nPoints$type,
+                            default = arg$filter_nPoints$default)
+manplot_parser$add_argument(arg$filter_quant$flag,
+                            help = arg$filter_quant$help,
+                            type = arg$filter_quant$type,
+                            default = arg$filter_quant$default)
 
-# Add command line arguments
-p <- add_argument(p, "fun", help="GWAS-Engine's function you want to run: `gwas`, `manplot`, `ldplot` or `adjresults`", type = "character")
 
-p <- add_argument(p, "--genoFile", help="[`gwas`, `ldplot`] path of the geno data file (`.vcf` or `.vcf.gz` file)", type = "character")
-p <- add_argument(p, "--phenoFile", help="[`gwas`] path of the phenotypic data file (`csv` file)", type = "character")
-p <- add_argument(p, "--gwasFile", help="[`manplot`, `adjresults`] path of the gwas result data file (json file)", type = "character")
-p <- add_argument(p, "--outFile", help="[`gwas`, `manplot`, `ldplot`, `adjresults`]  file where to save the results,", type = "character")
-
-
-p <- add_argument(p, "--adj_method", help='[`manplot`, `adjresults`] p-value correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none". Default: "bonferroni". (see https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust for more details)', type = "character", default = "bonferroni")
-p <- add_argument(p, "--thresh_p", help="[`manplot`, `adjresults`] p value significant threshold (default 0.05)", type = "numeric", default = 0.05)
-
-
-p <- add_argument(p, "--filter_pAdj", help="[`manplot`] threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)", type = "numeric", default = 1)
-p <- add_argument(p, "--filter_nPoints", help="[`manplot`] threshold to keep only the filter_nPoints with the lowest p-values for the plot (default no filtering)", type = "numeric", default = Inf)
-p <- add_argument(p, "--filter_quant", help="[`manplot`] threshold to keep only the filter_quant*100 % of the points with the lowest p-values for the plot (default no filtering)", type = "numeric", default = 1)
-
-
-# gwas specific parameters:
-p <- add_argument(p, "--test", help='[`gwas`] Which test to use. Either `"score"`, `"wald"` or `"lrt"`. For binary phenotypes, test = `"score"` is mandatory. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test' , type = "character")
-p <- add_argument(p, "--fixed", help='[`gwas`] Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is 0. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test', type = "integer", default = 0)
-p <- add_argument(p, "--response", help='[`gwas`] Either "quantitative" or "binary". Is the trait a quantitative or a binary phenotype? Default value is "quantitative"' , type = "character", default = "quantitative")
-p <- add_argument(p, "--trait", help="[`gwas`] name of the trait to analyze. Must be a column name of the phenotypic file.", type = "character")
-
-p <- add_argument(p, "--thresh_maf", help="[`gwas`] Threshold for filtering markers. Only markers with minor allele frequency > `thresh_maf` will be kept.", type = "numeric")
-p <- add_argument(p, "--thresh_callrate", help="[`gwas`] Threshold for filtering markers. Only markers with a callrate > `thresh_callrate` will be kept.", type = "numeric")
-
-
-# manplot specific parameters:
-p <- add_argument(p, "--chr", help="[`manplot`] name of the chromosome to show (show all by default)", type = "character", default = NA)
-p <- add_argument(p, "--interactive", help="[`manplot`] should the plot be interactive: TRUE or FALSE (the default is TRUE)", type = "logical", default = TRUE)
+# GWAS adjResults
+adjResults_parser = main_subparsers$add_parser("gwas-adjResults",
+                                               help = "Adjust GWAS p-values",
+                                               description = "Adjust GWAS p-values and filter the results")
+adjResults_parser$add_argument(arg$gwasFile$flag,
+                               help = arg$gwasFile$help,
+                               type = arg$gwasFile$type,
+                               required = TRUE)
+adjResults_parser$add_argument(arg$outFile$flag,
+                               help = arg$outFile$help,
+                               type = arg$outFile$type,
+                               required = TRUE)
+adjResults_parser$add_argument(arg$adj_method$flag,
+                               help = arg$adj_method$help,
+                               type = arg$adj_method$type,
+                               default = arg$adj_method$default)
+adjResults_parser$add_argument(arg$filter_pAdj$flag,
+                               help = arg$filter_pAdj$help,
+                               type = arg$filter_pAdj$type,
+                               default = arg$filter_pAdj$default)
+adjResults_parser$add_argument(arg$filter_nPoints$flag,
+                               help = arg$filter_nPoints$help,
+                               type = arg$filter_nPoints$type,
+                               default = arg$filter_nPoints$default)
+adjResults_parser$add_argument(arg$filter_quant$flag,
+                               help = arg$filter_quant$help,
+                               type = arg$filter_quant$type,
+                               default = arg$filter_quant$default)
 
 
-# ldplot specific parameters:
-p <- add_argument(p, "--from", help="[`ldplot`] lower bound of the range of SNPs for which the LD is computed (`from` must be lower than `to`)", type = "integer")
-p <- add_argument(p, "--to", help="[`ldplot`] upper bound of the range of SNPs for which the LD is computed (the total number of SNP should be lower than 50)", type = "integer")
+
+
+# LDplot
+ldplot_parser = main_subparsers$add_parser("ldplot",
+                                           help = "Get plot of the linkage disequilibrium between consecutive markers",
+                                           description = "Get plot of the linkage disequilibrium between consecutive markers")
+ldplot_parser$add_argument(arg$genoFile$flag,
+                           help = arg$genoFile$help,
+                           type = arg$genoFile$type,
+                           required = TRUE)
+ldplot_parser$add_argument(arg$outFile$flag,
+                           help = arg$outFile$help,
+                           type = arg$outFile$type,
+                           required = TRUE)
+ldplot_parser$add_argument(arg$from$flag,
+                           help = arg$from$help,
+                           type = arg$from$type,
+                           required = TRUE)
+ldplot_parser$add_argument(arg$to$flag,
+                           help = arg$to$help,
+                           type = arg$to$type,
+                           required = TRUE)
 
 
 # Parse the command line arguments
-args <- parse_args(p)
+args = main_parser$parse_args()
 
+# show help if no command is provided
+if (is.null(args$command)) {
+  main_parser$print_help()
+  quit(save = "no", status = 0)
+}
 
 # log input parameters
 time <- as.character(Sys.time())
-inArgs <- args[seq_len(length(args) - 1) + 1]
-cat(time, 'call to GWAS-Engine.R:\n', paste0('\t', names(inArgs), ' = ', inArgs, '\n'))
+cat(time, 'call to R-geno-engine.R:\n', paste0(names(args), ' = ', args, '\n'))
 
 
-if (!args$fun %in% c('gwas', 'manplot', 'ldplot', 'adjresults')) {
-  stop("`fun` should be one of 'gwas', 'manplot', 'ldplot', 'adjresults'")
-}
-
-# load R packages:
+# load engine's R packages dependencies:
 suppressPackageStartupMessages({
   library(gaston) # for many functions
   library(jsonlite) # manage json format
@@ -80,7 +184,7 @@ invisible(
 )
 
 
-if (args$fun == "gwas") {
+if (args$command == "gwas") {
   gwas_results <- run_gwas(genoFile = args$genoFile,
                            phenoFile = args$phenoFile,
                            trait = args$trait,
@@ -92,7 +196,10 @@ if (args$fun == "gwas") {
                            outFile = args$outFile)
   quit(save = "no", status = 0)
 
-} else if (args$fun == "manplot") {
+} else if (args$command == "gwas-manplot") {
+  if (identical(args$chr, '')) {
+    args$chr <- NA
+  }
   p <- draw_manhattanPlot(gwasFile = args$gwasFile,
                           adj_method = args$adj_method,
                           thresh_p = args$thresh_p,
@@ -104,7 +211,7 @@ if (args$fun == "gwas") {
                           outFile = args$outFile)
   quit(save = "no", status = 0)
 
-} else if (args$fun == "adjresults") {
+} else if (args$command == "gwas-adjresults") {
   gwas_adj <- run_resAdjustment(gwasFile = args$gwasFile,
                                 gwasUrl = args$gwasUrl,
                                 adj_method = args$adj_method,
@@ -114,7 +221,7 @@ if (args$fun == "gwas") {
                                 outFile = args$outFile)
   quit(save = "no", status = 0)
 
-} else if (args$fun == "ldplot") {
+} else if (args$command == "ldplot") {
   imgFile <- draw_ldPlot(genoFile = args$genoFile,
                          from = args$from,
                          to = args$to,
@@ -124,4 +231,3 @@ if (args$fun == "gwas") {
 
 # Should not arrive here.
 quit(save = "no", status = 1)
-
