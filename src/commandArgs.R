@@ -55,7 +55,7 @@ arg$filter_pAdj$type = 'double'
 
 # filter_nPoints ----
 arg$filter_nPoints$flag = '--filter-nPoints'
-arg$filter_nPoints$default = "Inf"
+arg$filter_nPoints$default = 1e100
 arg$filter_nPoints$help = 'Threshold to keep only the filter-nPoints points with the lowest p-values for the plot (default no filtering)'
 arg$filter_nPoints$type = 'double'
 
@@ -115,11 +115,10 @@ arg$chr$help = 'Name of the chromosome to show (show all by default)'
 arg$chr$type = 'character'
 
 
-# interactive ----
-arg$interactive$flag = '--interactive'
-arg$interactive$default = TRUE
-arg$interactive$help = paste0('Should the plot be interactive: TRUE or FALSE (the default is ', arg$interactive$default, ')')
-arg$interactive$type = 'logical'
+# no-interactive ----
+arg$no_interactive$flag = '--no-interactive'
+arg$no_interactive$default = FALSE
+arg$no_interactive$help = 'Make the output a static png image (if not the output will be an interactive html plot)'
 
 
 # from ----

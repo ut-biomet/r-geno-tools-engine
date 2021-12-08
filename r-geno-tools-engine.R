@@ -83,10 +83,9 @@ manplot_parser$add_argument(arg$chr$flag,
                             help = arg$chr$help,
                             type = arg$chr$type,
                             default = arg$chr$default)
-manplot_parser$add_argument(arg$interactive$flag,
-                            help = arg$interactive$help,
-                            type = arg$interactive$type,
-                            default = arg$interactive$default)
+manplot_parser$add_argument(arg$no_interactive$flag,
+                            help = arg$no_interactive$help,
+                            action = 'store_true')
 manplot_parser$add_argument(arg$filter_pAdj$flag,
                             help = arg$filter_pAdj$help,
                             type = arg$filter_pAdj$type,
@@ -204,7 +203,7 @@ if (args$command == "gwas") {
                           adj_method = args$adj_method,
                           thresh_p = args$thresh_p,
                           chr = args$chr,
-                          interactive = args$interactive,
+                          interactive = !args$no_interactive,
                           filter_pAdj = args$filter_pAdj,
                           filter_nPoints = args$filter_nPoints,
                           filter_quant = args$filter_quant,
