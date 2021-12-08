@@ -31,39 +31,39 @@ arg$outFile$help = 'Path of the file where to save the results'
 arg$outFile$type = 'character'
 
 
-# adj_method ----
-arg$adj_method$flag = '--adj_method'
+# adj-method ----
+arg$adj_method$flag = '--adj-method'
 arg$adj_method$default = 'bonferroni'
 arg$adj_method$help = paste0('p-value correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none". Default: ', arg$adj_method$default, '. (see https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust for more details)')
 arg$adj_method$type = 'character'
 
 
-# thresh_p ----
-arg$thresh_p$flag = '--thresh_p'
+# thresh-p ----
+arg$thresh_p$flag = '--thresh-p'
 arg$thresh_p$default = 0.05
 arg$thresh_p$help = paste0('p-value significant threshold (default: ',
                            arg$thresh_p$default, ')')
 arg$thresh_p$type = 'double'
 
 
-# filter_pAdj ----
-arg$filter_pAdj$flag = '--filter_pAdj'
+# filter-pAdj ----
+arg$filter_pAdj$flag = '--filter-pAdj'
 arg$filter_pAdj$default = 1
-arg$filter_pAdj$help = 'Threshold to remove points with pAdj < filter_pAdj from the plot (default no filtering)'
+arg$filter_pAdj$help = 'Threshold to remove points with pAdj < filter-pAdj from the plot (default no filtering)'
 arg$filter_pAdj$type = 'double'
 
 
 # filter_nPoints ----
-arg$filter_nPoints$flag = '--filter_nPoints'
+arg$filter_nPoints$flag = '--filter-nPoints'
 arg$filter_nPoints$default = "Inf"
-arg$filter_nPoints$help = 'Threshold to keep only the filter_nPoints points with the lowest p-values for the plot (default no filtering)'
+arg$filter_nPoints$help = 'Threshold to keep only the filter-nPoints points with the lowest p-values for the plot (default no filtering)'
 arg$filter_nPoints$type = 'double'
 
 
 # filter_quant ----
-arg$filter_quant$flag = '--filter_quant'
+arg$filter_quant$flag = '--filter-quant'
 arg$filter_quant$default = 1
-arg$filter_quant$help = 'Threshold to keep only the filter_quant*100 percent of the points with the lowest p-values for the plot (default no filtering)'
+arg$filter_quant$help = 'Threshold to keep only the filter-quant*100 percent of the points with the lowest p-values for the plot (default no filtering)'
 arg$filter_quant$type = 'double'
 
 
@@ -95,16 +95,16 @@ arg$trait$type = 'character'
 
 
 # thresh_maf ----
-arg$thresh_maf$flag = '--thresh_maf'
+arg$thresh_maf$flag = '--thresh-maf'
 arg$thresh_maf$default = 0
-arg$thresh_maf$help = 'Threshold for filtering markers. Only markers with minor allele frequency > `thresh_maf` will be kept. Default: no filtering.'
+arg$thresh_maf$help = 'Threshold for filtering markers. Only markers with minor allele frequency > `thresh-maf` will be kept. Default: no filtering.'
 arg$thresh_maf$type = 'double'
 
 
 # thresh_callrate ----
-arg$thresh_callrate$flag = '--thresh_callrate'
+arg$thresh_callrate$flag = '--thresh-callrate'
 arg$thresh_callrate$default = 0
-arg$thresh_callrate$help = 'Threshold for filtering markers. Only markers with a callrate > `thresh_callrate` will be kept. Default no filtering.'
+arg$thresh_callrate$help = 'Threshold for filtering markers. Only markers with a callrate > `thresh-callrate` will be kept. Default no filtering.'
 arg$thresh_callrate$type = 'double'
 
 
