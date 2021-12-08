@@ -62,9 +62,9 @@ arg$filter_nPoints$type = 'double'
 
 # filter_quant ----
 arg$filter_quant$flag = '--filter_quant'
-arg$filter_quant$help = 'Threshold to keep only the filter_quant*100 % of the points with the lowest p-values for the plot (default no filtering)'
-arg$filter_quant$type = 'double'
 arg$filter_quant$default = 1
+arg$filter_quant$help = 'Threshold to keep only the filter_quant*100 percent of the points with the lowest p-values for the plot (default no filtering)'
+arg$filter_quant$type = 'double'
 
 
 # test ----
