@@ -143,9 +143,9 @@ run_gwas(
 Argument      |Description
 ------------- |----------------
 `genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
-`phenoFile`     |     path of the phenotypic data file (`csv` file)
+`phenoFile`     |     path of the phenotypic data file (`csv` file). Individuals' name should be the first column of the file and no duplication is allowed.
 `genoUrl`     |     url of the geno data file (`.vcf` or `.vcf.gz` file)
-`phenoUrl`     |     url of the phenotypic data file (`csv` file)
+`phenoUrl`     |     url of the phenotypic data file (`csv` file) Individuals' name should be the first column of the file and no duplication is allowed.
 `trait`     |     Chraracter of length 1, name of the trait to analyze. Must be a column name of the phenotypic file.
 `test`     |     Which test to use. Either `"score"`,  `"wald"` or `"lrt"`. For binary phenotypes, test = `"score"` is mandatory. For more information about this parameters see: `??gaston::association.test`
 `fixed`     |     Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is 0. For more information about this parameters see: `??gaston::association.test`
@@ -218,45 +218,6 @@ If several filtering rules are given, the filtering process apply
 plotly graph if interactive is TRUE, or NULL if not.
 
 
-# `draw_ldPlot`
-
-Draw an LD Plot
-
-
-## Description
-
-Draw an LD Plot
-
-
-## Usage
-
-```r
-draw_ldPlot(
-  genoFile = NULL,
-  genoUrl = NULL,
-  from,
-  to,
-  outFile = tempfile(fileext = ".png")
-)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
-`from`     |     lower bound of the range of SNPs for which the LD is computed
-`to`     |     upper bound of the range of SNPs for which the LD is computed
-`outFile`     |     path of the png file to save the plot. If `NULL`, the image file will not be created. By default write in an tempoary `.png` file.
-`phenoFile`     |     path of the phenotypic data file (`csv` file)
-
-
-## Value
-
-path of the created file (or NULL if `file` is NULL)
-
-
 # `run_resAdjustment`
 
 Adjust GWAS p-values
@@ -298,6 +259,44 @@ Argument      |Description
 ## Value
 
 list with 3 elements `gwasAdjusted` for the results of the gwas analysis in json with adjusted p-values, `metadata` a list of metadata of the gwas analysis in json with adjusted p-values, and `file` path of the json file containing the results (if `dir` is not `NULL`)
+
+
+# `draw_ldPlot`
+
+Draw an LD Plot
+
+
+## Description
+
+Draw an LD Plot
+
+
+## Usage
+
+```r
+draw_ldPlot(
+  genoFile = NULL,
+  genoUrl = NULL,
+  from,
+  to,
+  outFile = tempfile(fileext = ".png")
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
+`from`     |     lower bound of the range of SNPs for which the LD is computed
+`to`     |     upper bound of the range of SNPs for which the LD is computed
+`outFile`     |     path of the png file to save the plot. If `NULL`, the image file will not be created. By default write in an tempoary `.png` file.
+
+
+## Value
+
+path of the created file (or NULL if `file` is NULL)
 
 
 # `manPlot`
@@ -447,6 +446,12 @@ Argument      |Description
 `url`     |     url of the phenotypic data file (csv file)
 
 
+## Details
+
+The individuals' names must be on the first column. No duplication
+ is allowed.
+
+
 ## Value
 
 `data.frame`
@@ -553,7 +558,7 @@ Read phenotypic data file
 ## Usage
 
 ```r
-readPhenoData(file, row.names = 1, ...)
+readPhenoData(file, ...)
 ```
 
 
@@ -562,8 +567,13 @@ readPhenoData(file, row.names = 1, ...)
 Argument      |Description
 ------------- |----------------
 `file`     |     file path
-`row.names`     |     [default 1] a single number giving the column of the table which contains the row names
 `...`     |     Further arguments to be passed to `read.csv`
+`ind.names`     |     [default 1] a single number giving the column of the table which contains the individuals' names.
+
+
+## Details
+
+Any duplication in the phenotypic file is forbidden.
 
 
 ## Value

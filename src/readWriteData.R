@@ -34,6 +34,8 @@ downloadGenoData <- function(url) {
 #'
 #' @param url url of the phenotypic data file (csv file)
 #'
+#' @details The individuals' names must be on the first column. No duplication
+#' is allowed.
 #' @return `data.frame`
 downloadPhenoData <- function(url){
   logger <- logger$new("r-downloadPhenoData()")
@@ -118,7 +120,7 @@ readGenoData <- function(file) {
   logger$log("Check file extention ... ")
 
   if (!file.exists(file)) {
-    stop("File do not exists")
+    stop("Genotypic file do not exists")
   }
 
   ext <- tools::file_ext(file)
@@ -147,21 +149,36 @@ readGenoData <- function(file) {
 #' Read phenotypic data file
 #'
 #' @param file file path
-#' @param row.names [default 1] a single number giving the column of the table which contains the row names
+#' @param ind.names [default 1] a single number giving the column of the table
+#'  which contains the individuals' names.
 #' @param ... Further arguments to be passed to `read.csv`
 #'
+#' @details Any duplication in the phenotypic file is forbidden.
 #' @return `data.frame`
-readPhenoData <- function(file, row.names = 1, ...) {
+readPhenoData <- function(file, ind.names = 1, ...) {
   logger <- logger$new("r-readPhenoData()")
+
   # read data file:
   if (!file.exists(file)) {
-    stop("File do not exists")
+    stop("Phenotypic file do not exists")
   }
   logger$log("Read phenotypic file ... ")
-  dta <- read.csv(file,
-                  row.names = row.names,
-                  ...)
+  dta <- read.csv(file, ...)
   logger$log("Read phenotypic file DONE ")
+
+  logger$log("Check individuals unicity ...")
+  inds <- dta[, ind.names]
+  if (any(duplicated(inds))) {
+    stop("Duplicated individuals found in the phenotypic file. ",
+         "Individuals must apprear only once in the phenotypic file.")
+  }
+  logger$log("Check individuals unicity DONE")
+
+  logger$log("Set pheno data's row names ...")
+  row.names(dta) <- dta[, ind.names]
+  dta <- dta[, -ind.names]
+  logger$log("Set pheno data's row names DONE")
+
   logger$log("DONE, return output.")
   dta
 }
@@ -203,7 +220,7 @@ readGWAS <- function(file) {
 
   logger$log("Read result file ... ")
   if (!file.exists(file)) {
-    stop("File do not exists")
+    stop("GWAS file do not exists")
   }
   gwasRes <- readLines(file)
   logger$log("Read result file DONE ")

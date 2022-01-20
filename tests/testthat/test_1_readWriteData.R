@@ -23,7 +23,7 @@ capture_output({
       # error
       expect_error({
         dta <- readGenoData("doNotExist")
-      }, "File do not exists")
+      }, "Genotypic file do not exists")
     })
 
     test_that(paste("downloadGenoData", tools::file_ext(file)), {
@@ -58,7 +58,14 @@ capture_output({
     # error
     expect_error({
       dta <- readPhenoData("doNotExist")
-    }, "File do not exists")
+    }, "Phenotypic file do not exists")
+
+    expect_error({
+      dta <- readPhenoData("../data/pheno_duplicated.csv")
+    }, paste0("Duplicated individuals found in the phenotypic file. ",
+              "Individuals must apprear only once in the phenotypic file."))
+
+
   })
 
 
@@ -99,10 +106,10 @@ capture_output({
     # error
     expect_error({
       dta <- readData("doNotExist", phenfile)
-    }, "File do not exists")
+    }, "Genotypic file do not exists")
     expect_error({
       dta <- readData(genfile, "doNotExist")
-    }, "File do not exists")
+    }, "Phenotypic file do not exists")
   })
 
 
@@ -123,10 +130,10 @@ capture_output({
     # error
     expect_error({
       dta <- readData("doNotExist", phenfile)
-    }, "File do not exists")
+    }, "Genotypic file do not exists")
     expect_error({
       dta <- readData(genfile, "doNotExist")
-    }, "File do not exists")
+    }, "Phenotypic file do not exists")
   })
 
 
@@ -187,7 +194,7 @@ capture_output({
     # error
     expect_error({
       dta <- readGWAS("doNotExist")
-    }, "File do not exists")
+    }, "GWAS file do not exists")
   })
 
 

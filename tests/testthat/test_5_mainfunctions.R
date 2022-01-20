@@ -57,7 +57,7 @@ capture.output({
                      outFile = NULL)
 
   wrongParamsL <- list(genoFile = c("/geno-do-not-exist", NA),
-                       phenoFile = c("/pheno-do-not-exist", NA),
+                       phenoFile = c("/pheno-do-not-exist", NA, "../data/pheno_duplicated.csv"),
                        trait = list("Trait.that.do.not.exist", c("a", "b"), NA),
                        test = list("not.a.test", c("c", "d"), NA),
                        fixed = list(-1, 1.5, "1", c(0,1)),
@@ -91,7 +91,7 @@ capture.output({
   }
 
 
-    # draw_manhattanPlot ----
+  # draw_manhattanPlot ----
   test_that("Draw Manhattan Plot", {
     expect_error({
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
@@ -278,11 +278,17 @@ capture.output({
   goodParams <- list(gwasFile = "../../data/results/gwasResult.json",
                      gwasUrl = NULL,
                      adj_method = "bonferroni",
+                     filter_pAdj = 1,
+                     filter_nPoints = Inf,
+                     filter_quant = 1,
                      outFile = NULL)
 
   wrongParamsL <- list(gwasFile = c("doNotExist", NA),
                        gwasUrl = c("doNotExist", NA),
                        adj_method = c("doNotExist", NA),
+                       filter_pAdj = c(-1, 2),
+                       filter_nPoints = -4,
+                       filter_quant = c(-1, 1.1),
                        outFile = list(c("f1", "f2")))
 
 
@@ -299,6 +305,9 @@ capture.output({
           run_resAdjustment(gwasFile = params[["gwasFile"]],
                             gwasUrl = params[["gwasUrl"]],
                             adj_method = params[["adj_method"]],
+                             filter_pAdj = params[['filter_pAdj']],
+                             filter_quant = params[['filter_quant']],
+                             filter_nPoints = params[['filter_nPoints']],
                             outFile = params[["outFile"]])
         })
       })

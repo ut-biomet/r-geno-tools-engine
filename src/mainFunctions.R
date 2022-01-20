@@ -7,9 +7,11 @@
 #' Run GWAS analysis
 #'
 #' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
-#' @param phenoFile path of the phenotypic data file (`csv` file)
+#' @param phenoFile path of the phenotypic data file (`csv` file). Individuals'
+#' name should be the first column of the file and no duplication is allowed.
 #' @param genoUrl url of the geno data file (`.vcf` or `.vcf.gz` file)
-#' @param phenoUrl url of the phenotypic data file (`csv` file)
+#' @param phenoUrl url of the phenotypic data file (`csv` file) Individuals'
+#' name should be the first column of the file and no duplication is allowed.
 #' @param trait Chraracter of length 1, name of the trait to analyze. Must be a
 #'   column name of the phenotypic file.
 #' @param test Which test to use. Either `"score"`,  `"wald"` or `"lrt"`. For
@@ -271,7 +273,6 @@ run_resAdjustment <- function(gwasFile = NULL,
 #' Draw an LD Plot
 #'
 #' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
-#' @param phenoFile path of the phenotypic data file (`csv` file)
 #' @param from lower bound of the range of SNPs for which the LD is computed
 #' @param to upper bound of the range of SNPs for which the LD is computed
 #' @param outFile path of the png file to save the plot. If `NULL`, the image file will not be

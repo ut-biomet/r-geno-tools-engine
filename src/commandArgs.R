@@ -15,7 +15,9 @@ arg$genoFile$type <- 'character'
 
 # phenoFile ----
 arg$phenoFile$flag = '--phenoFile'
-arg$phenoFile$help = 'Path of the phenotypic data file (`csv` file)'
+arg$phenoFile$help = paste('Path of the phenotypic data file (`csv` file).',
+                           'The individuals names should be on the first',
+                           'columns, and no duplicate are allowed')
 arg$phenoFile$type = 'character'
 
 
