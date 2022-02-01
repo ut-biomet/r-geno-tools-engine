@@ -310,6 +310,13 @@
       "Repository": "CRAN",
       "Hash": "a525aba14184fec243f9eaec62fbed43"
     },
+    "igraph": {
+      "Package": "igraph",
+      "Version": "1.2.11",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "1d10cd31c2979f9c819ffe4d16b9dc2b"
+    },
     "isoband": {
       "Package": "isoband",
       "Version": "0.2.5",

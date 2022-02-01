@@ -107,7 +107,27 @@ downloadGWAS <- function(url){
 }
 
 
+#' Download pedigree data
+#'
+#' @param url url of the result data file (csv file)
+#'
+#' @resturn List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
+downloadPedData <- function(url) {
+  logger <- logger$new("r-downloadPedData()")
+  logger$log("Create local temp file ... ")
+  localFile <- tempfile(pattern = "downloadedResult",
+                        tmpdir = tempdir(),
+                        fileext = ".csv")
+  logger$log("Download result file ... ")
+  download.file(url, localFile, quiet = TRUE)
 
+  logger$log("Read result file ... ")
+  ped <- readPedData(localFile)
+  logger$log("Read result file DONE ")
+
+  logger$log("DONE, return output.")
+  ped
+}
 
 
 #' Read geno data from a file
@@ -208,6 +228,159 @@ readData <- function(genoFile, phenoFile){
 
   dta
 }
+
+
+#' Read and prepare pedigree data
+#'
+#' @param file path of the pedigree data file (`csv` file).
+#' @param unknown_string [default: ""] a character vector of strings which are to
+#' be interpreted as "unknown parent". By default: missing value in the file.
+#' If this information is wrong,
+#' @param header [default: TRUE] a logical value indicating whether the file
+#' contains the names of the variables as its first line. The default value is
+#' TRUE. In any cases, the column 1 will be interpreted as the individual id,
+#' column 2 as the first parent, column 3 as the second parent.
+#'
+#' @details
+#' We consider here only allo-fecundation or auto-fecundation. For
+#' auto-fecundation, use the parental individual id in both column 2 and 3.
+#' Doubles haploids can not be interpreted, please avoid them in the file.
+#'
+#' Please be sure that all individuals id in columns 2 and 3 are defined in the
+#' column 1. If columns 2 and/or 3 contain id of individuals
+#' that are not in the first column, a warning will be raised and these
+#' individuals will be added to the pedigree with unknown
+#' parents as founder individuals.
+#'
+#'
+#' @resturn List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
+readPedData <- function(file, unknown_string = "", header = TRUE) {
+  logger <- logger$new('r-readPedData')
+
+  logger$log('Read pedigree file ...')
+  if (!file.exists(file)) {
+    stop("pedigree file do not exists")
+  }
+  if (!identical(tools::file_ext(file), 'csv')) {
+    stop('Pedigree file shoucd be a `.csv` file.')
+  }
+  ped <- read.csv(file,
+                  na.strings = unknown_string,
+                  header = header,
+                  stringsAsFactors = FALSE,
+                  comment.char = '#')
+  logger$log('Read pedigree file DONE')
+
+
+  logger$log('Check pedigree file ...')
+  # file dimention
+  if (ncol(ped) != 3) {
+    stop('Pedigree file should have exactly 3 columns', ncol(ped), 'detected.')
+  }
+  if (nrow(ped) == 0) {
+    stop('Pedigree file should have at least one row', ncol(ped), 'detected.')
+  }
+
+  # NA in first colunm
+  if (any(is.na(ped[,1]))) {
+    stop('The first colunm of the pedigree file should not have any unknown ',
+         'individual.')
+  }
+
+  # duplicated rows
+  dupRows <- duplicated(ped)
+  if (any(dupRows)) {
+    warning(sum(dupRows),
+            ' duplicated line(s) found in the pedigree file.',
+            ' They will be removed.')
+    ped <- ped[!dupRows,]
+  }
+
+  # inconsistent entries
+  incEnt <- duplicated(ped[, 1]) | duplicated(ped[, 1], fromLast = TRUE)
+  if (any(incEnt)) {
+    stop(length(unique(ped[incEnt, 1])),
+         ' inconsistent pedigree entrie(s) found at lines: ',
+         paste0('"', which(incEnt), '"',
+                collapse = ", ")
+         )
+  }
+
+  # find missing individual in column 1
+  missInd_2 <- na.omit(ped[!ped[, 2] %in% ped[, 1], 2])
+  missInd_3 <- na.omit(ped[!ped[, 3] %in% ped[, 1], 3])
+  missInd <- unique(c(missInd_2, missInd_3))
+  if (length(missInd) != 0) {
+    warning(length(missInd), ' unspecified individual(s) found',
+            ' in column 2 and/or 3: ',
+            ifelse(length(missInd) >= 5,
+                   paste(paste0('"', missInd[1:5], '"', collapse = " ,"), "..."),
+                   paste(paste0('"', missInd, '"', collapse = " ,"), ".")),
+            " These individuals are added in the pedigree with unknown parents."
+    )
+
+    missInd_df <- data.frame(missInd, NA, NA,
+                             stringsAsFactors = FALSE)
+    ped <- rbind(setNames(missInd_df, colnames(ped)),
+                 ped,
+                 stringsAsFactors = FALSE)
+
+    # Unique founder individual.
+    # If there is only one founder corresponding to the only missing
+    # individual, `unknown_string`, might have been miss-specified...(It will be
+    # the case only if `unknown_string` is miss-specified and all the
+    # the founder individuals are defined in the pedigree. This explains the
+    # recommendation about specifying all the founders in the pedigree.)
+    founders <- ped[is.na(ped[,2]) & is.na(ped[,3]), 1]
+    if (length(founders) == 1 && length(missInd) == 1) {
+      if (identical(founders, missInd)) {
+        warning('This individual is the only founder found in your pedigree. ',
+                'Please be sure you have specified the id of unknown parrent ',
+                'correctly.')
+      }
+    }
+  }
+
+  # inconsistent genealogy (may be long for big pedigree file)
+  # check that individual are not a parent of their parents.
+  edges <- c(as.vector(t(na.omit(ped[,c(2,1)]))),
+             as.vector(t(na.omit(ped[,c(3,1)]))))
+  g <- igraph::make_graph(edges, directed = TRUE)
+
+  cycle <- list()
+  for (i in seq_along(igraph::V(g))) {
+    i <- igraph::V(g)[i]
+    parents <- igraph::neighbors(g, i, mode = "in")
+    for (p in parents) {
+      paths <- igraph::all_simple_paths(g, i, p, 'out')
+      if (length(paths) != 0) {
+        cycle <- append(cycle, lapply(paths, function(p){names(sort(p))}))
+      }
+    }
+  }
+  cycle <- cycle[!duplicated(cycle)]
+  if (length(cycle) != 0) {
+    stop(length(cycle), ' inconsistent genealogy detected involving:\n',
+         paste('\t - ',
+            sapply(cycle, function(c){paste0('"', c, '"', collapse = ", ")}),
+            collapse = "\n"
+         ))
+  }
+  logger$log('Check pedigree file DONE')
+
+
+  logger$log("DONE, return output.")
+  # rename colunms
+  colnames(ped) <- c('ind', 'parent1', 'parent2')
+
+  return(list(
+    data = ped,
+    graph = g # TODO check if it is really necessary to return the graph
+  ))
+}
+
+
+
 
 
 #' Read GWAS analysis result file (`.json`)
