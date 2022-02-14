@@ -433,7 +433,8 @@ pedNetwork <- function(ped) {
   logger$log('Create network data DONE')
 
   logger$log('Create network ...')
-  withCallingHandlers({
+
+  supThisWarning({
     p <- forceNetwork(L,N,s,t,v,nid,nsize,grp,
                       zoom = TRUE,
                       fontSize = 14,
@@ -442,15 +443,7 @@ pedNetwork <- function(ped) {
                       opacityNoHover = 0.8,
                       charge = -50,
                       arrows = TRUE)
-  }, warning = function(warn) {
-    # this warning might be raised, but it has been took in consideration
-    # and Source/Target ARE zero-indexed
-    # so if it is raised, don't show it.
-    catchedWarn <- "It looks like Source/Target is not zero-indexed. This is required in JavaScript and so your plot may not render."
-    if (identical(warn$message, catchedWarn)) {
-      tryInvokeRestart("muffleWarning")
-    }
-  })
+  }, "It looks like Source/Target is not zero-indexed. This is required in JavaScript and so your plot may not render.")
   logger$log('Create network DONE')
 
   logger$log("DONE, return output.")

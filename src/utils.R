@@ -50,6 +50,28 @@ logger <- R6::R6Class(
 
 
 
+
+
+
+
+#' Do not show a specific warning message
+#'
+#' @param expr
+#' @param warnMessage
+#'
+#' @details This is based on the `base::suppressWarnings` function.
+#'
+supThisWarning <- function(expr, warnMessage) {
+  withCallingHandlers(expr, warning = function(warn) {
+    if (identical(warn$message, warnMessage)) {
+      tryInvokeRestart("muffleWarning")
+    }
+  })
+}
+
+
+
+
 #' Write engine documentation
 #'
 #' @param srcDir path of R sources folder (default "./src")
