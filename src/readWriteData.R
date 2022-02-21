@@ -117,7 +117,7 @@ downloadGWAS <- function(url){
 #' TRUE. In any cases, the column 1 will be interpreted as the individual id,
 #' column 2 as the first parent, column 3 as the second parent.
 #'
-#' @resturn List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
+#' @return List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
 downloadPedData <- function(url, unknown_string = "", header = TRUE) {
   logger <- logger$new("r-downloadPedData()")
   logger$log("Create local temp file ... ")
@@ -292,7 +292,7 @@ readData <- function(genoFile, phenoFile){
 #' parents as founder individuals.
 #'
 #'
-#' @resturn List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
+#' @return List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
 readPedData <- function(file, unknown_string = "", header = TRUE) {
   logger <- logger$new('r-readPedData')
 

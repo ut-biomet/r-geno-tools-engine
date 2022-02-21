@@ -56,8 +56,8 @@ logger <- R6::R6Class(
 
 #' Do not show a specific warning message
 #'
-#' @param expr
-#' @param warnMessage
+#' @param expr expression to evaluate.
+#' @param warnMessage warning message to catch
 #'
 #' @details This is based on the `base::suppressWarnings` function.
 #'
