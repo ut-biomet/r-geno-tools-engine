@@ -50,10 +50,6 @@ logger <- R6::R6Class(
 
 
 
-
-
-
-
 #' Do not show a specific warning message
 #'
 #' @param expr expression to evaluate.
@@ -110,6 +106,89 @@ writeDoc <- function(srcDir = "./src",
     }
   }
   file.remove(tmpDir)
+
+  NULL
+}
+
+
+#' Create results example files
+#'
+#'
+#' @return NULL
+#' @details Use predefined input/output files
+createResultExample <- function() {
+
+  # create gwas results ----
+  cat('create gwas results ----\n')
+  genoFile <- 'data/geno/testMarkerData01.vcf'
+  phenoFile <- 'data/pheno/testPhenoData01.csv'
+
+  gwas <- run_gwas(genoFile,
+                   phenoFile,
+                   trait = "Flowering.time.at.Arkansas",
+                   test = 'score',
+                   thresh_maf = 0.05,
+                   thresh_callrate = 0.5,
+                   outFile = 'data/results/gwasResult.json')
+
+  # create adjusted results ----
+  cat('create adjusted results ----\n')
+  gwasFile <- gwas$file
+
+  gwas <- run_resAdjustment(gwasFile,
+                            adj_method = "bonferroni",
+                            outFile = 'data/results/ajdResults.json')
+
+  # create Manhattan plot  ----
+  cat('create Manhattan plot  ----\n')
+  gwasFile <- gwas$file
+
+  draw_manhattanPlot(gwasFile,
+                     adj_method = 'bonferroni',
+                     thresh_p = 0.05,
+                     interactive = TRUE,
+                     outFile = 'data/results/manplot.html')
+  draw_manhattanPlot(gwasFile,
+                     adj_method = 'bonferroni',
+                     thresh_p = 0.05,
+                     interactive = FALSE,
+                     outFile = 'data/results/manplot.png')
+
+
+  # create LdPlot ----
+  cat('create LdPlot ----\n')
+  draw_ldPlot(genoFile,
+              from = 42,
+              to = 62,
+              outFile = 'data/results/ldplot.png')
+
+  # create pedigree network ----
+  cat('create pedigree network ----\n')
+  pedFile <- 'data/pedigree/testPedData_char.csv'
+
+  draw_pedNetwork(pedFile,
+                  outFile = 'data/results/pedigreeNetwork.html')
+
+  # create pedigree relationship ----
+  cat('create pedigree relationship ----\n')
+  calc_pedRelMAt(pedFile,
+                 outFile = 'data/results/pedigreeRelationship.csv')
+  calc_pedRelMAt(pedFile,
+                 outFile = 'data/results/pedigreeRelationship.json')
+
+  # create relationship heatmap ----
+  cat('create relationship heatmap ----\n')
+  draw_relHeatmap(relMatFile = 'data/results/pedigreeRelationship.csv',
+                  interactive = TRUE,
+                  outFile = 'data/results/relationshipHeatmap.html')
+  draw_relHeatmap(relMatFile = 'data/results/pedigreeRelationship.csv',
+                  interactive = FALSE,
+                  outFile = 'data/results/relationshipHeatmap.png')
+
+
+  # clear folder
+  unlink(list.dirs('data/results', recursive = FALSE),
+         recursive = TRUE)
 
   NULL
 }

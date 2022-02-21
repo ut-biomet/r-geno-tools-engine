@@ -1189,3 +1189,25 @@ Argument      |Description
 Write engine's functions documentation in a README.md file located in `docDir`.
 
 
+# `createResultExample`
+
+Create results example files
+
+
+## Description
+
+Create results example files
+
+
+## Usage
+
+```r
+createResultExample()
+```
+
+
+## Details
+
+Use predefined input/output files
+
+

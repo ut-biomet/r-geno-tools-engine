@@ -44,6 +44,19 @@ cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
 ```
 
 
+## `pedigree/`
+
+Example of pedigree file. This is fictive pedigree file inspired by Greek 
+mythology. It is the same pedigree in 3 versions:
+
+- Individual name with character string
+- Individual name with numbers
+- Pedigree with missing founders
+
+```{r}
+cat(paste(readLines("pedigree/testPedData_char.csv", n=10), collapse = "\n"))
+```
+
 ## `results/`
 
 To store the example of results created by the engine.
@@ -56,7 +69,12 @@ list.files("results")
 cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 ```
 
-
+```{r}
+cat(paste(readLines("results/pedigreeRelationship.csv", n=30), collapse = "\n"))
+```
+```{r}
+cat(paste(readLines("results/pedigreeRelationship.json", n=30), collapse = "\n"))
+```
 
 # Reference
 
