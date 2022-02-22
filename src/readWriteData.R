@@ -143,7 +143,7 @@ downloadPedData <- function(url, unknown_string = "", header = TRUE) {
 #' @param format format of the input file. Either "csv" or "json" (optional, by
 #' default it will use "json").
 #' @return matrix
-downloadRelMat <- function(url, format = file_ext(url)) {
+downloadRelMat <- function(url, format = tools::file_ext(url)) {
   logger <- logger$new("r-downloadRelMat()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "downloadedResult",
@@ -308,6 +308,7 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
                   header = header,
                   stringsAsFactors = FALSE,
                   comment.char = '#')
+  ped <- data.frame(lapply(ped, as.character))
   logger$log('Read pedigree file DONE')
 
 
@@ -429,7 +430,7 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
 #' @details The metadata of the file are not kept.
 #'
 #' @return matrix
-readRelMat <- function(file, format = file_ext(file)) {
+readRelMat <- function(file, format = tools::file_ext(file)) {
   logger <- logger$new("r-readRelMat()")
 
 
@@ -457,6 +458,7 @@ readRelMat <- function(file, format = file_ext(file)) {
     logger$log("Read relationship matrix `csv` file ... ")
     relMat <- read.csv(file = file,
                        header = TRUE,
+                       check.names = FALSE,
                        row.names = 1,
                        comment.char = "#")
     relMat <- as.matrix(relMat)
@@ -470,17 +472,7 @@ readRelMat <- function(file, format = file_ext(file)) {
   }
 
   logger$log("Check loaded relationship matrix ...")
-  if (!is.numeric(relMat)) {
-    stop('Bad relationship information, please be sure the relationship matrix file have been created using `r-geno-tool-engine`.')
-  }
-  cols <- sort(colnames(relMat))
-  rows <- sort(row.names(relMat))
-  if (!identical(cols, rows)) {
-    stop('Bad relationship information, please be sure the relationship matrix file have been created using `r-geno-tool-engine`.')
-  }
-  if (!isSymmetric(relMat)) {
-    stop('Bad relationship information, please be sure the relationship matrix file have been created using `r-geno-tool-engine`.')
-  }
+  checkRelMat(relMat)
   logger$log("Check loaded relationship matrix DONE")
 
   logger$log("DONE, return output.")
@@ -581,9 +573,14 @@ saveRelMat <- function(relMat,
                        metadata = NULL,
                        dir = NULL,
                        file = NULL,
-                       format = file_ext(file)){
+                       format = tools::file_ext(file)){
 
   logger <- logger$new("r-saveRelMat()")
+
+  logger$log('Check relationship matrix ...')
+  checkRelMat(relMat)
+  logger$log('Check relationship matrix DONE')
+
   if (is.null(file)) {
     if (is.null(dir)) {
       dir <- tempdir()

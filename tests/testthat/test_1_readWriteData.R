@@ -11,6 +11,7 @@ capture_output({
                  "../../data/geno/testMarkerData01.vcf.gz")
 
   for (file in genoFiles) {
+    # readGenoData ----
     test_that(paste("readGenoData", tools::file_ext(file)), {
       if (!file.exists(file)) {
         skip(paste("File", file, "not found. Skip test for this file"))
@@ -26,6 +27,7 @@ capture_output({
       }, "Genotypic file do not exists")
     })
 
+    # downloadGenoData ----
     test_that(paste("downloadGenoData", tools::file_ext(file)), {
       if (!file.exists(file)) {
         skip(paste("File", file, "not found. Skip test for this file"))
@@ -45,6 +47,7 @@ capture_output({
   }
 
 
+  # readPhenoData ----
   test_that("readPhenoData", {
     files <- c("../../data/pheno/testPhenoData01.csv")
 
@@ -64,11 +67,10 @@ capture_output({
       dta <- readPhenoData("../data/pheno_duplicated.csv")
     }, paste0("Duplicated individuals found in the phenotypic file. ",
               "Individuals must apprear only once in the phenotypic file."))
-
-
   })
 
 
+  # downloadPhenoData ----
   test_that("downloadPhenoData", {
     files <- c("../../data/pheno/testPhenoData01.csv")
     files <- normalizePath(files)
@@ -86,7 +88,7 @@ capture_output({
     # })
   })
 
-
+  # prepareData ----
   test_that("prepareData", {
     genoFiles <- c("../../data/geno/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
@@ -113,6 +115,7 @@ capture_output({
   })
 
 
+  # readData ----
   test_that("readData", {
     genoFiles <- c("../../data/geno/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
@@ -137,6 +140,7 @@ capture_output({
   })
 
 
+  # downloadData ----
   test_that("downloadData", {
     genoFiles <- c("../../data/geno/testMarkerData01.vcf.gz")
     phenoFiles <- c("../../data/pheno/testPhenoData01.csv")
@@ -166,7 +170,7 @@ capture_output({
     # })
   })
 
-
+  # readGWAS ----
   test_that("readGWAS", {
     files <- c("../../data/results/gwasResult.json")
 
@@ -197,7 +201,7 @@ capture_output({
     }, "GWAS file do not exists")
   })
 
-
+  # downloadGWAS ----
   test_that("downloadGWAS", {
     files <- c("../../data/results/gwasResult.json")
     files <- normalizePath(files)
@@ -229,7 +233,7 @@ capture_output({
     # })
   })
 
-
+  # saveGWAS ----
   test_that("saveGWAS", {
     file <- c(g = "../../data/geno/testMarkerData01.vcf.gz",
               p = "../../data/pheno/testPhenoData01.csv")
@@ -258,4 +262,156 @@ capture_output({
       file <- saveGWAS(gwasRes = resGwas,  file = c(tempfile(), tempfile()))
     }, 'Error: only one file name should be provided')
   })
+
+
+
+
+
+
+
+  # readPedData ----
+  pedFiles <- c('../../data/pedigree/testPedData_char.csv',
+                '../../data/pedigree/testPedData_num.csv',
+                '../../data/pedigree/testPedData_missFounder.csv')
+  for (file in pedFiles) {
+    test_that(paste("readPedData", basename(file)), {
+      if (grepl("missFounder", file)) {
+        expect_warning({
+          ped <- readPedData(file)
+        })
+      } else {
+        expect_error({
+          ped <- readPedData(file)
+        }, NA)
+      }
+      expect_true(class(ped) == "list")
+      expect_true(identical(names(ped), c("data", "graph")))
+      expect_true(is.data.frame(ped$data))
+      expect_true(identical(colnames(ped$data), c('ind', 'parent1', 'parent2')))
+      expect_true(is.character(ped$data$ind))
+      expect_true(is.character(ped$data$parent1))
+      expect_true(is.character(ped$data$parent2))
+      expect_true(identical(class(ped$graph), 'igraph'))
+
+    })
+  }
+  # error
+  test_that(paste("readPedData-error"), {
+    expect_error({
+      ped <- readPedData('doNotExist')
+    }, "pedigree file do not exists")
+    expect_error({
+      ped <- readPedData('../data/pedigree_circleGenealogy.csv')
+    }, 'inconsistent genealogy detected')
+    expect_error({
+      ped <- readPedData('../data/pedigree_duplicated.csv')
+    }, 'inconsistent pedigree entrie\\(s\\)')
+    expect_error({
+      ped <- readPedData('../data/pedigree_NA.csv')
+    }, 'unknown individual')
+  })
+
+  # downloadPedData ----
+  for (file in pedFiles) {
+    test_that(paste("downloadPedData",  basename(file)), {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      if (grepl("missFounder", file)) {
+        expect_warning({
+          ped <- downloadPedData(file)
+        })
+      } else {
+        expect_error({
+          ped <- downloadPedData(file)
+        }, NA)
+      }
+
+      expect_true(class(ped) == "list")
+      expect_true(identical(names(ped), c("data", "graph")))
+      expect_true(is.data.frame(ped$data))
+      expect_true(identical(colnames(ped$data), c('ind', 'parent1', 'parent2')))
+      expect_true(identical(class(ped$graph), 'igraph'))
+    })
+  }
+
+
+
+  # saveRelMat ----
+  for (file in pedFiles) {
+    for (format in c('csv', 'json', 'notGood')) {
+      test_that(paste("saveRelMat in", format, basename(file)), {
+        if (format %in% c('csv', 'json')) {
+          suppressWarnings({
+            relMat <- pedRelMat(readPedData(file))
+          })
+          resfile <- tempfile()
+          expect_error({
+            outfile <- saveRelMat(relMat,
+                                  metadata = list(info = 'test'),
+                                  file = resfile,
+                                  format = format)
+          }, NA)
+          expect_true(identical(outfile, resfile))
+          relMat2 <- readRelMat(file = outfile, format = format)
+          expect_true(identical(relMat2, relMat))
+
+        } else {
+          # error
+          suppressWarnings({
+            relMat <- pedRelMat(readPedData(file))
+          })
+          resfile <- tempfile()
+          expect_error({
+            outfile <- saveRelMat(relMat,
+                                  metadata = list(info = 'test'),
+                                  file = resfile,
+                                  format = format)
+          }, 'Error: File format misspecified. It should be either "csv",
+               or "json".')
+        }
+      })
+    }
+  }
+
+
+
+
+
+  # readRelMat ----
+  relMatFiles <- c('../../data/results/pedigreeRelationship.csv',
+                   '../../data/results/pedigreeRelationship.json')
+  for (file in relMatFiles) {
+    test_that(paste("readRelMat", basename(file)), {
+      expect_error({
+        relMat <- readRelMat(file)
+      }, NA)
+      expect_true(is.matrix(relMat))
+      expect_true(isSymmetric(relMat))
+      expect_true(!is.null(colnames(relMat)))
+      expect_true(identical(colnames(relMat), row.names(relMat)))
+    })
+  }
+  # error
+  test_that(paste("readRelMat-error"), {
+    expect_error({
+      relMat <- readRelMat("doNotExist", format = 'csv')
+    }, "Relationship matrix file do not exists")
+  })
+
+
+  # downloadRelMat ----
+  for (file in relMatFiles) {
+    test_that(paste("downloadRelMat",  basename(file)), {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      expect_error({
+        relMat <- downloadRelMat(file)
+      }, NA)
+      expect_true(is.matrix(relMat))
+      expect_true(isSymmetric(relMat))
+      expect_true(!is.null(colnames(relMat)))
+      expect_true(identical(colnames(relMat), row.names(relMat)))
+    })
+  }
+
 })

@@ -340,7 +340,7 @@ calc_pedRelMAt <- function(pedFile = NULL,
                            unknown_string = "",
                            header = TRUE,
                            outFile = tempfile(fileext = ".csv"),
-                           outFormat = file_ext(outFile)) {
+                           outFormat = tools::file_ext(outFile)) {
   logger <- logger$new("r-calc_pedRelMAt()")
 
   logger$log("Get data ...")
@@ -421,12 +421,12 @@ draw_relHeatmap <- function(relMatFile = NULL,
   logger$log("Get data ...")
   if (!is.null(relMatFile) &&  is.null(relMatUrl)) {
     if (is.null(format)) {
-      format <- file_ext(relMatFile)
+      format <- tools::file_ext(relMatFile)
     }
     relMat <- readRelMat(file = relMatFile, format = format)
   } else if (!is.null(relMatUrl) && is.null(relMatFile)) {
     if (is.null(format)) {
-      format <- file_ext(relMatUrl)
+      format <- tools::file_ext(relMatUrl)
     }
     relMat <- downloadRelMat(url = relMatUrl, format = format)
   } else {
