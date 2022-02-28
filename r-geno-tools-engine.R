@@ -154,6 +154,68 @@ ldplot_parser$add_argument(arg$to$flag,
                            required = TRUE)
 
 
+
+
+# relmat pedigree
+pedRelMat_parser = main_subparsers$add_parser("relmat-ped",
+                                         help = "Pedigree relationship matrix",
+                                         description = "Caclulate a pedigree relationship matrix")
+pedRelMat_parser$add_argument(arg$pedFile$flag,
+                              help = arg$pedFile$help,
+                              type = arg$pedFile$type,
+                              required = TRUE)
+pedRelMat_parser$add_argument(arg$outFile$flag,
+                              help = arg$outFile$help,
+                              type = arg$outFile$type,
+                              required = TRUE)
+pedRelMat_parser$add_argument(arg$u_string$flag,
+                              help = arg$u_string$help,
+                              type = arg$u_string$type,
+                              required = FALSE)
+pedRelMat_parser$add_argument(arg$no_header$flag,
+                              help = arg$no_header$help,
+                              action = 'store_true')
+
+
+
+# relmat heatmap
+relMatHeat_parser = main_subparsers$add_parser("relmat-heatmap",
+                                              help = "Draw a heatmap of a relationship matrix",
+                                              description = "Draw a heatmap of a relationship matrix")
+relMatHeat_parser$add_argument(arg$relmatFile$flag,
+                               help = arg$relmatFile$help,
+                               type = arg$relmatFile$type,
+                               required = TRUE)
+relMatHeat_parser$add_argument(arg$outFile$flag,
+                               help = arg$outFile$help,
+                               type = arg$outFile$type,
+                               required = TRUE)
+relMatHeat_parser$add_argument(arg$no_interactive$flag,
+                               help = arg$no_interactive$help,
+                               action = 'store_true')
+
+
+# pedNetwork
+pedNet_parser = main_subparsers$add_parser("pedNetwork",
+                                           help = "Draw interactive pedigree network",
+                                           description = "Draw interactive pedigree network")
+pedNet_parser$add_argument(arg$pedFile$flag,
+                           help = arg$pedFile$help,
+                           type = arg$pedFile$type,
+                           required = TRUE)
+pedNet_parser$add_argument(arg$outFile$flag,
+                           help = arg$outFile$help,
+                           type = arg$outFile$type,
+                           required = TRUE)
+pedNet_parser$add_argument(arg$u_string$flag,
+                           help = arg$u_string$help,
+                           type = arg$u_string$type,
+                           required = FALSE)
+pedNet_parser$add_argument(arg$no_header$flag,
+                           help = arg$no_header$help,
+                           action = 'store_true')
+
+
 # Parse the command line arguments
 args = main_parser$parse_args()
 
@@ -170,9 +232,6 @@ cat(time, 'call to R-geno-engine.R:\n', paste0(names(args), ' = ', args, '\n'))
 
 # load engine's R packages dependencies:
 suppressPackageStartupMessages({
-  library(gaston) # for many functions
-  library(jsonlite) # manage json format
-  library(manhattanly) # manhattan plot using plotly
   library(R6) # R object oriented
 })
 
@@ -225,6 +284,30 @@ if (args$command == "gwas") {
                          from = args$from,
                          to = args$to,
                          outFile = args$outFile)
+  quit(save = "no", status = 0)
+
+} else if (args$command == "relmat-ped") {
+  if (args$outFormat == "__default__") {
+    args$outFormat <- tools::file_ext(args$outFile)
+  }
+  relMat <- calc_pedRelMAt(pedFile = args$pedFile,
+                           unknown_string = args$unkown_string,
+                           header = args$header,
+                           outFormat = args$outFormat,
+                           outFile = args$outFile)
+  quit(save = 'no', status = 0)
+
+} else if (args$command == 'relmat-heatmap') {
+  p <- draw_relHeatmap(relMatFile = args$relmatFile,
+                       interactive = !args$no_interactive,
+                       outFile = args$outFile)
+  quit(save = "no", status = 0)
+
+} else if (args$command == 'pedNetwork') {
+  p <- draw_pedNetwork(pedFile = args$pedFile,
+                       unknown_string = args$unkown_string,
+                       header = args$header,
+                       outFile = args$outFile)
   quit(save = "no", status = 0)
 }
 
