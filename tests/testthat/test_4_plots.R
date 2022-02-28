@@ -200,4 +200,44 @@ capture_output({
     }
   }
 
+
+
+
+  # pedNetwork ----
+  pedFiles <- c('../../data/pedigree/testPedData_char.csv',
+                '../../data/pedigree/testPedData_num.csv',
+                '../../data/pedigree/testPedData_missFounder.csv')
+  for (file in pedFiles) {
+    test_that(paste("pedNetwork", basename(file)), {
+      suppressWarnings({
+        ped <- readPedData(file)
+      })
+      expect_error({
+        pn <- pedNetwork(ped)
+      }, NA)
+      expect_true(all.equal(class(pn), c("forceNetwork", "htmlwidget")))
+    })
+  }
+
+  for (file in pedFiles) {
+    for (interactive in c(TRUE, FALSE)) {
+      test_that(paste("relMatHeatmap - inter:", interactive, basename(file)), {
+        suppressWarnings({
+          ped <- readPedData(file)
+          relMat <- pedRelMat(ped)
+        })
+        expect_error({
+          hm <- relMatHeatmap(relMat, interactive)
+        }, NA)
+        if (interactive) {
+          expect_true(all.equal(class(hm), c("plotly", "htmlwidget")))
+        } else {
+          expect_true(is.null(hm))
+        }
+      })
+    }
+  }
+
+
+
 })

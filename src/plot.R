@@ -331,18 +331,19 @@ relMatHeatmap <- function(relMat, interactive = TRUE) {
     # Create inreractive heatmap
     logger$log('Create interactive heatmap ...')
     newOrder <- hclust(dist(relMat))$order
-    hm <- plot_ly(type = "heatmap",
+    hm <- plotly::plot_ly(type = "heatmap",
                   x = colnames(relMat[newOrder, newOrder]),
                   y = rownames(relMat[newOrder, newOrder]),
                   z = relMat[newOrder, newOrder],
                   colors = hcl.colors(12, "YlOrRd", rev = TRUE)
-    ) %>% layout(
-      xaxis = list(
-        type = "category"
-      ),
-      yaxis = list(
-        type = "category",
-        autorange = "reversed")
+    )
+    hm <- plotly::layout(hm,
+                         xaxis = list(
+                           type = "category"
+                         ),
+                         yaxis = list(
+                           type = "category",
+                           autorange = "reversed")
     )
     logger$log('Create interactive heatmap DONE')
   } else {
@@ -435,14 +436,14 @@ pedNetwork <- function(ped) {
   logger$log('Create network ...')
 
   supThisWarning({
-    p <- forceNetwork(L,N,s,t,v,nid,nsize,grp,
-                      zoom = TRUE,
-                      fontSize = 14,
-                      fontFamily = "sans-serif",
-                      opacity = 0.9,
-                      opacityNoHover = 0.8,
-                      charge = -50,
-                      arrows = TRUE)
+    p <- networkD3::forceNetwork(L,N,s,t,v,nid,nsize,grp,
+                                 zoom = TRUE,
+                                 fontSize = 14,
+                                 fontFamily = "sans-serif",
+                                 opacity = 0.9,
+                                 opacityNoHover = 0.8,
+                                 charge = -50,
+                                 arrows = TRUE)
   }, "It looks like Source/Target is not zero-indexed. This is required in JavaScript and so your plot may not render.")
   logger$log('Create network DONE')
 

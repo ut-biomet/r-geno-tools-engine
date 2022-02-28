@@ -143,7 +143,7 @@ draw_manhattanPlot <- function(gwasFile = NULL,
     if (length(outFile) != 1) {
       stop("Error: `outFile` must be of length 1.")
     }
-    if (tools::file_ext(outFile) == '') {
+    if (missing(outFile)) {
       if (interactive) {
         outFile <- paste0(outFile, '.html')
       } else {
@@ -408,7 +408,7 @@ draw_relHeatmap <- function(relMatFile = NULL,
     if (length(outFile) != 1) {
       stop("Error: `outFile` must be of length 1.")
     }
-    if (tools::file_ext(outFile) == '') {
+    if (missing(outFile)) {
       if (interactive) {
         outFile <- paste0(outFile, '.html')
       } else {

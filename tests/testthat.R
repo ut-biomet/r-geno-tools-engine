@@ -23,7 +23,7 @@ invisible(
 # test_file("tests/testthat/test_3_filtering.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
-# test_file("tests/testthat/test_4_plots.r",
+# test_file("tests/testthat/test_4_plots.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
 # test_file("tests/testthat/test_5_mainfunctions.R",
