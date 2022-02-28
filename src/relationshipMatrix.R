@@ -86,6 +86,8 @@ pedRelMat <- function(ped) {
       lut$parent2[ped$data$parent2 == selectedNames[j]] <- selectedId[j]
     }
   }
+  lut$name <- ped$data$ind
+  lut <- lut[order(lut$id),] # re-order the table
   logger$log('Create look-up table DONE')
 
 
@@ -93,25 +95,24 @@ pedRelMat <- function(ped) {
   ### Calculate relationship matrix
   logger$log('Calculate relationship matrix ...')
   relMat <- matrix(NA, nrow = nrow(ped$data), ncol = nrow(ped$data))
+  for (i in seq(nrow(lut))) {
+    # l <- which(lut$id == i) # l is always = to i because lut is ordered.
+    # p1 <- lut[l, 'parent1']
+    # p2 <- lut[l, 'parent2']
 
-  ### order pedigree data chronologically
-  lut <- lut[order(lut$id),]
-  sorted_ped <- ped$data[lut$id,]
-
-  for (i in lut$id) {
     p1 <- lut$parent1[i]
     p2 <- lut$parent2[i]
 
-    for (j in seq_len(i)) {
+    for (j in seq(i)) {
       if (j != i) {
         if (p1 != 0 & p2 != 0) {
-          relMat[j, i] <- relMat[i, j] <- 0.5 * (relMat[j, p1] + relMat[j, p2])
+          relMat[i, j] <- relMat[j, i] <- 0.5 * (relMat[j, p1] + relMat[j, p2])
         } else if (p1 == 0 & p2 == 0) {
-          relMat[j, i] <- relMat[i, j] <- 0
+          relMat[i, j] <- relMat[j, i] <- 0
         } else if (p1 == 0) {
-          relMat[j, i] <- relMat[i, j] <- 0.5 * relMat[j, p2]
+          relMat[i, j] <- relMat[j, i] <- 0.5 * relMat[j, p2]
         } else if (p2 == 0) {
-          relMat[j, i] <- relMat[i, j] <- 0.5 * relMat[j, p1]
+          relMat[i, j] <- relMat[j, i] <- 0.5 * relMat[j, p1]
         }
       } else {
         if (p1 != 0 & p2 != 0) {
@@ -122,7 +123,12 @@ pedRelMat <- function(ped) {
       }
     }
   }
-  row.names(relMat) <- colnames(relMat) <- sorted_ped$ind
+  row.names(relMat) <- colnames(relMat) <- lut$name
+  # because lut is ordered, the above line is similar to:
+  #   names <- sapply(seq(nrow(relMat)), function(i){lut[lut$id == i, 'name']})
+  #   row.names(relMat) <- colnames(relMat) <- name
+
+
   # reset initial order
   relMat <- relMat[ped$data$ind, ped$data$ind]
 

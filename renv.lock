@@ -9,6 +9,13 @@
     ]
   },
   "Packages": {
+    "AGHmatrix": {
+      "Package": "AGHmatrix",
+      "Version": "2.0.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7025f40323c335142ab84c7fdbd18832"
+    },
     "BH": {
       "Package": "BH",
       "Version": "1.75.0-0",
@@ -699,6 +706,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "2826c5d9efb0a88f657c7a679c7106db"
+    },
+    "zoo": {
+      "Package": "zoo",
+      "Version": "1.8-9",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "035d1c7c12593038c26fb1c2fd40c4d2"
     }
   }
 }
