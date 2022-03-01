@@ -9,14 +9,13 @@
 
 
 
-
 capture_output({
   setwd('../..')
 
   # help ----
   test_that('engine help', {
     expect_error({
-      x <- system("./r-geno-tools-engine.R",
+      x <- system("Rscript ./r-geno-tools-engine.R",
                   intern = FALSE,
                   ignore.stdout = TRUE)
     }, NA)
@@ -24,7 +23,7 @@ capture_output({
   })
 
   # all commands help ----
-  x <- system("./r-geno-tools-engine.R",
+  x <- system("Rscript ./r-geno-tools-engine.R",
               intern = TRUE)
   x <- x[which(grepl('Available commands', x)) + 1]
   x <- gsub('[^\\w,\\-]', '', x, perl = TRUE)
@@ -33,7 +32,7 @@ capture_output({
   for (cmd in cmds) {
     test_that(paste('help:', cmd), {
       expect_error({
-        x <- system(paste("./r-geno-tools-engine.R", cmd),
+        x <- system(paste("Rscript ./r-geno-tools-engine.R", cmd),
                     intern = FALSE,
                     ignore.stdout = TRUE)
       }, NA)
@@ -43,7 +42,7 @@ capture_output({
 
   # gwas ----
   test_that('gwas', {
-    cmd <- paste('./r-geno-tools-engine.R gwas',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R gwas',
                  '--genoFile "data/geno/testMarkerData01.vcf"',
                  '--phenoFile "data/pheno/testPhenoData01.csv"',
                  '--trait "Flowering.time.at.Arkansas"',
@@ -64,7 +63,7 @@ capture_output({
   # gwas-manplot ----
   test_that('gwas-manplot', {
 
-    cmd <- paste('./r-geno-tools-engine.R gwas-manplot',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R gwas-manplot',
                  '--gwasFile "tests/testthat/testOutput/gwasRes.json"',
                  '--adj-method "bonferroni"',
                  '--thresh-p 0.05',
@@ -83,7 +82,7 @@ capture_output({
   # gwas-adjResults ----
   test_that('gwas-adjResults', {
 
-    cmd <- paste('./r-geno-tools-engine.R gwas-adjresults',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R gwas-adjresults',
                  '--gwasFile "tests/testthat/testOutput/gwasRes.json"',
                  '--adj-method "bonferroni"',
                  '--filter-nPoints 3000',
@@ -101,7 +100,7 @@ capture_output({
   # ldplot ----
   test_that('ldplot', {
 
-    cmd <- paste('./r-geno-tools-engine.R ldplot',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R ldplot',
                  '--genoFile "data/geno/testMarkerData01.vcf"',
                  '--from 42',
                  '--to 62',
@@ -118,7 +117,7 @@ capture_output({
   # relmat-ped ----
   test_that('relmat-ped', {
 
-    cmd <- paste('./r-geno-tools-engine.R relmat-ped',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-ped',
                  '--pedFile "data/pedigree/testPedData_char.csv"',
                  '--outFile "tests/testthat/testOutput/pedRelMat.json"')
 
@@ -134,7 +133,7 @@ capture_output({
   # relmat-heatmap ----
   test_that('relmat-heatmap', {
 
-    cmd <- paste('./r-geno-tools-engine.R relmat-heatmap',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-heatmap',
                  '--relmatFile "tests/testthat/testOutput/pedRelMat.json"',
                  '--outFile "tests/testthat/testOutput/relMat.png"')
 
@@ -149,7 +148,7 @@ capture_output({
   # pedNetwork ----
   test_that('pedNetwork', {
 
-    cmd <- paste('./r-geno-tools-engine.R pedNetwork',
+    cmd <- paste('Rscript ./r-geno-tools-engine.R pedNetwork',
                  '--pedFile "data/pedigree/testPedData_char.csv"',
                  '--outFile "tests/testthat/testOutput/pedNet.html"')
 
