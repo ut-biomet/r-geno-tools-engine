@@ -61,6 +61,12 @@ cat(paste(readLines("pedigree/testPedData_char.csv", n=10), collapse = "\n"))
 
 To store the example of results created by the engine.
 
+This can be done automatically using: 
+
+```{r eval=FALSE}
+createResultExample()
+```
+
 ```{r}
 list.files("results")
 ```

@@ -318,7 +318,7 @@ calc_pedRelMAt(
   unknown_string = "",
   header = TRUE,
   outFile = tempfile(fileext = ".csv"),
-  outFormat = file_ext(outFile)
+  outFormat = tools::file_ext(outFile)
 )
 ```
 
@@ -746,7 +746,7 @@ Download relationship matrix
 ## Usage
 
 ```r
-downloadRelMat(url, format = file_ext(url))
+downloadRelMat(url, format = tools::file_ext(url))
 ```
 
 
@@ -915,7 +915,7 @@ Read a relationship matrix file
 ## Usage
 
 ```r
-readRelMat(file, format = file_ext(file))
+readRelMat(file, format = tools::file_ext(file))
 ```
 
 
@@ -1016,7 +1016,7 @@ saveRelMat(
   metadata = NULL,
   dir = NULL,
   file = NULL,
-  format = file_ext(file)
+  format = tools::file_ext(file)
 )
 ```
 
