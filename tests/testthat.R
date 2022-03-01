@@ -29,12 +29,16 @@ invisible(
 # test_file("tests/testthat/test_5_mainfunctions.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
-
+# test_file("tests/testthat/test_6_engineCommands.R",
+#           stop_on_failure = TRUE,
+#           stop_on_warning = FALSE)
 
 test_dir("tests/testthat",
          stop_on_failure = TRUE,
          stop_on_warning = FALSE)
 
 # clean testOutput dir
-f <- list.files("tests/testthat/testOutput/", full.names = TRUE)
-invisible(lapply(f, file.remove))
+f <- list.files("tests/testthat/testOutput",
+                full.names = TRUE,
+                include.dirs = TRUE)
+invisible(lapply(f, unlink, recursive = TRUE))

@@ -1,0 +1,163 @@
+# Author: Julien Diot juliendiot@ut-biomet.org
+# 2022 The University of Tokyo
+#
+# Description:
+# Test engine commands
+
+
+
+
+
+
+
+capture_output({
+  setwd('../..')
+
+  # help ----
+  test_that('engine help', {
+    expect_error({
+      x <- system("./r-geno-tools-engine.R",
+                  intern = FALSE,
+                  ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+  # all commands help ----
+  x <- system("./r-geno-tools-engine.R",
+              intern = TRUE)
+  x <- x[which(grepl('Available commands', x)) + 1]
+  x <- gsub('[^\\w,\\-]', '', x, perl = TRUE)
+  cmds <- c('', strsplit(x, split = ',')[[1]])
+  cmds <- paste(cmds, '--help')
+  for (cmd in cmds) {
+    test_that(paste('help:', cmd), {
+      expect_error({
+        x <- system(paste("./r-geno-tools-engine.R", cmd),
+                    intern = FALSE,
+                    ignore.stdout = TRUE)
+      }, NA)
+      expect_equal(x, 0)
+    })
+  }
+
+  # gwas ----
+  test_that('gwas', {
+    cmd <- paste('./r-geno-tools-engine.R gwas',
+                 '--genoFile "data/geno/testMarkerData01.vcf"',
+                 '--phenoFile "data/pheno/testPhenoData01.csv"',
+                 '--trait "Flowering.time.at.Arkansas"',
+                 '--test "score"',
+                 '--fixed 0',
+                 '--response "quantitative"',
+                 '--thresh-maf 0.05',
+                 '--thresh-callrate 0.95',
+                 '--outFile "tests/testthat/testOutput/gwasRes.json"')
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+  # gwas-manplot ----
+  test_that('gwas-manplot', {
+
+    cmd <- paste('./r-geno-tools-engine.R gwas-manplot',
+                 '--gwasFile "tests/testthat/testOutput/gwasRes.json"',
+                 '--adj-method "bonferroni"',
+                 '--thresh-p 0.05',
+                 '--filter-nPoints 3000',
+                 '--outFile "tests/testthat/testOutput/manPlot.html"')
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
+
+  # gwas-adjResults ----
+  test_that('gwas-adjResults', {
+
+    cmd <- paste('./r-geno-tools-engine.R gwas-adjresults',
+                 '--gwasFile "tests/testthat/testOutput/gwasRes.json"',
+                 '--adj-method "bonferroni"',
+                 '--filter-nPoints 3000',
+                 '--outFile "tests/testthat/testOutput/gwasRes_adj.json"')
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
+
+  # ldplot ----
+  test_that('ldplot', {
+
+    cmd <- paste('./r-geno-tools-engine.R ldplot',
+                 '--genoFile "data/geno/testMarkerData01.vcf"',
+                 '--from 42',
+                 '--to 62',
+                 '--outFile "tests/testthat/testOutput/ldplot.png"')
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
+  # relmat-ped ----
+  test_that('relmat-ped', {
+
+    cmd <- paste('./r-geno-tools-engine.R relmat-ped',
+                 '--pedFile "data/pedigree/testPedData_char.csv"',
+                 '--outFile "tests/testthat/testOutput/pedRelMat.json"')
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
+
+  # relmat-heatmap ----
+  test_that('relmat-heatmap', {
+
+    cmd <- paste('./r-geno-tools-engine.R relmat-heatmap',
+                 '--relmatFile "tests/testthat/testOutput/pedRelMat.json"',
+                 '--outFile "tests/testthat/testOutput/relMat.png"')
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
+  # pedNetwork ----
+  test_that('pedNetwork', {
+
+    cmd <- paste('./r-geno-tools-engine.R pedNetwork',
+                 '--pedFile "data/pedigree/testPedData_char.csv"',
+                 '--outFile "tests/testthat/testOutput/pedNet.html"')
+
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+})

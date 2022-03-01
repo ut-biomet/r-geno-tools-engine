@@ -1,10 +1,11 @@
-#! /usr/local/bin/Rscript --vanilla
+#! /usr/local/bin/Rscript
 
 # Author: Julien Diot juliendiot@ut-biomet.org
 # Tue 24 Aug 2021 The University of Tokyo
 #
 # Description:
 # Main script of R-geno-tools-enigne
+
 
 library(argparse)
 
@@ -17,7 +18,7 @@ main_subparsers = main_parser$add_subparsers(title = "Available commands",
 source('src/commandArgs.R')
 parserList <- c() # to keep names of subcommands
 
-# GWAS gwas
+## GWAS gwas ----
 gwas_parser = main_subparsers$add_parser("gwas",
                                          help = "running a gwas analysis",
                                          description = "Run a GWAS analysis")
@@ -59,7 +60,7 @@ gwas_parser$add_argument(arg$thresh_callrate$flag,
                          default = arg$thresh_callrate$default)
 
 
-# GWAS manplot
+## GWAS manplot ----
 manplot_parser = main_subparsers$add_parser("gwas-manplot",
                                             help = "Draw a Manhattan Plot",
                                             description = "Draw a Manhattan Plot")
@@ -100,8 +101,8 @@ manplot_parser$add_argument(arg$filter_quant$flag,
                             default = arg$filter_quant$default)
 
 
-# GWAS adjResults
-adjResults_parser = main_subparsers$add_parser("gwas-adjResults",
+## GWAS adjResults ----
+adjResults_parser = main_subparsers$add_parser("gwas-adjresults",
                                                help = "Adjust GWAS p-values",
                                                description = "Adjust GWAS p-values and filter the results")
 adjResults_parser$add_argument(arg$gwasFile$flag,
@@ -132,7 +133,7 @@ adjResults_parser$add_argument(arg$filter_quant$flag,
 
 
 
-# LDplot
+## LDplot ----
 ldplot_parser = main_subparsers$add_parser("ldplot",
                                            help = "Get plot of the linkage disequilibrium between consecutive markers",
                                            description = "Get plot of the linkage disequilibrium between consecutive markers")
@@ -156,10 +157,10 @@ ldplot_parser$add_argument(arg$to$flag,
 
 
 
-# relmat pedigree
+## relmat pedigree ----
 pedRelMat_parser = main_subparsers$add_parser("relmat-ped",
                                          help = "Pedigree relationship matrix",
-                                         description = "Caclulate a pedigree relationship matrix")
+                                         description = "Caclulate a pedigree relationship matrix. The output file shoud end by either `.csv` or `.json`.")
 pedRelMat_parser$add_argument(arg$pedFile$flag,
                               help = arg$pedFile$help,
                               type = arg$pedFile$type,
@@ -171,14 +172,14 @@ pedRelMat_parser$add_argument(arg$outFile$flag,
 pedRelMat_parser$add_argument(arg$u_string$flag,
                               help = arg$u_string$help,
                               type = arg$u_string$type,
-                              required = FALSE)
+                              default = arg$u_string$default)
 pedRelMat_parser$add_argument(arg$no_header$flag,
                               help = arg$no_header$help,
                               action = 'store_true')
 
 
 
-# relmat heatmap
+## relmat heatmap ----
 relMatHeat_parser = main_subparsers$add_parser("relmat-heatmap",
                                               help = "Draw a heatmap of a relationship matrix",
                                               description = "Draw a heatmap of a relationship matrix")
@@ -195,7 +196,7 @@ relMatHeat_parser$add_argument(arg$no_interactive$flag,
                                action = 'store_true')
 
 
-# pedNetwork
+## pedNetwork ----
 pedNet_parser = main_subparsers$add_parser("pedNetwork",
                                            help = "Draw interactive pedigree network",
                                            description = "Draw interactive pedigree network")
@@ -210,7 +211,7 @@ pedNet_parser$add_argument(arg$outFile$flag,
 pedNet_parser$add_argument(arg$u_string$flag,
                            help = arg$u_string$help,
                            type = arg$u_string$type,
-                           required = FALSE)
+                           default = arg$u_string$default)
 pedNet_parser$add_argument(arg$no_header$flag,
                            help = arg$no_header$help,
                            action = 'store_true')
@@ -241,8 +242,8 @@ invisible(
          X = list.files("src", pattern = ".R$",full.names = T))
 )
 
-
 if (args$command == "gwas") {
+  # gwas ----
   gwas_results <- run_gwas(genoFile = args$genoFile,
                            phenoFile = args$phenoFile,
                            trait = args$trait,
@@ -255,6 +256,7 @@ if (args$command == "gwas") {
   quit(save = "no", status = 0)
 
 } else if (args$command == "gwas-manplot") {
+  # gwas-manplot ----
   if (identical(args$chr, '')) {
     args$chr <- NA
   }
@@ -270,6 +272,7 @@ if (args$command == "gwas") {
   quit(save = "no", status = 0)
 
 } else if (args$command == "gwas-adjresults") {
+  # gwas-adjresults ----
   gwas_adj <- run_resAdjustment(gwasFile = args$gwasFile,
                                 gwasUrl = args$gwasUrl,
                                 adj_method = args$adj_method,
@@ -280,6 +283,7 @@ if (args$command == "gwas") {
   quit(save = "no", status = 0)
 
 } else if (args$command == "ldplot") {
+  # ldplot ----
   imgFile <- draw_ldPlot(genoFile = args$genoFile,
                          from = args$from,
                          to = args$to,
@@ -287,26 +291,25 @@ if (args$command == "gwas") {
   quit(save = "no", status = 0)
 
 } else if (args$command == "relmat-ped") {
-  if (args$outFormat == "__default__") {
-    args$outFormat <- tools::file_ext(args$outFile)
-  }
+  # relmat-ped ----
   relMat <- calc_pedRelMAt(pedFile = args$pedFile,
-                           unknown_string = args$unkown_string,
-                           header = args$header,
-                           outFormat = args$outFormat,
+                           unknown_string = args$unknown_string,
+                           header = !args$no_header,
                            outFile = args$outFile)
   quit(save = 'no', status = 0)
 
 } else if (args$command == 'relmat-heatmap') {
+  # relmat-heatmap ----
   p <- draw_relHeatmap(relMatFile = args$relmatFile,
                        interactive = !args$no_interactive,
                        outFile = args$outFile)
   quit(save = "no", status = 0)
 
 } else if (args$command == 'pedNetwork') {
+  # pedNetwork ----
   p <- draw_pedNetwork(pedFile = args$pedFile,
-                       unknown_string = args$unkown_string,
-                       header = args$header,
+                       unknown_string = args$unknown_string,
+                       header = !args$no_header,
                        outFile = args$outFile)
   quit(save = "no", status = 0)
 }

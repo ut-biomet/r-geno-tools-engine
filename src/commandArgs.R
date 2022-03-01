@@ -164,10 +164,3 @@ arg$no_header$help = paste('To specify the input file do not have a header. In a
                            'the column 1 will be interpreted as the individual id',
                            ', column 2 as the first parent, column 3 as the',
                            'second parent.')
-
-
-# outFormat ----
-arg$outFormat$flag = '--outFormat'
-arg$outFormat$default = '__default__'
-arg$outFormat$help = 'Format of the output file, either `csv` or `json`'
-arg$outFormat$type = 'character'
