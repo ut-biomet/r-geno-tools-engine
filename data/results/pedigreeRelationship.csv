@@ -1,7 +1,7 @@
 #info=R-geno-engine, Pedigree relationship matrix
-#date=1646117619.15394
+#date=1646965264.32415
 #nInds=20
-#pedFP=11e9047a2a65e782d4c30bf1140147fe
+#pedFP=4c6cfd7731781081ba4c6a357fd084f5
 "Pluto","Zeus","Leda","Dione","Tantale","Europe","Pelos","Minos","Pelopia","Atree","Catree","Egiste","Aerope","Menelas","Agamemnon","Clytemnestre","Helene","Electre","Oreste","Hyphigenie"
 "Pluto",1,0,0,0,0.5,0,0.25,0,0.25,0.25,0,0.25,0,0.125,0.125,0,0,0.0625,0.0625,0.0625
 "Zeus",0,1,0,0,0.5,0.5,0.25,0.75,0.25,0.25,0.375,0.25,0.1875,0.21875,0.21875,0.5,0.5,0.359375,0.359375,0.359375
