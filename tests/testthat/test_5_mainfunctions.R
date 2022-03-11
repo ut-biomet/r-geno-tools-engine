@@ -353,6 +353,31 @@ capture.output({
     }
   }
 
+  # calc_genoRelMat ----
+  genoFiles <- c('../../data/geno/breedGame_geno.vcf.gz')
+  formats <- c('csv', 'json')
+  for (format in formats) {
+    for (file in genoFiles) {
+      test_that(paste("calc_genoRelMAt", format, basename(file)), {
+        expect_error({
+          relMat_results <- calc_genoRelMAt(genoFile = file,
+                                            genoUrl = NULL,
+                                            outFormat = format)
+        }, NA)
+
+        expect_true(class(relMat_results) == "list")
+        expect_identical(names(relMat_results),
+                         c("relMat", "metadata", "file"))
+        expect_true(is.matrix(relMat_results$relMat))
+        expect_identical(names(relMat_results$metadata),
+                         c("info", "date", "nInds", "genoFP"))
+        expect_true(file.exists(relMat_results$file))
+      })
+    }
+  }
+
+
+
   # draw_pedNetrowk ----
   for (file in pedFiles) {
     test_that(paste("draw_pedNetwork", basename(file)), {
@@ -372,7 +397,6 @@ capture.output({
       expect_true(file.info(tmpF)$size > 0)
     })
   }
-
 
   # draw_relMat ----
   relMatFiles <- c('../../data/results/pedigreeRelationship.csv',

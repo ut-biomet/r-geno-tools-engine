@@ -176,6 +176,13 @@ createResultExample <- function() {
   calc_pedRelMAt(pedFile,
                  outFile = 'data/results/pedigreeRelationship.json')
 
+  # create genomic relationship ----
+  cat('create genomic relationship ----\n')
+  calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
+                  outFile = 'data/results/genomicRelationship.csv')
+  calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
+                  outFile = 'data/results/genomicRelationship.json')
+
   # create relationship heatmap ----
   cat('create relationship heatmap ----\n')
   draw_relHeatmap(relMatFile = 'data/results/pedigreeRelationship.csv',

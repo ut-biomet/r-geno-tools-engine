@@ -178,6 +178,20 @@ pedRelMat_parser$add_argument(arg$no_header$flag,
                               action = 'store_true')
 
 
+## relmat genomic ----
+genoRelMat_parser = main_subparsers$add_parser("relmat-geno",
+                                         help = "Genomic relationship matrix",
+                                         description = "Caclulate a genomic relationship matrix. The output file shoud end by either `.csv` or `.json`.")
+genoRelMat_parser$add_argument(arg$genoFile$flag,
+                               help = arg$genoFile$help,
+                               type = arg$genoFile$type,
+                               required = TRUE)
+genoRelMat_parser$add_argument(arg$outFile$flag,
+                               help = arg$outFile$help,
+                               type = arg$outFile$type,
+                               required = TRUE)
+
+
 
 ## relmat heatmap ----
 relMatHeat_parser = main_subparsers$add_parser("relmat-heatmap",
@@ -296,6 +310,12 @@ if (args$command == "gwas") {
                            unknown_string = args$unknown_string,
                            header = !args$no_header,
                            outFile = args$outFile)
+  quit(save = 'no', status = 0)
+
+} else if (args$command == "relmat-geno") {
+  # relmat-geno ----
+  relMat <- calc_genoRelMAt(genoFile = args$genoFile,
+                            outFile = args$outFile)
   quit(save = 'no', status = 0)
 
 } else if (args$command == 'relmat-heatmap') {

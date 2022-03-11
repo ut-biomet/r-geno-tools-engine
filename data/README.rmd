@@ -20,7 +20,7 @@ This folder contain example data to run this engine.
 
 Genetic data.
 
-The `.vcf` files are not gitted.
+The `.vcf` files are not "gitted".
 
 ```{r}
 list.files("geno")
@@ -84,7 +84,12 @@ cat(paste(readLines("results/pedigreeRelationship.json", n=30), collapse = "\n")
 
 # Reference
 
-The genotypic and phenotypic data used as example come from:
+The genotypic and phenotypic `geno/testMarkerData01` and `pheno/testPhenoData01.csv`data used as example come from:
 
-- Keyan Zhao, Chih-Wei Tung, Georgia C. Eizenga, Mark H. Wright, M. Liakat Ali, Adam H. Price, Gareth J. Norton, M. Rafiqul Islam, Andy Reynolds, Jason Mezey, Anna M. McClung, Carlos D. Bustamante & Susan R. McCouch (2011). [Genome-wide association mapping reveals a rich genetic architecture of complex traits in *Oryza sativa*.](http://www.nature.com/ncomms/journal/v2/n9/full/ncomms1467.html) Nat Comm 2:467 | DOI: 10.1038/ncomms1467, Published Online 13 Sep 2011.
-- Flutre, T., Diot, J., and David, J. (2019). [PlantBreedGame: A Serious Game that Puts Students in the Breeder’s Seat. Crop Science.](https://acsess.onlinelibrary.wiley.com/doi/10.2135/cropsci2019.03.0183le) DOI 10.2135/cropsci2019.03.0183le
+> Keyan Zhao, Chih-Wei Tung, Georgia C. Eizenga, Mark H. Wright, M. Liakat Ali, Adam H. Price, Gareth J. Norton, M. Rafiqul Islam, Andy Reynolds, Jason Mezey, Anna M. McClung, Carlos D. Bustamante & Susan R. McCouch (2011). [Genome-wide association mapping reveals a rich genetic architecture of complex traits in *Oryza sativa*.](http://www.nature.com/ncomms/journal/v2/n9/full/ncomms1467.html) Nat Comm 2:467 | DOI: 10.1038/ncomms1467, Published Online 13 Sep 2011.
+
+
+The data `geno/breedGame_geno.vcf.gz`, `pheno/breedGame_pheno.csv`, and `breedGame_pedigree.csv` are simulated data generated using "PlantBreedGame":
+
+> Flutre, T., Diot, J., and David, J. (2019). [PlantBreedGame: A Serious Game that Puts Students in the Breeder’s Seat.](https://acsess.onlinelibrary.wiley.com/doi/10.2135/cropsci2019.03.0183le) Crop Science. DOI 10.2135/cropsci2019.03.0183le
+

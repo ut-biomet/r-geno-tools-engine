@@ -370,7 +370,7 @@ calc_pedRelMAt <- function(pedFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- saveRelMat(relMat = relMat, metadata = metadata, file = outFile)
+    file <- saveRelMat(relMat = relMat, metadata = metadata, file = outFile, format = outFormat)
     logger$log("Save results DONE")
   } else {
     file <- NULL
@@ -383,6 +383,66 @@ calc_pedRelMAt <- function(pedFile = NULL,
   ))
 }
 
+
+
+
+
+#' Calculate genomic relationship matrix
+#'
+#' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param genoUrl url of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param outFile path of the output file. If `NULL`, the output will not be
+#' written in any file. By default write in an tempoary `.json` file.
+#' @param outFormat Format of the output file, either `csv` or `json`.
+#' by default it will use the file extension of `outfile`.
+#'
+#' @details
+#' For `csv` output, the file will include some metadata lines (starting by a `#`
+#' symbol), the the csv data with a header and the row ids in its first column.
+#'
+#' @return list with 3 elements `relMat` the relationship matrix, `metadata` a
+#' list of metadata of these analysis (pedigree fingerprint,
+#' number of individuals, creation time) and `file` path
+#' of the file containing the results.
+calc_genoRelMAt <- function(genoFile = NULL,
+                            genoUrl = NULL,
+                            outFile = tempfile(fileext = ".csv"),
+                            outFormat = tools::file_ext(outFile)) {
+  logger <- logger$new("r-calc_genoRelMAt()")
+
+  logger$log("Get data ...")
+  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+    geno <- readGenoData(genoFile)
+  } else if (!is.null(genoUrl) && is.null(genoFile)) {
+    geno <- downloadGenoData(genoUrl)
+  } else {
+    stop("Error: either genoFile or genoUrl should be provided")
+  }
+
+  logger$log("Calcualte genomic relationship matrix ...")
+  relMat <- genoRelMat(geno = geno)
+  logger$log("Calcualte genomic relationship matrix DONE")
+  logger$log("Get metadata ...")
+  metadata <- list(info = "R-geno-engine, genomic relationship matrix",
+                   date = Sys.time(),
+                   nInds = ncol(relMat),
+                   genoFP = digest::digest(geno))
+  logger$log("Get metadata DONE")
+
+  if (!is.null(outFile)) {
+    logger$log("Save results ...")
+    file <- saveRelMat(relMat = relMat, metadata = metadata, file = outFile, format = outFormat)
+    logger$log("Save results DONE")
+  } else {
+    file <- NULL
+  }
+
+  return(list(
+    "relMat" = relMat,
+    "metadata" = metadata,
+    "file" = file
+  ))
+}
 
 
 

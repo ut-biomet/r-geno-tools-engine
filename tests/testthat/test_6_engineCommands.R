@@ -127,6 +127,18 @@ capture_output({
     expect_equal(x, 0)
   })
 
+  # relmat-geno ----
+  test_that('relmat-geno', {
+
+    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-geno',
+                 '--genoFile "data/geno/breedGame_geno.vcf.gz"',
+                 '--outFile "tests/testthat/testOutput/genoRelMat.json"')
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
 
 
 

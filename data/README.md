@@ -9,7 +9,7 @@ This folder contain example data to run this engine.
 
 Genetic data.
 
-The `.vcf` files are not gitted.
+The `.vcf` files are not “gitted”.
 
 ``` r
 list.files("geno")
@@ -99,11 +99,12 @@ createResultExample()
 
 ``` r
 list.files("results")
-#>  [1] "ajdResults.json"           "gwasResult.json"          
-#>  [3] "ldplot.png"                "manplot.html"             
-#>  [5] "manplot.png"               "pedigreeNetwork.html"     
-#>  [7] "pedigreeRelationship.csv"  "pedigreeRelationship.json"
-#>  [9] "relationshipHeatmap.html"  "relationshipHeatmap.png"
+#>  [1] "ajdResults.json"           "genomicRelationship.csv"  
+#>  [3] "genomicRelationship.json"  "gwasResult.json"          
+#>  [5] "ldplot.png"                "manplot.html"             
+#>  [7] "manplot.png"               "pedigreeNetwork.html"     
+#>  [9] "pedigreeRelationship.csv"  "pedigreeRelationship.json"
+#> [11] "relationshipHeatmap.html"  "relationshipHeatmap.png"
 ```
 
 ``` r
@@ -117,8 +118,8 @@ cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 #>       "A1": "A",
 #>       "A2": "T",
 #>       "freqA2": 0.135854341736695,
-#>       "score": 4.39503775602528,
-#>       "p": 0.0360436616126728
+#>       "score": 4.39502824590197,
+#>       "p": 0.036043862635721
 #>     },
 #>     {
 #>       "chr": "1",
@@ -127,8 +128,8 @@ cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 #>       "A1": "C",
 #>       "A2": "T",
 #>       "freqA2": 0.125352112676056,
-#>       "score": 1.67446032151039,
-#>       "p": 0.195662174699949
+#>       "score": 1.67445585071392,
+#>       "p": 0.195662771396972
 #>     },
 #>     {
 #>       "chr": "1",
@@ -137,15 +138,15 @@ cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
 #>       "A1": "A",
 #>       "A2": "T",
 #>       "freqA2": 0.293539325842697,
-#>       "score": 3.65922094486515,
+#>       "score": 3.65922266048491,
 ```
 
 ``` r
 cat(paste(readLines("results/pedigreeRelationship.csv", n=30), collapse = "\n"))
 #> #info=R-geno-engine, Pedigree relationship matrix
-#> #date=1646117619.15394
+#> #date=2022-03-11 12:05:27
 #> #nInds=20
-#> #pedFP=11e9047a2a65e782d4c30bf1140147fe
+#> #pedFP=8a6b7f58359f42470000f4a5a2d440d7
 #> "Pluto","Zeus","Leda","Dione","Tantale","Europe","Pelos","Minos","Pelopia","Atree","Catree","Egiste","Aerope","Menelas","Agamemnon","Clytemnestre","Helene","Electre","Oreste","Hyphigenie"
 #> "Pluto",1,0,0,0,0.5,0,0.25,0,0.25,0.25,0,0.25,0,0.125,0.125,0,0,0.0625,0.0625,0.0625
 #> "Zeus",0,1,0,0,0.5,0.5,0.25,0.75,0.25,0.25,0.375,0.25,0.1875,0.21875,0.21875,0.5,0.5,0.359375,0.359375,0.359375
@@ -205,17 +206,23 @@ cat(paste(readLines("results/pedigreeRelationship.json", n=30), collapse = "\n")
 
 # Reference
 
-The genotypic and phenotypic data used as example come from:
+The genotypic and phenotypic `geno/testMarkerData01` and
+`pheno/testPhenoData01.csv`data used as example come from:
 
--   Keyan Zhao, Chih-Wei Tung, Georgia C. Eizenga, Mark H. Wright, M.
-    Liakat Ali, Adam H. Price, Gareth J. Norton, M. Rafiqul Islam, Andy
-    Reynolds, Jason Mezey, Anna M. McClung, Carlos D. Bustamante &
-    Susan R. McCouch (2011). [Genome-wide association mapping reveals a
-    rich genetic architecture of complex traits in *Oryza
-    sativa*.](http://www.nature.com/ncomms/journal/v2/n9/full/ncomms1467.html)
-    Nat Comm 2:467 \| DOI: 10.1038/ncomms1467, Published Online 13
-    Sep 2011.
--   Flutre, T., Diot, J., and David, J. (2019). [PlantBreedGame: A
-    Serious Game that Puts Students in the Breeder’s Seat. Crop
-    Science.](https://acsess.onlinelibrary.wiley.com/doi/10.2135/cropsci2019.03.0183le)
-    DOI 10.2135/cropsci2019.03.0183le
+> Keyan Zhao, Chih-Wei Tung, Georgia C. Eizenga, Mark H. Wright, M.
+> Liakat Ali, Adam H. Price, Gareth J. Norton, M. Rafiqul Islam, Andy
+> Reynolds, Jason Mezey, Anna M. McClung, Carlos D. Bustamante & Susan
+> R. McCouch (2011). [Genome-wide association mapping reveals a rich
+> genetic architecture of complex traits in *Oryza
+> sativa*.](http://www.nature.com/ncomms/journal/v2/n9/full/ncomms1467.html)
+> Nat Comm 2:467 \| DOI: 10.1038/ncomms1467, Published Online 13 Sep
+> 2011.
+
+The data `geno/breedGame_geno.vcf.gz`, `pheno/breedGame_pheno.csv`, and
+`breedGame_pedigree.csv` are simulated data generated using
+“PlantBreedGame”:
+
+> Flutre, T., Diot, J., and David, J. (2019). [PlantBreedGame: A Serious
+> Game that Puts Students in the Breeder’s
+> Seat.](https://acsess.onlinelibrary.wiley.com/doi/10.2135/cropsci2019.03.0183le)
+> Crop Science. DOI 10.2135/cropsci2019.03.0183le

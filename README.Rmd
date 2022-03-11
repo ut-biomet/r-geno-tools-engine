@@ -11,6 +11,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+options(max.print = 50)
 dir.create("readmeTemp")
 ```
 
@@ -398,6 +399,30 @@ calc_pedRelMAt(pedFile = 'data/pedigree/testPedData_char.csv',
                unknown_string = '',
                outFile = tempfile(fileext = ".json"))
 ```
+
+
+
+### Genomic relationship matrix
+
+This engine can calculate the genomic-based relationship matrix:
+
+```sh
+docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
+    -v "$PWD"/readmeTemp:/out rgenotoolsengine \
+    relmat-geno \
+    --genoFile "/geno/breedGame_geno.vcf.gz" \
+    --outFile "/out/pedRelMat.json"
+```
+
+
+```{r genoRelMat}
+calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
+                genoUrl = NULL,
+                outFile = tempfile(fileext = ".json"))
+```
+
+
+
 
 
 ### Relationship matrix visualisation

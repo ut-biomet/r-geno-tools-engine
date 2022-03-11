@@ -349,6 +349,52 @@ list with 3 elements `relMat` the relationship matrix, `metadata` a
  of the file containing the results.
 
 
+# `calc_genoRelMAt`
+
+Calculate genomic relationship matrix
+
+
+## Description
+
+Calculate genomic relationship matrix
+
+
+## Usage
+
+```r
+calc_genoRelMAt(
+  genoFile = NULL,
+  genoUrl = NULL,
+  outFile = tempfile(fileext = ".csv"),
+  outFormat = tools::file_ext(outFile)
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
+`genoUrl`     |     url of the geno data file (`.vcf` or `.vcf.gz` file)
+`outFile`     |     path of the output file. If `NULL`, the output will not be written in any file. By default write in an tempoary `.json` file.
+`outFormat`     |     Format of the output file, either `csv` or `json`. by default it will use the file extension of `outfile`.
+
+
+## Details
+
+For `csv` output, the file will include some metadata lines (starting by a `#`
+ symbol), the the csv data with a header and the row ids in its first column.
+
+
+## Value
+
+list with 3 elements `relMat` the relationship matrix, `metadata` a
+ list of metadata of these analysis (pedigree fingerprint,
+ number of individuals, creation time) and `file` path
+ of the file containing the results.
+
+
 # `draw_relHeatmap`
 
 Draw a heatmap of a relationship matrix
@@ -1094,6 +1140,40 @@ pedRelMat(ped)
 Argument      |Description
 ------------- |----------------
 `ped`     |     List return by `readPedData` function
+
+
+## Value
+
+matrix
+
+
+## Author
+
+Hiroyoshi Iwata, Julien Diot
+
+
+# `genoRelMat`
+
+Genomic Relationship Matrix calculation
+
+
+## Description
+
+Genomic Relationship Matrix calculation
+
+
+## Usage
+
+```r
+genoRelMat(geno)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`geno`     |     `gaston::bed.matrix` return by `readGenoData` function
 
 
 ## Value
