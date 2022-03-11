@@ -365,7 +365,7 @@ calc_pedRelMAt <- function(pedFile = NULL,
   metadata <- list(info = "R-geno-engine, Pedigree relationship matrix",
                    date = Sys.time(),
                    nInds = ncol(relMat),
-                   pedFP = digest::digest(ped))
+                   pedFP = digest::digest(ped$data))
   logger$log("Get metadata DONE")
 
   if (!is.null(outFile)) {

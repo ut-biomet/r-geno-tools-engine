@@ -628,6 +628,7 @@ saveRelMat <- function(relMat,
   if (format == "csv") {
     logger$log('Write relationship matrix in `.csv` file ...')
     if (!is.null(metadata)) {
+      metadata <- lapply(metadata, as.character)
       writeLines(paste0("#", names(metadata), "=", unlist(metadata),
                         collapse = "\n"),
                  con = file)
