@@ -49,7 +49,8 @@ capture_output({
 
   # readPhenoData ----
   test_that("readPhenoData", {
-    files <- c("../../data/pheno/testPhenoData01.csv")
+    files <- c("../../data/pheno/testPhenoData01.csv",
+               "../data/resistance_initColl.csv")
 
     for (file in files) {
       expect_error({
@@ -72,7 +73,8 @@ capture_output({
 
   # downloadPhenoData ----
   test_that("downloadPhenoData", {
-    files <- c("../../data/pheno/testPhenoData01.csv")
+    files <- c("../../data/pheno/testPhenoData01.csv",
+               "../data/resistance_initColl.csv")
     files <- normalizePath(files)
     files <- paste0("file://", files)
     for (file in files) {

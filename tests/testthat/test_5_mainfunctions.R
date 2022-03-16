@@ -7,6 +7,12 @@
 capture.output({
 
   # run GWAS ----
+  files <- list(
+    list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
+         pheno = "../../data/pheno/testPhenoData01.csv"),
+    list(geno = "../data/Result_genos_hd_subset-initialColl.vcf.gz",
+         pheno = "../data/resistance_initColl.csv")
+  )
   test_that("Run GWAS", {
     expect_error({
       gwas_results <- run_gwas(genoFile = "../../data/geno/testMarkerData01.vcf.gz",

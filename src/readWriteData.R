@@ -236,7 +236,7 @@ readPhenoData <- function(file, ind.names = 1, ...) {
 
   logger$log("Set pheno data's row names ...")
   row.names(dta) <- dta[, ind.names]
-  dta <- dta[, -ind.names]
+  dta <- dta[, -ind.names, drop = FALSE]
   logger$log("Set pheno data's row names DONE")
 
   logger$log("DONE, return output.")
@@ -675,7 +675,7 @@ prepareData <- function(gDta, pDta) {
 
   # reorder phenotypic data with id in bed matrix
   logger$log("reorder matrix ...")
-  pDta <- pDta[gDta@ped$id,]
+  pDta <- pDta[gDta@ped$id,,drop=F]
   logger$log("reorder matrix DONE")
 
 
