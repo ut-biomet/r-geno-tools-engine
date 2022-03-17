@@ -156,8 +156,10 @@ manPlot <- function(gwas,
         title = title)
 
       if (!is.na(chr)) {
-        p <- layout(p,
-                    xaxis = list(title = paste('Chromosome', chr, 'position')))
+        p <- plotly::layout(
+          p,
+          xaxis = list(title = paste('Chromosome', chr, 'position'))
+        )
       }
     }
   } else {
