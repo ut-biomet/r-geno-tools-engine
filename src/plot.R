@@ -156,9 +156,8 @@ manPlot <- function(gwas,
         title = title)
 
       if (!is.na(chr)) {
-        p <- p %>% layout(
-          xaxis = list(title = paste('Chromosome', chr, 'position'))
-        )
+        p <- layout(p,
+                    xaxis = list(title = paste('Chromosome', chr, 'position')))
       }
     }
   } else {
