@@ -154,6 +154,12 @@ manPlot <- function(gwas,
         genomewideline = -log10(thresh_pAdj),
         suggestiveline = FALSE,
         title = title)
+
+      if (!is.na(chr)) {
+        p <- p %>% layout(
+          xaxis = list(title = paste('Chromosome', chr, 'position'))
+        )
+      }
     }
   } else {
     if (remainPoints == 0) {
