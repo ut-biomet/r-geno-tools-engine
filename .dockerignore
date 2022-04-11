@@ -43,7 +43,9 @@ renv/lock/
 renv/python/
 renv/staging/
 
-# vim 
+# vim
 tags
 *.vim
 
+# Other
+utils/

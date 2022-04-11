@@ -476,6 +476,13 @@ The genotypic and phenotypic data used as example come from:
 
 > Keyan Zhao, Chih-Wei Tung, Georgia C. Eizenga, Mark H. Wright, M. Liakat Ali, Adam H. Price, Gareth J. Norton, M. Rafiqul Islam, Andy Reynolds, Jason Mezey, Anna M. McClung, Carlos D. Bustamante & Susan R. McCouch (2011). [Genome-wide association mapping reveals a rich genetic architecture of complex traits in *Oryza sativa*.](http://www.nature.com/ncomms/journal/v2/n9/full/ncomms1467.html) Nat Comm 2:467 | DOI: 10.1038/ncomms1467, Published Online 13 Sep 2011.
 
+> Flutre, T., Diot, J., and David, J. (2019). [PlantBreedGame: A Serious Game that Puts Students in the Breeder’s Seat. Crop Science.](https://acsess.onlinelibrary.wiley.com/doi/10.2135/cropsci2019.03.0183le) DOI 10.2135/cropsci2019.03.0183le
+
+
+# Utils
+
+The [`utils`](./utils) folder contain miscellaneous code that can be useful for developers working on this project. This engine should NOT depend on any file of this folder.
+
 ```{r, include = FALSE}
 # remove temp dir
 unlink("readmeTemp", recursive = TRUE)
