@@ -182,4 +182,116 @@ genoRelMat <- function(geno) {
   logger$log("DONE, return output.")
   return(grm)
 
+}
+
+
+
+#' Combined (pedigree + genomic) Relationship Matrix
+#'
+#' Correct a pedigree relationship matrix by using genomic relationship matrix.
+#'
+#' @param ped_rm pedigree relationship matrix (matrix from function pedRelMat)
+#' @param geno_rm genomic relationship matrix (matrix from function genoRelMat)
+#' @param method method to use, either "Legarra" or "Martini"
+#' @param tau tau parameter of the Martini's method
+#' @param omega omega parameter of the Martini's method
+#'
+#' @return matrix
+#' @author Hiroyoshi Iwata, Julien Diot
+combinedRelMat <- function(ped_rm,
+                           geno_rm,
+                           method = 'Legarra',
+                           tau = NULL,
+                           omega = NULL) {
+
+  logger <- logger$new("r-combineRelMat()")
+
+  ### Check input ----
+  logger$log('Check inputs ...')
+  checkRelMat(ped_rm)
+  checkRelMat(geno_rm)
+  if (length(method) != 1) {
+    errMsg <- 'Only one method should be provided to `combineRelMat` function.'
+    logger$log('ERROR:', errMsg)
+    stop(errMsg)
   }
+  if (!method %in% c('Martini', 'Legarra')) {
+    errMsg <- 'Method should be either "Legarra" or "Marini".'
+    logger$log('ERROR:', errMsg)
+    stop(errMsg)
+  }
+  if (identical(method, 'Legarra')) {
+    if (!is.null(tau) || !is.null(omega)) {
+      warnMsg <- paste('`tau` and `omega` are only used for "Martini" method.',
+                       'Those parameters will be ignored.')
+      logger$log('Warning:', warnMsg)
+      warning(warnMsg)
+    }
+    tau <- 1
+    omega <- 1
+  }
+  if (!any(rownames(geno_rm) %in% rownames(ped_rm))) {
+    errMsg <- paste('No common individuals between genomic',
+                    'and pedigree relationship matrices.')
+    logger$log('ERROR:', errMsg)
+    stop(errMsg)
+  }
+
+  additionalInds <- rownames(geno_rm)[!rownames(geno_rm) %in% rownames(ped_rm)]
+  if (length(additionalInds) != 0) {
+    warning(paste(
+      length(additionalInds),
+      'individuals of the genomic relationship matrix',
+      'are not in the pedigree relationship matrix:',
+      paste(additionalInds, collapse = ', '),
+      '\nThe combined relationship matrix will only include individuals of the',
+      'pedigree relationship matrix.'
+    ))
+    geno_rm <- geno_rm[row.names(geno_rm) %in% colnames(ped_rm),
+                       colnames(geno_rm) %in% colnames(ped_rm)]
+  }
+  logger$log('Check inputs DONE')
+
+  # calculate genetic relationship matrix
+  logger$log('Calculate combined relationship matrix ...')
+
+  # # the following is an alternative to `AGHmatrix` by Iwata-sensei
+  #
+  # A.name <- rownames(ped_rm)
+  # G.name <- rownames(geno_rm)
+  #
+  # is.inG <- A.name %in% G.name
+  # A1.name <- A.name[!is.inG]
+  # A2.name <- A.name[is.inG]
+  #
+  # A00 <- ped_rm[c(A1.name, A2.name), c(A1.name, A2.name)]
+  # G22 <- geno_rm[A2.name, A2.name]
+  #
+  # A12 <- A00[A1.name, A2.name]
+  # A22 <- A00[A2.name, A2.name]
+  #
+  # G22.inv <- solve(G22)
+  # A22.inv <- solve(A22)
+  # H22 <- solve(tau * G22.inv + (1 - omega) * A22.inv)
+  #
+  # T11 <- A12 %*% A22.inv %*% (H22 - A22) %*% A22.inv %*% t(A12)
+  # T12 <- A12 %*% A22.inv %*% (H22 - A22)
+  # hrm <- A00 + rbind(cbind(T11, T12), cbind(t(T12), H22 - A22))
+  #
+  # rownames(hrm) <- colnames(hrm) <- rownames(A00)
+  # hrm <- hrm[rownames(ped_rm), rownames(ped_rm)]
+  # return(hrm)
+
+
+  hrm <- AGHmatrix::Hmatrix(A = ped_rm,
+                            G = geno_rm,
+                            method = 'Martini',
+                            tau = tau,
+                            omega = omega)
+  hrm <- hrm[row.names(ped_rm), colnames(ped_rm)]
+  logger$log('Calculate combined relationship matrix DONE')
+
+  ### output ----
+  logger$log("DONE, return output.")
+  return(hrm)
+}

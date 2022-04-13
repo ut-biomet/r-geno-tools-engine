@@ -407,11 +407,11 @@ calc_pedRelMAt(pedFile = 'data/pedigree/testPedData_char.csv',
 This engine can calculate the genomic-based relationship matrix:
 
 ```sh
-docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
+docker run --rm -v "$PWD"/data/geno/:/geno \
     -v "$PWD"/readmeTemp:/out rgenotoolsengine \
     relmat-geno \
     --genoFile "/geno/breedGame_geno.vcf.gz" \
-    --outFile "/out/pedRelMat.json"
+    --outFile "/out/genoRelMat.json"
 ```
 
 
@@ -421,6 +421,39 @@ calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
                 outFile = tempfile(fileext = ".json"))
 ```
 
+
+### Combined relationship matrix
+
+This method allow to correct a pedigree relationship matrix using a genomic 
+relationship matrix.
+
+2 methods are implemented:
+
+- `Legarra`: *Legarra, A, et al. 2009 A relationship matrix including full pedigree and genomic information. Journal of Dairy Science 92, 4656–4663*
+- `Martini`: *Martini, JW, et al. 2018 The effect of the H-1 scaling factors tau and omega on the structure of H in the single-step procedure. Genetics Selection Evolution 50(1), 16*. This method use additional parameters `tau` and `omega`. Martini's 
+method with `tau=1` and `omega=1` is equivalent to the `Legarra`'s method.
+
+```sh
+docker run --rm -v "$PWD"/data/results/:/results \
+    -v "$PWD"/readmeTemp:/out rgenotoolsengine \
+    relmat-combined \
+    --ped-relmatFile /results/breedGame_pedRelMat.csv
+    --geno-relmatFile /results/breedGame_genoRelMat.csv
+    --combine-method Martini
+    --tau 1
+    --omega 4
+    --outFile "/out/combined_relMat.json"
+```
+
+
+```{r combinedRelMat}
+calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
+                    genoRelMatFile = 'data/results/breedGame_genoRelMat.csv',
+                    method = "Martini",
+                    tau = 1,
+                    omega = 1.3,
+                    outFile = tempfile(fileext = ".json"))
+```
 
 
 

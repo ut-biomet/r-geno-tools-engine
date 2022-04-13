@@ -378,6 +378,48 @@ capture.output({
 
 
 
+  # calc_combinedRelMat ----
+  rm_files <- list(
+    breedGameFiles = list(
+      ped_rm = c('../../data/results/breedGame_pedRelMat.csv'),
+      geno_rm = c('../../data/results/breedGame_genoRelMat.csv')
+    )
+  )
+  formats <- c('csv', 'json')
+  methods <- c('Legarra', 'Martini')
+  tau <- list(Legarra = NULL, Martini = 0.4)
+  omega <- list(Legarra = NULL, Martini = 0.7)
+  for (format in formats) {
+    for (method in methods) {
+      for (filesName in names(rm_files)) {
+        test_that(paste("calc_genoRelMAt", format, method, filesName), {
+          files <- rm_files[[filesName]]
+          expect_error({
+            relMat_results <- calc_combinedRelMat(
+              pedRelMatFile = files$ped_rm,
+              genoRelMatFile = files$geno_rm,
+              method = method,
+              tau = tau[[method]],
+              omega = omega[[method]],
+              outFormat = format
+            )
+          }, NA)
+
+          expect_true(class(relMat_results) == "list")
+          expect_identical(names(relMat_results),
+                           c("relMat", "metadata", "file"))
+          expect_true(is.matrix(relMat_results$relMat))
+          expect_identical(names(relMat_results$metadata),
+                           c("info", "date", "nInds",
+                             "geno_relMatFP" , "ped_relMatFP"))
+          expect_true(file.exists(relMat_results$file))
+        })
+      }
+    }
+  }
+
+
+
   # draw_pedNetrowk ----
   for (file in pedFiles) {
     test_that(paste("draw_pedNetwork", basename(file)), {

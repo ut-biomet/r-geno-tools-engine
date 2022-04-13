@@ -139,6 +139,23 @@ capture_output({
     expect_equal(x, 0)
   })
 
+  # relmat-combined ----
+  test_that('relmat-combined', {
+
+    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-combined',
+                 '--ped-relmatFile data/results/breedGame_pedRelMat.csv',
+                 '--geno-relmatFile data/results/breedGame_genoRelMat.csv',
+                 # '--combine-method Legarra',
+                 '--combine-method Martini',
+                 '--tau 1.3',
+                 '--omega 0.7',
+                 '--outFile "tests/testthat/testOutput/genoRelMat.json"')
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
 
 
 

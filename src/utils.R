@@ -176,12 +176,24 @@ createResultExample <- function() {
   calc_pedRelMAt(pedFile,
                  outFile = 'data/results/pedigreeRelationship.json')
 
+  calc_pedRelMAt(pedFile = 'data/pedigree/breedGame_pedigree.csv',
+                 outFile = 'data/results/breedGame_pedRelMat.csv')
+  calc_pedRelMAt(pedFile = 'data/pedigree/breedGame_pedigree.csv',
+                 outFile = 'data/results/breedGame_pedRelMat.json')
+
   # create genomic relationship ----
   cat('create genomic relationship ----\n')
   calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
-                  outFile = 'data/results/genomicRelationship.csv')
+                  outFile = 'data/results/breedGame_genoRelMat.csv')
   calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
-                  outFile = 'data/results/genomicRelationship.json')
+                  outFile = 'data/results/breedGame_genoRelMat.json')
+
+  # create combined relationship ----
+  cat('create combined relationship ----\n')
+  calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
+                      genoRelMatFile = 'data/results/breedGame_genoRelMat.csv',
+                      method = 'Legarra',
+                      outFile = 'data/results/breedGame_combinedRelMat.csv')
 
   # create relationship heatmap ----
   cat('create relationship heatmap ----\n')

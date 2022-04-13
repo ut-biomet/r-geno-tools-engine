@@ -14,6 +14,7 @@
 # get pedigree data ----
 # 1st download all the "Plant material Data"
 # of the breeder in the `baseFolder`
+# (I used UT-previous sessions: Todai_session3_2021-11_training, Sakurai2)
 baseFolder <- '~/Downloads'
 pedFiles <- list.files(baseFolder, 'IndList', full.names = T)
 
@@ -50,6 +51,12 @@ req <- data.frame(
   task = 'geno',
   details = 'hd')
 
+# for a smaller request:
+usedInds <- c(allInds[!allInds %in% allFounders], usedFounders)
+req <- data.frame(
+  ind = usedInds,
+  task = 'geno',
+  details = 'hd')
 
 newReq <- paste0(baseFolder, '/breedGame_genoReq.txt')
 write.table(req, newReq,

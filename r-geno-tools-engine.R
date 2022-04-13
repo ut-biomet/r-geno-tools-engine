@@ -10,8 +10,16 @@
 library(argparse)
 
 # Create parser ----
-main_parser = ArgumentParser()
-main_subparsers = main_parser$add_subparsers(title = "Available commands",
+formatter_class <- "lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=42, width=100)"
+main_parser = ArgumentParser(
+  prog = './r-geno-tools-engine.R',
+  description = "Toolbox for some genomic analysis written in R.",
+  formatter_class = formatter_class,
+  # argument_default = "True",
+  usage = "%(prog)s"
+  )
+main_subparsers = main_parser$add_subparsers(prog = './r-geno-tools-engine.R',
+                                             title = "Available commands",
                                              dest = "command")
 
 # load argument descriptions
@@ -193,10 +201,50 @@ genoRelMat_parser$add_argument(arg$outFile$flag,
 
 
 
+## relmat combined ----
+combinedRelMat_parser = main_subparsers$add_parser(
+  "relmat-combined",
+  help = "Combined relationship matrix",
+  description = paste(
+    "Correct a pedigree relationship matrix using a genomic relationship matrix.",
+    "\\n\\nThe output file shoud end by either `.csv` or `.json`.",
+    "\\n\\nIndividuals in the genomic relationship matrix which do not belong ",
+    "to the pedigree relationship matrix will be ignored.",
+    "\\n\\nRefference of the method can be found at:",
+    "\\n\t- \"Martini, JW, et al. 2018 The effect of the H-1 scaling factors tau and omega on the structure of H in the single-step procedure. Genetics Selection Evolution 50(1), 16\"",
+    "\\n\t-\"Legarra, A, et al. 2009 A relationship matrix including full pedigree and genomic information. Journal of Dairy Science 92, 4656–4663\"",
+    "\\n \\n \\n "),
+  formatter_class=formatter_class)
+combinedRelMat_parser$add_argument(arg$ped_relmatFile$flag,
+                                   help = arg$ped_relmatFile$help,
+                                   type = arg$ped_relmatFile$type,
+                                   required = TRUE)
+combinedRelMat_parser$add_argument(arg$geno_relmatFile$flag,
+                                   help = arg$geno_relmatFile$help,
+                                   type = arg$geno_relmatFile$type,
+                                   required = TRUE)
+combinedRelMat_parser$add_argument(arg$combine_method$flag,
+                                   help = arg$combine_method$help,
+                                   type = arg$combine_method$type,
+                                   required = TRUE)
+combinedRelMat_parser$add_argument(arg$tau$flag,
+                                   help = arg$tau$help,
+                                   type = arg$tau$type)
+combinedRelMat_parser$add_argument(arg$omega$flag,
+                                   help = arg$omega$help,
+                                   type = arg$omega$type)
+combinedRelMat_parser$add_argument(arg$outFile$flag,
+                                   help = arg$outFile$help,
+                                   type = arg$outFile$type,
+                                   required = TRUE)
+
+
+
 ## relmat heatmap ----
 relMatHeat_parser = main_subparsers$add_parser("relmat-heatmap",
                                               help = "Draw a heatmap of a relationship matrix",
-                                              description = "Draw a heatmap of a relationship matrix")
+                                              description = "Draw a heatmap of a relationship matrix",
+                                              formatter_class=formatter_class)
 relMatHeat_parser$add_argument(arg$relmatFile$flag,
                                help = arg$relmatFile$help,
                                type = arg$relmatFile$type,
@@ -316,6 +364,16 @@ if (args$command == "gwas") {
   # relmat-geno ----
   relMat <- calc_genoRelMAt(genoFile = args$genoFile,
                             outFile = args$outFile)
+  quit(save = 'no', status = 0)
+
+} else if (args$command == "relmat-combined") {
+  # relmat-combined ----
+  relMat <- calc_combinedRelMat(pedRelMatFile = args$ped_relmatFile,
+                                genoRelMatFile = args$geno_relmatFile,
+                                method = args$combine_method,
+                                tau = args$tau,
+                                omega = args$omega,
+                                outFile = args$outFile)
   quit(save = 'no', status = 0)
 
 } else if (args$command == 'relmat-heatmap') {
