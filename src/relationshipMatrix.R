@@ -162,18 +162,36 @@ genoRelMat <- function(geno) {
       "\""
     )
   }
+  # remove monomorphic markers
+  geno <- gaston::select.snps(geno, maf != 0)
   logger$log('Check inputs DONE')
+
 
   # calculate genetic relationship matrix
   logger$log('Calculate genomic relationship matrix ...')
-  # # the following is commented because it take too much time for "big" geno
-  # X <- as.matrix(geno)
+
+  # # the following is an alternative to `gaston`
+  # X <- gaston::as.matrix(geno)
   # logger$log('Scale genomic matrix ...')
   # X_scaled <- scale(X)
   # logger$log('Scale genomic matrix DONE')
+  # if (any(is.na(X_scaled))) {
+  # logger$log('Impute missing values ...')
+  #   X_scaled[is.na(X_scaled)] <- 0
+  # logger$log('Impute missing values DONE')
+  # }
   # logger$log('Calculate crossproduct (this might take a while) ...')
-  # grm <- tcrossprod(X_scaled) / ncol(X_scaled)
+  # grm <- matrix(0, nrow = nrow(X_scaled), ncol = nrow(X_scaled))
+  # nSplit <- 100 # this value might probably be optimized
+  # for (i in 1:nSplit ) {
+  #   logger$log(paste0('\t', i, ' / ', nSplit, ' ...'), context = FALSE)
+  #   sel <- (1:ncol(X_scaled)) %% nSplit == i - 1
+  #   grm <- grm + tcrossprod(X_scaled[, sel])
+  # }
+  # grm / ncol(X_scaled)
   # logger$log('Calculate crossproduct DONE')
+
+
   grm <- gaston::GRM(geno, autosome.only = FALSE)
   logger$log('Calculate genomic relationship matrix DONE')
 
