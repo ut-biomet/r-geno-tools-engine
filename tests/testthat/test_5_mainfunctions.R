@@ -8,45 +8,53 @@ capture.output({
 
   # run GWAS ----
   files <- list(
-    list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
-         pheno = "../../data/pheno/testPhenoData01.csv"),
-    list(geno = "../data/Result_genos_hd_subset-initialColl.vcf.gz",
-         pheno = "../data/resistance_initColl.csv")
+    test_01 = list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
+                   pheno = "../../data/pheno/testPhenoData01.csv"),
+    test_singleTrait = list(geno = "../data/Result_genos_hd_subset-initialColl.vcf.gz",
+                          pheno = "../data/resistance_initColl.csv")
   )
-  test_that("Run GWAS", {
-    expect_error({
-      gwas_results <- run_gwas(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
-                               phenoFile = "../../data/pheno/testPhenoData01.csv",
-                               genoUrl = NULL,
-                               phenoUrl = NULL,
-                               trait = "Flowering.time.at.Arkansas",
-                               test = "score",
-                               fixed = 0,
-                               response = "quantitative",
-                               thresh_maf = 0.05,
-                               thresh_callrate = 0.95,
-                               outFile = tempfile(fileext = ".json"))
-    },NA)
-    expect_error({
-      gwas <- readGWAS(gwas_results$file)
-    }, NA)
-    expect_true(class(gwas) == "list")
-    expect_true(all.equal(names(gwas), c("gwas", "metadata")))
-    expect_true(class(gwas_results$gwas) == "json")
-    expect_true(class(gwas$gwas) == "data.frame")
-    expect_true(class(gwas$metadata) == "list")
-    expect_true(
-      all.equal(names(gwas$metadata), c("genoFP",
-                                        "phenoFP",
-                                        "trait",
-                                        "test",
-                                        "fixed",
-                                        "response",
-                                        "thresh_maf",
-                                        "thresh_callrate",
-                                        "date"))
-    )
-  })
+  for (test in names(files)) {
+
+    test_that(paste0("Run GWAS", test), {
+      if (test == 'test_01') {
+        trait <- "Flowering.time.at.Arkansas"
+      } else if (test == 'test_singleTrait') {
+        trait <- "resist"
+      }
+      expect_error({
+        gwas_results <- run_gwas(genoFile = files[[test]]$geno,
+                                 phenoFile = files[[test]]$pheno,
+                                 genoUrl = NULL,
+                                 phenoUrl = NULL,
+                                 trait = trait,
+                                 test = "score",
+                                 fixed = 0,
+                                 response = "quantitative",
+                                 thresh_maf = 0.05,
+                                 thresh_callrate = 0.95,
+                                 outFile = tempfile(fileext = ".json"))
+      },NA)
+      expect_error({
+        gwas <- readGWAS(gwas_results$file)
+      }, NA)
+      expect_true(class(gwas) == "list")
+      expect_true(all.equal(names(gwas), c("gwas", "metadata")))
+      expect_true(class(gwas_results$gwas) == "json")
+      expect_true(class(gwas$gwas) == "data.frame")
+      expect_true(class(gwas$metadata) == "list")
+      expect_true(
+        all.equal(names(gwas$metadata), c("genoFP",
+                                          "phenoFP",
+                                          "trait",
+                                          "test",
+                                          "fixed",
+                                          "response",
+                                          "thresh_maf",
+                                          "thresh_callrate",
+                                          "date"))
+      )
+    })
+  }
 
 
   # Test run_gwas() with wrong parameters:

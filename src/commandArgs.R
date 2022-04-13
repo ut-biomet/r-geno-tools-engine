@@ -63,7 +63,7 @@ arg$outFile$type = 'character'
 # adj-method ----
 arg$adj_method$flag = '--adj-method'
 arg$adj_method$default = 'bonferroni'
-arg$adj_method$help = paste0('p-value correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none". Default: ', arg$adj_method$default, '. (see https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust for more details)')
+arg$adj_method$help = paste0('p-value correction method: "holm", "hochberg", "bonferroni", "BH", "BY", "fdr", "none".\\nDefault: ', arg$adj_method$default, '. (see https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust for more details)')
 arg$adj_method$type = 'character'
 
 
@@ -107,14 +107,14 @@ arg$filter_quant$type = 'double'
 # test ----
 arg$test$flag = '--test'
 arg$test$default = 'score'
-arg$test$help = paste0('Which test to use. Either `"score"`, `"wald"` or `"lrt"`. For binary phenotypes, test = `"score"` is mandatory. Default ', arg$test$default, '. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test')
+arg$test$help = paste0('Which test to use. Either `"score"`, `"wald"` or `"lrt"`.\\nFor binary phenotypes, test = `"score"` is mandatory. Default ', arg$test$default, '.\\nFor more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test')
 arg$test$type = 'character'
 
 
 # fixed ----
 arg$fixed$flag = '--fixed'
 arg$fixed$default = 0
-arg$fixed$help = paste0('Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is ', arg$fixed$default, '. For more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test')
+arg$fixed$help = paste0('Number of Principal Components to include in the model with fixed effect (for test = `"wald"` or `"lrt"`). Default value is ', arg$fixed$default, '.\\nFor more information about this parameters see: https://www.rdocumentation.org/packages/gaston/versions/1.4.9/topics/association.test')
 arg$fixed$type = 'integer'
 
 

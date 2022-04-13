@@ -329,7 +329,7 @@ draw_ldPlot <- function(genoFile = NULL,
 #'
 #' @details
 #' For `csv` output, the file will include some metadata lines (starting by a `#`
-#' symbol), the the csv data with a header and the row ids in its first column.
+#' symbol), a header and the row ids in its first column.
 #'
 #' @return list with 3 elements `relMat` the relationship matrix, `metadata` a
 #' list of metadata of these analysis (pedigree fingerprint,
@@ -398,7 +398,7 @@ calc_pedRelMAt <- function(pedFile = NULL,
 #'
 #' @details
 #' For `csv` output, the file will include some metadata lines (starting by a `#`
-#' symbol), the the csv data with a header and the row ids in its first column.
+#' symbol), a header and the row ids in its first column.
 #'
 #' @return list with 3 elements `relMat` the relationship matrix, `metadata` a
 #' list of metadata of these analysis (pedigree fingerprint,

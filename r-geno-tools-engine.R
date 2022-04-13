@@ -28,8 +28,10 @@ parserList <- c() # to keep names of subcommands
 
 ## GWAS gwas ----
 gwas_parser = main_subparsers$add_parser("gwas",
-                                         help = "running a gwas analysis",
-                                         description = "Run a GWAS analysis")
+                                         help = "Do a gwas analysis",
+                                         description = "Run a GWAS analysis",
+                                         formatter_class = formatter_class,
+                                         argument_default = "True")
 gwas_parser$add_argument(arg$genoFile$flag,
                          help = arg$genoFile$help,
                          type = arg$genoFile$type,
@@ -71,7 +73,8 @@ gwas_parser$add_argument(arg$thresh_callrate$flag,
 ## GWAS manplot ----
 manplot_parser = main_subparsers$add_parser("gwas-manplot",
                                             help = "Draw a Manhattan Plot",
-                                            description = "Draw a Manhattan Plot")
+                                            description = "Draw a Manhattan Plot",
+                                            formatter_class=formatter_class)
 manplot_parser$add_argument(arg$gwasFile$flag,
                             help = arg$gwasFile$help,
                             type = arg$gwasFile$type,
@@ -112,7 +115,8 @@ manplot_parser$add_argument(arg$filter_quant$flag,
 ## GWAS adjResults ----
 adjResults_parser = main_subparsers$add_parser("gwas-adjresults",
                                                help = "Adjust GWAS p-values",
-                                               description = "Adjust GWAS p-values and filter the results")
+                                               description = "Adjust GWAS p-values and filter the results",
+                                               formatter_class=formatter_class)
 adjResults_parser$add_argument(arg$gwasFile$flag,
                                help = arg$gwasFile$help,
                                type = arg$gwasFile$type,
@@ -144,7 +148,8 @@ adjResults_parser$add_argument(arg$filter_quant$flag,
 ## LDplot ----
 ldplot_parser = main_subparsers$add_parser("ldplot",
                                            help = "Get plot of the linkage disequilibrium between consecutive markers",
-                                           description = "Get plot of the linkage disequilibrium between consecutive markers")
+                                           description = "Get plot of the linkage disequilibrium between consecutive markers",
+                                           formatter_class=formatter_class)
 ldplot_parser$add_argument(arg$genoFile$flag,
                            help = arg$genoFile$help,
                            type = arg$genoFile$type,
@@ -168,7 +173,8 @@ ldplot_parser$add_argument(arg$to$flag,
 ## relmat pedigree ----
 pedRelMat_parser = main_subparsers$add_parser("relmat-ped",
                                          help = "Pedigree relationship matrix",
-                                         description = "Caclulate a pedigree relationship matrix. The output file shoud end by either `.csv` or `.json`.")
+                                         description = "Caclulate a pedigree relationship matrix.\\n\\nThe output file shoud end by either `.csv` or `.json`.",
+                                         formatter_class=formatter_class)
 pedRelMat_parser$add_argument(arg$pedFile$flag,
                               help = arg$pedFile$help,
                               type = arg$pedFile$type,
@@ -189,7 +195,8 @@ pedRelMat_parser$add_argument(arg$no_header$flag,
 ## relmat genomic ----
 genoRelMat_parser = main_subparsers$add_parser("relmat-geno",
                                          help = "Genomic relationship matrix",
-                                         description = "Caclulate a genomic relationship matrix. The output file shoud end by either `.csv` or `.json`.")
+                                         description = "Caclulate a genomic relationship matrix.\\n\\nThe output file shoud end by either `.csv` or `.json`.",
+                                         formatter_class=formatter_class)
 genoRelMat_parser$add_argument(arg$genoFile$flag,
                                help = arg$genoFile$help,
                                type = arg$genoFile$type,
@@ -261,7 +268,8 @@ relMatHeat_parser$add_argument(arg$no_interactive$flag,
 ## pedNetwork ----
 pedNet_parser = main_subparsers$add_parser("pedNetwork",
                                            help = "Draw interactive pedigree network",
-                                           description = "Draw interactive pedigree network")
+                                           description = "Draw interactive pedigree network",
+                                           formatter_class=formatter_class)
 pedNet_parser$add_argument(arg$pedFile$flag,
                            help = arg$pedFile$help,
                            type = arg$pedFile$type,

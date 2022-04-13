@@ -301,7 +301,7 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
     stop("pedigree file do not exists")
   }
   if (!identical(tools::file_ext(file), 'csv')) {
-    stop('Pedigree file shoucd be a `.csv` file.')
+    stop('Pedigree file should be a `.csv` file.')
   }
   ped <- read.csv(file,
                   na.strings = unknown_string,
