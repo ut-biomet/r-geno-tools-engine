@@ -73,6 +73,7 @@ manPlot <- function(gwas,
 
   # plot functions require chr as numeric values:
   chrlabels <- unique(gwas$chr)
+  chrlabels <- stringr::str_sort(chrlabels, numeric = TRUE)
   gwas$chr <- as.numeric(factor(gwas$chr,
                                 levels = chrlabels))
 
