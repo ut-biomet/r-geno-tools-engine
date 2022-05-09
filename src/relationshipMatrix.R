@@ -248,6 +248,22 @@ combinedRelMat <- function(ped_rm,
     tau <- 1
     omega <- 1
   }
+  if (identical(c(tau, omega), c(0, 1))) {
+    errMsg <- 'The combination `tau`= 0, and `omega` = 1 is not possible.'
+    logger$log('ERROR:', errMsg)
+    stop(errMsg)
+  }
+  if (tau < 0) {
+    errMsg <- '`tau` must be a positive number.'
+    logger$log('ERROR:', errMsg)
+    stop(errMsg)
+  }
+  if (omega > 1) {
+    errMsg <- '`omega` must be lower than one.'
+    logger$log('ERROR:', errMsg)
+    stop(errMsg)
+  }
+
   if (!any(rownames(geno_rm) %in% rownames(ped_rm))) {
     errMsg <- paste('No common individuals between genomic',
                     'and pedigree relationship matrices.')

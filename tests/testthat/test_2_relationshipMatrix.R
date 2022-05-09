@@ -79,6 +79,8 @@ capture_output({
     legarra = list(ped_rm = A, geno_rm = G, method = 'Legarra'),
     martini = list(ped_rm = A, geno_rm = G, method = 'Martini',
                    tau = 0.5, omega = 0.5),
+    martini_randParams = list(ped_rm = A, geno_rm = G, method = 'Martini',
+                   tau = runif(1, 0, 20), omega = runif(1, -20, 1)),
     warn_missIndInPed = list(ped_rm = A[-(1:10), -(1:10)], geno_rm = G),
     warn_tauOmeg_leggara = list(ped_rm = A, geno_rm = G, method = 'Legarra',
                                 tau = 0.5, omega = 0.5)
@@ -155,5 +157,28 @@ capture_output({
   })
 
 
+  test_that(paste('combinedRelMat: wron tau omega'), {
+    expect_error({
+      relMat <- combinedRelMat(ped_rm = A,
+                               geno_rm = G,
+                               method = 'Martini',
+                               tau = 0,
+                               omega = 1)
+    }, 'The combination `tau`= 0, and `omega` = 1 is not possible.')
+    expect_error({
+      relMat <- combinedRelMat(ped_rm = A,
+                               geno_rm = G,
+                               method = 'Martini',
+                               tau = -1,
+                               omega = 1)
+    }, '`tau` must be a positive number.')
+    expect_error({
+      relMat <- combinedRelMat(ped_rm = A,
+                               geno_rm = G,
+                               method = 'Martini',
+                               tau = 0,
+                               omega = 1.5)
+    }, '`omega` must be lower than one.')
+  })
 
 })
