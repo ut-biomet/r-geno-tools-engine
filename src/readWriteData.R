@@ -30,6 +30,31 @@ downloadGenoData <- function(url) {
   dta
 }
 
+#' Download phased geno data
+#'
+#' @param url url of the geno data file (.vcf.gz file)
+#'
+#' @return list of 2: `haplotypes` a matrix of the individuals haplotypes
+#'  and `SNPcoord`, data frame of the SNP coordinates.
+downloadPhasedGeno <- function(url) {
+  logger <- logger$new("r-downloadPhasedGeno()")
+  logger$log("Create local temp file ... ")
+  localFile <- tempfile(pattern = "geno",
+                        tmpdir = tempdir(),
+                        fileext = ".vcf.gz")
+  logger$log("Download geno file ...")
+
+  # download data file:
+  logger$log("Download genotypic file ... ")
+  download.file(url, localFile, quiet = TRUE)
+  logger$log("Download genotypic file DONE")
+  logger$log("Read genotypic file ...")
+  dta <- readPhasedGeno(localFile)
+  logger$log("Read genotypic file DONE")
+
+  logger$log("DONE, return output.")
+  dta
+}
 #' Download phenotypic data
 #'
 #' @param url url of the phenotypic data file (csv file)
@@ -204,6 +229,92 @@ readGenoData <- function(file) {
 
   dta
 }
+
+
+#' Read phased genetic data from a file
+#'
+#' @param file VCF file path (ext `.vcf` or `.vcf.gz`)
+#'
+#' @return list of 2: `haplotypes` a matrix of the individuals haplotypes
+#'  and `SNPcoord`, data frame of the SNP coordinates.
+readPhasedGeno <- function(file) {
+  logger <- logger$new("r-readPhasedGeno()")
+  logger$log("Check file extention ... ")
+
+  if (!file.exists(file)) {
+    stop("Phased genotypic file do not exists")
+  }
+
+  ext <- tools::file_ext(file)
+  if (identical(ext, "gz")) {
+    ext <- paste0(
+      tools::file_ext(tools::file_path_sans_ext(file, compression = FALSE)),
+      ".", ext)
+  }
+
+  if (!(identical(ext, "vcf.gz") || identical(ext, "vcf"))) {
+    stop("Phased genotypic file should be in VCF format. `.vcf`, or `.vcf.gz`. Provided file extention is ", ext)
+  }
+
+  logger$log("Read geno file ... ")
+  vcf <- vcfR::read.vcfR(file, verbose = FALSE)
+  logger$log("Read phased geno file DONE")
+
+
+  # get SNP information
+  logger$log("Extract SNP information...")
+  fixVcf <- as.data.frame(vcfR::getFIX(vcf), stringsAsFactors = FALSE)
+  SNPcoord <- fixVcf[,c("CHROM", "POS", "ID")]
+  colnames(SNPcoord) <- c("chr", "physPos", "SNPid")
+  logger$log("Extract SNP information DONE")
+
+
+  # Check if genotypes are phased
+  logger$log("Check pahsing ...")
+  if (all(vcf@gt[,"FORMAT"] == "GT")) {
+    # quick return if FORMAT == GT
+    gt <- vcf@gt
+    gt <- gt[, colnames(gt) != "FORMAT"]
+    row.names(gt) <- vcf@fix[,"ID"]
+  } else {
+    gt <- vcfR::extract.gt(vcf, element = 'GT')
+  }
+  if (!all(grepl("|", gt, fixed = TRUE))) {
+    errMsg <- "VCF file should be phased for all variant and all individuals, (`|` separator for GT field)."
+    logger$log("ERROR:", errMsg)
+    stop(errMsg)
+  }
+  logger$log("Check pahsing DONE")
+
+
+  # extract haplotypes
+  logger$log("Extract haplotypes...")
+  indNames <- colnames(gt)
+  markersNames <- rownames(gt)
+
+  # paste all values in one vector (make strsplit faster)
+  gt <- paste(gt, collapse = "|")
+  gt <- strsplit(gt, split = "|", fixed = TRUE)
+  gt <- unlist(gt)
+  gt <- as.integer(gt)
+  # values of gt are mixed so we need to reorder:
+  gt <- c(gt[seq(1, length(gt), 2)], gt[seq(2, length(gt), 2)])
+  gt <- matrix(gt,
+               nrow = length(markersNames),
+               byrow = FALSE)
+  rownames(gt) <- markersNames
+  colnames(gt) <- paste(rep(indNames, 2),
+                        rep(1:2, each = length(indNames)),
+                        sep = "_")
+  logger$log("Extract haplotypes DONE")
+
+  logger$log("DONE, return output.")
+
+  list(haplotypes = gt,
+       SNPcoord = SNPcoord)
+
+}
+
 
 
 #' Read phenotypic data file
