@@ -186,8 +186,31 @@ downloadRelMat <- function(url, format = tools::file_ext(url)) {
 }
 
 
+#' Download crossing table
+#'
+#' @param url url of the crossing table data file (`csv` file of 2 or 3 columns).
+#' @param header [default: TRUE] a logical value indicating whether the file
+#' contains the names of the variables as its first line. The default value is
+#' TRUE. In any cases, the column 1 and 2 will be interpreted as the parents id.
+#' The optional third column will be interpreted as the offspring base name.
+#'
+#' @return data.frame with the crossing table information.
+downloadCrossTable <- function(url, header = TRUE) {
+  logger <- logger$new("r-downloadCrossTable()")
+  logger$log("Create local temp file ... ")
+  localFile <- tempfile(pattern = "downloadedResult",
+                        tmpdir = tempdir(),
+                        fileext = ".csv")
+  logger$log("Download result file ... ")
+  download.file(url, localFile, quiet = TRUE)
 
+  logger$log("Read result file ... ")
+  crossTable <- readCrossTable(localFile, header)
+  logger$log("Read result file DONE ")
 
+  logger$log("DONE, return output.")
+  crossTable
+}
 
 
 
@@ -429,7 +452,7 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
     stop('Pedigree file should have exactly 3 columns', ncol(ped), 'detected.')
   }
   if (nrow(ped) == 0) {
-    stop('Pedigree file should have at least one row', ncol(ped), 'detected.')
+    stop('Pedigree file should have at least one row')
   }
 
   # NA in first colunm
@@ -591,6 +614,61 @@ readRelMat <- function(file, format = tools::file_ext(file)) {
 }
 
 
+
+#' Read crossing table
+#'
+#' @param file path of the crossing table data file (`csv` file of 2 or 3 columns).
+#' @param header [default: TRUE] a logical value indicating whether the file
+#' contains the names of the variables as its first line. The default value is
+#' TRUE. In any cases, the column 1 and 2 will be interpreted as the parents id.
+#' The optional third column will be interpreted as the offspring base name.
+#'
+#' @return data.frame with the crossing table information.
+readCrossTable <- function(file, header = TRUE) {
+  logger <- logger$new('r-readCrossTable')
+
+  logger$log('Read crossing table file ...')
+  if (!file.exists(file)) {
+    stop("crossing table file do not exists")
+  }
+  if (!identical(tools::file_ext(file), 'csv')) {
+    stop('crossing table file should be a `.csv` file.')
+  }
+  crossTable <- read.csv(file,
+                  header = header,
+                  stringsAsFactors = FALSE)
+  logger$log('Read crossing table file DONE')
+
+
+  logger$log('Check crossing table file ...')
+  # file dimension
+  if (!ncol(crossTable) %in% c(2, 3)) {
+    stop('crossing table file should have 2 or 3 columns', ncol(crossTable), 'detected.')
+  }
+  if (nrow(crossTable) == 0) {
+    stop('crossing table file should have at least one row')
+  }
+
+  # missing values
+  if (any(is.na(crossTable))) {
+    stop('crossing table should not have any missing values')
+  }
+
+  # duplicated rows
+  dupRows <- duplicated(crossTable[, c(1,2)])
+  if (any(dupRows)) {
+    warning(sum(dupRows),
+            ' duplicated patental pair(s) found in the crossing table file.',
+            ' They will be removed.')
+    crossTable <- crossTable[!dupRows,]
+  }
+
+  colnames(crossTable)[c(1,2)] <- c('parent1', 'parent2')
+  if (ncol(crossTable) == 3) {
+    colnames(crossTable)[3] <- 'offspringBaseName'
+  }
+  return(crossTable)
+}
 
 #' Read GWAS analysis result file (`.json`)
 #'
