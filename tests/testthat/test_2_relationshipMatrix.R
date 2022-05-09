@@ -101,15 +101,37 @@ capture_output({
       expect_true(is.numeric(relMat))
       expect_identical(dim(relMat), dim(params$ped_rm))
       expect_true(!any(is.na(relMat)))
-      # expect_true(isSymmetric(relMat)) # exact symmetry fail
+      expect_true(isSymmetric(relMat)) # exact symmetry
       # check approximate symmetry (diff< ~1.5e-8.) instead
-      expect_true(all.equal.numeric(relMat, t(relMat)))
+      # expect_true(all.equal.numeric(relMat, t(relMat)))
 
       expect_true(!is.null(colnames(relMat)))
       expect_true(!is.null(row.names(relMat)))
       expect_identical(colnames(relMat), row.names(relMat))
       expect_identical(colnames(params$ped_rm), colnames(relMat))
     })
+    if (!grepl('warn_', paramName)) {
+      test_that(paste("combineRelMat vs AGHmatrix:", paramName),{
+        skip_if_not_installed("AGHmatrix")
+        params <- paramList[[paramName]]
+        suppressWarnings({
+          relMat <- do.call(combinedRelMat, params)
+        })
+        agh_params <- list()
+        agh_params$A <- params$ped_rm
+        agh_params$G <- params$geno_rm
+        agh_params$method <- "Martini"
+        agh_params$omega <- params$omega
+        agh_params$tau <- params$tau
+        exp_relMat <- do.call(AGHmatrix::Hmatrix, agh_params)
+        exp_relMat <- exp_relMat[row.names(agh_params$A),
+                                 colnames(agh_params$A)]
+
+        expect_identical(colnames(relMat), colnames(exp_relMat))
+        expect_identical(row.names(relMat), row.names(exp_relMat))
+        expect_true(all.equal.numeric(exp_relMat, relMat))
+      })
+    }
   }
 
   test_that(paste('combinedRelMat: wrong method'), {

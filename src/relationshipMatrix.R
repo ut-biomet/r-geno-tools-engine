@@ -273,40 +273,35 @@ combinedRelMat <- function(ped_rm,
   # calculate genetic relationship matrix
   logger$log('Calculate combined relationship matrix ...')
 
-  # # the following is an alternative to `AGHmatrix` by Iwata-sensei
-  #
-  # A.name <- rownames(ped_rm)
-  # G.name <- rownames(geno_rm)
-  #
-  # is.inG <- A.name %in% G.name
-  # A1.name <- A.name[!is.inG]
-  # A2.name <- A.name[is.inG]
-  #
-  # A00 <- ped_rm[c(A1.name, A2.name), c(A1.name, A2.name)]
-  # G22 <- geno_rm[A2.name, A2.name]
-  #
-  # A12 <- A00[A1.name, A2.name]
-  # A22 <- A00[A2.name, A2.name]
-  #
-  # G22.inv <- solve(G22)
-  # A22.inv <- solve(A22)
-  # H22 <- solve(tau * G22.inv + (1 - omega) * A22.inv)
-  #
-  # T11 <- A12 %*% A22.inv %*% (H22 - A22) %*% A22.inv %*% t(A12)
-  # T12 <- A12 %*% A22.inv %*% (H22 - A22)
-  # hrm <- A00 + rbind(cbind(T11, T12), cbind(t(T12), H22 - A22))
-  #
-  # rownames(hrm) <- colnames(hrm) <- rownames(A00)
-  # hrm <- hrm[rownames(ped_rm), rownames(ped_rm)]
-  # return(hrm)
+  # the following is an alternative to `AGHmatrix` by Iwata-sensei
+  A.name <- rownames(ped_rm)
+  G.name <- rownames(geno_rm)
+
+  is.inG <- A.name %in% G.name
+  A1.name <- A.name[!is.inG]
+  A2.name <- A.name[is.inG]
+
+  A00 <- ped_rm[c(A1.name, A2.name), c(A1.name, A2.name)]
+  G22 <- geno_rm[A2.name, A2.name]
+
+  A12 <- A00[A1.name, A2.name]
+  A22 <- A00[A2.name, A2.name]
+
+  G22.inv <- solve(G22)
+  A22.inv <- solve(A22)
+  H22 <- solve(tau * G22.inv + (1 - omega) * A22.inv)
+
+  T11 <- A12 %*% A22.inv %*% (H22 - A22) %*% A22.inv %*% t(A12)
+  T12 <- A12 %*% A22.inv %*% (H22 - A22)
+  hrm <- A00 + rbind(cbind(T11, T12), cbind(t(T12), H22 - A22))
 
 
-  hrm <- AGHmatrix::Hmatrix(A = ped_rm,
-                            G = geno_rm,
-                            method = 'Martini',
-                            tau = tau,
-                            omega = omega)
+  rownames(hrm) <- colnames(hrm) <- rownames(A00)
   hrm <- hrm[row.names(ped_rm), colnames(ped_rm)]
+
+  # `hrm` is not exactly symetric due to computer precision
+  hrm <- (hrm + t(hrm)) / 2 # make hrm symetric by taking the mean value
+
   logger$log('Calculate combined relationship matrix DONE')
 
   ### output ----
