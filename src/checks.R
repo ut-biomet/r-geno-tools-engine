@@ -71,7 +71,7 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
   vcf_SNPcoord <- vcf_SNPcoord[order(vcf_SNPcoord$SNPid),]
 
   linkMapColumnId <- which(colnames(user_SNPcoord) == 'linkMapPos')
-  user_SNPcoord_tmp <- user_SNPcoord[, -linkMapColumnId]
+  user_SNPcoord_tmp <- user_SNPcoord_tmp[, -linkMapColumnId]
 
   columns <- c('chr', 'SNPid', 'physPos')
   vcf_SNPcoord <- vcf_SNPcoord[, columns]
@@ -80,7 +80,7 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
   if (!identical(user_SNPcoord_tmp, vcf_SNPcoord)) {
     diffId <- which(user_SNPcoord_tmp != vcf_SNPcoord)
     diffLineId <- diffId %% nrow(user_SNPcoord_tmp)
-    errMsg <- paste('The SNPs coordinate file and the geontype files are inconsistent.',
+    errMsg <- paste('The SNPs coordinate file and the geontype files have inconsistent data.',
                     length(diffLineId),
                     'incompatibilities detected about SNPs:',
                     paste(vcf_SNPcoord$SNPid[diffLineId], collapse = ', '))
@@ -131,7 +131,7 @@ checkChrInfoConsistency <- function(chrInfo, SNPcoord) {
 
   # chromosomes length
   colnames(chrInfo)[1] <- 'chr'
-  SNPcoord <- dplyr::full_join(SNPcoord, chrInfo)
+  suppressMessages({SNPcoord <- dplyr::full_join(SNPcoord, chrInfo,)})
   exceedingSNPs <- which(SNPcoord$physPos > SNPcoord$length_phys)
   if (length(exceedingSNPs) != 0) {
     msg <- paste(

@@ -741,6 +741,7 @@ readSNPcoord <- function(file) {
     paste(SNPcoord$SNPid[duplicatedIds], collapse = ', '))
     stop(msg)
   }
+  logger$log('Check snps coordinates file DONE')
 
   return(SNPcoord)
 }
