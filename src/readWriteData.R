@@ -678,10 +678,10 @@ readCrossTable <- function(file, header = TRUE) {
 #' @param file path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns:
 #' - `chr`: Chromosome holding the SNP
 #' - `physPos`: SNP physical position on the chromosome
-#' - `linkMapPos`: SNP linkage map position on the chromosome
+#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
 #' - `SNPid`: SNP's IDs
 #'
-#' @return
+#' @return data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
 readSNPcoord <- function(file) {
   logger <- logger$new('r-readSNPcoord()')
 
@@ -696,6 +696,7 @@ readSNPcoord <- function(file) {
                        header = TRUE,
                        stringsAsFactors = FALSE)
   logger$log('Read snps coordinates file DONE')
+
 
 
   logger$log('Check snps coordinates file ...')
@@ -723,7 +724,7 @@ readSNPcoord <- function(file) {
   }
 
   # duplicated rows
-  dupRows <- duplicated(SNPcoord[, c(1,2)])
+  dupRows <- duplicated(SNPcoord)
   if (any(dupRows)) {
     warning(sum(dupRows),
             'duplicated rows found in the snps coordinates file. ',
@@ -731,8 +732,93 @@ readSNPcoord <- function(file) {
     SNPcoord <- SNPcoord[!dupRows,]
   }
 
+  # check unicity of SNPids
+  duplicatedIds <- which(duplicated(SNPcoord$SNPid))
+  if (length(duplicatedIds) != 0) {
+    msg <- paste(
+    length(duplicatedIds),
+    'duplicated SNPs\' id detected in the SNP coordinate file:',
+    paste(SNPcoord$SNPid[duplicatedIds], collapse = ', '))
+    stop(msg)
+  }
+
   return(SNPcoord)
 }
+
+
+#' Read chromosomes information file
+#'
+#' @param file path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns:
+#' - `name`: Chromosomes names
+#' - `length_phys`: chromosomes length in base pairs
+#' - `length_morgan`: chromosomes length in Morgan
+#'
+#' @return data.frame of 3 columns: 'name', 'length_phys', 'length_cm'
+readChrInfo <- function(file) {
+  logger <- logger$new('r-readChrInfo()')
+
+  logger$log('Read chromosomes information file ...')
+  if (!file.exists(file)) {
+    stop("chromosomes information file do not exists")
+  }
+  if (!identical(tools::file_ext(file), 'csv')) {
+    stop('chromosomes information file should be a `.csv` file.')
+  }
+  chrInfo <- read.csv(file,
+                      header = TRUE,
+                      stringsAsFactors = FALSE)
+  logger$log('Read chromosomes information file DONE')
+
+
+  logger$log('Check chromosomes information file ...')
+  # file dimension
+  if (ncol(chrInfo) != 3) {
+    stop('chromosomes information file should have 3 columns',
+         ncol(chrInfo), 'detected.')
+  }
+
+  refColNames <- sort(c('name', 'length_phys', 'length_morgan'))
+  if (!identical(sort(colnames(chrInfo)), refColNames)) {
+    stop('chromosomes information file should have a header specifying the the 3 columns names: `',
+         paste(refColNames, collapse = '`, `'),
+         '`. The detected columns are: ',
+         paste(colnames(chrInfo), collapse = '`, `'), '`.'
+    )
+  }
+  if (nrow(chrInfo) == 0) {
+    stop('chromosomes information file should have at least one row')
+  }
+
+
+  # missing values
+  if (any(is.na(chrInfo))) {
+    stop('chromosomes information file should not have any missing values')
+  }
+
+  # duplicated rows
+  dupRows <- duplicated(chrInfo)
+  if (any(dupRows)) {
+    warning(sum(dupRows),
+            'duplicated rows found in the chromosomes information file. ',
+            'They will be removed.')
+    chrInfo <- chrInfo[!dupRows,]
+  }
+
+  # check unicity of chromosome name
+  duplicatedIds <- which(duplicated(chrInfo$name))
+  if (length(duplicatedIds) != 0) {
+    msg <- paste(
+    length(duplicatedIds),
+    'duplicated chromosome name detected in the chromosome information file:',
+    paste(chrInfo$name[duplicatedIds], collapse = ', '))
+    stop(msg)
+  }
+
+  return(chrInfo)
+}
+
+
+
 
 
 

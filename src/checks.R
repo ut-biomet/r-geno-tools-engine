@@ -89,3 +89,66 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
 
   return(user_SNPcoord)
 }
+
+
+
+#' Check individuals in the crossing table are in the haplotype data
+#'
+#' @param crossTable the crossing table
+#' @param haplo the haplotype data given by the function `readPhasedGeno`
+#'
+#' @return NULL, raise error if missing individuals are detected.
+checkIndNamesConsistency <- function(crossTable, haplo) {
+  crossTableInds <- unique(c(crossTable$ind1, crossTable$ind2))
+  haploInds <- gsub('_[12]$', '', colnames(haplo)[1:(ncol(haplo)/2)])
+
+  missIndsId <- which(!crossTableInds %in% haploInds)
+  if (length(missIndsId) != 0) {
+    msg <- paste(
+      length(missIndsId),
+      'individuals are defined in the crossing table but not in the genoype file:',
+      paste(crossTableInds[missIndsId], collapse = ', ')
+    )
+    stop(msg)
+  }
+  invisible(NULL)
+}
+
+
+
+#' Check the SNPs' coordinates are consistent with the chromosomes information.
+#'
+#' @param chrInfo output of `readChrInfo`
+#' @param SNPcoord output of `readSNPcoord`
+#'
+#' @return NULL, raise error if not consistent
+checkChrInfoConsistency <- function(chrInfo, SNPcoord) {
+
+  # chromosomes names
+  if (!identical(sort(chrInfo$name), sort(unique(SNPcoord$chr)))) {
+    stop("Chromosomes names in chromosomes information and SNPs coordinates files do not match.")
+  }
+
+  # chromosomes length
+  colnames(chrInfo)[1] <- 'chr'
+  SNPcoord <- dplyr::full_join(SNPcoord, chrInfo)
+  exceedingSNPs <- which(SNPcoord$physPos > SNPcoord$length_phys)
+  if (length(exceedingSNPs) != 0) {
+    msg <- paste(
+      length(exceedingSNPs),
+      'SNPs exceed their chromosome\'s physical length:',
+      paste(SNPcoord$SNPid[exceedingSNPs], collapse = ', '))
+    stop(msg)
+  }
+
+  exceedingSNPs <- which(SNPcoord$linkMapPos > SNPcoord$length_morgan)
+  if (length(exceedingSNPs) != 0) {
+    msg <- paste(
+      length(exceedingSNPs),
+      'SNPs exceed their chromosome\'s linkage map length:',
+      paste(SNPcoord$SNPid[exceedingSNPs], collapse = ', '))
+    stop(msg)
+  }
+
+  invisible(NULL)
+}
