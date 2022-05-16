@@ -30,3 +30,62 @@ checkRelMat <- function(relMat) {
 
   return(TRUE)
 }
+
+
+#' Check compatibility between 2 snps coordinates data set
+#' and keep only genotypes SNPs
+#'
+#' @param user_SNPcoord SNPs coordinates data coming from the user (`.csv` file)
+#' @param vcf_SNPcoord SNPs coordinates data coming from the `.vcf` file
+#'
+#' @description If the `user_SNPcoord` data miss some SNPs defined in the `.vcf`
+#' file, an error is raised. If the `user_SNPcoord` data have additional SNPs,
+#' those SNPs will be removed.
+#' If the data between those two data-set are inconsistent, an error is raised.
+#'
+#' @return The filtered `user_SNPcoord` data.frame
+checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
+
+  # SNP ids
+  user_SNPid <- user_SNPcoord$SNPid
+  vcf_SNPid <- vcf_SNPcoord$SNPid
+  missingSNP <- which(!vcf_SNPid %in% user_SNPid)
+  if (length(missingSNP) != 0) {
+    msg <- paste('The SNPs coordinate file miss', length(missingSNP),
+                 'genotype\'s SNPs:',
+                 paste(vcf_SNPid[missingSNP], collapse = ', '))
+    stop(msg)
+  }
+
+  additionalSNP <- which(!user_SNPid %in% vcf_SNPid)
+  if (length(additionalSNP) != 0) {
+    msg <- paste('The SNPs coordinate file have', length(additionalSNP),
+                 'SNPs not defined in the `.vcf` file, those SNP will not be considered:',
+                 paste(user_SNPid[additionalSNP], collapse = ', '))
+    warning(msg)
+    user_SNPcoord <- user_SNPcoord[-additionalSNP,]
+  }
+
+  # Check they have the same data
+  user_SNPcoord_tmp <- user_SNPcoord[order(user_SNPcoord$SNPid),]
+  vcf_SNPcoord <- vcf_SNPcoord[order(vcf_SNPcoord$SNPid),]
+
+  linkMapColumnId <- which(colnames(user_SNPcoord) == 'linkMapPos')
+  user_SNPcoord_tmp <- user_SNPcoord[, -linkMapColumnId]
+
+  columns <- c('chr', 'SNPid', 'physPos')
+  vcf_SNPcoord <- vcf_SNPcoord[, columns]
+  user_SNPcoord_tmp <- user_SNPcoord_tmp[, columns]
+
+  if (!identical(user_SNPcoord_tmp, vcf_SNPcoord)) {
+    diffId <- which(user_SNPcoord_tmp != vcf_SNPcoord)
+    diffLineId <- diffId %% nrow(user_SNPcoord_tmp)
+    errMsg <- paste('The SNPs coordinate file and the geontype files are inconsistent.',
+                    length(diffLineId),
+                    'incompatibilities detected about SNPs:',
+                    paste(vcf_SNPcoord$SNPid[diffLineId], collapse = ', '))
+    stop(errMsg)
+  }
+
+  return(user_SNPcoord)
+}
