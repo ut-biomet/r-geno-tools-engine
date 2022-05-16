@@ -289,6 +289,7 @@ readPhasedGeno <- function(file) {
   fixVcf <- as.data.frame(vcfR::getFIX(vcf), stringsAsFactors = FALSE)
   SNPcoord <- fixVcf[,c("CHROM", "POS", "ID")]
   colnames(SNPcoord) <- c("chr", "physPos", "SNPid")
+  SNPcoord$physPos <- as.integer(SNPcoord$physPos)
   logger$log("Extract SNP information DONE")
 
 
@@ -663,12 +664,78 @@ readCrossTable <- function(file, header = TRUE) {
     crossTable <- crossTable[!dupRows,]
   }
 
-  colnames(crossTable)[c(1,2)] <- c('parent1', 'parent2')
+  colnames(crossTable)[c(1,2)] <- c('ind1', 'ind2')
   if (ncol(crossTable) == 3) {
-    colnames(crossTable)[3] <- 'offspringBaseName'
+    colnames(crossTable)[3] <- 'names'
   }
   return(crossTable)
 }
+
+
+
+#' Read SNP coordinates `.csv` file
+#'
+#' @param file path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns:
+#' - `chr`: Chromosome holding the SNP
+#' - `physPos`: SNP physical position on the chromosome
+#' - `linkMapPos`: SNP linkage map position on the chromosome
+#' - `SNPid`: SNP's IDs
+#'
+#' @return
+readSNPcoord <- function(file) {
+  logger <- logger$new('r-readSNPcoord()')
+
+  logger$log('Read snps coordinates file ...')
+  if (!file.exists(file)) {
+    stop("snps coordinates file do not exists")
+  }
+  if (!identical(tools::file_ext(file), 'csv')) {
+    stop('snps coordinates file should be a `.csv` file.')
+  }
+  SNPcoord <- read.csv(file,
+                       header = TRUE,
+                       stringsAsFactors = FALSE)
+  logger$log('Read snps coordinates file DONE')
+
+
+  logger$log('Check snps coordinates file ...')
+  # file dimension
+  if (ncol(SNPcoord) != 4) {
+    stop('snps coordinates file should have 4 columns', ncol(SNPcoord), 'detected.')
+  }
+
+  refColNames <- sort(c('chr', 'physPos', 'linkMapPos', 'SNPid'))
+  if (!identical(sort(colnames(SNPcoord)), refColNames)) {
+    stop('snps coordinates file should have a header specifying the the 4 columns names: `',
+         paste(refColNames, collapse = '`, `'),
+         '`. The detected columns are: ',
+         paste(colnames(SNPcoord), collapse = '`, `'), '`.'
+    )
+  }
+  if (nrow(SNPcoord) == 0) {
+    stop('snps coordinates file should have at least one row')
+  }
+
+
+  # missing values
+  if (any(is.na(SNPcoord))) {
+    stop('snps coordinates should not have any missing values')
+  }
+
+  # duplicated rows
+  dupRows <- duplicated(SNPcoord[, c(1,2)])
+  if (any(dupRows)) {
+    warning(sum(dupRows),
+            'duplicated rows found in the snps coordinates file. ',
+            'They will be removed.')
+    SNPcoord <- SNPcoord[!dupRows,]
+  }
+
+  return(SNPcoord)
+}
+
+
+
 
 #' Read GWAS analysis result file (`.json`)
 #'
