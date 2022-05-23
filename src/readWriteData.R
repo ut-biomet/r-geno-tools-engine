@@ -305,7 +305,7 @@ readGenoData <- function(file) {
 
 #' Read phased genetic data from a file
 #'
-#' @param file VCF file path (ext `.vcf` or `.vcf.gz`)
+#' @param file phased VCF file path (ext `.vcf` or `.vcf.gz`)
 #'
 #' @return list of 2: `haplotypes` a matrix of the individuals haplotypes
 #'  and `SNPcoord`, data frame of the SNP coordinates.
@@ -693,7 +693,8 @@ readCrossTable <- function(file, header = TRUE) {
   logger$log('Check crossing table file ...')
   # file dimension
   if (!ncol(crossTable) %in% c(2, 3)) {
-    stop('crossing table file should have 2 or 3 columns', ncol(crossTable), 'detected.')
+    stop('crossing table file should have 2 or 3 columns',
+         ncol(crossTable), 'detected.')
   }
   if (nrow(crossTable) == 0) {
     stop('crossing table file should have at least one row')
@@ -713,10 +714,19 @@ readCrossTable <- function(file, header = TRUE) {
     crossTable <- crossTable[!dupRows,]
   }
 
+  # rename columns
   colnames(crossTable)[c(1,2)] <- c('ind1', 'ind2')
   if (ncol(crossTable) == 3) {
     colnames(crossTable)[3] <- 'names'
   }
+
+  # Get simulated individuals names if not specified
+  if (is.null(crossTable$names)) {
+    logger$log("Generate simulated individuals names...")
+    crossTable$names <- paste0(crossTable$ind1, '_X_', crossTable$ind2)
+    logger$log("Generate simulated individuals names DONE")
+  }
+
   return(crossTable)
 }
 
@@ -745,7 +755,6 @@ readSNPcoord <- function(file) {
                        header = TRUE,
                        stringsAsFactors = FALSE)
   logger$log('Read snps coordinates file DONE')
-
 
 
   logger$log('Check snps coordinates file ...')
