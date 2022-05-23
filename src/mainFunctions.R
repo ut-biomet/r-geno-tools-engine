@@ -734,7 +734,7 @@ crossingSimulation <- function(genoFile,
     # estimate chr size with max SNP coordinates for each chromosome
     chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
     chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
-    chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
+    colnames(chrInfo) <- c('name', 'length_phys', 'length_morgan')
   }
   logger$log("Get data DONE")
 
