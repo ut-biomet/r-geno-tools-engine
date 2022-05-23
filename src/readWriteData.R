@@ -213,7 +213,56 @@ downloadCrossTable <- function(url, header = TRUE) {
 }
 
 
+#' download SNP coordinates `.csv` file
+#'
+#' @param url url of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns:
+#' - `chr`: Chromosome holding the SNP
+#' - `physPos`: SNP physical position on the chromosome
+#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
+#' - `SNPid`: SNP's IDs
+#'
+#' @return data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
+downloadSNPcoord <- function(url) {
+  logger <- logger$new("r-downloadSNPcoord()")
+  logger$log("Create local temp file ... ")
+  localFile <- tempfile(pattern = "downloadedResult",
+                        tmpdir = tempdir(),
+                        fileext = ".csv")
+  logger$log("Download result file ... ")
+  download.file(url, localFile, quiet = TRUE)
 
+  logger$log("Read result file ... ")
+  snpCoord <- readSNPcoord(localFile)
+  logger$log("Read result file DONE ")
+
+  logger$log("DONE, return output.")
+  snpCoord
+}
+
+#' Download chromosomes information file
+#'
+#' @param file path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns:
+#' - `name`: Chromosomes names
+#' - `length_phys`: chromosomes length in base pairs
+#' - `length_morgan`: chromosomes length in Morgan
+#'
+#' @return data.frame of 3 columns: 'name', 'length_phys', 'length_cm'
+downloadChrInfo <- function(url) {
+  logger <- logger$new("r-downloadChrInfo()")
+  logger$log("Create local temp file ... ")
+  localFile <- tempfile(pattern = "downloadedResult",
+                        tmpdir = tempdir(),
+                        fileext = ".csv")
+  logger$log("Download result file ... ")
+  download.file(url, localFile, quiet = TRUE)
+
+  logger$log("Read result file ... ")
+  chrInfo <- readChrInfo(localFile)
+  logger$log("Read result file DONE ")
+
+  logger$log("DONE, return output.")
+  chrInfo
+}
 
 
 
