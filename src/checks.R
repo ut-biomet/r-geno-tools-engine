@@ -60,7 +60,8 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
   additionalSNP <- which(!user_SNPid %in% vcf_SNPid)
   if (length(additionalSNP) != 0) {
     msg <- paste('The SNPs coordinate file have', length(additionalSNP),
-                 'SNPs not defined in the `.vcf` file, those SNP will not be considered:',
+                 'SNPs not defined in the `.vcf` file,',
+                 'those SNP will not be considered:',
                  paste(user_SNPid[additionalSNP], collapse = ', '))
     warning(msg)
     user_SNPcoord <- user_SNPcoord[-additionalSNP,]
@@ -80,7 +81,8 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
   if (!identical(user_SNPcoord_tmp, vcf_SNPcoord)) {
     diffId <- which(user_SNPcoord_tmp != vcf_SNPcoord)
     diffLineId <- diffId %% nrow(user_SNPcoord_tmp)
-    errMsg <- paste('The SNPs coordinate file and the geontype files have inconsistent data.',
+    errMsg <- paste('The SNPs coordinate file and the genotype files have',
+                    'inconsistent data.',
                     length(diffLineId),
                     'incompatibilities detected about SNPs:',
                     paste(vcf_SNPcoord$SNPid[diffLineId], collapse = ', '))
@@ -106,7 +108,8 @@ checkIndNamesConsistency <- function(crossTable, haplo) {
   if (length(missIndsId) != 0) {
     msg <- paste(
       length(missIndsId),
-      'individuals are defined in the crossing table but not in the genoype file:',
+      'individuals are defined in the crossing table',
+      'but not in the genoype file:',
       paste(crossTableInds[missIndsId], collapse = ', ')
     )
     stop(msg)
@@ -126,7 +129,8 @@ checkChrInfoConsistency <- function(chrInfo, SNPcoord) {
 
   # chromosomes names
   if (!identical(sort(chrInfo$name), sort(unique(SNPcoord$chr)))) {
-    stop("Chromosomes names in chromosomes information and SNPs coordinates files do not match.")
+    stop("Chromosomes names in chromosomes information and SNPs coordinates",
+         " files do not match.")
   }
 
   # chromosomes length
