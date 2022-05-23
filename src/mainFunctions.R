@@ -682,3 +682,112 @@ draw_pedNetwork <- function(pedFile = NULL,
   }
   p
 }
+
+
+
+
+
+#' Simulate the genotypes of offspring given the parent genotypes.
+#'
+#' @param genoFile phased VCF file path (ext `.vcf` or `.vcf.gz`)
+#' @param crossTableFile path of the crossing table data file
+#' (`csv` file of 2 or 3 columns). It must contain the names of the variables
+#' as its first line. The column 1 and 2 will be interpreted as the parents
+#' ids. The optional third column will be interpreted as the offspring base
+#' name.
+#' @param SNPcoordFile path of the SNPs coordinates file
+#' (`csv` file). This `.csv` file should have 4 named columns:
+#' - `chr`: Chromosome holding the SNP
+#' - `physPos`: SNP physical position on the chromosome
+#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
+#' - `SNPid`: SNP's IDs
+#' @param chrInfoFile path of the chromosomes information file (`csv` file).
+#' This `.csv` file should have 3 named columns:
+#' - `name`: Chromosomes names
+#' - `length_phys`: chromosomes length in base pairs
+#' - `length_morgan`: chromosomes length in Morgan
+#' @param nCross number of cross to simulate for each parent pair defined
+#' in the crossing table.
+#' @param outFile path of the `.vcf.gz` file containing the simulated genotypes
+#' of the offspring. It must end by `.vcf.gz`. By default write in an temporary
+#' file.
+#'
+#' @return path of the `.vcf.gz` file containing the simulated genotypes
+#' of the offspring.
+crossingSimulation <- function(genoFile,
+                               crossTableFile,
+                               SNPcoordFile,
+                               chrInfoFile = NULL,
+                               nCross = 30,
+                               outFile = tempfile(fileext = ".vcf.gz")) {
+  logger <- logger$new("r-crossingSimulation()")
+
+  # load input data
+  logger$log("Get data ...")
+  g <- readPhasedGeno(genoFile)
+  SNPcoord <- readSNPcoord(SNPcoordFile)
+  crossTable <- readCrossTable(crossTableFile)
+  crossTable$n <- nCross
+  if (!is.null(chrInfoFile)) {
+    chrInfo <- readChrInfo(chrInfoFile)
+  } else {
+    # estimate chr size with max SNP coordinates for each chromosome
+    chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
+    chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
+    chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
+  }
+  logger$log("Get data DONE")
+
+  # check input data
+  logger$log("Check SNP's coordinates consistency between",
+             "`.vcf` and SNPcoordinate file ...")
+  SNPcoord <- checkAndFilterSNPcoord(SNPcoord, g$SNPcoord)
+  g$SNPcoord <- NULL # release some memory
+  logger$log("Check SNP's coordinates consistency between",
+             " `.vcf` and SNPcoordinate file DONE")
+
+  logger$log("Check individuals' names consistency between",
+             " `.vcf` and `.csv` file ...")
+  checkIndNamesConsistency(crossTable, g$haplotypes)
+  logger$log("Check individuals' names consistency between",
+             " `.vcf` and `.csv` file DONE")
+
+  logger$log("Check output file extention ...")
+  ext1 <- tools::file_ext(outFile)
+  ext2 <- tools::file_ext(tools::file_path_sans_ext(outFile))
+  if (ext1 != "gz" || ext2 != "vcf") {
+    stop('The output file must end by `.vcf.gz`')
+  }
+  logger$log("Check output file extention DONE")
+
+  if (!is.null(chrInfo)) {
+    logger$log("Check chromosomes information consistency between",
+             " `.vcf` and `.csv` file ...")
+    checkChrInfoConsistency(chrInfo, SNPcoord)
+    logger$log("Check chromosomes information consistency between",
+             " `.vcf` and `.csv` file DONE")
+  }
+
+
+  # Initialise sumulation population
+  logger$log("Initialise simulation ...")
+  parentPopulation <- initializeSimulation(chrInfo = chrInfo,
+                                           haplotypes = g$haplotypes,
+                                           SNPcoord = SNPcoord)
+  logger$log("Initialise simulation DONE")
+
+  # Simulate crosses
+  logger$log("Corssing simulation ...")
+  simulatedIndividuals <- breedSimulatR::makeCrosses(crosses = crossTable,
+                                                     pop = parentPopulation)
+  logger$log("Corssing simulation DONE")
+
+  # write results
+  logger$log("Write output file ...")
+  simulatedPop <- breedSimulatR::population$new(inds = simulatedIndividuals,
+                                                verbose = FALSE)
+  simulatedPop$writeVcf(outFile)
+  logger$log("Write output file DONE")
+
+  return(outFile)
+}
