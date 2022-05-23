@@ -20,6 +20,12 @@ invisible(
 # test_file("tests/testthat/test_2_relationshipMatrix.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
+# test_file("tests/testthat/test_2_checks.R",
+#           stop_on_failure = TRUE,
+#           stop_on_warning = FALSE)
+# test_file("tests/testthat/test_3_crossingSimulation.R",
+#           stop_on_failure = TRUE,
+#           stop_on_warning = FALSE)
 # test_file("tests/testthat/test_3_filtering.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)

@@ -416,4 +416,169 @@ capture_output({
     })
   }
 
+
+
+
+
+
+  # readPhasedGeno ----
+  phasedGenoFiles <- c('../../data/geno/breedGame_phasedGeno.vcf.gz')
+  for (file in phasedGenoFiles) {
+    test_that(paste("readPhasedGeno", basename(file)), {
+      expect_error({
+        g <- readPhasedGeno(file)
+      }, NA)
+      g2 <- readGenoData(file)
+      expect_is(g, "list")
+      expect_equal(names(g), c('haplotypes', 'SNPcoord'))
+
+      # snp coord:
+      expect_is(g$SNPcoord, 'data.frame')
+      expect_equal(colnames(g$SNPcoord), c("chr", "physPos", "SNPid"))
+      expect_true(is.numeric(g$SNPcoord$physPos))
+      expect_equal(g$SNPcoord$SNPid, g2@snps$id)
+      expect_equal(g$SNPcoord$physPos, g2@snps$pos)
+      expect_equal(g$SNPcoord$chr, g2@snps$chr)
+
+      # haplotypes:
+      expect_is(g$haplotypes, 'matrix')
+      expect_equal(sort(row.names(g$haplotypes)), sort(g$SNPcoord$SNPid))
+      haploInds <- unique(gsub('_[12]$', '', colnames(g$haplotypes)))
+      expect_equal(sort(haploInds), sort(g2@ped$id))
+      expect_equal(colnames(g$haplotypes), c(paste0(haploInds, '_1'),
+                                             paste0(haploInds, '_2')))
+    })
+
+    # downloadPhasedGeno ----
+    test_that(paste("downloadPhasedGeno", basename(file)), {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      expect_error({
+        g <- downloadPhasedGeno(file)
+      }, NA)
+      g2 <- downloadGenoData(file)
+      expect_is(g, "list")
+      expect_equal(names(g), c('haplotypes', 'SNPcoord'))
+
+      # snp coord:
+      expect_is(g$SNPcoord, 'data.frame')
+      expect_equal(colnames(g$SNPcoord), c("chr", "physPos", "SNPid"))
+      expect_true(is.numeric(g$SNPcoord$physPos))
+      expect_equal(g$SNPcoord$SNPid, g2@snps$id)
+      expect_equal(g$SNPcoord$physPos, g2@snps$pos)
+      expect_equal(g$SNPcoord$chr, g2@snps$chr)
+
+      # haplotypes:
+      expect_is(g$haplotypes, 'matrix')
+      expect_equal(sort(row.names(g$haplotypes)), sort(g$SNPcoord$SNPid))
+      haploInds <- unique(gsub('_[12]$', '', colnames(g$haplotypes)))
+      expect_equal(sort(haploInds), sort(g2@ped$id))
+      expect_equal(colnames(g$haplotypes), c(paste0(haploInds, '_1'),
+                                             paste0(haploInds, '_2')))
+    })
+  }
+
+  unPhasedGenoFiles <- c('../../data/geno/breedGame_geno.vcf.gz')
+  test_that(paste("readPhasedGeno unphased geno", basename(file)), {
+    expect_error({
+      readPhasedGeno(unPhasedGenoFiles)
+    }, paste("VCF file should be phased for all variant and all individuals"))
+  })
+
+
+  # readCrossTable ----
+  crossTableFiles <- c('../../data/crossingTable/breedGame_crossTable.csv')
+  for (file in crossTableFiles) {
+    test_that(paste('readCrossTable', basename(file)), {
+      expect_error({
+        crossTable <- readCrossTable(file)
+      }, NA)
+      expect_is(crossTable, 'data.frame')
+      expect_equal(colnames(crossTable), c("ind1", "ind2", "names"))
+      expect_true(!any(duplicated(crossTable)))
+      expect_true(!any(is.na(crossTable)))
+    })
+    # downloadCrossTable ----
+    test_that(paste('downloadCrossTable', basename(file)), {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      expect_error({
+        crossTable <- downloadCrossTable(file)
+      }, NA)
+      expect_is(crossTable, 'data.frame')
+      expect_equal(colnames(crossTable), c("ind1", "ind2", "names"))
+      expect_true(!any(duplicated(crossTable)))
+      expect_true(!any(is.na(crossTable)))
+    })
+  }
+
+
+  # readSNPcoord ----
+  SNPcoordFiles <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
+  for (file in SNPcoordFiles) {
+    test_that(paste('readSNPcoord', basename(file)), {
+      expect_error({
+        SNPcoord <- readSNPcoord(file)
+      }, NA)
+      expect_is(SNPcoord, 'data.frame')
+      expect_equal(colnames(SNPcoord),
+                   c("chr", "physPos", "SNPid", "linkMapPos"))
+      expect_true(is.numeric(SNPcoord$physPos))
+      expect_true(is.numeric(SNPcoord$linkMapPos))
+      expect_true(!any(duplicated(SNPcoord)))
+      expect_true(!any(is.na(SNPcoord)))
+    })
+    # downloadSNPcoord ----
+    test_that(paste('downloadSNPcoord', basename(file)), {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      expect_error({
+        SNPcoord <- downloadSNPcoord(file)
+      }, NA)
+      expect_is(SNPcoord, 'data.frame')
+      expect_equal(colnames(SNPcoord),
+                   c("chr", "physPos", "SNPid", "linkMapPos"))
+      expect_true(is.numeric(SNPcoord$physPos))
+      expect_true(is.numeric(SNPcoord$linkMapPos))
+      expect_true(!any(duplicated(SNPcoord)))
+      expect_true(!any(is.na(SNPcoord)))
+    })
+  }
+
+  # test with incinsistent physical / linkage map position SNPs
+
+
+
+  # readChrInfo ----
+  crhInfoFiles <- '../../data/chromosomesInformation/breedingGame_chrInfo.csv'
+  for (file in crhInfoFiles) {
+    test_that(paste('readChrInfo', basename(file)), {
+      expect_error({
+        chrInfo <- readChrInfo(file)
+      }, NA)
+      expect_is(chrInfo, 'data.frame')
+      expect_equal(colnames(chrInfo),
+                   c("name", "length_phys", "length_morgan"))
+      expect_true(!any(duplicated(chrInfo)))
+      expect_true(!any(is.na(chrInfo)))
+    })
+    # downloadChrInfo ----
+    test_that(paste('downloadChrInfo', basename(file)), {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      expect_error({
+        chrInfo <- downloadChrInfo(file)
+      }, NA)
+      expect_is(chrInfo, 'data.frame')
+      expect_equal(colnames(chrInfo),
+                   c("name", "length_phys", "length_morgan"))
+      expect_true(!any(duplicated(chrInfo)))
+      expect_true(!any(is.na(chrInfo)))
+    })
+  }
+
+
+
 })
+
+
