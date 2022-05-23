@@ -786,6 +786,10 @@ crossingSimulation <- function(genoFile,
   logger$log("Write output file ...")
   simulatedPop <- breedSimulatR::population$new(inds = simulatedIndividuals,
                                                 verbose = FALSE)
+
+  if (file.exists(outFile)) {
+    file.remove(outFile)
+  }
   simulatedPop$writeVcf(outFile)
   logger$log("Write output file DONE")
 
