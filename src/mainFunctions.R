@@ -777,10 +777,10 @@ crossingSimulation <- function(genoFile,
   logger$log("Initialise simulation DONE")
 
   # Simulate crosses
-  logger$log("Corssing simulation ...")
+  logger$log("Crossing simulation ...")
   simulatedIndividuals <- breedSimulatR::makeCrosses(crosses = crossTable,
                                                      pop = parentPopulation)
-  logger$log("Corssing simulation DONE")
+  logger$log("Crossing simulation DONE")
 
   # write results
   logger$log("Write output file ...")
