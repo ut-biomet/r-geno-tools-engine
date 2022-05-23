@@ -45,7 +45,6 @@ checkRelMat <- function(relMat) {
 #'
 #' @return The filtered `user_SNPcoord` data.frame
 checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
-
   # SNP ids
   user_SNPid <- user_SNPcoord$SNPid
   vcf_SNPid <- vcf_SNPcoord$SNPid
@@ -77,9 +76,9 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
   columns <- c('chr', 'SNPid', 'physPos')
   vcf_SNPcoord <- vcf_SNPcoord[, columns]
   user_SNPcoord_tmp <- user_SNPcoord_tmp[, columns]
+  diffId <- which(user_SNPcoord_tmp != vcf_SNPcoord)
 
-  if (!identical(user_SNPcoord_tmp, vcf_SNPcoord)) {
-    diffId <- which(user_SNPcoord_tmp != vcf_SNPcoord)
+  if (length(diffId) != 0) {
     diffLineId <- diffId %% nrow(user_SNPcoord_tmp)
     errMsg <- paste('The SNPs coordinate file and the genotype files have',
                     'inconsistent data.',
