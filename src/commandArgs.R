@@ -13,6 +13,13 @@ arg$genoFile$help <- 'Path of the geno data file (`.vcf` or `.vcf.gz` file)'
 arg$genoFile$type <- 'character'
 
 
+# phasedGenoFile ----
+arg$phasedGenoFile$flag <- '--genoFile'
+arg$phasedGenoFile$help <- paste('Path of the phased genetic data file',
+                                 '(`.vcf` or `.vcf.gz` file)')
+arg$phasedGenoFile$type <- 'character'
+
+
 # phenoFile ----
 arg$phenoFile$flag = '--phenoFile'
 arg$phenoFile$help = paste('Path of the phenotypic data file (`csv` file).',
@@ -198,3 +205,64 @@ arg$omega$flag = '--omega'
 arg$omega$default = NULL
 arg$omega$help = "omega parameter of the Martini's method"
 arg$omega$type = 'double'
+
+
+# crossTableFile ----
+arg$crossTableFile$flag = '--crossTableFile'
+arg$crossTableFile$help = paste("path of the crossing table data file",
+                                "(`csv` file of 2 or 3 columns).",
+                                "It must contain the names of the variables",
+                                "as its first line. The column 1 and 2 will",
+                                "be interpreted as the parents ids.",
+                                "The optional third column will be interpreted",
+                                "as the offspring base name.")
+arg$crossTableFile$type = 'character'
+
+
+# SNPcoordFile ----
+arg$SNPcoordFile$flag = '--SNPcoordFile'
+arg$SNPcoordFile$help = paste("path of the SNPs coordinates",
+                              "file (`csv` file). This `.csv` file should have",
+                              "4 named columns:\\n",
+                              "- `chr`: chromosome name holding the SNP\\n",
+                              "- `physPos`: physical position of the SNP on",
+                              "the chromosome\\n",
+                              "- `linkMapPos`: linkage map position of the SNP",
+                              "on the chromosome in Morgan\\n",
+                              "- `SNPid`: ID of the SNP\\n")
+                              # "end of line")
+arg$SNPcoordFile$type = 'character'
+
+
+# chrInfoFile ----
+arg$chrInfoFile$flag = '--chrInfoFile'
+arg$chrInfoFile$default = NULL
+arg$chrInfoFile$help = paste("[Optional] Path of the chromosomes information",
+                             "file (`csv` file). This `.csv` file should have",
+                             "3 named columns:\\n",
+                             "- `name`: chromosomes names\\n",
+                             "- `length_phys`: chromosomes length in",
+                             "base pairs\\n",
+                             "- `length_morgan`: chromosomes length in",
+                             "Morgan\\n",
+                             "If this file is not provided, the chromosome",
+                             "lengths will be set to the largest SNPs position",
+                             "of each chromosome.")
+arg$chrInfoFile$type = 'character'
+
+
+# nCross ----
+arg$nCross$flag = '--nCross'
+arg$nCross$default = 15
+arg$nCross$help = paste("[Optional] Number of cross to simulate for each parent",
+                        "pair defined in the crossing table.",
+                        "Default is :", arg$nCross$default)
+arg$nCross$type = 'integer'
+
+
+# outGenoFile ----
+arg$outGenoFile$flag = '--outFile'
+arg$outGenoFile$help = paste("path of the `.vcf.gz` file containing the",
+                             "simulated genotypes of the offspring. It must",
+                             "end by `.vcf.gz`.")
+arg$outGenoFile$type = 'character'

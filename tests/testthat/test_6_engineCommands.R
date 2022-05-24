@@ -188,4 +188,23 @@ capture_output({
     expect_equal(x, 0)
   })
 
+
+
+  # crossing-simulation ----
+  test_that('crossing-simulation', {
+
+    cmd <- paste(
+      'Rscript ./r-geno-tools-engine.R crossing-simulation',
+      '--genoFile "data/geno/breedGame_phasedGeno.vcf.gz"',
+      '--crossTableFile "data/crossingTable/breedGame_crossTable.csv"',
+      '--SNPcoordFile "data/SNPcoordinates/breedingGame_SNPcoord.csv"',
+      '--outFile "tests/testthat/testOutput/crossSim.vcf.gz"'
+    )
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
 })

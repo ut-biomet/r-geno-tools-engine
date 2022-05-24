@@ -1,4 +1,4 @@
-#! /usr/local/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Author: Julien Diot juliendiot@ut-biomet.org
 # Tue 24 Aug 2021 The University of Tokyo
@@ -287,6 +287,45 @@ pedNet_parser$add_argument(arg$no_header$flag,
                            action = 'store_true')
 
 
+
+## crossing-simulation ----
+crossSim_parser = main_subparsers$add_parser("crossing-simulation",
+                                             help = "Simulate crossing between individuals",
+                                             description = paste(
+                                               "Simulate the cross",
+                                               "specified in the crossing",
+                                               "table and write the simulated",
+                                               "genotypes in a phased `.vcf.gz`",
+                                               "file. This command will return",
+                                               "the path of the created file"),
+                                             formatter_class = formatter_class)
+crossSim_parser$add_argument(arg$phasedGenoFile$flag,
+                             help = arg$phasedGenoFile$help,
+                             type = arg$phasedGenoFile$type,
+                             required = TRUE)
+crossSim_parser$add_argument(arg$crossTableFile$flag,
+                             help = arg$crossTableFile$help,
+                             type = arg$crossTableFile$type,
+                             required = TRUE)
+crossSim_parser$add_argument(arg$SNPcoordFile$flag,
+                             help = arg$SNPcoordFile$help,
+                             type = arg$SNPcoordFile$type,
+                             default = NULL)
+                             # required = TRUE)
+crossSim_parser$add_argument(arg$chrInfoFile$flag,
+                             help = arg$chrInfoFile$help,
+                             type = arg$chrInfoFile$type,
+                             default = arg$chrInfoFile$default)
+crossSim_parser$add_argument(arg$nCross$flag,
+                             help = arg$nCross$help,
+                             type = arg$nCross$type,
+                             default = arg$nCross$default)
+crossSim_parser$add_argument(arg$outGenoFile$flag,
+                             help = arg$outGenoFile$help,
+                             type = arg$outGenoFile$type,
+                             required = TRUE)
+
+
 # Parse the command line arguments
 args = main_parser$parse_args()
 
@@ -397,6 +436,16 @@ if (args$command == "gwas") {
                        unknown_string = args$unknown_string,
                        header = !args$no_header,
                        outFile = args$outFile)
+  quit(save = "no", status = 0)
+} else if (args$command == 'crossing-simulation') {
+  # crossing-simulation ----
+  outFile <- crossingSimulation(genoFile = args$genoFile,
+                                crossTableFile = args$crossTableFile,
+                                SNPcoordFile = args$SNPcoordFile,
+                                chrInfoFile = args$chrInfoFile,
+                                nCross = args$nCross,
+                                outFile = args$outFile)
+  cat(outFile)
   quit(save = "no", status = 0)
 }
 
