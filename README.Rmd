@@ -1,6 +1,9 @@
 ---
 output:
   github_document:
+    pandoc_args: [
+      "--columns", "2000"
+    ]
     toc: true
 ---
  
@@ -441,7 +444,7 @@ docker run --rm -v "$PWD"/data/results/:/results \
     --geno-relmatFile /results/breedGame_genoRelMat.csv
     --combine-method Martini
     --tau 1
-    --omega 4
+    --omega 0.5
     --outFile "/out/combined_relMat.json"
 ```
 
@@ -451,7 +454,7 @@ calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
                     genoRelMatFile = 'data/results/breedGame_genoRelMat.csv',
                     method = "Martini",
                     tau = 1,
-                    omega = 1.3,
+                    omega = 0.5,
                     outFile = tempfile(fileext = ".json"))
 ```
 
@@ -518,6 +521,150 @@ imgFile <- draw_pedNetwork(pedFile = "data/pedigree/testPedData_char.csv",
 
 
 </details>
+
+
+
+## Crossing Simulation
+
+<details><summary>Click to expand</summary>
+
+### Introduction
+
+<details><summary>Click to see <strong>GitHub</strong> version</summary>
+This engine contain a simulation tool that can simulate the genotypes of
+some progeny given the phased genotypes of parental individuals. 
+
+The for the simulation, the engine needs:
+
+- The phased genotypes of the parents
+- A crossing table specifying which cross to simulate
+- The SNP coordinates in base pair and in Morgan
+- The chromosomes lengths in base pair and in Morgan
+
+
+To generate the SNP genotypes of new individuals from those of the parents,
+the engine simulate two gametogenesis, one from each parent:
+
+For each pair of chromosome:
+
+We drew the number of crossing-overs \$n_{co}\$ for each chromosome in a 
+Poisson distribution of rate \$l_{chr}\$, which is the length of the chromosome 
+in Morgan:
+
+\$\$
+n_{co} \\sim \\text{Pois}(l_{chr})
+\$\$
+
+
+When \$n_{co} \\neq 0 \$, we drew independently the positions of crossing-overs
+in a uniform distribution along the length of the chromosome in Morgan.
+We had, the sampled positions \$pos_i\$ \n
+(\$\\forall i \\in [0,n_{co}+1 ] \$)
+of the crossing-overs so
+that \$pos_j < pos_{j+1}\$ (\$\\forall j \\in [0,n_{co}]\$) 
+with \$pos_0 = 0\$ and \$pos_{n_{co}+1} = l_{chr}\$.
+
+
+\$X\$ was the \$2\\times n_{snp_k}\$ matrix representing the genotype of the
+parent for the current pair of chromosomes \$k\$. Each individual represents one
+chromosome of the pair. \$Y\$ was the vector of length \${n_{snp}}_k\$ representing 
+the genotype of the gamete for the chromosome pair. We set \$[a,b] = [1, 2]\$ 
+or \$[2, 1]\$ with probability \$\\frac{1}{2}\$. \$Y\$ was then calculated as:
+
+$$
+Y[i] = \left\{
+\begin{array}{ll}
+X[a,i] & \text{if} \quad \exists\ k \in [0, floor\left(\frac{n_{co}}{2}\right)],  pos_{2k} \leq pos_i < pos_{2k+1} \\
+X[b,i] & \text{if} \quad \exists\ k \in [1, floor\left(\frac{n_{co}}{2}\right)],  pos_{2k-1} < pos_i \leq pos_{2k}
+\end{array}
+\right.
+$$
+
+where \$pos_i\$ is the position of the marker \$i\$.
+
+Genotype of the offspring is obtain by merging two gametes from its parents.
+
+</details>
+
+<details><summary>Click to see <strong>GitLab</strong> version</summary>
+
+This engine contain a simulation tool that can simulate the genotypes of
+some progeny given the phased genotypes of parental individuals. 
+
+The for the simulation, the engine needs:
+
+- The phased genotypes of the parents
+- A crossing table specifying which cross to simulate
+- The SNP coordinates in base pair and in Morgan
+- The chromosomes lengths in base pair and in Morgan
+
+
+To generate the SNP genotypes of new individuals from those of the parents,
+the engine simulate two gametogenesis, one from each parent:
+
+For each pair of chromosome:
+
+- We drew the number of crossing-overs \$`n_{co}`\$ for each chromosome in a 
+Poisson distribution of rate \$`l_{chr}`\$, which is the length of the chromosome 
+in Morgan: \$`n_{co} \sim \text{Pois}(l_{chr})`\$
+- When \$`n_{co} \neq 0 `\$, we drew independently the positions of crossing-overs
+in a uniform distribution along the length of the chromosome in Morgan.
+We had, the sampled positions \$`pos_i`\$
+(\$`\forall i \in \llbracket 0,n_{co}+1 \rrbracket `\$) of the crossing-overs so
+that \$`pos_j < pos_{j+1}`\$ (\$`\forall j \in \llbracket0,n_{co}\rrbracket`\$) 
+with \$`pos_0 = 0`\$ and \$`pos_{n_{co}+1} = l_{chr}`\$.
+- \$`X`\$ was the \$`2 \times {n_{snp}}_k`\$ matrix representing the genotype of the
+parent for the current pair of chromosomes \$`k`\$. Each individual represents one
+chromosome of the pair. \$Y\$ was the vector of length \$`{n_{snp}}_k`\$ representing 
+the genotype of the gamete for the chromosome pair. We set \$`[a,b] = [1, 2]`\$ 
+or \$`[2, 1]`\$ with probability \$`\frac{1}{2}`\$. \$`Y`\$ was then calculated as:
+
+```math
+Y[i] = \left\{
+\begin{array}{ll}
+X[a,i] & \text{if} \quad \exists\ k \in [0, floor\left(\frac{n_{co}}{2}\right)],  pos_{2k} \leq pos_i < pos_{2k+1} \\
+X[b,i] & \text{if} \quad \exists\ k \in [1, floor\left(\frac{n_{co}}{2}\right)],  pos_{2k-1} < pos_i \leq pos_{2k}
+\end{array}
+\right.
+```
+
+where \$`pos_i`\$ is the position of the marker \$`i`\$.
+
+Genotype of the offspring is obtain by merging two gametes from its parents.
+
+</details>
+
+
+### Command
+
+
+```sh
+docker run --rm -v "$PWD"/data/:/data \
+    -v "$PWD"/readmeTemp:/out rgenotoolsengine \
+    crossing-simulation \
+    --genoFile "/data/geno/breedGame_phasedGeno.vcf.gz" \
+    --crossTableFile "/data/crossingTable/breedGame_crossTable.csv" \
+    --SNPcoordFile "/data/SNPcoordinates/breedingGame_SNPcoord.csv" \
+    --chrInfoFile "/data/chromosomesInformation/breedingGame_chrInfo.csv" \
+    --nCross 10 \
+    --outFile "/out/crossSim.vcf.gz"
+```
+
+**Main function**
+
+```{r crossing-sim}
+crossingSimulation(genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
+                   crossTableFile = 'data/crossingTable/breedGame_crossTable.csv',
+                   SNPcoordFile = 'data/SNPcoordinates/breedingGame_SNPcoord.csv',
+                   chrInfoFile = 'data/chromosomesInformation/breedingGame_chrInfo.csv',
+                   nCross = 10,
+                   outFile = tempfile(fileext = ".vcf.gz"))
+```
+
+</details>
+
+
+
 
 
 # Data references
