@@ -690,22 +690,26 @@ draw_pedNetwork <- function(pedFile = NULL,
 #' Simulate the genotypes of offspring given the parent genotypes.
 #'
 #' @param genoFile phased VCF file path (ext `.vcf` or `.vcf.gz`)
+#' @param genoUrl url of a phased VCF file path (ext `.vcf` or `.vcf.gz`)
 #' @param crossTableFile path of the crossing table data file
 #' (`csv` file of 2 or 3 columns). It must contain the names of the variables
 #' as its first line. The column 1 and 2 will be interpreted as the parents
 #' ids. The optional third column will be interpreted as the offspring base
 #' name.
+#' @param crossTableUrl URL of a crossing table file
 #' @param SNPcoordFile path of the SNPs coordinates file
 #' (`csv` file). This `.csv` file should have 4 named columns:
 #' - `chr`: Chromosome holding the SNP
 #' - `physPos`: SNP physical position on the chromosome
 #' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
 #' - `SNPid`: SNP's IDs
+#' @param SNPcoordUrl URL of a SNP coordinate file
 #' @param chrInfoFile path of the chromosomes information file (`csv` file).
 #' This `.csv` file should have 3 named columns:
 #' - `name`: Chromosomes names
 #' - `length_phys`: chromosomes length in base pairs
 #' - `length_morgan`: chromosomes length in Morgan
+#' @param chrInfoUrl URL of a chromosome information file
 #' @param nCross number of cross to simulate for each parent pair defined
 #' in the crossing table.
 #' @param outFile path of the `.vcf.gz` file containing the simulated genotypes
@@ -714,24 +718,53 @@ draw_pedNetwork <- function(pedFile = NULL,
 #'
 #' @return path of the `.vcf.gz` file containing the simulated genotypes
 #' of the offspring.
-crossingSimulation <- function(genoFile,
-                               crossTableFile,
-                               SNPcoordFile,
+crossingSimulation <- function(genoFile = NULL,
+                               genoUrl = NULL,
+                               crossTableFile = NULL,
+                               crossTableUrl = NULL,
+                               SNPcoordFile = NULL,
+                               SNPcoordUrl = NULL,
                                chrInfoFile = NULL,
+                               chrInfoUrl = NULL,
                                nCross = 30,
                                outFile = tempfile(fileext = ".vcf.gz")) {
   logger <- logger$new("r-crossingSimulation()")
 
   # load input data
   logger$log("Get data ...")
-  g <- readPhasedGeno(genoFile)
-  SNPcoord <- readSNPcoord(SNPcoordFile)
-  crossTable <- readCrossTable(crossTableFile)
+  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+    g <- readPhasedGeno(genoFile)
+  } else if (is.null(genoFile) && !is.null(genoUrl)) {
+    g <- downloadPhasedGeno(genoUrl)
+  } else {
+    stop("Error: either `genoFile` or `genoUrl` should be provided")
+  }
+
+  if (!is.null(SNPcoordFile) &&  is.null(SNPcoordUrl)) {
+    SNPcoord <- readSNPcoord(SNPcoordFile)
+  } else if (is.null(SNPcoordFile) && !is.null(SNPcoordUrl)) {
+    SNPcoord <- downloadSNPcoord(SNPcoordUrl)
+  } else {
+    stop("Error: either `SNPcoordFile` or `SNPcoordUrl` should be provided")
+  }
+
+  if (!is.null(crossTableFile) &&  is.null(crossTableUrl)) {
+    crossTable <- readCrossTable(crossTableFile)
+  } else if (is.null(crossTableFile) && !is.null(crossTableUrl)) {
+    crossTable <- downloadCrossTable(crossTableUrl)
+  } else {
+    stop("Error: either `crossTableFile` or `crossTableUrl` should be provided")
+  }
   crossTable$n <- nCross
-  if (!is.null(chrInfoFile)) {
+
+  if (!is.null(chrInfoFile) && is.null(chrInfoUrl)) {
     chrInfo <- readChrInfo(chrInfoFile)
+  } else if (is.null(crossTableFile) && !is.null(chrInfoUrl)) {
+    chrInfo <- downloadChrInfo(chrInfoUrl)
   } else {
     # estimate chr size with max SNP coordinates for each chromosome
+    logger$log("Chromosomes information not provided.",
+               "Estimate using SNP coordinates.")
     chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
     chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
     colnames(chrInfo) <- c('name', 'length_phys', 'length_morgan')

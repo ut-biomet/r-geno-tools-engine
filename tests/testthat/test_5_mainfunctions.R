@@ -480,11 +480,11 @@ capture.output({
 
   test_that('crossingSimulation', {
     expect_error({
-      createdFile <- crossingSimulation(phasedGenoFile,
-                                        crossTableFile,
-                                        SNPcoordFile,
-                                        chrInfoFile,
-                                        nCross,
+      createdFile <- crossingSimulation(genoFile = phasedGenoFile,
+                                        crossTableFile = crossTableFile,
+                                        SNPcoordFile = SNPcoordFile,
+                                        chrInfoFile = chrInfoFile,
+                                        nCross = nCross,
                                         outFile = outFile)
     }, NA)
     expect_equal(createdFile, outFile)
@@ -508,26 +508,45 @@ capture.output({
 
   })
 
+  test_that('crossingSimulation with downloaded files', {
+    as_url <- function(file) {
+      file <- normalizePath(file)
+      file <- paste0("file://", file)
+      file
+    }
+    expect_error({
+      createdFileWithoutChrInfo <- crossingSimulation(
+        genoUrl = as_url(phasedGenoFile),
+        crossTableUrl = as_url(crossTableFile),
+        SNPcoordUrl = as_url(SNPcoordFile),
+        chrInfoUrl = as_url(chrInfoFile),
+        nCross = nCross,
+        outFile = outFile)
+    }, NA)
+  })
+
   test_that('crossingSimulation no chrInfo', {
     expect_error({
-      createdFileWithoutChrInfo <- crossingSimulation(phasedGenoFile,
-                                                      crossTableFile,
-                                                      SNPcoordFile,
-                                                      NULL,
-                                                      nCross,
-                                                      outFile = outFile)
+      createdFileWithoutChrInfo <- crossingSimulation(
+        genoFile = phasedGenoFile,
+        crossTableFile = crossTableFile,
+        SNPcoordFile = SNPcoordFile,
+        chrInfoFile = NULL,
+        nCross = nCross,
+        outFile = outFile)
     }, NA)
   })
 
   inconsistentSNPFile <- '../data/inconsistent_SNPcoord_2.csv'
   test_that('crossingSimulation inconsistent SNPs', {
     expect_error({
-      createdFile <- crossingSimulation(phasedGenoFile,
-                                        crossTableFile,
-                                        inconsistentSNPFile,
-                                        chrInfoFile,
-                                        nCross,
-                                        outFile = outFile)
+      createdFile <- crossingSimulation(
+        genoFile = phasedGenoFile,
+        crossTableFile = crossTableFile,
+        SNPcoordFile = inconsistentSNPFile,
+        chrInfoFile = chrInfoFile,
+        nCross = nCross,
+        outFile = outFile)
     }, paste("SNP's position order should be similar when sorted by",
              "physical position and by linkage map position."))
   })
