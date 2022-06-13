@@ -62,36 +62,6 @@ Argument      |Description
 NULL, raise error if missing individuals are detected.
 
 
-# `checkChrInfoConsistency`
-
-Check the SNPs' coordinates are consistent with the chromosomes information.
-
-
-## Description
-
-Check the SNPs' coordinates are consistent with the chromosomes information.
-
-
-## Usage
-
-```r
-checkChrInfoConsistency(chrInfo, SNPcoord)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`chrInfo`     |     output of `readChrInfo`
-`SNPcoord`     |     output of `readSNPcoord`
-
-
-## Value
-
-NULL, raise error if not consistent
-
-
 # `initializeSimulation`
 
 Initialise the simulation
@@ -105,7 +75,7 @@ Initialise the simulation
 ## Usage
 
 ```r
-initializeSimulation(chrInfo, haplotypes, SNPcoord)
+initializeSimulation(haplotypes, SNPcoord)
 ```
 
 
@@ -113,7 +83,6 @@ initializeSimulation(chrInfo, haplotypes, SNPcoord)
 
 Argument      |Description
 ------------- |----------------
-`chrInfo`     |     chromosomes information. data.frame with one row per chromosome and 3 columns: - `name` name of the chromosome - `lenght_phys` physical length of the chromosome - `lenght_morgan` lenght of the chromosome **in morgan**
 `haplotypes`     |     haplotypes of the parents, data.frame with genotype values in row, and individuals'haplotype in columns. The columns name should be `individualName_1` and `individualName_2` for the first/second haplotype of the individual named `individualName`. (the list item named `haplo` return by the function `readPhasedGeno`)
 `SNPcoord`     |     snp coordinates, data.frame of 4 columns: - `chr`: Name of the chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome **in morgan** - `SNPid`: SNP's IDs
 
@@ -681,10 +650,12 @@ Simulate the genotypes of offspring given the parent genotypes.
 
 ```r
 crossingSimulation(
-  genoFile,
-  crossTableFile,
-  SNPcoordFile,
-  chrInfoFile = NULL,
+  genoFile = NULL,
+  genoUrl = NULL,
+  crossTableFile = NULL,
+  crossTableUrl = NULL,
+  SNPcoordFile = NULL,
+  SNPcoordUrl = NULL,
   nCross = 30,
   outFile = tempfile(fileext = ".vcf.gz")
 )
@@ -696,9 +667,11 @@ crossingSimulation(
 Argument      |Description
 ------------- |----------------
 `genoFile`     |     phased VCF file path (ext `.vcf` or `.vcf.gz`)
+`genoUrl`     |     url of a phased VCF file path (ext `.vcf` or `.vcf.gz`)
 `crossTableFile`     |     path of the crossing table data file (`csv` file of 2 or 3 columns). It must contain the names of the variables as its first line. The column 1 and 2 will be interpreted as the parents ids. The optional third column will be interpreted as the offspring base name.
+`crossTableUrl`     |     URL of a crossing table file
 `SNPcoordFile`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs
-`chrInfoFile`     |     path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns: - `name`: Chromosomes names - `length_phys`: chromosomes length in base pairs - `length_morgan`: chromosomes length in Morgan
+`SNPcoordUrl`     |     URL of a SNP coordinate file
 `nCross`     |     number of cross to simulate for each parent pair defined in the crossing table.
 `outFile`     |     path of the `.vcf.gz` file containing the simulated genotypes of the offspring. It must end by `.vcf.gz`. By default write in an temporary file.
 
@@ -1135,35 +1108,6 @@ Argument      |Description
 data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
 
 
-# `downloadChrInfo`
-
-Download chromosomes information file
-
-
-## Description
-
-Download chromosomes information file
-
-
-## Usage
-
-```r
-downloadChrInfo(url)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`file`     |     path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns: - `name`: Chromosomes names - `length_phys`: chromosomes length in base pairs - `length_morgan`: chromosomes length in Morgan
-
-
-## Value
-
-data.frame of 3 columns: 'name', 'length_phys', 'length_cm'
-
-
 # `readGenoData`
 
 Read geno data from a file
@@ -1425,35 +1369,6 @@ Argument      |Description
 ## Value
 
 data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
-
-
-# `readChrInfo`
-
-Read chromosomes information file
-
-
-## Description
-
-Read chromosomes information file
-
-
-## Usage
-
-```r
-readChrInfo(file)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`file`     |     path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns: - `name`: Chromosomes names - `length_phys`: chromosomes length in base pairs - `length_morgan`: chromosomes length in Morgan
-
-
-## Value
-
-data.frame of 3 columns: 'name', 'length_phys', 'length_cm'
 
 
 # `readGWAS`

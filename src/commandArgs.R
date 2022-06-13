@@ -234,23 +234,6 @@ arg$SNPcoordFile$help = paste("path of the SNPs coordinates",
 arg$SNPcoordFile$type = 'character'
 
 
-# chrInfoFile ----
-arg$chrInfoFile$flag = '--chrInfoFile'
-arg$chrInfoFile$default = NULL
-arg$chrInfoFile$help = paste("[Optional] Path of the chromosomes information",
-                             "file (`csv` file). This `.csv` file should have",
-                             "3 named columns:\\n",
-                             "- `name`: chromosomes names\\n",
-                             "- `length_phys`: chromosomes length in",
-                             "base pairs\\n",
-                             "- `length_morgan`: chromosomes length in",
-                             "Morgan\\n",
-                             "If this file is not provided, the chromosome",
-                             "lengths will be set to the largest SNPs position",
-                             "of each chromosome.")
-arg$chrInfoFile$type = 'character'
-
-
 # nCross ----
 arg$nCross$flag = '--nCross'
 arg$nCross$default = 15

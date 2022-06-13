@@ -545,39 +545,6 @@ capture_output({
     })
   }
 
-  # test with incinsistent physical / linkage map position SNPs
-
-
-
-  # readChrInfo ----
-  crhInfoFiles <- '../../data/chromosomesInformation/breedingGame_chrInfo.csv'
-  for (file in crhInfoFiles) {
-    test_that(paste('readChrInfo', basename(file)), {
-      expect_error({
-        chrInfo <- readChrInfo(file)
-      }, NA)
-      expect_is(chrInfo, 'data.frame')
-      expect_equal(colnames(chrInfo),
-                   c("name", "length_phys", "length_morgan"))
-      expect_true(!any(duplicated(chrInfo)))
-      expect_true(!any(is.na(chrInfo)))
-    })
-    # downloadChrInfo ----
-    test_that(paste('downloadChrInfo', basename(file)), {
-      file <- normalizePath(file)
-      file <- paste0("file://", file)
-      expect_error({
-        chrInfo <- downloadChrInfo(file)
-      }, NA)
-      expect_is(chrInfo, 'data.frame')
-      expect_equal(colnames(chrInfo),
-                   c("name", "length_phys", "length_morgan"))
-      expect_true(!any(duplicated(chrInfo)))
-      expect_true(!any(is.na(chrInfo)))
-    })
-  }
-
-
 
 })
 

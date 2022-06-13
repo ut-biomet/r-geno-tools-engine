@@ -92,32 +92,4 @@ capture_output({
   })
 
 
-
-  # checkChrInfoConsistency ----
-  chrInfoFile <- '../../data/chromosomesInformation/breedingGame_chrInfo.csv'
-  SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
-  test_that('checkChrInfoConsistency', {
-    chrInfo <- readChrInfo(chrInfoFile)
-    SNPcoord <- readSNPcoord(SNPcoordFile)
-
-    # no error
-    expect_error({
-      checkChrInfoConsistency(chrInfo, SNPcoord)
-    }, NA)
-
-    # SNP with exceeding physical position
-    SNPcoord_exPhysPos <- SNPcoord
-    SNPcoord_exPhysPos[1, "physPos"] <- chrInfo$length_phys[1] + 1
-    expect_error({
-      checkChrInfoConsistency(chrInfo, SNPcoord_exPhysPos)
-    }, 'SNPs exceed their chromosome\'s physical length:')
-
-    # SNP with exceeding linkage map position
-    SNPcoord_exLMapPos <- SNPcoord
-    SNPcoord_exLMapPos[1, "linkMapPos"] <- chrInfo$length_morgan[1] + 0.01
-    expect_error({
-      checkChrInfoConsistency(chrInfo, SNPcoord_exLMapPos)
-    }, 'SNPs exceed their chromosome\'s linkage map length:')
-  })
-
 })

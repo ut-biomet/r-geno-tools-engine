@@ -239,30 +239,6 @@ downloadSNPcoord <- function(url) {
   snpCoord
 }
 
-#' Download chromosomes information file (Not used anymore)
-#'
-#' @param file path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns:
-#' - `name`: Chromosomes names
-#' - `length_phys`: chromosomes length in base pairs
-#' - `length_morgan`: chromosomes length in Morgan
-#'
-#' @return data.frame of 3 columns: 'name', 'length_phys', 'length_cm'
-downloadChrInfo <- function(url) {
-  logger <- logger$new("r-downloadChrInfo()")
-  logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedResult",
-                        tmpdir = tempdir(),
-                        fileext = ".csv")
-  logger$log("Download result file ... ")
-  download.file(url, localFile, quiet = TRUE)
-
-  logger$log("Read result file ... ")
-  chrInfo <- readChrInfo(localFile)
-  logger$log("Read result file DONE ")
-
-  logger$log("DONE, return output.")
-  chrInfo
-}
 
 
 
@@ -803,83 +779,6 @@ readSNPcoord <- function(file) {
 
   return(SNPcoord)
 }
-
-
-#' Read chromosomes information file (Not used anymore)
-#'
-#' @param file path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns:
-#' - `name`: Chromosomes names
-#' - `length_phys`: chromosomes length in base pairs
-#' - `length_morgan`: chromosomes length in Morgan
-#'
-#' @return data.frame of 3 columns: 'name', 'length_phys', 'length_cm'
-readChrInfo <- function(file) {
-  logger <- logger$new('r-readChrInfo()')
-
-  logger$log('Read chromosomes information file ...')
-  if (!file.exists(file)) {
-    stop("chromosomes information file do not exists")
-  }
-  if (!identical(tools::file_ext(file), 'csv')) {
-    stop('chromosomes information file should be a `.csv` file.')
-  }
-  chrInfo <- read.csv(file,
-                      header = TRUE,
-                      stringsAsFactors = FALSE)
-  logger$log('Read chromosomes information file DONE')
-
-
-  logger$log('Check chromosomes information file ...')
-  # file dimension
-  if (ncol(chrInfo) != 3) {
-    stop('chromosomes information file should have 3 columns',
-         ncol(chrInfo), 'detected.')
-  }
-
-  refColNames <- sort(c('name', 'length_phys', 'length_morgan'))
-  if (!identical(sort(colnames(chrInfo)), refColNames)) {
-    stop('chromosomes information file should have a header specifying the the 3 columns names: `',
-         paste(refColNames, collapse = '`, `'),
-         '`. The detected columns are: ',
-         paste(colnames(chrInfo), collapse = '`, `'), '`.'
-    )
-  }
-  if (nrow(chrInfo) == 0) {
-    stop('chromosomes information file should have at least one row')
-  }
-
-
-  # missing values
-  if (any(is.na(chrInfo))) {
-    stop('chromosomes information file should not have any missing values')
-  }
-
-  # duplicated rows
-  dupRows <- duplicated(chrInfo)
-  if (any(dupRows)) {
-    warning(sum(dupRows),
-            'duplicated rows found in the chromosomes information file. ',
-            'They will be removed.')
-    chrInfo <- chrInfo[!dupRows,]
-  }
-
-  # check unicity of chromosome name
-  duplicatedIds <- which(duplicated(chrInfo$name))
-  if (length(duplicatedIds) != 0) {
-    msg <- paste(
-    length(duplicatedIds),
-    'duplicated chromosome name detected in the chromosome information file:',
-    paste(chrInfo$name[duplicatedIds], collapse = ', '))
-    stop(msg)
-  }
-
-  return(chrInfo)
-}
-
-
-
-
-
 
 
 #' Read GWAS analysis result file (`.json`)
