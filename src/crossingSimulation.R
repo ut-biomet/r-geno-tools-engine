@@ -6,11 +6,6 @@
 
 #' Initialise the simulation
 #'
-#' @param chrInfo chromosomes information. data.frame with one row per
-#' chromosome and 3 columns:
-#'  - `name` name of the chromosome
-#'  - `lenght_phys` physical length of the chromosome
-#'  - `lenght_morgan` lenght of the chromosome **in morgan**
 #' @param haplotypes haplotypes of the parents, data.frame with genotype values
 #' in row, and individuals'haplotype in columns. The columns name should be
 #' `individualName_1` and `individualName_2` for the first/second haplotype of
@@ -23,17 +18,23 @@
 #'  - `SNPid`: SNP's IDs
 #'
 #' @return `breedSimulatR`'s population object
-initializeSimulation <- function(chrInfo,
-                                 haplotypes,
+initializeSimulation <- function(haplotypes,
                                  SNPcoord) {
   logger <- logger$new("r-initializeSimulation()")
 
   # create specie object
+
+  # get chr size with max SNP coordinates for each chromosome
+  logger$log("Extract chromosomes information ...")
+  chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
+  chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
+  colnames(chrInfo) <- c('name', 'max_physPos', 'max_linkMapPos')
+
   logger$log('Create specie ...')
   specie <- breedSimulatR::specie$new(nChr = nrow(chrInfo),
                                       chrNames = chrInfo$name,
-                                      lchr = chrInfo$length_phys,
-                                      lchrCm = chrInfo$length_morgan * 10^2,
+                                      lchr = chrInfo$max_physPos,
+                                      lchrCm = chrInfo$max_linkMapPos * 10^2,
                                       verbose = FALSE)
   logger$log('Create specie DONE')
 

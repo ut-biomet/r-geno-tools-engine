@@ -10,32 +10,34 @@ capture_output({
 
   # initializeSimulation ----
   phasedGenoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
-  chrInfoFile <- '../../data/chromosomesInformation/breedingGame_chrInfo.csv'
   SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
 
   test_that('initializeSimulation', {
     g <- readPhasedGeno(phasedGenoFile)
-    chrInfo <- readChrInfo(chrInfoFile)
     SNPcoord <- checkAndFilterSNPcoord(readSNPcoord(SNPcoordFile), g$SNPcoord)
 
     expect_error({
-      parent_pop <- initializeSimulation(chrInfo, g$haplotypes, SNPcoord)
+      parent_pop <- initializeSimulation(g$haplotypes, SNPcoord)
     }, NA)
     expect_is(parent_pop, "population")
     expect_equal(parent_pop$nInd, ncol(g$haplotypes)/2)
 
     # chromosome information
+    chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
+    chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
+    colnames(chrInfo) <- c('name', 'max_physPos', 'max_linkMapPos')
+
     expect_equal(sort(parent_pop$specie$chrNames), sort(chrInfo$name))
 
-    chrLength_cm <- chrInfo$length_morgan * 10^2
-    names(chrLength_cm) <- chrInfo$name
-    chrLength_cm <- chrLength_cm[parent_pop$specie$chrNames]
-    expect_equal(parent_pop$specie$lchrCm, chrLength_cm)
+    max_linkMapPos <- chrInfo$max_linkMapPos * 10^2
+    names(max_linkMapPos) <- chrInfo$name
+    max_linkMapPos <- max_linkMapPos[parent_pop$specie$chrNames]
+    expect_equal(parent_pop$specie$lchrCm, max_linkMapPos)
 
-    chrLength_physPos <- chrInfo$length_phys
-    names(chrLength_physPos) <- chrInfo$name
-    chrLength_physPos <- chrLength_physPos[parent_pop$specie$chrNames]
-    expect_equal(parent_pop$specie$lchr, chrLength_physPos)
+    max_physPos <- chrInfo$max_physPos
+    names(max_physPos) <- chrInfo$name
+    max_physPos <- max_physPos[parent_pop$specie$chrNames]
+    expect_equal(parent_pop$specie$lchr, max_physPos)
 
 
     # SNP coordinates:

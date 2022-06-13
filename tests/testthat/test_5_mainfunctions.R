@@ -474,7 +474,6 @@ capture.output({
     phasedGenoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
     SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
     crossTableFile <- '../../data/crossingTable/breedGame_crossTable.csv'
-    chrInfoFile <- '../../data/chromosomesInformation/breedingGame_chrInfo.csv'
     nCross <- 3
     outFile <- tempfile(fileext = ".vcf.gz")
 
@@ -483,7 +482,6 @@ capture.output({
       createdFile <- crossingSimulation(genoFile = phasedGenoFile,
                                         crossTableFile = crossTableFile,
                                         SNPcoordFile = SNPcoordFile,
-                                        chrInfoFile = chrInfoFile,
                                         nCross = nCross,
                                         outFile = outFile)
     }, NA)
@@ -519,19 +517,6 @@ capture.output({
         genoUrl = as_url(phasedGenoFile),
         crossTableUrl = as_url(crossTableFile),
         SNPcoordUrl = as_url(SNPcoordFile),
-        chrInfoUrl = as_url(chrInfoFile),
-        nCross = nCross,
-        outFile = outFile)
-    }, NA)
-  })
-
-  test_that('crossingSimulation no chrInfo', {
-    expect_error({
-      createdFileWithoutChrInfo <- crossingSimulation(
-        genoFile = phasedGenoFile,
-        crossTableFile = crossTableFile,
-        SNPcoordFile = SNPcoordFile,
-        chrInfoFile = NULL,
         nCross = nCross,
         outFile = outFile)
     }, NA)
@@ -544,7 +529,6 @@ capture.output({
         genoFile = phasedGenoFile,
         crossTableFile = crossTableFile,
         SNPcoordFile = inconsistentSNPFile,
-        chrInfoFile = chrInfoFile,
         nCross = nCross,
         outFile = outFile)
     }, paste("SNP's position order should be similar when sorted by",

@@ -704,12 +704,6 @@ draw_pedNetwork <- function(pedFile = NULL,
 #' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
 #' - `SNPid`: SNP's IDs
 #' @param SNPcoordUrl URL of a SNP coordinate file
-#' @param chrInfoFile path of the chromosomes information file (`csv` file).
-#' This `.csv` file should have 3 named columns:
-#' - `name`: Chromosomes names
-#' - `length_phys`: chromosomes length in base pairs
-#' - `length_morgan`: chromosomes length in Morgan
-#' @param chrInfoUrl URL of a chromosome information file
 #' @param nCross number of cross to simulate for each parent pair defined
 #' in the crossing table.
 #' @param outFile path of the `.vcf.gz` file containing the simulated genotypes
@@ -724,8 +718,6 @@ crossingSimulation <- function(genoFile = NULL,
                                crossTableUrl = NULL,
                                SNPcoordFile = NULL,
                                SNPcoordUrl = NULL,
-                               chrInfoFile = NULL,
-                               chrInfoUrl = NULL,
                                nCross = 30,
                                outFile = tempfile(fileext = ".vcf.gz")) {
   logger <- logger$new("r-crossingSimulation()")
@@ -756,19 +748,6 @@ crossingSimulation <- function(genoFile = NULL,
     stop("Error: either `crossTableFile` or `crossTableUrl` should be provided")
   }
   crossTable$n <- nCross
-
-  if (!is.null(chrInfoFile) && is.null(chrInfoUrl)) {
-    chrInfo <- readChrInfo(chrInfoFile)
-  } else if (is.null(crossTableFile) && !is.null(chrInfoUrl)) {
-    chrInfo <- downloadChrInfo(chrInfoUrl)
-  } else {
-    # estimate chr size with max SNP coordinates for each chromosome
-    logger$log("Chromosomes information not provided.",
-               "Estimate using SNP coordinates.")
-    chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
-    chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
-    colnames(chrInfo) <- c('name', 'length_phys', 'length_morgan')
-  }
   logger$log("Get data DONE")
 
   # check input data
@@ -793,19 +772,11 @@ crossingSimulation <- function(genoFile = NULL,
   }
   logger$log("Check output file extention DONE")
 
-  if (!is.null(chrInfo)) {
-    logger$log("Check chromosomes information consistency between",
-             " `.vcf` and `.csv` file ...")
-    checkChrInfoConsistency(chrInfo, SNPcoord)
-    logger$log("Check chromosomes information consistency between",
-             " `.vcf` and `.csv` file DONE")
-  }
 
 
   # Initialise sumulation population
   logger$log("Initialise simulation ...")
-  parentPopulation <- initializeSimulation(chrInfo = chrInfo,
-                                           haplotypes = g$haplotypes,
+  parentPopulation <- initializeSimulation(haplotypes = g$haplotypes,
                                            SNPcoord = SNPcoord)
   logger$log("Initialise simulation DONE")
 

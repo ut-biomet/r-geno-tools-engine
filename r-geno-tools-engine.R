@@ -312,10 +312,6 @@ crossSim_parser$add_argument(arg$SNPcoordFile$flag,
                              type = arg$SNPcoordFile$type,
                              default = NULL)
                              # required = TRUE)
-crossSim_parser$add_argument(arg$chrInfoFile$flag,
-                             help = arg$chrInfoFile$help,
-                             type = arg$chrInfoFile$type,
-                             default = arg$chrInfoFile$default)
 crossSim_parser$add_argument(arg$nCross$flag,
                              help = arg$nCross$help,
                              type = arg$nCross$type,
@@ -442,7 +438,6 @@ if (args$command == "gwas") {
   outFile <- crossingSimulation(genoFile = args$genoFile,
                                 crossTableFile = args$crossTableFile,
                                 SNPcoordFile = args$SNPcoordFile,
-                                chrInfoFile = args$chrInfoFile,
                                 nCross = args$nCross,
                                 outFile = args$outFile)
   cat(outFile)

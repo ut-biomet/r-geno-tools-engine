@@ -239,7 +239,7 @@ downloadSNPcoord <- function(url) {
   snpCoord
 }
 
-#' Download chromosomes information file
+#' Download chromosomes information file (Not used anymore)
 #'
 #' @param file path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns:
 #' - `name`: Chromosomes names
@@ -805,7 +805,7 @@ readSNPcoord <- function(file) {
 }
 
 
-#' Read chromosomes information file
+#' Read chromosomes information file (Not used anymore)
 #'
 #' @param file path of the chromosomes information file (`csv` file). This `.csv` file should have 3 named columns:
 #' - `name`: Chromosomes names
