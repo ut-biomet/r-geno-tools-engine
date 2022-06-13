@@ -23,16 +23,21 @@ capture_output({
     expect_equal(parent_pop$nInd, ncol(g$haplotypes)/2)
 
     # chromosome information
-    chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
-    chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
-    colnames(chrInfo) <- c('name', 'max_physPos', 'max_linkMapPos')
+    chrInfo_max <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
+    chrInfo_max <- chrInfo_max[, c('name', 'physPos', 'linkMapPos')]
+    colnames(chrInfo_max) <- c('name', 'max_physPos', 'max_linkMapPos')
+    chrInfo_min <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = min)
+    chrInfo_min <- chrInfo_min[, c('name', 'physPos', 'linkMapPos')]
+    colnames(chrInfo_min) <- c('name', 'min_physPos', 'min_linkMapPos')
+    chrInfo <- dplyr::left_join(chrInfo_min, chrInfo_max)
+    chrInfo$chrLength <- chrInfo$max_linkMapPos - chrInfo$min_linkMapPos
 
     expect_equal(sort(parent_pop$specie$chrNames), sort(chrInfo$name))
 
-    max_linkMapPos <- chrInfo$max_linkMapPos * 10^2
-    names(max_linkMapPos) <- chrInfo$name
-    max_linkMapPos <- max_linkMapPos[parent_pop$specie$chrNames]
-    expect_equal(parent_pop$specie$lchrCm, max_linkMapPos)
+    chrLength <- chrInfo$chrLength * 10^2
+    names(chrLength) <- chrInfo$name
+    chrLength <- chrLength[parent_pop$specie$chrNames]
+    expect_equal(parent_pop$specie$lchrCm, chrLength)
 
     max_physPos <- chrInfo$max_physPos
     names(max_physPos) <- chrInfo$name
@@ -43,6 +48,14 @@ capture_output({
     # SNP coordinates:
     simulInit_SNPcoord <- parent_pop$inds[[1]]$haplo$SNPinfo$SNPcoord
     simulInit_SNPcoord <- simulInit_SNPcoord[order(simulInit_SNPcoord$SNPid),]
+
+    # transform SNP linkage map position to start at 0 (simple translation)
+    for (chr in unique(SNPcoord$chr)) {
+      selLines <- SNPcoord$chr == chr # (selected)lines of the current chromosome
+      minLMPos <- min(SNPcoord[selLines, 'linkMapPos'])
+      SNPcoord[selLines, 'linkMapPos'] <- SNPcoord$linkMapPos[selLines] - minLMPos
+    }
+
     expect_equal(sort(simulInit_SNPcoord$SNPid), sort(SNPcoord$SNPid))
     expect_equal(simulInit_SNPcoord$linkMapPos,
                  SNPcoord[order(SNPcoord$SNPid), 'linkMapPos'] * 10^2)

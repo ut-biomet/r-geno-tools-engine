@@ -22,7 +22,13 @@ initializeSimulation <- function(haplotypes,
                                  SNPcoord) {
   logger <- logger$new("r-initializeSimulation()")
 
-  # create specie object
+  # initialisation
+  # transform SNP linkage map position to start at 0 (simple translation)
+  for (chr in unique(SNPcoord$chr)) {
+    selLines <- SNPcoord$chr == chr # (selected)lines of the current chromosome
+    minLMPos <- min(SNPcoord[selLines, 'linkMapPos'])
+    SNPcoord[selLines, 'linkMapPos'] <- SNPcoord$linkMapPos[selLines] - minLMPos
+  }
 
   # get chr size with max SNP coordinates for each chromosome
   logger$log("Extract chromosomes information ...")
@@ -30,6 +36,7 @@ initializeSimulation <- function(haplotypes,
   chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
   colnames(chrInfo) <- c('name', 'max_physPos', 'max_linkMapPos')
 
+  # create specie object
   logger$log('Create specie ...')
   specie <- breedSimulatR::specie$new(nChr = nrow(chrInfo),
                                       chrNames = chrInfo$name,
