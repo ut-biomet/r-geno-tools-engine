@@ -499,10 +499,12 @@ capture.output({
     createdIndBaseName <- unique(gsub('-[0-9]*$', '', createdGeno@ped$id))
     expect_equal(sort(createdIndBaseName), sort(crossTable$names))
 
-    # SNPs
-    SNPcoord <- readSNPcoord(SNPcoordFile)
-    expect_equal(sort(createdPhasedGeno$SNPcoord$SNPid), sort(SNPcoord$SNPid))
-    expect_equal(createdPhasedGeno$SNPcoord$physPos, SNPcoord$physPos)
+    # SNPs: check original and new vcf files' snp position are the same
+    g <- readPhasedGeno(phasedGenoFile)
+    snpPhysPos_newVcf <- createdPhasedGeno$SNPcoord[order(createdPhasedGeno$SNPcoord$SNPid),]
+    snpPhysPos_ref <- g$SNPcoord[order(g$SNPcoord$SNPid),]
+    expect_equal(snpPhysPos_newVcf$SNPid, snpPhysPos_ref$SNPid)
+    expect_equal(snpPhysPos_newVcf$physPos, snpPhysPos_ref$physPos)
 
   })
 
@@ -535,4 +537,41 @@ capture.output({
              "physical position and by linkage map position."))
   })
 
+  missingPhysPosSNPfile <- '../data/breedingGame_SNPcoord_missingPhysPos.csv'
+  test_that('crossingSimulation missing PhysPos SNPs', {
+    expect_error({
+      createdFile <- crossingSimulation(
+        genoFile = phasedGenoFile,
+        crossTableFile = crossTableFile,
+        SNPcoordFile = missingPhysPosSNPfile,
+        nCross = nCross,
+        outFile = outFile)
+    }, NA)
+    # SNPs: check original and new vcf files' snp position are the same
+    g <- readPhasedGeno(phasedGenoFile)
+    createdPhasedGeno <- readPhasedGeno(createdFile)
+    snpPhysPos_newVcf <- createdPhasedGeno$SNPcoord[order(createdPhasedGeno$SNPcoord$SNPid),]
+    snpPhysPos_ref <- g$SNPcoord[order(g$SNPcoord$SNPid),]
+    expect_equal(snpPhysPos_newVcf$SNPid, snpPhysPos_ref$SNPid)
+    expect_equal(snpPhysPos_newVcf$physPos, snpPhysPos_ref$physPos)
+  })
+
+  phasedGenoFile_missingPhysPos <- '../data/breedGame_phasedGeno_missingPos.vcf.gz'
+  test_that('crossingSimulation missing PhysPos in VCF', {
+    expect_error({
+      createdFile <- crossingSimulation(
+        genoFile = phasedGenoFile_missingPhysPos,
+        crossTableFile = crossTableFile,
+        SNPcoordFile = SNPcoordFile,
+        nCross = nCross,
+        outFile = outFile)
+    }, NA)
+    expect_error({
+      createdGeno <- readGenoData(createdFile)
+    }, NA)
+    expect_error({
+      createdPhasedGeno <- readPhasedGeno(createdFile)
+    }, NA)
+    expect_true(all(is.na(createdPhasedGeno$SNPcoord$physPos)))
+  })
 })

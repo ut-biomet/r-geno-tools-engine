@@ -1,0 +1,6 @@
+chr,physPos,SNPid,linkMapPos
+chr1, 100, snp1, 0.01
+chr1, 150, snp1, 0.020
+chr1, 200, snp1, 0.015
+chr1, 300, snp1, 0.03
+chr2, 100, snp1, 0.01

@@ -39,12 +39,6 @@ capture_output({
     chrLength <- chrLength[parent_pop$specie$chrNames]
     expect_equal(parent_pop$specie$lchrCm, chrLength)
 
-    max_physPos <- chrInfo$max_physPos
-    names(max_physPos) <- chrInfo$name
-    max_physPos <- max_physPos[parent_pop$specie$chrNames]
-    expect_equal(parent_pop$specie$lchr, max_physPos)
-
-
     # SNP coordinates:
     simulInit_SNPcoord <- parent_pop$inds[[1]]$haplo$SNPinfo$SNPcoord
     simulInit_SNPcoord <- simulInit_SNPcoord[order(simulInit_SNPcoord$SNPid),]
@@ -59,8 +53,6 @@ capture_output({
     expect_equal(sort(simulInit_SNPcoord$SNPid), sort(SNPcoord$SNPid))
     expect_equal(simulInit_SNPcoord$linkMapPos,
                  SNPcoord[order(SNPcoord$SNPid), 'linkMapPos'] * 10^2)
-    expect_equal(simulInit_SNPcoord$physPos,
-                 SNPcoord[order(SNPcoord$SNPid), 'physPos'])
     expect_equal(simulInit_SNPcoord$chr,
                  SNPcoord[order(SNPcoord$SNPid), 'chr'])
     })

@@ -794,8 +794,9 @@ crossingSimulation <- function(genoFile = NULL,
   if (file.exists(outFile)) {
     file.remove(outFile)
   }
-  simulatedPop$writeVcf(outFile)
+  saveVcf(outFile, simulatedPop, SNPcoord)
   logger$log("Write output file DONE")
+
 
   return(outFile)
 }

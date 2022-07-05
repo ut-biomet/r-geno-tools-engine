@@ -1368,7 +1368,7 @@ Argument      |Description
 
 ## Value
 
-data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
+data.frame of 4 columns: 'chr', 'linkMapPos', 'SNPid'
 
 
 # `readGWAS`
@@ -1504,6 +1504,32 @@ The function remove the monomorphic markers and
 ## Value
 
 List of 2 elements: `genoData` (a bed matrix), `phenoData` (a data.frame)
+
+
+# `saveVcf`
+
+Save phased genotypes of simulatied population to vcf.gz file
+
+
+## Description
+
+Save phased genotypes of simulatied population to vcf.gz file
+
+
+## Usage
+
+```r
+saveVcf(file, pop, SNPcoord)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`file`     |     file path where to save the data. If the file already exists, it will be overwritten.
+`pop`     |     simulated population (`breedSimulatR`'s population)
+`SNPcoord`     |     snp coordinate of the genotypes. (data.frame with `chr`, `physPos`, and `SNPid` columns)
 
 
 # `pedRelMat`

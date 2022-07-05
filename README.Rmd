@@ -538,7 +538,7 @@ The for the simulation, the engine needs:
 
 - The phased genotypes of the parents
 - A crossing table specifying which cross to simulate
-- The SNP coordinates in base pair and in Morgan
+- The SNP coordinates in Morgan
 
 
 To generate the SNP genotypes of new individuals from those of the parents,
@@ -594,7 +594,7 @@ The for the simulation, the engine needs:
 
 - The phased genotypes of the parents
 - A crossing table specifying which cross to simulate
-- The SNP coordinates in base pair and in Morgan
+- The SNP coordinates in Morgan
 
 
 To generate the SNP genotypes of new individuals from those of the parents,

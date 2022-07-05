@@ -66,27 +66,8 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
     user_SNPcoord <- user_SNPcoord[-additionalSNP,]
   }
 
-  # Check they have the same data
-  user_SNPcoord_tmp <- user_SNPcoord[order(user_SNPcoord$SNPid),]
-  vcf_SNPcoord <- vcf_SNPcoord[order(vcf_SNPcoord$SNPid),]
-
-  linkMapColumnId <- which(colnames(user_SNPcoord) == 'linkMapPos')
-  user_SNPcoord_tmp <- user_SNPcoord_tmp[, -linkMapColumnId]
-
-  columns <- c('chr', 'SNPid', 'physPos')
-  vcf_SNPcoord <- vcf_SNPcoord[, columns]
-  user_SNPcoord_tmp <- user_SNPcoord_tmp[, columns]
-  diffId <- which(user_SNPcoord_tmp != vcf_SNPcoord)
-
-  if (length(diffId) != 0) {
-    diffLineId <- diffId %% nrow(user_SNPcoord_tmp)
-    errMsg <- paste('The SNPs coordinate file and the genotype files have',
-                    'inconsistent data.',
-                    length(diffLineId),
-                    'incompatibilities detected about SNPs:',
-                    paste(vcf_SNPcoord$SNPid[diffLineId], collapse = ', '))
-    stop(errMsg)
-  }
+  # add vcf_file snp physical position to SNPcoord data frame
+  user_SNPcoord[order(user_SNPcoord$SNPid), 'physPos'] <- vcf_SNPcoord[order(vcf_SNPcoord$SNPid), 'physPos']
 
   return(user_SNPcoord)
 }

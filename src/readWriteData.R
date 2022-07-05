@@ -716,7 +716,7 @@ readCrossTable <- function(file, header = TRUE) {
 #' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
 #' - `SNPid`: SNP's IDs
 #'
-#' @return data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
+#' @return data.frame of 4 columns: 'chr', 'linkMapPos', 'SNPid'
 readSNPcoord <- function(file) {
   logger <- logger$new('r-readSNPcoord()')
 
@@ -734,14 +734,11 @@ readSNPcoord <- function(file) {
 
 
   logger$log('Check snps coordinates file ...')
-  # file dimension
-  if (ncol(SNPcoord) != 4) {
-    stop('snps coordinates file should have 4 columns', ncol(SNPcoord), 'detected.')
-  }
 
-  refColNames <- sort(c('chr', 'physPos', 'linkMapPos', 'SNPid'))
-  if (!identical(sort(colnames(SNPcoord)), refColNames)) {
-    stop('snps coordinates file should have a header specifying the the 4 columns names: `',
+  refColNames <- sort(c('chr', 'linkMapPos', 'SNPid'))
+  if (!all(refColNames %in% colnames(SNPcoord))) {
+    stop('snps coordinates file should have a header specifying at least those',
+         ' variables: `',
          paste(refColNames, collapse = '`, `'),
          '`. The detected columns are: ',
          paste(colnames(SNPcoord), collapse = '`, `'), '`.'
@@ -753,8 +750,9 @@ readSNPcoord <- function(file) {
 
 
   # missing values
-  if (any(is.na(SNPcoord))) {
-    stop('snps coordinates should not have any missing values')
+  if (any(is.na(SNPcoord[, refColNames]))) {
+    stop('snps coordinates should not have any missing values for variables: `',
+         paste(refColNames, collapse = '`, `'), '`')
   }
 
   # duplicated rows
@@ -988,4 +986,59 @@ prepareData <- function(gDta, pDta) {
   logger$log("DONE, return output.")
 
   list(genoData = gDta, phenoData = pDta)
+}
+
+
+#' Save phased genotypes of simulatied population to vcf.gz file
+#'
+#' @param file file path where to save the data. If the file already exists, it
+#' will be overwritten.
+#' @param pop simulated population (`breedSimulatR`'s population)
+#' @param SNPcoord snp coordinate of the genotypes. (data.frame with `chr`, `physPos`, and `SNPid` columns)
+#'
+saveVcf <- function(file, pop, SNPcoord){
+
+  # Fixed region
+  data <- SNPcoord[, c("chr", "physPos", "SNPid")]
+  data$physPos[is.na(data$physPos)] <- '.'
+
+  colnames(data) <- c("#CHROM", "POS", "ID")
+  data <- data[order(data$POS),]
+  data <- data[order(data$`#CHROM`),]
+
+  data$REF <- "."
+  data$ALT <- "."
+  data$QUAL <- "."
+  data$FILTER <- "PASS"
+  data$INFO <- "."
+
+  # Genotype region
+  data$FORMAT <- "GT"
+  gt <- vapply(pop$inds, function(ind){
+    hap <- do.call(cbind, ind$haplo$values)
+    x <- paste(hap[1,], hap[2,], sep = "|")
+    names(x) <- colnames(hap)
+    x
+  }, vector(mode = "character",
+            length = length(pop$inds[[1]]$haplo$allelDose)))
+  gt <- as.data.frame(gt[data$ID,])
+  data <- cbind(data, gt)
+
+  # Meta region
+  meta <- paste("##fileformat=VCFv4.3",
+                "##source=\"R-Geno-tool-engine\", data in this file are simulated.",
+                "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+                sep = "\n")
+
+  # write file
+  f <- gzfile(file, "w")
+  writeLines(text = meta, con = f)
+  close(f)
+  data.table::fwrite(x = data,
+                     file = file,
+                     append = TRUE,
+                     sep = "\t",
+                     quote = FALSE,
+                     row.names = FALSE,
+                     col.names = TRUE)
 }

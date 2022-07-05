@@ -42,15 +42,6 @@ capture_output({
     }, paste("The SNPs coordinate file miss 1 genotype's SNPs:",
              SNPcoord$SNPid[nrow(SNPcoord)]))
 
-
-    # inconsistent physical position between user's snp and vcf snp (error)
-    SNPcoord_inconsistPhysPos <- SNPcoord
-    SNPcoord_inconsistPhysPos[1, 'physPos'] <- SNPcoord[1, 'physPos'] + 1
-    expect_error({
-      checkAndFilterSNPcoord(SNPcoord_inconsistPhysPos, g$SNPcoord)
-    }, paste('The SNPs coordinate file and the genotype files have',
-             'inconsistent data.'))
-
   })
 
 

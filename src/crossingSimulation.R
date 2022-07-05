@@ -31,6 +31,7 @@ initializeSimulation <- function(haplotypes,
   }
 
   # get chr size with max SNP coordinates for each chromosome
+  SNPcoord$physPos <- seq(nrow(SNPcoord)) # dummy data
   logger$log("Extract chromosomes information ...")
   chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
   chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
@@ -40,7 +41,7 @@ initializeSimulation <- function(haplotypes,
   logger$log('Create specie ...')
   specie <- breedSimulatR::specie$new(nChr = nrow(chrInfo),
                                       chrNames = chrInfo$name,
-                                      lchr = chrInfo$max_physPos,
+                                      lchr = nrow(SNPcoord), # dummy data
                                       lchrCm = chrInfo$max_linkMapPos * 10^2,
                                       verbose = FALSE)
   logger$log('Create specie DONE')
