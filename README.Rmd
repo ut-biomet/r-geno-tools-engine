@@ -663,6 +663,297 @@ crossingSimulation(genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
 
 
 
+## Estimate progeny genotype variance (need better name)
+
+<details><summary>Click to expand</summary>
+
+### Introduction
+
+We would like to estimate the esperance and variance of progenies' genotypes from parents' (phased) genotypes and recombination rates of markers.
+
+#### Theory (by Julien)
+
+Let's consider 2 markers $x$ and $y$ place on the same chromosome. A given individual have 2 alleles for each of those markers:
+
+- the maternal alleles $x_M, y_M$
+- the paternal alleles: $x_P, y_P$.
+
+Let $X_i$ be the random variable representing the genotype value of the marker $x$ in a gamete from the individual $i$. And let $x_{ij}$ be the genotype value of the allele $j$ of the marker $x$ for individual $i$. (this is not a random variable)
+
+We call $r_{xy}$ be the recombination rate between $x$ and $y$.
+
+We are interested in the variance, covariance and expected value of $X_i$ and $Y_i$.
+
+For one gamete, we have:
+$$
+\begin{align}
+\mathbb{E}(X_i) &= \frac{1}{2}(x_M+x_P)\\
+Cov(X_i,Y_i) &= \frac{1}{4} (1-2r_{xy}) z_{ixy}\\
+Var(X_i) &= \frac{1}{4} z_{ixx}\\
+\text{with } z_{ixy} &= x_My_M + x_Py_P - x_My_P - x_Py_M\\
+\end{align}
+$$
+
+And for a progeny from parent 1 and 2 we have:
+
+$$
+\begin{align}
+\mathbb{E}(X_1 + X_2) &= \frac{1}{2}(x_{1M} + x_{1P} + x_{2M} + x_{2P})\\
+Cov(X_1 + X_2, Y_1 + Y_2) &= \frac{1}{4} (1-2r) (z_{1xy} + z_{2xy})\\
+Var(X_1+X_2) &= \frac{1}{4}(z_{1xx} + z_{2xx})\\
+\end{align}
+$$
+
+
+We can also calculate the expected value and variance of the genetic value of the progeny if we suppose an additive genetic architecture and if we know the markers effects $e_x$.
+Let $G$ be the genetic value of the progeny of individual $1$ and $2$: $G = \sum_i e_i (X_{1i} + X_{2i})$
+
+$$
+\begin{align}
+\mathbb{E}(G) &= \frac{1}{2} \sum_i e_i (x_{1iM} + x_{1iP} + x_{2iM} + x_{2iP}) \\
+Var(G) &= \frac{1}{4} \sum_{jk} e_je_k (1-2r_{jk})(z_{1jk} + z_{2jk}) \\
+\end{align}
+$$
+
+
+
+<details><summary>Proof</summary>
+
+Let $P(x_{ij})$ be the probability that the individual $i$ transmit its allele $j$ for the marker $x$ in one of it's gamete.
+And let $P(x_ij,y_kl)$ be the probability that the individuals $i$ and $k$ transmit their alleles $j$ and $l$ for markers $x$ and $y$ in one of their gamete.
+
+We have the following formula:
+
+- $P(x_{iM}) = P(x_{iP}) = P(y_{iM}) = P(y_{iP}) = \frac{1}{2}$
+- $P(x_{iM}y_{iM}) = P(x_{iP}y{i_P})$
+- $P(x_{iM}y_{iP}) = P(x_{iP}y_{iM})$
+
+
+##### Expected value
+
+$$
+\begin{align}
+\mathbb{E}(X_i) &= \sum_jx_{ij}P(x_{ij})\\
+\mathbb{E}(X_i) &= x_{iM}P(x_{iM}) + x_{iP}P(x_{iP})\\
+\mathbb{E}(X_i) &= \frac{1}{2} (x_{iM}+x_{iP})\\
+\end{align}
+$$
+
+
+##### Covariance
+
+By definition the recombination rate $r_{xy}$ between markers $x$ and $y$ is $r_{xy} \overset{def}{=} P(x_{iM}y_{iP} \cup x_{iP}y_{iM})$ therefore:
+
+$$
+\begin{align}
+r_{xy} &\overset{def}{=} P(x_{iM}y_{iP} \cup x_{iP}y_{iM})\\
+  &= P(x_{iM}y_{iP}) + P(x_{iP}y_{iM}) - P(x_{iM}y_{iP} \cap {ix}_Py_{iM})\\
+  &= P(x_{iM}y_{iP}) + P(x_{iP}y_{iM}) - 0\\
+r_{xy} &= 2P(x_{iM}y_{iP}) = 2P(x_{iP}y_{iM})\\
+P(x_{iM}y_{iP}) = P(x_{iP}y_{iM}) &= \frac{r_{xy}}{2} 
+\end{align}
+$$
+
+and
+
+$$
+\begin{align}
+1 - r_{xy} &= 1 - P(x_{iM}y_{iP} \cup x_{iP}y_{iM})\\
+      &= P(x_{iM}y_{iM} \cup x_{iP}y_{iP})\\
+      &= P(x_{iM}y_{iM}) + P(x_{iP}y_{iP}) -  P(x_{iM}y_{iM} \cap x_{iP}y_{iP})\\
+      &= P(x_{iM}y_{iM}) + P(x_{iP}y_{iP}) - 0\\
+1 - r_{xy} &= 2P(x_{iM}y_{iM}) = 2P(x_{iP}y_{iP})\\
+P(x_{iM}y_{iM}) = P(x_{iP}y_{iP}) &= \frac{1-r_{xy}}{2}
+\end{align}
+$$
+
+
+We can now calculate the formula of $Cov(X_i, Y_i)$
+
+$$
+\begin{align}
+Cov(X_i, Y_i) &\overset{def}{=} \mathbb{E}[(X_i-\mathbb{E}(X_i))(Y_i-\mathbb{E}(Y_i))]\\
+Cov(X_i, Y_i)  &= \mathbb{E}(X_iY_i) - \mathbb{E}(X_i)\mathbb{E}(Y_i) \ \text{(covariance property)}\\
+\end{align}
+$$
+
+First let's calculate $\mathbb{E}(X_i)\mathbb{E}(Y_i)$
+
+$$
+\begin{align}
+\mathbb{E}(X_i)\mathbb{E}(Y_i) &= \frac{1}{2}(x_{iM}+x_{iP})\frac{1}{2}(y_{iM}+y_{iP})\\
+\mathbb{E}(X_i)\mathbb{E}(Y_i) &= \frac{1}{4}(x_{iM}+x_{iP})(y_{iM}+y_{iP})\\
+\mathbb{E}(X_i)\mathbb{E}(Y_i) &= \frac{1}{4}(x_{iM}y_{iM} + x_{iM}y_{iP} + x_{iP}y_{iM} + x_{iP}y_{iP})\\
+\end{align}
+$$
+
+
+Now let's calculate $\mathbb{E}(X_iY_i)$
+
+$$
+\begin{align}
+\mathbb{E}(X_iY_i) &= \sum_{j,k}x_{ij}y{ik} \times P(x_{ij}y_{ik})\\
+\mathbb{E}(X_iY_i) &=  x_{iM}y_{iM} P(x_{iM}y_{iM})
+    + x_{iM}y_{iP} P(x_{iM}y_{iP})
+    + x_{iP}y_{iM} P(x_{iP}y_{iM})
+    + x_{iP}y_{iP} P(x_{iP}y_{iP})\\
+\mathbb{E}(X_iY_i) &=  x_{iM}y_{iM} \frac{1-r_{xy}}{2}
+    + x_{iM}y_{iP} \frac{r_{xy}}{2}
+    + x_{iP}y_{iM} \frac{r_{xy}}{2}
+    + x_{iP}y_{iP} \frac{1-r_{xy}}{2})\\
+\mathbb{E}(X_iY_i) &= \frac{1}{2}(x_{iM}y_{iM}) - \frac{r_{xy}}{2}(x_{iM}y_{iM})
+    +  \frac{r_{xy}}{2} (x_{iM}y_{iP})
+    +  \frac{r_{xy}}{2} (x_{iP}y_{iM})
+    + \frac{1}{2}(x_{iP}y_{iP}) - \frac{r_{xy}}{2}(x_{iP}y_{iP})\\
+\mathbb{E}(X_iY_i) &= \frac{1}{2}(x_{iM}y_{iM} + x_{iP}y_{iP})
+    + \frac{r_{xy}}{2}(-x_{iM}y_{iM} + x_{iM}y_{iP} + x_{iP}y_{iM} -x_{iP}y_{iP})\\
+\mathbb{E}(X_iY_i) &= \frac{1}{4}(2x_{iM}y_{iM} + 2x_{iP}y_{iP})
+    + \frac{r_{xy}}{2}(-x_{iM}y_{iM} + x_{iM}y_{iP} + x_{iP}y_{iM} -x_{iP}y_{iP})\\
+\mathbb{E}(X_iY_i) &= \frac{1}{4}(2x_{iM}y_{iM} + 2x_{iP}y_{iP})
+    - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})\\
+\end{align}
+$$
+
+We now calculate $Cov(X_i,Y_i) = \mathbb{E}(X_iY_i) - \mathbb{E}(X_i)\mathbb{E}(Y_i)$:
+
+
+$$
+\begin{align}
+\mathbb{E}(X_iY_i) - \mathbb{E}(X_i)\mathbb{E}(Y_i) &= 
+    \frac{1}{4}(2x_{iM}y_{iM} + 2x_{iP}y_{iP})
+    - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})
+    -\frac{1}{4}(x_{iM}y_{iM} + x_{iM}y_{iP} + x_{iP}y_{iM} + x_{iP}y_{iP})\\
+Cov(X_i,Y_i) &= 
+    \frac{1}{4}(2x_{iM}y_{iM} + 2x_{iP}y_{iP} - x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} - x_{iP}y_{iP})
+    - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})\\
+ &= \frac{1}{4}(x_{iM}y_{iM} + x_{iP}y_{iP} - x_{iM}y_{iP} - x_{iP}y_{iM} )
+    - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})\\
+ &= \frac{1}{4}z_{ixy} - \frac{r_{xy}}{2}z_{ixy} \qquad\text{with: } z_{ixy} = x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP}\\ 
+Cov(X_i,Y_i) &= \frac{1}{4}(1-2r_{xy})z_{ixy}\\ 
+\end{align}
+$$
+
+##### Variance 
+
+We can now calculate the variance $Var(X_i)$
+
+$$
+\begin{align}
+Var(X_i) &= Cov(X_i, X_i)\\
+ &= \frac{1}{4}(1-2r_{xx})z_{ixx}\\
+ &= \frac{1}{4}(1-0)z_{ixx}\\
+Var(X_i) &= \frac{1}{4}z_{ixx}
+\end{align}
+$$
+
+
+##### For the sum of $X_1,X_2$ and $Y_1,Y_2$
+
+
+Let $x_ij$ be the genotype value of the allele $j$ of the marker $x$ for the gamete of individual $i$:
+
+
+Let's calculate $\mathbb{E}(X_1 + X_2)$
+
+$$
+\begin{align}
+\mathbb{E}(X_1 + X_2) &= \mathbb{E}(X_1) + \mathbb{E}(X_2)\\
+ &= \frac{1}{2} (x_{1M}+x_{1P}) + \frac{1}{2} (x_{2M}+x_{2P})\\
+\mathbb{E}(X_1 + X_2) &= \frac{1}{2}(x_{1M} + x_{1P} + x_{2M} + x_{2P})\\
+\end{align}
+$$
+
+Let's calculate $Var(X_1 + X_2)$
+
+$$
+\begin{align}
+Var(X_1 + X_2) &= Var(X_1) + Var(X_2) + 2 Cov(X_1, X_2)\\
+  &= Var(X_1) + Var(X_2) + 0 \qquad \text{(we consider } X_1, X_2 \text{ independent)}\\
+  &= \frac{1}{4}z_{1xx} + \frac{1}{4}z_{2xx}\\
+Var(X_1 + X_2) &= \frac{1}{4} (z_{1xx} + z_{2xx})
+\end{align}
+$$
+
+Let's calculate $Cov(X_1 + X_2, Y_1 + Y_2)$
+
+$$
+\begin{align}
+Cov(X_1 + X_2, Y_1 + Y_2) &= Cov(X_1, Y_1) + Cov(X_1, Y_2) + Cov(X_2, Y_1) + Cov(X_2, Y_2)\\
+ &= Cov(X_1, Y_1) + 0 + 0 + Cov(X_2, Y_2)  \qquad \text{(we consider } X_1, Y_2 \text{ and } X_2, Y_1 \text{ independent)}\\
+ &=  \frac{1}{4}(1-2r_{xy})z_{1xy} +  \frac{1}{4}(1-2r_{xy})z_{2xy} \\
+Cov(X_1 + X_2, Y_1 + Y_2) &= \frac{1}{4}(1-2r_{xy})(z_{1xy} + z_{2xy}) \\
+\end{align}
+$$
+
+
+##### Genetic values
+
+We will now consider all the markers.
+
+Let $X_ij$ be the random variable representing the genotype value of the marker $j$ in a gamete from the individual $i$.
+Let $x_{ijM}$ and $x_{ijP}$ be the genotype value of the maternal ($M$) and paternal ($P$) allels of the marker $j$ for the individual $i$. (this is not a random variable)
+
+ be the genotype value of the allele $j$ of the marker $x$ for the gamete of individual $i$. (this is not a random variable)
+
+Let's consider an additive genetic architecture and let $e_j$ be the effect of marker $j$.
+Let $G$ be the genetic value of the progeny of individual $1$ and $2$, so:
+
+- $G = \sum_j e_j (X_{1j} + X_{2j})$
+
+
+$$
+\begin{align}
+\mathbb{E}(G) &= \mathbb{E}(\sum_j e_j (X_{1j} + X_{2j}))\\
+ &= \sum_j e_j \mathbb{E}(X_{1j} + X_{2j})\\
+ &= \sum_j e_j \frac{1}{2}(x_{1jM} + x_{1jP} + x_{2jM} + x_{2jP})\\
+\mathbb{E}(G) &= \frac{1}{2} \sum_j e_j (x_{1jM} + x_{1jP} + x_{2jM} + x_{2jP})\\
+\end{align}
+$$
+
+> Note: we can recognise that this is the mean of the genetic value of the 2 parents: $\frac{1}{2} (\sum_j e_j (x_{1jM} + x_{1jP}) + \sum_j e_j  (x_{2jM} + x_{2jP}))$
+
+$$
+\begin{align}
+Var(G) &= Var(\sum_j e_j (X_{1j} + X_{2j}))\\
+ &= \sum_{jk} Cov(e_j(X_{1j} + X_{2j}), e_k(X_{1k}+X_{2k})) \qquad \text{(Bienaymé's identity)}\\
+ &= \sum_{jk} e_je_kCov(X_{1j} + X_{2j}, X_{1k}+X_{2k})\\
+Var(G) &= \sum_{jk} e_je_k  \frac{1}{4}(1-2r_{jk})(z_{1jk} + z_{2jk})\\
+\end{align}
+$$
+
+in Matrix notation: with $X$ a random vector and $a$ a vector: 
+
+$$
+\begin{align}
+Cov(X) &= E(XX') - E(X)E(X') \\
+Cov(a'X) &= E(a'X(a'X)') - E(a'X)E((a'X)') \\
+ &= E(aXX'a) - a'E(X)E(X')a \\
+ &= a'E(XX')a - aE(X)E(X')a \\
+ &= a'(E(XX') - E(X)E(X'))a \\
+Cov(a'X) &= a'Cov(X)a \\
+\end{align}
+$$
+
+
+
+
+</details>
+
+
+
+
+
+
+
+
+
+</details>
+
+
+
+
+
+
 # Data references
 
 Some example data are available in the folder [data](data/). This folder also includes examples of output files.
