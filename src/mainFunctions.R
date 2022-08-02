@@ -800,3 +800,124 @@ crossingSimulation <- function(genoFile = NULL,
 
   return(outFile)
 }
+
+
+
+
+
+
+
+
+calc_progenyBlupVarExp <- function(genoFile = NULL,
+                                   genoUrl = NULL,
+                                   crossTableFile = NULL,
+                                   crossTableUrl = NULL,
+                                   SNPcoordFile = NULL,
+                                   SNPcoordUrl = NULL,
+                                   markerEffectsFiles = NULL,
+                                   markerEffectsUrl = NULL,
+                                   outFile = tempfile(fileext = ".json")) {
+  logger <- logger$new("r-progenyBlupVarExp()")
+
+  # load input data
+  logger$log("Get data ...")
+  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+    g <- readPhasedGeno(genoFile)
+  } else if (is.null(genoFile) && !is.null(genoUrl)) {
+    g <- downloadPhasedGeno(genoUrl)
+  } else {
+    stop("Error: either `genoFile` or `genoUrl` should be provided")
+  }
+
+  if (!is.null(SNPcoordFile) &&  is.null(SNPcoordUrl)) {
+    SNPcoord <- readSNPcoord(SNPcoordFile)
+  } else if (is.null(SNPcoordFile) && !is.null(SNPcoordUrl)) {
+    SNPcoord <- downloadSNPcoord(SNPcoordUrl)
+  } else {
+    stop("Error: either `SNPcoordFile` or `SNPcoordUrl` should be provided")
+  }
+
+  if (!is.null(crossTableFile) &&  is.null(crossTableUrl)) {
+    crossTable <- readCrossTable(crossTableFile)
+  } else if (is.null(crossTableFile) && !is.null(crossTableUrl)) {
+    crossTable <- downloadCrossTable(crossTableUrl)
+  } else {
+    stop("Error: either `crossTableFile` or `crossTableUrl` should be provided")
+  }
+
+  if (!is.null(markerEffectsFiles) &&  is.null(markerEffectsUrl)) {
+    markerEffects <- readMarkerEffects(markerEffectsFiles)
+  } else if (is.null(markerEffectsFiles) && !is.null(markerEffectsUrl)) {
+    markerEffects <- downloadMarkerEffects(markerEffectsUrl)
+  } else {
+    stop("Error: either `markerEffectsFiles` or `markerEffectsUrl` should be provided")
+  }
+  logger$log("Get data DONE")
+
+  # check input data
+  logger$log("Check individuals' names consistency between",
+             " `.vcf` and `.csv` file ...")
+  checkIndNamesConsistency(crossTable, g$haplotypes)
+  logger$log("Check individuals' names consistency between",
+             " `.vcf` and `.csv` file DONE")
+
+  logger$log("Check SNP's coordinates consistency between",
+             "`.vcf` and SNPcoordinate file ...")
+  SNPcoord <- checkAndFilterSNPcoord(SNPcoord, g$SNPcoord)
+  g$SNPcoord <- NULL # release some memory
+  logger$log("Check SNP's coordinates consistency between",
+             " `.vcf` and SNPcoordinate file DONE")
+
+  logger$log("Check SNPs' ids consistency between",
+             "SNPcoordinate and markerEffects file ...")
+  if (!all(SNPcoord$SNPid %in% row.names(markerEffects))) {
+    stop("Missing marker effects for some SNPs of the genetic data.")
+  }
+  logger$log("Check SNPs' ids consistency between",
+             "SNPcoordinate and markerEffects file DONE")
+
+
+  if (!is.null(outFile)) {
+    logger$log("Check output file extention ...")
+    ext <- tools::file_ext(outFile)
+    if (ext != ".json") {
+      stop('The output file must end by `.json`')
+    }
+    logger$log("Check output file extention DONE")
+  }
+
+
+  # calculate recombination rate
+  r <- calcRecombRate(SNPcoord)
+
+  # initialize results data.frame
+  blupVarExp <- crossTable[, c('ind1', 'ind2')]
+  blupVarExp$blup_var <- NA
+  blupVarExp$blup_exp <- NA
+
+  # calculation for each couple
+  for (i in seq(nrow(crossTable))) {
+    p1.id <- which(grepl(crossTable$ind1[i], colnames(g$haplotypes)))
+    p2.id <- which(grepl(crossTable$ind2[i], colnames(g$haplotypes)))
+
+    geneticCovar <- calcProgenyGenetCovar(SNPcoord, r, g$haplotypes, p1.id, p2.id)
+    blupVar <- calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
+    blupExp <- calcProgenyBlupExpected(SNPcoord, g$haplotypes,
+                                p1.id, p2.id, markerEffects)
+
+    blupVarExp$blup_var[i] <- blupVar
+    blupVarExp$blup_exp[i] <- blupExp
+  }
+
+  # save and return results
+  if (!is.null(outFile)) {
+    logger$log("Save results ...")
+    file <- saveProgenyBlupVarExp(blupVarExp, file = outFile)
+    logger$log("Save results DONE")
+  } else {
+    file <- NULL
+  }
+
+  return(blupVarExp)
+
+}

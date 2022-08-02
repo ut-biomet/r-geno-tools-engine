@@ -240,7 +240,22 @@ downloadSNPcoord <- function(url) {
 }
 
 
+downloadMarkerEffects <- function(url, header = TRUE) {
+  logger <- logger$new("r-downloadMarkerEffects()")
+  logger$log("Create local temp file ... ")
+  localFile <- tempfile(pattern = "markerEffects",
+                        tmpdir = tempdir(),
+                        fileext = ".csv")
+  logger$log("Download marker effects file ... ")
+  download.file(url, localFile, quiet = TRUE)
 
+  logger$log("Read marker effects file ... ")
+  markerEffects <- readMarkerEffects(localFile, header)
+  logger$log("Read marker effects file DONE ")
+
+  logger$log("DONE, return output.")
+  markerEffects
+}
 
 
 #' Read geno data from a file
@@ -804,6 +819,75 @@ readGWAS <- function(file) {
   gwasRes
 }
 
+
+
+readMarkerEffects <- function(file) {
+  logger <- logger$new("r-readMarkerEffects()")
+
+  logger$log('Marker effects table file ...')
+  if (!file.exists(file)) {
+    stop("Marker effects file do not exists")
+  }
+  if (!identical(tools::file_ext(file), 'csv')) {
+    stop('Marker effects file should be a `.csv` file.')
+  }
+  markerEffects <- read.csv(file,
+                            header = TRUE,
+                            stringsAsFactors = FALSE)
+  logger$log('Marker effects table file DONE')
+
+
+  logger$log('Check marker effects coordinates file ...')
+  expectedColumns <- c('SNPid', 'effects')
+  if (!all(colnames(markerEffects) %in% expectedColumns)) {
+    stop('Marker effects file should have a header specifying those',
+         ' columns: `',
+         paste(expectedColumns, collapse = '`, `'),
+         '`. The detected columns names are: ',
+         paste(colnames(markerEffects), collapse = '`, `'), '`.'
+    )
+  }
+  if (nrow(markerEffects) == 0) {
+    stop('Marker effects file should have at least one row')
+  }
+
+  # missing values
+  if (any(is.na(markerEffects))) {
+    stop('Marker effects should not have any missing values')
+  }
+
+  # duplicated rows
+  dupRows <- duplicated(markerEffects)
+  if (any(dupRows)) {
+    warning(sum(dupRows),
+            'duplicated rows found in the marker effects file. ',
+            'They will be removed.')
+    SNPcoord <- SNPcoord[!dupRows,]
+  }
+
+  # check unicity of SNPids
+  duplicatedIds <- which(duplicated(markerEffects$SNPid))
+  if (length(duplicatedIds) != 0) {
+    msg <- paste(
+      length(duplicatedIds),
+      'duplicated SNPs\' id detected in the marker effects file:',
+      paste(SNPcoord$SNPid[duplicatedIds], collapse = ', '))
+    stop(msg)
+  }
+  logger$log('Check marker effects file DONE')
+
+  # reshape the markerEffects data.frame
+  row.names(markerEffects) <- markerEffects$SNPid
+  markerEffects <- markerEffects[, 'effects', drop = FALSE]
+  return(markerEffects)
+}
+
+
+
+
+
+
+
 #' saveGWAS save gwas result in a temporary file
 #'
 #' @param gwasRes data.frame return by `gwas` function
@@ -1041,4 +1125,38 @@ saveVcf <- function(file, pop, SNPcoord){
                      quote = FALSE,
                      row.names = FALSE,
                      col.names = TRUE)
+}
+
+
+
+saveProgenyBlupVarExp <- function(blupVarExp, file){
+  logger <- logger$new("r-saveProgenyBlupVarExp()")
+
+    logger$log('Check file ...')
+    if (length(file) != 1) {
+      logger$log('Error: only one file name should be provided')
+      stop('Error: only one file name should be provided')
+    }
+
+    logger$log("Check output file extention ...")
+    ext <- tools::file_ext(file)
+    if (ext != ".json") {
+      stop('The output file must end by `.json`')
+    }
+    logger$log("Check output file extention DONE")
+
+    if (file.exists(file)) {
+      logger$log('Warning: "file" directory already exists. This file will be overwritten.')
+    } else {
+      file.create(file)
+    }
+    logger$log('Check file DONE')
+
+    writeLines(jsonlite::toJSON(blupVarExp,
+                                dataframe = "rows",
+                                pretty = T,
+                                digits = NA,
+                                na = 'string'),
+               con = file)
+    return(file)
 }
