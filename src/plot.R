@@ -471,7 +471,7 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
   ### Check input ----
   logger$log('Check inputs ...')
   expectedColumns <- c("ind1", "ind2", "blup_exp", "blup_var")
-  if (!expectedColumns %in% colnames(blupDta)) {
+  if (!all(expectedColumns %in% colnames(blupDta))) {
     stop('`blupDta` must conntains the folowing columns: ',
          paste(expectedColumns, collapse = ', '))
   }
@@ -488,9 +488,9 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
 
 
   # get cross' names ----
-  blupDta$cross <- paste0(progenyBlupVarExp$ind1,
+  blupDta$cross <- paste0(blupDta$ind1,
                           '_X_',
-                          progenyBlupVarExp$ind2)
+                          blupDta$ind2)
 
   # sort x axis values ----
   logger$log('sort x axis ...')

@@ -23,10 +23,10 @@ genoFile <- 'data/geno/breedGame_phasedGeno.vcf.gz'
 crossTableFile <- 'data/crossingTable/breedGame_small_crossTable.csv'
 SNPcoordFile <- 'data/SNPcoordinates/breedingGame_SNPcoord.csv'
 markerEffectsFiles <- 'data/markerEffects/breedGame_markerEffects.csv'
-outFile <- NULL
+outFile <- 'data/results/progenyBlupEstimation.json'
 
 
-progenyBlupVarExp <- calc_progenyBlupEstimation(
+progenyBlups <- calc_progenyBlupEstimation(
   genoFile = genoFile,
   crossTableFile = crossTableFile,
   SNPcoordFile = SNPcoordFile,
@@ -35,5 +35,7 @@ progenyBlupVarExp <- calc_progenyBlupEstimation(
 )
 
 
-plotBlup(progenyBlupVarExp)
+plotBlup(progenyBlups)
 
+graphFile <- tempfile(fileext = ".html")
+draw_progBlupsPlot(outFile, sorting = 'alpha', outFile = graphFile)

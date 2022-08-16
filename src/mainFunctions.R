@@ -921,3 +921,52 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   return(blupVarExp)
 
 }
+
+
+
+
+
+draw_progBlupsPlot <- function(progEstimFile = NULL,
+                               progEstimUrl = NULL,
+                               sorting = 'alpha',
+                               outFile = tempfile(fileext = ".html")) {
+  logger <- logger$new("r-draw_progBlupsPlot()")
+
+  logger$log("Check outFile ...")
+  if (!is.null(outFile)) {
+    if (length(outFile) != 1) {
+      stop("Error: `outFile` must be of length 1.")
+    }
+    if (missing(outFile)) {
+      if (interactive) {
+        outFile <- paste0(outFile, '.html')
+      } else {
+        outFile <- paste0(outFile, '.png')
+      }
+    }
+  }
+  logger$log("Check outFile DONE")
+
+  logger$log("Get data ...")
+  if (!is.null(progEstimFile) &&  is.null(progEstimUrl)) {
+    progBlup <- readProgBlupEstim(progEstimFile)
+  } else if (!is.null(progEstimUrl) && is.null(progEstimFile)) {
+    progBlup <- downloadProgBlupEstim(progEstimUrl)
+  } else {
+    stop("Error: either progEstimFile or progEstimUrl should be provided")
+  }
+  logger$log("Get data DONE")
+
+  logger$log("Draw progenies' blup plot ...")
+  p <- plotBlup(progBlup, sorting = sorting)
+  logger$log("Draw progenies' blup plot DONE")
+
+  if (!is.null(outFile)) {
+    logger$log("Save results ...")
+    htmlwidgets::saveWidget(p,
+                            outFile, selfcontained = TRUE)
+    logger$log("Save results DONE")
+  }
+  p
+
+}
