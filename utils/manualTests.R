@@ -5,6 +5,8 @@
 # Utility file to manually test the tools
 
 
+# packages
+library(plotly)
 
 # load the functions
 sapply(FUN = source,
@@ -24,31 +26,14 @@ markerEffectsFiles <- 'data/markerEffects/breedGame_markerEffects.csv'
 outFile <- NULL
 
 
-progenyBlupVarExp <- calc_progenyBlupVarExp(genoFile = genoFile,
-                                            crossTableFile = crossTableFile,
-                                            SNPcoordFile = SNPcoordFile,
-                                            markerEffectsFiles = markerEffectsFiles,
-                                            outFile = outFile)
-
-
-progenyBlupVarExp$cross <- paste0(progenyBlupVarExp$ind1,
-                                  '_X_',
-                                  progenyBlupVarExp$ind2)
-
-library(plotly)
-
-fig <- plot_ly(
-  data = progenyBlupVarExp,
-  x = ~ cross,
-  y = ~ exp,
-  type = 'scatter',
-  mode = 'markers',
-  error_y = ~ list(array = sqrt(var),
-                   color = '#000000'),
-  hoverinfo = 'text',
-  text = apply(progenyBlupVarExp, 1, function(l) {
-    paste(names(l), ":", l, collapse = "\n")
-  })
+progenyBlupVarExp <- calc_progenyBlupVarExp(
+  genoFile = genoFile,
+  crossTableFile = crossTableFile,
+  SNPcoordFile = SNPcoordFile,
+  markerEffectsFiles = markerEffectsFiles,
+  outFile = outFile
 )
-fig
+
+
+plotBlup(progenyBlupVarExp)
 

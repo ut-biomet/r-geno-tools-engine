@@ -458,3 +458,71 @@ pedNetwork <- function(ped) {
   logger$log("DONE, return output.")
   return(p)
 }
+
+
+
+
+
+
+
+plotBlup <- function(blupDta, sorting = 'alpha') {
+  logger <- logger$new("r-plotBlup()")
+
+  ### Check input ----
+  logger$log('Check inputs ...')
+  expectedColumns <- c("ind1", "ind2", "blup_exp", "blup_var")
+  if (!expectedColumns %in% colnames(blupDta)) {
+    stop('`blupDta` must conntains the folowing columns: ',
+         paste(expectedColumns, collapse = ', '))
+  }
+  if (nrow(blupDta) == 0) {
+    stop('`blupDta` do not contain any row')
+  }
+  expectedSort <- c('alpha', 'asc', 'dec')
+  if (!sorting %in% expectedSort) {
+    message('Sorting method not recognised, ',
+            'x axis will be sorted alphabetically. Recognised methods are: ',
+            paste(expectedSort, collapse = ', '))
+  }
+  logger$log('Check inputs DONE')
+
+
+  # get cross' names ----
+  blupDta$cross <- paste0(progenyBlupVarExp$ind1,
+                          '_X_',
+                          progenyBlupVarExp$ind2)
+
+  # sort x axis values ----
+  logger$log('sort x axis ...')
+  if (sorting == 'asc') {
+    blupDta$cross <- reorder(blupDta$cross, blupDta$blup_exp)
+  } else if (sorting == 'dec') {
+    blupDta$cross <- reorder(blupDta$cross, -blupDta$blup_exp)
+  }
+  logger$log('sort x axis DONE')
+
+  # draw graph ----
+  logger$log('draw plot ...')
+  p <- plot_ly(
+    data = blupDta,
+    x = ~ cross,
+    y = ~ blup_exp,
+    type = 'scatter',
+    mode = 'markers',
+    error_y = ~ list(array = sqrt(blup_var),
+                     type = 'data',
+                     color = '#000000'),
+    hoverinfo = 'text',
+    text = apply(blupDta, 1, function(l) {
+      paste(names(l), ":", l, collapse = "\n")
+    })
+  ) %>% layout(
+    yaxis = list(title = "Blup"),
+    xaxis = list(title = "Cross")
+  )
+  logger$log('draw plot DONE')
+
+  # return output
+  p
+
+}
