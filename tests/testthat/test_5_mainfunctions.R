@@ -574,4 +574,55 @@ capture.output({
     }, NA)
     expect_true(all(is.na(createdPhasedGeno$SNPcoord$physPos)))
   })
-})
+
+
+
+  # calc_progenyBlupEstimation ----
+  genoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
+  crossTableFile <- '../../data/crossingTable/breedGame_small_crossTable.csv'
+  SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
+  markerEffectsFiles <- '../../data/markerEffects/breedGame_markerEffects.csv'
+  outFile <- tempfile(fileext = ".json")
+
+  test_that('calc_progenyBlupEstimation', {
+    expect_error({
+      projBlups <- calc_progenyBlupEstimation(
+        genoFile = genoFile,
+        crossTableFile = crossTableFile,
+        SNPcoordFile = SNPcoordFile,
+        markerEffectsFiles = markerEffectsFiles,
+        outFile = outFile
+      )
+    }, NA)
+
+    expect_is(projBlups, "data.frame")
+    expect_identical(colnames(projBlups),
+                     c("ind1", "ind2", "blup_var", "blup_exp"))
+    })
+
+
+
+  # draw_progBlupsPlot ----
+  progEstimFiles <- '../../data/results/progenyBlupEstimation.json'
+  for (file in progEstimFiles) {
+    test_that(paste("draw_progBlupsPlot", basename(file)), {
+
+      tmpF <- tempfile(fileext = ".html")
+      expect_error({
+        p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                 outFile = tmpF)
+      }, NA)
+
+      for (s in c('asc', 'dec', '???')) {
+        expect_error({
+        p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                 sorting = s,
+                                 outFile = tmpF)
+        }, NA)
+      }
+
+    })
+  }
+
+
+  })

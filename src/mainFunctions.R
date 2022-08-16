@@ -805,9 +805,6 @@ crossingSimulation <- function(genoFile = NULL,
 
 
 
-
-
-
 calc_progenyBlupEstimation <- function(genoFile = NULL,
                                    genoUrl = NULL,
                                    crossTableFile = NULL,
@@ -880,7 +877,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   if (!is.null(outFile)) {
     logger$log("Check output file extention ...")
     ext <- tools::file_ext(outFile)
-    if (ext != ".json") {
+    if (ext != "json") {
       stop('The output file must end by `.json`')
     }
     logger$log("Check output file extention DONE")
@@ -912,7 +909,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   # save and return results
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- saveProgenyBlupVarExp(blupVarExp, file = outFile)
+    file <- saveProgenyBlupEstim(blupVarExp, file = outFile)
     logger$log("Save results DONE")
   } else {
     file <- NULL

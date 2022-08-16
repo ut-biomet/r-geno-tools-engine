@@ -41,10 +41,12 @@ calcProgenyGenetCovar <- function(SNPcoord, r, haplo, p1.id, p2.id) {
     t_matHaplo_2.2 <- matrix(haplo_parent2[,2], nSNPs, nSNPs, byrow = F)
     z <- z1 + matHaplo_1.2 * t_matHaplo_1.2 + matHaplo_2.2 * t_matHaplo_2.2 -
       (matHaplo_1.2 * t_matHaplo_2.2 + t_matHaplo_1.2 * matHaplo_2.2)
+
     covar <- 0.25 * (1 - 2 * r[[chr]]) * (z)
     row.names(covar) <- colnames(covar) <- SNPs
     covar
   })
+
   names(geneticCovar) <- unique(SNPcoord$chr)
   geneticCovar
 }

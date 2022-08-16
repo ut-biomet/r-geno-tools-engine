@@ -546,6 +546,75 @@ capture_output({
   }
 
 
+  # readMarkerEffects ----
+  markerEffectsFiles <- '../../data/markerEffects/breedGame_markerEffects.csv'
+  for (file in markerEffectsFiles) {
+    test_that(paste('readMarkerEffects', basename(file)), {
+      expect_error({
+        markerEff <- readMarkerEffects(file)
+      }, NA)
+      expect_is(markerEff, 'data.frame')
+      expect_equal(colnames(markerEff),
+                   "effects")
+      expect_equal(row.names(markerEff),
+                   read.csv(file)$SNPid)
+      expect_true(is.numeric(markerEff$effects))
+      expect_true(!any(is.na(markerEff)))
+    })
+    # downloadMarkerEffects ----
+    test_that(paste('downloadMarkerEffects', basename(file)), {
+      d_file <- normalizePath(file)
+      d_file <- paste0("file://", d_file)
+      expect_error({
+        markerEff <- downloadMarkerEffects(d_file)
+      }, NA)
+      expect_is(markerEff, 'data.frame')
+      expect_equal(colnames(markerEff),
+                   "effects")
+      expect_equal(row.names(markerEff),
+                   read.csv(file)$SNPid)
+      expect_true(is.numeric(markerEff$effects))
+      expect_true(!any(is.na(markerEff)))
+    })
+  }
+
+  # readProgEstim ----
+  progEstimFiles <- '../../data/results/progenyBlupEstimation.json'
+  for (file in progEstimFiles) {
+    test_that(paste('readProgEstim', basename(file)), {
+      expect_error({
+        projBlups <- readProgBlupEstim(file)
+      }, NA)
+    })
+
+    # readProgEstim ----
+    test_that(paste('readProgEstim', basename(file)), {
+      d_file <- normalizePath(file)
+      d_file <- paste0("file://", d_file)
+      expect_error({
+        projBlups <- downloadProgBlupEstim(d_file)
+      }, NA)
+    })
+  }
+
+  # saveProgenyBlupEstim ----
+  test_that('saveProgenyBlupEstim', {
+      projBlups <- data.frame(
+        ind1 = paste0('ind', 1:10),
+        ind2 = paste0('ind', 11:20),
+        blup_var = abs(rnorm(10)),
+        blup_exp = rnorm(10)
+      )
+      resfile <- tempfile(fileext = ".json")
+    expect_error({
+      outfile <- saveProgenyBlupEstim(projBlups, resfile)
+    }, NA)
+    expect_equal(resfile, outfile)
+    saved_projBlups <- readProgBlupEstim(outfile)
+    expect_equal(saved_projBlups, projBlups)
+
+  })
+
 })
 
 

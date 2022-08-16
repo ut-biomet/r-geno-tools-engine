@@ -240,7 +240,7 @@ downloadSNPcoord <- function(url) {
 }
 
 
-downloadMarkerEffects <- function(url, header = TRUE) {
+downloadMarkerEffects <- function(url) {
   logger <- logger$new("r-downloadMarkerEffects()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "markerEffects",
@@ -250,7 +250,7 @@ downloadMarkerEffects <- function(url, header = TRUE) {
   download.file(url, localFile, quiet = TRUE)
 
   logger$log("Read marker effects file ... ")
-  markerEffects <- readMarkerEffects(localFile, header)
+  markerEffects <- readMarkerEffects(localFile)
   logger$log("Read marker effects file DONE ")
 
   logger$log("DONE, return output.")
@@ -978,6 +978,11 @@ saveGWAS <- function(gwasRes, metadata, dir = NULL, file = NULL) {
 
 
 
+
+
+
+
+
 #' Save relationship matrix in file
 #'
 #' @param relMat relationship matrix created with `pedRelMat`
@@ -1179,7 +1184,7 @@ saveProgenyBlupEstim <- function(blupVarExp, file){
 
     logger$log("Check output file extention ...")
     ext <- tools::file_ext(file)
-    if (ext != ".json") {
+    if (ext != "json") {
       stop('The output file must end by `.json`')
     }
     logger$log("Check output file extention DONE")

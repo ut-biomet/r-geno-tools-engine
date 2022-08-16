@@ -480,7 +480,7 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
   }
   expectedSort <- c('alpha', 'asc', 'dec')
   if (!sorting %in% expectedSort) {
-    message('Sorting method not recognised, ',
+    logger$log('Sorting method not recognised, ',
             'x axis will be sorted alphabetically. Recognised methods are: ',
             paste(expectedSort, collapse = ', '))
   }
@@ -503,7 +503,7 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
 
   # draw graph ----
   logger$log('draw plot ...')
-  p <- plot_ly(
+  p <- plotly::plot_ly(
     data = blupDta,
     x = ~ cross,
     y = ~ blup_exp,
@@ -516,7 +516,7 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
     text = apply(blupDta, 1, function(l) {
       paste(names(l), ":", l, collapse = "\n")
     })
-  ) %>% layout(
+  ) %>% plotly::layout(
     yaxis = list(title = "Blup"),
     xaxis = list(title = "Cross")
   )
