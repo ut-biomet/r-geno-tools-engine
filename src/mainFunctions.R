@@ -808,7 +808,7 @@ crossingSimulation <- function(genoFile = NULL,
 
 
 
-calc_progenyBlupVarExp <- function(genoFile = NULL,
+calc_progenyBlupEstimation <- function(genoFile = NULL,
                                    genoUrl = NULL,
                                    crossTableFile = NULL,
                                    crossTableUrl = NULL,

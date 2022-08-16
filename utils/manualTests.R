@@ -26,7 +26,7 @@ markerEffectsFiles <- 'data/markerEffects/breedGame_markerEffects.csv'
 outFile <- NULL
 
 
-progenyBlupVarExp <- calc_progenyBlupVarExp(
+progenyBlupVarExp <- calc_progenyBlupEstimation(
   genoFile = genoFile,
   crossTableFile = crossTableFile,
   SNPcoordFile = SNPcoordFile,

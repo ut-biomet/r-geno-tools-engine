@@ -1129,7 +1129,7 @@ saveVcf <- function(file, pop, SNPcoord){
 
 
 
-saveProgenyBlupVarExp <- function(blupVarExp, file){
+saveProgenyBlupEstim <- function(blupVarExp, file){
   logger <- logger$new("r-saveProgenyBlupVarExp()")
 
     logger$log('Check file ...')
