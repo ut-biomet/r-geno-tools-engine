@@ -11,7 +11,7 @@
 #'
 #' @return `gaston::bed.matrix`
 downloadGenoData <- function(url) {
-  logger <- logger$new("r-downloadGenoData()")
+  logger <- Logger$new("r-downloadGenoData()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "geno",
                         tmpdir = tempdir(),
@@ -37,7 +37,7 @@ downloadGenoData <- function(url) {
 #' @return list of 2: `haplotypes` a matrix of the individuals haplotypes
 #'  and `SNPcoord`, data frame of the SNP coordinates.
 downloadPhasedGeno <- function(url) {
-  logger <- logger$new("r-downloadPhasedGeno()")
+  logger <- Logger$new("r-downloadPhasedGeno()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "geno",
                         tmpdir = tempdir(),
@@ -63,7 +63,7 @@ downloadPhasedGeno <- function(url) {
 #' is allowed.
 #' @return `data.frame`
 downloadPhenoData <- function(url){
-  logger <- logger$new("r-downloadPhenoData()")
+  logger <- Logger$new("r-downloadPhenoData()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "pheno",
                         tmpdir = tempdir(),
@@ -90,7 +90,7 @@ downloadPhenoData <- function(url){
 #'
 #' @return List
 downloadData <- function(genoUrl, phenoUrl){
-  logger <- logger$new("r-downloadData()")
+  logger <- Logger$new("r-downloadData()")
   logger$log("get geno data ...")
   mDta <- downloadGenoData(genoUrl)
   logger$log("get geno data DONE")
@@ -115,7 +115,7 @@ downloadData <- function(genoUrl, phenoUrl){
 #'
 #' @return `data.frame`
 downloadGWAS <- function(url){
-  logger <- logger$new("r-downloadGWAS()")
+  logger <- Logger$new("r-downloadGWAS()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "downloadedResult",
                         tmpdir = tempdir(),
@@ -144,7 +144,7 @@ downloadGWAS <- function(url){
 #'
 #' @return List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
 downloadPedData <- function(url, unknown_string = "", header = TRUE) {
-  logger <- logger$new("r-downloadPedData()")
+  logger <- Logger$new("r-downloadPedData()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "downloadedResult",
                         tmpdir = tempdir(),
@@ -169,7 +169,7 @@ downloadPedData <- function(url, unknown_string = "", header = TRUE) {
 #' default it will use "json").
 #' @return matrix
 downloadRelMat <- function(url, format = tools::file_ext(url)) {
-  logger <- logger$new("r-downloadRelMat()")
+  logger <- Logger$new("r-downloadRelMat()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "downloadedResult",
                         tmpdir = tempdir(),
@@ -196,7 +196,7 @@ downloadRelMat <- function(url, format = tools::file_ext(url)) {
 #'
 #' @return data.frame with the crossing table information.
 downloadCrossTable <- function(url, header = TRUE) {
-  logger <- logger$new("r-downloadCrossTable()")
+  logger <- Logger$new("r-downloadCrossTable()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "downloadedResult",
                         tmpdir = tempdir(),
@@ -223,7 +223,7 @@ downloadCrossTable <- function(url, header = TRUE) {
 #'
 #' @return data.frame of 4 columns: 'chr', 'physPos', 'linkMapPos', 'SNPid'
 downloadSNPcoord <- function(url) {
-  logger <- logger$new("r-downloadSNPcoord()")
+  logger <- Logger$new("r-downloadSNPcoord()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "downloadedResult",
                         tmpdir = tempdir(),
@@ -250,7 +250,7 @@ downloadSNPcoord <- function(url) {
 #' @return data.frame of 1 columns named `effects` with the marker ids as
 #' row names.
 downloadMarkerEffects <- function(url) {
-  logger <- logger$new("r-downloadMarkerEffects()")
+  logger <- Logger$new("r-downloadMarkerEffects()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "markerEffects",
                         tmpdir = tempdir(),
@@ -274,7 +274,7 @@ downloadMarkerEffects <- function(url) {
 #'
 #' @return data.frame of 4 columns named "ind1", "ind2", "blup_var", "blup_exp"
 downloadProgBlupEstim <- function(url) {
-  logger <- logger$new("r-downloadProgBlupEstim()")
+  logger <- Logger$new("r-downloadProgBlupEstim()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "progBlupEstim",
                         tmpdir = tempdir(),
@@ -299,7 +299,7 @@ downloadProgBlupEstim <- function(url) {
 #'
 #' @return `gaston::bed.matrix`
 readGenoData <- function(file) {
-  logger <- logger$new("r-readGenoData()")
+  logger <- Logger$new("r-readGenoData()")
   logger$log("Check file extention ... ")
 
   if (!file.exists(file)) {
@@ -336,7 +336,7 @@ readGenoData <- function(file) {
 #' @return list of 2: `haplotypes` a matrix of the individuals haplotypes
 #'  and `SNPcoord`, data frame of the SNP coordinates.
 readPhasedGeno <- function(file) {
-  logger <- logger$new("r-readPhasedGeno()")
+  logger <- Logger$new("r-readPhasedGeno()")
   logger$log("Check file extention ... ")
 
   if (!file.exists(file)) {
@@ -426,7 +426,7 @@ readPhasedGeno <- function(file) {
 #' @details Any duplication in the phenotypic file is forbidden.
 #' @return `data.frame`
 readPhenoData <- function(file, ind.names = 1, ...) {
-  logger <- logger$new("r-readPhenoData()")
+  logger <- Logger$new("r-readPhenoData()")
 
   # read data file:
   if (!file.exists(file)) {
@@ -461,7 +461,7 @@ readPhenoData <- function(file, ind.names = 1, ...) {
 #'
 #' @return List
 readData <- function(genoFile, phenoFile){
-  logger <- logger$new("r-readData()")
+  logger <- Logger$new("r-readData()")
   logger$log("get geno data ...")
   mDta <- readGenoData(genoFile)
   logger$log("get geno data DONE")
@@ -504,7 +504,7 @@ readData <- function(genoFile, phenoFile){
 #'
 #' @return List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
 readPedData <- function(file, unknown_string = "", header = TRUE) {
-  logger <- logger$new('r-readPedData')
+  logger <- Logger$new('r-readPedData')
 
   logger$log('Read pedigree file ...')
   if (!file.exists(file)) {
@@ -641,7 +641,7 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
 #'
 #' @return matrix
 readRelMat <- function(file, format = tools::file_ext(file)) {
-  logger <- logger$new("r-readRelMat()")
+  logger <- Logger$new("r-readRelMat()")
 
 
   logger$log('Check file format ...')
@@ -701,7 +701,7 @@ readRelMat <- function(file, format = tools::file_ext(file)) {
 #'
 #' @return data.frame with the crossing table information.
 readCrossTable <- function(file, header = TRUE) {
-  logger <- logger$new('r-readCrossTable')
+  logger <- Logger$new('r-readCrossTable')
 
   logger$log('Read crossing table file ...')
   if (!file.exists(file)) {
@@ -768,7 +768,7 @@ readCrossTable <- function(file, header = TRUE) {
 #'
 #' @return data.frame of 4 columns: 'chr', 'linkMapPos', 'SNPid'
 readSNPcoord <- function(file) {
-  logger <- logger$new('r-readSNPcoord()')
+  logger <- Logger$new('r-readSNPcoord()')
 
   logger$log('Read snps coordinates file ...')
   if (!file.exists(file)) {
@@ -835,7 +835,7 @@ readSNPcoord <- function(file) {
 #'
 #' @return `list` of 2 elements `gwas` (data.frame) and `metadata` (list)
 readGWAS <- function(file) {
-  logger <- logger$new("r-readGWAS()")
+  logger <- Logger$new("r-readGWAS()")
 
   logger$log("Read result file ... ")
   if (!file.exists(file)) {
@@ -866,7 +866,7 @@ readGWAS <- function(file) {
 #' @return data.frame of 1 columns named `effects` with the marker ids as
 #' row names.
 readMarkerEffects <- function(file) {
-  logger <- logger$new("r-readMarkerEffects()")
+  logger <- Logger$new("r-readMarkerEffects()")
 
   logger$log('Marker effects table file ...')
   if (!file.exists(file)) {
@@ -936,7 +936,7 @@ readMarkerEffects <- function(file) {
 #'
 #' @return data.frame of 4 columns named "ind1", "ind2", "blup_var", "blup_exp"
 readProgBlupEstim <- function(file) {
-  logger <- logger$new("r-readProgBlupEstim()")
+  logger <- Logger$new("r-readProgBlupEstim()")
 
   logger$log("Read result file ... ")
   if (!file.exists(file)) {
@@ -970,7 +970,7 @@ readProgBlupEstim <- function(file) {
 #'
 #' @return path of the created file
 saveGWAS <- function(gwasRes, metadata, dir = NULL, file = NULL) {
-  logger <- logger$new("r-saveGWAS()")
+  logger <- Logger$new("r-saveGWAS()")
   if (is.null(file)) {
     if (is.null(dir)) {
        dir <- tempdir()
@@ -1033,7 +1033,7 @@ saveRelMat <- function(relMat,
                        file = NULL,
                        format = tools::file_ext(file)){
 
-  logger <- logger$new("r-saveRelMat()")
+  logger <- Logger$new("r-saveRelMat()")
 
   logger$log('Check relationship matrix ...')
   checkRelMat(relMat)
@@ -1125,7 +1125,7 @@ saveRelMat <- function(relMat,
 #' @details The function remove the monomorphic markers and
 #' @return List of 2 elements: `genoData` (a bed matrix), `phenoData` (a data.frame)
 prepareData <- function(gDta, pDta) {
-  logger <- logger$new("r-prepareData()")
+  logger <- Logger$new("r-prepareData()")
   # Remove from geno data individuals that are not in phenotypic data-set
   logger$log("Remove from geno data individuals that are not in phenotypic data-set ...")
   gDta <- gaston::select.inds(gDta, id %in% rownames(pDta))
@@ -1215,7 +1215,7 @@ saveVcf <- function(file, pop, SNPcoord){
 #'
 #' @return path of the created file
 save_dataFrame_as_json <- function(df, file){
-  logger <- logger$new("r-save_dataFrame_as_json()")
+  logger <- Logger$new("r-save_dataFrame_as_json()")
 
     logger$log('Check file ...')
     if (length(file) != 1) {

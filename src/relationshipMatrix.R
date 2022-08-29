@@ -11,7 +11,7 @@
 #' @return matrix
 #' @author Hiroyoshi Iwata, Julien Diot
 pedRelMat <- function(ped) {
-  logger <- logger$new("r-pedRelMat()")
+  logger <- Logger$new("r-pedRelMat()")
 
   ### Check input ----
   logger$log('Check inputs ...')
@@ -150,7 +150,7 @@ pedRelMat <- function(ped) {
 #' @return matrix
 #' @author Hiroyoshi Iwata, Julien Diot
 genoRelMat <- function(geno) {
-  logger <- logger$new("r-genodRelMat()")
+  logger <- Logger$new("r-genodRelMat()")
 
   ### Check input ----
   logger$log('Check inputs ...')
@@ -222,7 +222,7 @@ combinedRelMat <- function(ped_rm,
                            tau = NULL,
                            omega = NULL) {
 
-  logger <- logger$new("r-combineRelMat()")
+  logger <- Logger$new("r-combineRelMat()")
 
   ### Check input ----
   logger$log('Check inputs ...')

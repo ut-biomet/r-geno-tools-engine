@@ -7,7 +7,7 @@
 
 #' R6 class use to log messages in this engine's function
 #'
-logger <- R6::R6Class(
+Logger <- R6::R6Class(
   "logger",
   lock_objects = FALSE,
   public = list(
@@ -20,7 +20,7 @@ logger <- R6::R6Class(
     #' @param context [char] context of the log, (eg. inside which function)
     #' @return A new `logger` object.
     #' @examples
-    #' mylogger <- logger$new(context = NULL)
+    #' mylogger <- Logger$new(context = NULL)
     initialize = function(context = NULL){
       self$context <- context
     },

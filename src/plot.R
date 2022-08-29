@@ -29,7 +29,7 @@ manPlot <- function(gwas,
                     filter_quant = 1,
                     interactive = TRUE) {
 
-  logger <- logger$new("r-manPlot()")
+  logger <- Logger$new("r-manPlot()")
 
 
   # Check parameters ----
@@ -215,7 +215,7 @@ manPlot <- function(gwas,
 #' (In order to get a readable image). If write is `TRUE`, the function will write the plot in a png file, else it will plot it.
 #' @return null if `dir` is NULL, else the path of the png file.
 LDplot <- function(geno, from, to, file = tempfile(fileext = ".png")) {
-  logger <- logger$new("r-LDplot()")
+  logger <- Logger$new("r-LDplot()")
 
   # Checks:
   logger$log('Check "from" and "to" format ...')
@@ -323,7 +323,7 @@ LDplot <- function(geno, from, to, file = tempfile(fileext = ".png")) {
 #'
 #' @return plotly graph if interactive is TRUE, or NULL if not.
 relMatHeatmap <- function(relMat, interactive = TRUE) {
-  logger <- logger$new("r-manPlot()")
+  logger <- Logger$new("r-manPlot()")
 
   # Check parameters ----
   logger$log('Check parameters ...')
@@ -377,7 +377,7 @@ relMatHeatmap <- function(relMat, interactive = TRUE) {
 #'
 #' @return a `forceNetwork` object (`htmlwidget`)
 pedNetwork <- function(ped) {
-  logger <- logger$new("r-pedNetwork()")
+  logger <- Logger$new("r-pedNetwork()")
 
   # Check parameters ----
   logger$log('Check parameters ...')
@@ -477,7 +477,7 @@ pedNetwork <- function(ped) {
 #'
 #' @return plotly graph
 plotBlup <- function(blupDta, sorting = 'alpha') {
-  logger <- logger$new("r-plotBlup()")
+  logger <- Logger$new("r-plotBlup()")
 
   ### Check input ----
   logger$log('Check inputs ...')

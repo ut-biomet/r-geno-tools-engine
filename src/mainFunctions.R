@@ -43,7 +43,7 @@ run_gwas <- function(genoFile = NULL,
                      thresh_callrate,
                      outFile = tempfile(fileext = ".json")){
 
-  logger <- logger$new("r-run_gwas()")
+  logger <- Logger$new("r-run_gwas()")
 
   logger$log("Get data ...")
   if (!is.null(genoFile) && !is.null(phenoFile)
@@ -136,7 +136,7 @@ draw_manhattanPlot <- function(gwasFile = NULL,
                                filter_nPoints = Inf,
                                filter_quant = 1,
                                outFile = tempfile()) {
-  logger <- logger$new("r-draw_manhattanPlot()")
+  logger <- Logger$new("r-draw_manhattanPlot()")
 
   logger$log("Check outFile ...")
   if (!is.null(outFile)) {
@@ -228,7 +228,7 @@ run_resAdjustment <- function(gwasFile = NULL,
                               filter_nPoints = Inf,
                               filter_quant = 1,
                               outFile = tempfile(fileext = ".json")){
-  logger <- logger$new("r-run_resAdjustment()")
+  logger <- Logger$new("r-run_resAdjustment()")
 
   logger$log("Get data ...")
   if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
@@ -289,7 +289,7 @@ draw_ldPlot <- function(genoFile = NULL,
                         from,
                         to,
                         outFile = tempfile(fileext = ".png")) {
-  logger <- logger$new("r-draw_ldPlot()")
+  logger <- Logger$new("r-draw_ldPlot()")
 
   logger$log("Get data ...")
   if (!is.null(genoFile) &&  is.null(genoUrl)) {
@@ -341,7 +341,7 @@ calc_pedRelMAt <- function(pedFile = NULL,
                            header = TRUE,
                            outFile = tempfile(fileext = ".csv"),
                            outFormat = tools::file_ext(outFile)) {
-  logger <- logger$new("r-calc_pedRelMAt()")
+  logger <- Logger$new("r-calc_pedRelMAt()")
 
   logger$log("Get data ...")
   if (!is.null(pedFile) &&  is.null(pedUrl)) {
@@ -408,7 +408,7 @@ calc_genoRelMAt <- function(genoFile = NULL,
                             genoUrl = NULL,
                             outFile = tempfile(fileext = ".csv"),
                             outFormat = tools::file_ext(outFile)) {
-  logger <- logger$new("r-calc_genoRelMAt()")
+  logger <- Logger$new("r-calc_genoRelMAt()")
 
   logger$log("Get data ...")
   if (!is.null(genoFile) &&  is.null(genoUrl)) {
@@ -496,7 +496,7 @@ calc_combinedRelMat <- function(pedRelMatFile = NULL,
                                 outFile = tempfile(fileext = ".csv"),
                                 outFormat = tools::file_ext(outFile)) {
 
-  logger <- logger$new("r-calc_combinedRelMat()")
+  logger <- Logger$new("r-calc_combinedRelMat()")
 
   logger$log("Get data ...")
   if (!is.null(pedRelMatFile) &&  is.null(pedRelMatUrl)) {
@@ -564,7 +564,7 @@ draw_relHeatmap <- function(relMatFile = NULL,
                             format = NULL,
                             interactive = TRUE,
                             outFile = tempfile()) {
-  logger <- logger$new("r-draw_relHeatmap()")
+  logger <- Logger$new("r-draw_relHeatmap()")
 
   logger$log("Check outFile ...")
   if (!is.null(outFile)) {
@@ -654,7 +654,7 @@ draw_pedNetwork <- function(pedFile = NULL,
                             unknown_string = "",
                             header = TRUE,
                             outFile = tempfile(fileext = ".html")) {
-  logger <- logger$new("r-draw_pedNetwork()")
+  logger <- Logger$new("r-draw_pedNetwork()")
 
   logger$log("Get data ...")
   if (!is.null(pedFile) &&  is.null(pedUrl)) {
@@ -720,7 +720,7 @@ crossingSimulation <- function(genoFile = NULL,
                                SNPcoordUrl = NULL,
                                nCross = 30,
                                outFile = tempfile(fileext = ".vcf.gz")) {
-  logger <- logger$new("r-crossingSimulation()")
+  logger <- Logger$new("r-crossingSimulation()")
 
   # load input data
   logger$log("Get data ...")
@@ -841,7 +841,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
                                    markerEffectsFile = NULL,
                                    markerEffectsUrl = NULL,
                                    outFile = tempfile(fileext = ".json")) {
-  logger <- logger$new("r-progenyBlupVarExp()")
+  logger <- Logger$new("r-progenyBlupVarExp()")
 
   # load input data
   logger$log("Get data ...")
@@ -977,7 +977,7 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
                                progEstimUrl = NULL,
                                sorting = 'alpha',
                                outFile = tempfile(fileext = ".html")) {
-  logger <- logger$new("r-draw_progBlupsPlot()")
+  logger <- Logger$new("r-draw_progBlupsPlot()")
 
   logger$log("Check outFile ...")
   if (!is.null(outFile)) {

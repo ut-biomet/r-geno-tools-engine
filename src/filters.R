@@ -18,7 +18,7 @@ filterGWAS <- function(gwas,
                        filter_nPoints = Inf,
                        filter_quant = 1) {
 
-  logger <- logger$new("r-filterGWAS()")
+  logger <- Logger$new("r-filterGWAS()")
 
 
   logger$log("Check parameters...")

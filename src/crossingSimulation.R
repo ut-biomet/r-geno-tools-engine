@@ -20,7 +20,7 @@
 #' @return `breedSimulatR`'s population object
 initializeSimulation <- function(haplotypes,
                                  SNPcoord) {
-  logger <- logger$new("r-initializeSimulation()")
+  logger <- Logger$new("r-initializeSimulation()")
 
   # initialisation
   # transform SNP linkage map position to start at 0 (simple translation)

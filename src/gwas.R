@@ -33,7 +33,7 @@ gwas <- function(data,
                  response = "quantitative",
                  thresh_maf,
                  thresh_callrate) {
-  logger <- logger$new("r-gwas()")
+  logger <- Logger$new("r-gwas()")
 
   ### Check inputs ----
   logger$log("Check inputs ...")
@@ -321,7 +321,7 @@ gwas <- function(data,
 #' @details The method "hommel" is not implemented because it is too long to calculate.
 #' @return list of two elements: "p_adj" vector of adjusted p values, "thresh_adj" the adjusted threshold (if thresh_p is preovided, NULL if not)
 adjustPval <- function(p, adj_method, thresh_p = NULL){
-  logger <- logger$new("r-adjustPval()")
+  logger <- Logger$new("r-adjustPval()")
 
   # check adjMethod
   logger$log("Check adj_method ...")
