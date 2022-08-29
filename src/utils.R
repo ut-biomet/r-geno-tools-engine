@@ -104,6 +104,16 @@ writeDoc <- function(srcDir = "./src",
       Rd2md::Rd2markdown(file.path(tmpDir, funName), outFile, append = TRUE)
       file.remove(file.path(tmpDir, funName))
     }
+
+    # log functions with missing doc:
+    definedFunctions <- names(source_env)
+    definedFunctions <- definedFunctions[definedFunctions != '.packageName']
+    documentedFunctions <- tools::file_path_sans_ext(names(rd_code))
+    missIds <- which(!definedFunctions %in% documentedFunctions)
+    if (any(missIds)) {
+    message("Missing roxygen doc in file ", sourcefile, ":\n\t`",
+            paste(definedFunctions[missIds], collapse = '`, `'), "`")
+    }
   }
   file.remove(tmpDir)
 

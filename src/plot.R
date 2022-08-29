@@ -464,7 +464,18 @@ pedNetwork <- function(ped) {
 
 
 
-
+#' Draw a plotly graph of blups data
+#'
+#' X axis is the crosses, and Y axis the blups. The points are located at the
+#' expected value and the error bar length is the standard deviation.
+#'
+#' @param blupDta data.frame of 4 columns: "ind1", "ind2", "blup_exp", "blup_var"
+#' @param sorting method to sort the individuals (X axis) can be:
+#'   - "asc": sort the BLUP expected value in ascending order (from left to right)
+#'   - "dec": sort the BLUP expected value in decreasing order (from left to right)
+#'   - any other value will sort the individuals in alphabetical order (from left to right)
+#'
+#' @return plotly graph
 plotBlup <- function(blupDta, sorting = 'alpha') {
   logger <- logger$new("r-plotBlup()")
 

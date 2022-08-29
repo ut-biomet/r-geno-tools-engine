@@ -5,6 +5,16 @@
 # functions related to progenies's genetic values variance and expected values.
 
 
+#' Calculate the recombination rate matrix for each couple of SNP
+#'
+#' The recombination rate is alculated using the "haldane inverse" function
+#'
+#' @param SNPcoord SNP coordinate data.frame return by `readSNPcoord`
+#'
+#' @return named list of matrices. List names are the chromosomes' names.
+#' Matrices' row and columns names are the SNP ids
+#' (of the corresponding chromosome). Matrices values are the recombination rate
+#' between the corresponding SNPs.
 calcRecombRate <- function(SNPcoord) {
   # calculate recombination rate for each chromosome
   r <- lapply(unique(SNPcoord$chr), function(chr){
@@ -20,6 +30,20 @@ calcRecombRate <- function(SNPcoord) {
 
 
 
+#' Calculate the genetic variance-covariance of matrix the progenies of 2 given
+#' parents
+#'
+#' @param SNPcoord SNP coordinate data.frame return by `readSNPcoord`
+#' @param r recombination rate matrices return by `calcRecombRate`
+#' @param haplo haplotypes of individuals ("haplotypes" element of the list
+#' return by `readPhasedGeno` function)
+#' @param p1.id id of the first parent
+#' @param p2.id id of the second parent
+#'
+#' @return named list of matrices. List names are the chromosomes' names.
+#' Matrices' row and columns names are the SNP ids
+#' (of the corresponding chromosome). Matrices values are the genetic covariance
+#' between the corresponding SNPs for the progeny of the given parents.
 calcProgenyGenetCovar <- function(SNPcoord, r, haplo, p1.id, p2.id) {
   geneticCovar <- lapply(unique(SNPcoord$chr), function(chr){
     subsetSNPcoord <- SNPcoord[SNPcoord$chr == chr,]
@@ -53,6 +77,14 @@ calcProgenyGenetCovar <- function(SNPcoord, r, haplo, p1.id, p2.id) {
 
 
 
+#' Calculate the BULP variance of the progeny
+#'
+#' @param SNPcoord SNP coordinate data.frame return by `readSNPcoord`
+#' @param markerEffects data.frame of the markers effects return by `readMarkerEffects`
+#' @param geneticCovar list of the genetic variance covariance matrices return by
+#' `calcProgenyGenetCovar`
+#'
+#' @return numeric
 calcProgenyBlupVariance <- function(SNPcoord, markerEffects, geneticCovar) {
   blupVar <- lapply(unique(SNPcoord$chr), function(chr){
     eff <- markerEffects[row.names(geneticCovar[[chr]]), ]
@@ -62,6 +94,16 @@ calcProgenyBlupVariance <- function(SNPcoord, markerEffects, geneticCovar) {
   blupVar
 }
 
+#' Calculate the BULP expected values of the progeny
+#'
+#' @param SNPcoord SNP coordinate data.frame return by `readSNPcoord`
+#' @param haplo haplotypes of individuals ("haplotypes" element of the list
+#' return by `readPhasedGeno` function)
+#' @param p1.id id of the first parent
+#' @param p2.id id of the second parent
+#' @param markerEffects data.frame of the markers effects return by `readMarkerEffects`
+#'
+#' @return numeric
 calcProgenyBlupExpected <- function(SNPcoord, haplo, p1.id, p2.id, markerEffects) {
   blupExp <- lapply(unique(SNPcoord$chr), function(chr){
     subsetSNPcoord <- SNPcoord[SNPcoord$chr == chr,]
@@ -76,7 +118,3 @@ calcProgenyBlupExpected <- function(SNPcoord, haplo, p1.id, p2.id, markerEffects
   blupExp <- sum(unlist(blupExp))
   blupExp
 }
-
-
-
-
