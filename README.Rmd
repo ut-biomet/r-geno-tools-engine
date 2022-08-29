@@ -663,7 +663,7 @@ crossingSimulation(genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
 
 
 
-## Estimate progeny genotype variance (need better name)
+## Progenies BLUP variance and expected values
 
 <details><summary>Click to expand</summary>
 
@@ -671,7 +671,7 @@ crossingSimulation(genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
 
 We would like to estimate the esperance and variance of progenies' genotypes from parents' (phased) genotypes and recombination rates of markers.
 
-#### Theory (by Julien)
+#### Theory
 
 Let's consider 2 markers $x$ and $y$ place on the same chromosome. A given individual have 2 alleles for each of those markers:
 
@@ -940,10 +940,56 @@ $$
 </details>
 
 
+### Command
+
+#### Calculation
+
+```sh
+docker run --rm -v "$PWD"/data/:/data \
+    -v "$PWD"/readmeTemp:/out rgenotoolsengine \
+    progeny-blup-calculation \
+    --genoFile "/data/geno/breedGame_phasedGeno.vcf.gz" \
+    --crossTableFile "/data/crossingTable/breedGame_small_crossTable.csv" \
+    --SNPcoordFile "/data/SNPcoordinates/breedingGame_SNPcoord.csv" \
+    --markerEffectsFile "/data/markerEffects/breedGame_markerEffects.csv" \
+    --outFile "/out/progBlups.json"
+```
+
+**Main function**
+
+```{r progeny-blup-calculation}
+calc_progenyBlupEstimation(
+  genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
+  crossTableFile = 'data/crossingTable/breedGame_small_crossTable.csv',
+  SNPcoordFile = 'data/SNPcoordinates/breedingGame_SNPcoord.csv',
+  markerEffectsFile = 'data/markerEffects/breedGame_markerEffects.csv',
+  outFile = tempfile(fileext = ".json")
+)
+```
 
 
+#### Plot
 
 
+```sh
+docker run --rm -v "$PWD"/data/:/data \
+    -v "$PWD"/readmeTemp:/out rgenotoolsengine \
+    progeny-blup-plot \
+    --progeniesBlupFile "/data/results/progenyBlupEstimation.json" \
+    --outFile "/out/progBlupsPlot.html"
+```
+
+**Main function**
+
+```{r progeny-blup-plot}
+plot <- draw_progBlupsPlot(
+  progEstimFile = 'data/results/progenyBlupEstimation.json',
+  sorting = 'dec',
+  outFile = tempfile(fileext = ".html")
+)
+```
+
+![progBlupPlot](README_files/progBlupPlot.png)
 
 
 
