@@ -581,7 +581,7 @@ capture.output({
   genoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
   crossTableFile <- '../../data/crossingTable/breedGame_small_crossTable.csv'
   SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
-  markerEffectsFiles <- '../../data/markerEffects/breedGame_markerEffects.csv'
+  markerEffectsFile <- '../../data/markerEffects/breedGame_markerEffects.csv'
   outFile <- tempfile(fileext = ".json")
 
   test_that('calc_progenyBlupEstimation', {
@@ -590,7 +590,7 @@ capture.output({
         genoFile = genoFile,
         crossTableFile = crossTableFile,
         SNPcoordFile = SNPcoordFile,
-        markerEffectsFiles = markerEffectsFiles,
+        markerEffectsFile = markerEffectsFile,
         outFile = outFile
       )
     }, NA)

@@ -597,8 +597,8 @@ capture_output({
     })
   }
 
-  # saveProgenyBlupEstim ----
-  test_that('saveProgenyBlupEstim', {
+  # save_dataFrame_as_json ----
+  test_that('save_dataFrame_as_json', {
       projBlups <- data.frame(
         ind1 = paste0('ind', 1:10),
         ind2 = paste0('ind', 11:20),
@@ -607,7 +607,7 @@ capture_output({
       )
       resfile <- tempfile(fileext = ".json")
     expect_error({
-      outfile <- saveProgenyBlupEstim(projBlups, resfile)
+      outfile <- save_dataFrame_as_json(projBlups, resfile)
     }, NA)
     expect_equal(resfile, outfile)
     saved_projBlups <- readProgBlupEstim(outfile)

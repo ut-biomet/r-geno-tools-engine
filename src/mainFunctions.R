@@ -811,7 +811,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
                                    crossTableUrl = NULL,
                                    SNPcoordFile = NULL,
                                    SNPcoordUrl = NULL,
-                                   markerEffectsFiles = NULL,
+                                   markerEffectsFile = NULL,
                                    markerEffectsUrl = NULL,
                                    outFile = tempfile(fileext = ".json")) {
   logger <- logger$new("r-progenyBlupVarExp()")
@@ -842,12 +842,12 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
     stop("Error: either `crossTableFile` or `crossTableUrl` should be provided")
   }
 
-  if (!is.null(markerEffectsFiles) &&  is.null(markerEffectsUrl)) {
-    markerEffects <- readMarkerEffects(markerEffectsFiles)
-  } else if (is.null(markerEffectsFiles) && !is.null(markerEffectsUrl)) {
+  if (!is.null(markerEffectsFile) &&  is.null(markerEffectsUrl)) {
+    markerEffects <- readMarkerEffects(markerEffectsFile)
+  } else if (is.null(markerEffectsFile) && !is.null(markerEffectsUrl)) {
     markerEffects <- downloadMarkerEffects(markerEffectsUrl)
   } else {
-    stop("Error: either `markerEffectsFiles` or `markerEffectsUrl` should be provided")
+    stop("Error: either `markerEffectsFile` or `markerEffectsUrl` should be provided")
   }
   logger$log("Get data DONE")
 
@@ -914,7 +914,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   # save and return results
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- saveProgenyBlupEstim(blupVarExp, file = outFile)
+    file <- save_dataFrame_as_json(blupVarExp, file = outFile)
     logger$log("Save results DONE")
   } else {
     file <- NULL

@@ -1173,8 +1173,10 @@ saveVcf <- function(file, pop, SNPcoord){
 
 
 
-saveProgenyBlupEstim <- function(blupVarExp, file){
-  logger <- logger$new("r-saveProgenyBlupVarExp()")
+
+
+save_dataFrame_as_json <- function(df, file){
+  logger <- logger$new("r-save_dataFrame_as_json()")
 
     logger$log('Check file ...')
     if (length(file) != 1) {
@@ -1196,7 +1198,7 @@ saveProgenyBlupEstim <- function(blupVarExp, file){
     }
     logger$log('Check file DONE')
 
-    writeLines(jsonlite::toJSON(blupVarExp,
+    writeLines(jsonlite::toJSON(df,
                                 dataframe = "rows",
                                 pretty = T,
                                 digits = NA,
