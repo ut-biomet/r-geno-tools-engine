@@ -322,6 +322,68 @@ crossSim_parser$add_argument(arg$outGenoFile$flag,
                              required = TRUE)
 
 
+
+## progeny-blup-calculation ----
+prog_blup_parser = main_subparsers$add_parser(
+  "progeny-blup-calculation",
+  help = "Estimate progenies' BLUPs of given crosses",
+  description = paste(
+    "Estimate the BLUPs' expected value and variance of the progenies of a",
+    "given crosses specifyed in the crossing table. The results are written in",
+    "a `.json` file."
+  ),
+  formatter_class = formatter_class)
+
+prog_blup_parser$add_argument(arg$phasedGenoFile$flag,
+                             help = arg$phasedGenoFile$help,
+                             type = arg$phasedGenoFile$type,
+                             required = TRUE)
+prog_blup_parser$add_argument(arg$crossTableFile$flag,
+                             help = arg$crossTableFile$help,
+                             type = arg$crossTableFile$type,
+                             required = TRUE)
+prog_blup_parser$add_argument(arg$SNPcoordFile$flag,
+                             help = arg$SNPcoordFile$help,
+                             type = arg$SNPcoordFile$type,
+                             required = TRUE)
+prog_blup_parser$add_argument(arg$markersEffectsFile$flag,
+                             help = arg$markersEffectsFile$help,
+                             type = arg$markersEffectsFile$type,
+                             required = TRUE)
+prog_blup_parser$add_argument(arg$outProgBlupFile$flag,
+                             help = arg$outProgBlupFile$help,
+                             type = arg$outProgBlupFile$type,
+                             required = TRUE)
+
+
+
+## progeny-blup-plot ----
+prog_blup_plot = main_subparsers$add_parser(
+  "progeny-blup-plot",
+  help = "Draw a plot of the progenies BLUPs' expected values with error bars",
+  description = paste(
+    "Draw a plot of the progenies BLUPs' expected values with error bars.",
+    "X axis is the crosses, and Y axis the blups. The points are located",
+    "at the expected value and the error bar length is the standard deviation."
+  ),
+  formatter_class = formatter_class)
+
+prog_blup_plot$add_argument(arg$progeniesBlupFile$flag,
+                            help = arg$progeniesBlupFile$help,
+                            type = arg$progeniesBlupFile$type,
+                            required = TRUE)
+prog_blup_plot$add_argument(arg$sorting$flag,
+                            help = arg$sorting$help,
+                            type = arg$sorting$type,
+                            default = arg$sorting$default)
+prog_blup_plot$add_argument(arg$outFile$flag,
+                            help = arg$outFile$help,
+                            type = arg$outFile$type,
+                            required = TRUE)
+
+
+
+
 # Parse the command line arguments
 args = main_parser$parse_args()
 
@@ -441,6 +503,23 @@ if (args$command == "gwas") {
                                 nCross = args$nCross,
                                 outFile = args$outFile)
   cat(outFile)
+  quit(save = "no", status = 0)
+} else if (args$command == 'progeny-blup-calculation') {
+  # progeny-blup-calculation ----
+  progBlups <- calc_progenyBlupEstimation(
+    genoFile = args$genoFile,
+    crossTableFile = args$crossTableFile,
+    SNPcoordFile = args$SNPcoordFile,
+    markerEffectsFile = args$markerEffectsFile,
+    outFile = args$outFile
+  )
+  quit(save = "no", status = 0)
+} else if (args$command == 'progeny-blup-plot') {
+  p <- draw_progBlupsPlot(
+    progEstimFile = args$progeniesBlupFile,
+    sorting = args$sorting,
+    outFile = args$outFile
+  )
   quit(save = "no", status = 0)
 }
 

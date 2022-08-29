@@ -207,4 +207,40 @@ capture_output({
     expect_equal(x, 0)
   })
 
+  # progeny-blup-calculation ----
+  test_that('progeny-blup-calculation', {
+
+    cmd <- paste(
+      'Rscript ./r-geno-tools-engine.R progeny-blup-calculation',
+      '--genoFile "data/geno/breedGame_phasedGeno.vcf.gz"',
+      '--crossTableFile "data/crossingTable/breedGame_small_crossTable.csv"',
+      '--SNPcoordFile "data/SNPcoordinates/breedingGame_SNPcoord.csv"',
+      '--markerEffectsFile "data/markerEffects/breedGame_markerEffects.csv"',
+      '--outFile "tests/testthat/testOutput/progBlups.json"'
+    )
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+  # progeny-blup-plot ----
+  test_that('progeny-blup-plot', {
+
+    cmd <- paste(
+      'Rscript ./r-geno-tools-engine.R progeny-blup-plot',
+      '--progeniesBlupFile "tests/testthat/testOutput/progBlups.json"',
+      '--outFile "tests/testthat/testOutput/blupPlot.html"'
+    )
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
 })
