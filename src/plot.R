@@ -527,7 +527,8 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
     text = apply(blupDta, 1, function(l) {
       paste(names(l), ":", l, collapse = "\n")
     })
-  ) %>% plotly::layout(
+  )
+  p <- plotly::layout(p,
     yaxis = list(title = "Blup"),
     xaxis = list(title = "Cross")
   )

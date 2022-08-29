@@ -6,7 +6,6 @@
 
 
 # packages
-library(plotly)
 
 # load the functions
 sapply(FUN = source,
@@ -22,7 +21,7 @@ sapply(FUN = source,
 genoFile <- 'data/geno/breedGame_phasedGeno.vcf.gz'
 crossTableFile <- 'data/crossingTable/breedGame_small_crossTable.csv'
 SNPcoordFile <- 'data/SNPcoordinates/breedingGame_SNPcoord.csv'
-markerEffectsFiles <- 'data/markerEffects/breedGame_markerEffects.csv'
+markerEffectsFile <- 'data/markerEffects/breedGame_markerEffects.csv'
 outFile <- 'data/results/progenyBlupEstimation.json'
 
 
@@ -30,7 +29,7 @@ progenyBlups <- calc_progenyBlupEstimation(
   genoFile = genoFile,
   crossTableFile = crossTableFile,
   SNPcoordFile = SNPcoordFile,
-  markerEffectsFiles = markerEffectsFiles,
+  markerEffectsFile = markerEffectsFile,
   outFile = outFile
 )
 
