@@ -893,7 +893,11 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   blupVarExp$blup_exp <- NA
 
   # calculation for each couple
-  for (i in seq(nrow(crossTable))) {
+  logger$log("BLUP variance and expected value calculation for each crosses ...")
+  iter <- 1
+  nCrosses <- nrow(crossTable)
+  for (i in seq(nCrosses)) {
+    logger$log(paste0("Calculating cross: ", i, "/", nCrosses))
     p1.id <- which(grepl(crossTable$ind1[i], colnames(g$haplotypes)))
     p2.id <- which(grepl(crossTable$ind2[i], colnames(g$haplotypes)))
 
@@ -905,6 +909,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
     blupVarExp$blup_var[i] <- blupVar
     blupVarExp$blup_exp[i] <- blupExp
   }
+  logger$log("BLUP variance and expected value calculation for each crosses DONE")
 
   # save and return results
   if (!is.null(outFile)) {
