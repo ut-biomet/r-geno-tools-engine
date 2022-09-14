@@ -222,14 +222,19 @@ arg$crossTableFile$type = 'character'
 # SNPcoordFile ----
 arg$SNPcoordFile$flag = '--SNPcoordFile'
 arg$SNPcoordFile$help = paste("path of the SNPs coordinates",
-                              "file (`csv` file). This `.csv` file should have",
+                              "file (`csv` file). This `.csv` file can have",
                               "4 named columns:\\n",
                               "- `chr`: chromosome name holding the SNP\\n",
                               "- `physPos`: physical position of the SNP on",
                               "the chromosome\\n",
                               "- `linkMapPos`: linkage map position of the SNP",
                               "on the chromosome in Morgan\\n",
-                              "- `SNPid`: ID of the SNP\\n")
+                              "- `SNPid`: ID of the SNP\\n",
+                              "If `SNPid` columns is missing or have missing",
+                              "values, the SNPid will be automatically imputed",
+                              "using the convention `chr@physPos` therefore",
+                              "columns `chr` and `physPos` should not have",
+                              "any missing values")
 arg$SNPcoordFile$type = 'character'
 
 

@@ -1352,7 +1352,7 @@ downloadSNPcoord(url)
 
 Argument      |Description
 ------------- |----------------
-`url`     |     url of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs
+`url`     |     url of the SNPs coordinates file (`csv` file). This `.csv` file can have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs  If `SNPid` columns is missing or have missing values, the SNPid will be automatically imputed using the convention `chr@physPos` therefore columns `chr` and `physPos` should not have any missing values
 
 
 ## Value
@@ -1674,7 +1674,7 @@ readSNPcoord(file)
 
 Argument      |Description
 ------------- |----------------
-`file`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs
+`file`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file can have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs  If `SNPid` columns is missing or have missing values, the SNPid will be automatically imputed using the convention `chr@physPos` therefore columns `chr` and `physPos` should not have any missing values
 
 
 ## Value
@@ -2038,7 +2038,7 @@ matrix
 Hiroyoshi Iwata, Julien Diot
 
 
-# `logger`
+# `Logger`
 
 R6 class use to log messages in this engine's function
 
@@ -2054,10 +2054,10 @@ R6 class use to log messages in this engine's function
 
 ```r
 ## ------------------------------------------------
-## Method `logger$new`
+## Method `Logger$new`
 ## ------------------------------------------------
 
-mylogger <- logger$new(context = NULL)
+mylogger <- Logger$new(context = NULL)
 ```
 
 
