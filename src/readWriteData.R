@@ -314,7 +314,8 @@ readGenoData <- function(file) {
   }
 
   if (!(identical(ext, "vcf.gz") || identical(ext, "vcf"))) {
-    stop("Genotypic file should be in VCF format. `.vcf`, or `.vcf.gz`. Provided file extention is ", ext)
+    stop("Genotypic file should be in VCF format. `.vcf`, or `.vcf.gz`. ",
+         "Provided file extention is ", ext)
   }
 
   logger$log("Read geno file ... ")
@@ -322,6 +323,15 @@ readGenoData <- function(file) {
   dta <- gaston::read.vcf(file,
                           verbose = TRUE,
                           convert.chr = FALSE)
+
+  # impute missing SNP ids
+  missingIDlines <- is.na(dta@snps$id)
+  dta@snps$id[missingIDlines] <- paste0(
+    dta@snps$chr[missingIDlines],
+    '@',
+    dta@snps$pos[missingIDlines])
+  dta@snps$id[is.na(dta@snps$chr[missingIDlines]) | is.na(dta@snps$pos[missingIDlines])] <- NA
+
   logger$log("Read geno file DONE ")
   logger$log("DONE, return output.")
 
@@ -358,6 +368,17 @@ readPhasedGeno <- function(file) {
   vcf <- vcfR::read.vcfR(file, verbose = FALSE)
   logger$log("Read phased geno file DONE")
 
+  colnames(vcf@fix)
+
+  # impute missing SNP ids
+  missingIDlines <- is.na(vcf@fix[,'ID'])
+  vcf@fix[missingIDlines, 'ID'] <- paste0(
+    vcf@fix[missingIDlines, 'CHROM'],
+    '@',
+    vcf@fix[missingIDlines, 'POS'])
+  vcf@fix[is.na(vcf@fix[missingIDlines,'CHROM']) | is.na(vcf@fix[missingIDlines,'POS'])
+          ,'ID'] <- NA
+
 
   # get SNP information
   logger$log("Extract SNP information...")
@@ -366,6 +387,8 @@ readPhasedGeno <- function(file) {
   colnames(SNPcoord) <- c("chr", "physPos", "SNPid")
   SNPcoord$physPos <- as.integer(SNPcoord$physPos)
   logger$log("Extract SNP information DONE")
+
+
 
 
   # Check if genotypes are phased
@@ -784,28 +807,55 @@ readSNPcoord <- function(file) {
 
 
   logger$log('Check snps coordinates file ...')
-
-  refColNames <- sort(c('chr', 'linkMapPos', 'SNPid'))
-  if (!all(refColNames %in% colnames(SNPcoord))) {
-    stop('snps coordinates file should have a header specifying at least those',
-         ' variables: `',
-         paste(refColNames, collapse = '`, `'),
-         '`. The detected columns are: ',
-         paste(colnames(SNPcoord), collapse = '`, `'), '`.'
-    )
-  }
   if (nrow(SNPcoord) == 0) {
     stop('snps coordinates file should have at least one row')
   }
 
+  refColNames <- sort(c('chr', 'physPos', 'SNPid', 'linkMapPos'))
+  missingVar <- !refColNames %in% colnames(SNPcoord)
+  names(missingVar) <- refColNames
 
-  # missing values
-  if (any(is.na(SNPcoord[, refColNames]))) {
-    stop('snps coordinates should not have any missing values for variables: `',
-         paste(refColNames, collapse = '`, `'), '`')
+  if (missingVar['linkMapPos']) {
+    # linkMapPos is mandatory
+    stop('snps coordinates file should have the header `linkMapPos`specifying ',
+         'the linkage map position in Morgan.')
+  }
+  if (missingVar['SNPid'] & (missingVar['chr'] | missingVar['physPos'])) {
+    # we need either SNPid or (chr and physPos)
+    stop('snps coordinates file should have a header specifying either ',
+         '`SNPid` (id of the markers) and/or both `chr` and `physPos` ',
+         '(chromosome and physical position).')
+  }
+  # add missing values for missing variables
+  if (any(missingVar)) {
+    SNPcoord[[names(which(missingVar))]] <- NA
+  }
+  SNPcoord <- SNPcoord[, c("chr", "physPos", "SNPid", "linkMapPos")]
+
+  # check missing values
+  if (any(is.na(SNPcoord$linkMapPos))) {
+    # no missing values for linkMapPos
+    stop('snps coordinates should not have any missing values for the linkage ',
+         'map positions')
+  }
+  if (any(is.na(SNPcoord$SNPid) & (is.na(SNPcoord$chr) | is.na(SNPcoord$physPos)))) {
+    # no missing values SNPid or (chr and physPos)
+    stop('snps coordinates should not have any missing values for either ',
+         '`SNPid` (id of the markers) or any of `chr` and `physPos` ',
+         '(chromosome and physical position).')
   }
 
-  # duplicated rows
+
+  # impute missing SNPid
+  missingIDlines <- is.na(SNPcoord$SNPid)
+  SNPcoord$SNPid[missingIDlines] <- paste0(
+    SNPcoord$chr[missingIDlines],
+    '@',
+    SNPcoord$physPos[missingIDlines]
+    )
+
+
+  # remove duplicated rows
   dupRows <- duplicated(SNPcoord)
   if (any(dupRows)) {
     warning(sum(dupRows),
