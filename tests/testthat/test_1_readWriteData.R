@@ -514,7 +514,9 @@ capture_output({
 
 
   # readSNPcoord ----
-  SNPcoordFiles <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
+  SNPcoordFiles <- c('../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
+                     '../data/breedingGame_SNPcoord_missingIds.csv',
+                     '../data/breedingGame_SNPcoord_missingPhysPos.csv')
   for (file in SNPcoordFiles) {
     test_that(paste('readSNPcoord', basename(file)), {
       expect_error({
@@ -523,10 +525,18 @@ capture_output({
       expect_is(SNPcoord, 'data.frame')
       expect_equal(colnames(SNPcoord),
                    c("chr", "physPos", "SNPid", "linkMapPos"))
-      expect_true(is.numeric(SNPcoord$physPos))
+      expect_true((is.numeric(SNPcoord$physPos[!is.na(SNPcoord$physPos)])
+                   | all(is.na(SNPcoord$physPos))))
       expect_true(is.numeric(SNPcoord$linkMapPos))
       expect_true(!any(duplicated(SNPcoord)))
-      expect_true(!any(is.na(SNPcoord)))
+      expect_true(!any(is.na(SNPcoord$linkMapPos)))
+      expect_true(!any(is.na(SNPcoord$SNPid)))
+
+      if (grepl(pattern = 'missingIds', file)) {
+        expect_true(all(SNPcoord$SNPid == paste0(SNPcoord$chr,
+                                                 '@',
+                                                 SNPcoord$physPos)))
+      }
     })
     # downloadSNPcoord ----
     test_that(paste('downloadSNPcoord', basename(file)), {
@@ -538,12 +548,29 @@ capture_output({
       expect_is(SNPcoord, 'data.frame')
       expect_equal(colnames(SNPcoord),
                    c("chr", "physPos", "SNPid", "linkMapPos"))
-      expect_true(is.numeric(SNPcoord$physPos))
+      expect_true((is.numeric(SNPcoord$physPos[!is.na(SNPcoord$physPos)])
+                   | all(is.na(SNPcoord$physPos))))
       expect_true(is.numeric(SNPcoord$linkMapPos))
       expect_true(!any(duplicated(SNPcoord)))
-      expect_true(!any(is.na(SNPcoord)))
+      expect_true(!any(is.na(SNPcoord$linkMapPos)))
+      expect_true(!any(is.na(SNPcoord$SNPid)))
+
+      if (grepl(pattern = 'missingIds', file)) {
+        expect_true(all(SNPcoord$SNPid == paste0(SNPcoord$chr,
+                                                 '@',
+                                                 SNPcoord$physPos)))
+      }
     })
   }
+
+  file <- '../data/breedingGame_SNPcoord_missingPhysPosIds.csv'
+  test_that(paste('readSNPcoord', basename(file)), {
+      expect_error({
+        SNPcoord <- readSNPcoord(file)
+      }, paste0('snps coordinates file should have a header specifying either ',
+                '`SNPid` (id of the markers) and/or both `chr` and `physPos` ',
+                '(chromosome and physical position).'), fixed = TRUE)
+  })
 
 
   # readMarkerEffects ----

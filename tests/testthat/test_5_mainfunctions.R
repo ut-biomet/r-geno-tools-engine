@@ -11,14 +11,16 @@ capture.output({
     test_01 = list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
                    pheno = "../../data/pheno/testPhenoData01.csv"),
     test_singleTrait = list(geno = "../data/Result_genos_hd_subset-initialColl.vcf.gz",
-                          pheno = "../data/resistance_initColl.csv")
+                            pheno = "../data/resistance_initColl.csv"),
+    missingSNPid = list(geno = "../data/Result_genos_hd_subset-initialColl_missingId.vcf.gz",
+                        pheno = "../data/resistance_initColl.csv")
   )
   for (test in names(files)) {
 
     test_that(paste0("Run GWAS", test), {
       if (test == 'test_01') {
         trait <- "Flowering.time.at.Arkansas"
-      } else if (test == 'test_singleTrait') {
+      } else {
         trait <- "resist"
       }
       expect_error({
@@ -319,9 +321,9 @@ capture.output({
           run_resAdjustment(gwasFile = params[["gwasFile"]],
                             gwasUrl = params[["gwasUrl"]],
                             adj_method = params[["adj_method"]],
-                             filter_pAdj = params[['filter_pAdj']],
-                             filter_quant = params[['filter_quant']],
-                             filter_nPoints = params[['filter_nPoints']],
+                            filter_pAdj = params[['filter_pAdj']],
+                            filter_quant = params[['filter_quant']],
+                            filter_nPoints = params[['filter_nPoints']],
                             outFile = params[["outFile"]])
         })
       })
@@ -342,11 +344,11 @@ capture.output({
       test_that(paste("calc_pedRelMAt", format, basename(file)), {
         expect_error({
           suppressWarnings({
-          relMat_results <- calc_pedRelMAt(pedFile = file,
-                                           pedUrl = NULL,
-                                           header = TRUE,
-                                           unknown_string = '',
-                                           outFormat = format)
+            relMat_results <- calc_pedRelMAt(pedFile = file,
+                                             pedUrl = NULL,
+                                             header = TRUE,
+                                             unknown_string = '',
+                                             outFormat = format)
           })
         }, NA)
 
@@ -434,11 +436,11 @@ capture.output({
       tmpF <- tempfile(fileext = ".html")
       expect_error({
         suppressWarnings({
-        pedNet <- draw_pedNetwork(pedFile = file,
-                                  pedUrl = NULL,
-                                  header = TRUE,
-                                  unknown_string = '',
-                                  outFile = tmpF)
+          pedNet <- draw_pedNetwork(pedFile = file,
+                                    pedUrl = NULL,
+                                    header = TRUE,
+                                    unknown_string = '',
+                                    outFile = tmpF)
         })
       }, NA)
       expect_identical(class(pedNet),
@@ -471,42 +473,72 @@ capture.output({
 
 
   # crossingSimulation ----
-    phasedGenoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
-    SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
-    crossTableFile <- '../../data/crossingTable/breedGame_crossTable.csv'
-    nCross <- 3
-    outFile <- tempfile(fileext = ".vcf.gz")
+  crossigSimDataList <- list(
+    completeDta = list(
+      phasedGenoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
+      SNPcoordFile = '../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_crossTable.csv',
+      nCross = 3,
+      outFile = tempfile(fileext = ".vcf.gz")
+    ),
+    missingSNPid = list(
+      phasedGenoFile = '../data/breedGame_phasedGeno_missingIds.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingIds.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_crossTable.csv',
+      nCross = 3,
+      outFile = tempfile(fileext = ".vcf.gz")
+    ),
+    missingPhysPos = list(
+      phasedGenoFile = '../data/breedGame_phasedGeno_missingPos.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingPhysPos.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_crossTable.csv',
+      nCross = 3,
+      outFile = tempfile(fileext = ".vcf.gz")
+    )
+  )
 
-  test_that('crossingSimulation', {
-    expect_error({
-      createdFile <- crossingSimulation(genoFile = phasedGenoFile,
-                                        crossTableFile = crossTableFile,
-                                        SNPcoordFile = SNPcoordFile,
-                                        nCross = nCross,
-                                        outFile = outFile)
-    }, NA)
-    expect_equal(createdFile, outFile)
-    expect_error({
-      createdGeno <- readGenoData(createdFile)
-    }, NA)
-    expect_error({
-      createdPhasedGeno <- readPhasedGeno(createdFile)
-    }, NA)
+  for (i in seq_along(crossigSimDataList)) {
+    data <- crossigSimDataList[[i]]
+    phasedGenoFile <- data$phasedGenoFile
+    SNPcoordFile <- data$SNPcoordFile
+    crossTableFile <- data$crossTableFile
+    nCross <- data$nCross
+    outFile <- data$outFile
 
-    # individual names
-    crossTable <- readCrossTable(crossTableFile)
-    expect_equal(nrow(createdGeno@ped), nrow(crossTable) * nCross)
-    createdIndBaseName <- unique(gsub('-[0-9]*$', '', createdGeno@ped$id))
-    expect_equal(sort(createdIndBaseName), sort(crossTable$names))
+    test_that(paste('crossingSimulation -', names(crossigSimDataList)[i]), {
+      expect_error({
+        createdFile <- crossingSimulation(genoFile = phasedGenoFile,
+                                          crossTableFile = crossTableFile,
+                                          SNPcoordFile = SNPcoordFile,
+                                          nCross = nCross,
+                                          outFile = outFile)
+      }, NA)
+      expect_equal(createdFile, outFile)
+      expect_error({
+        createdGeno <- readGenoData(createdFile)
+      }, NA)
+      expect_error({
+        createdPhasedGeno <- readPhasedGeno(createdFile)
+      }, NA)
 
-    # SNPs: check original and new vcf files' snp position are the same
-    g <- readPhasedGeno(phasedGenoFile)
-    snpPhysPos_newVcf <- createdPhasedGeno$SNPcoord[order(createdPhasedGeno$SNPcoord$SNPid),]
-    snpPhysPos_ref <- g$SNPcoord[order(g$SNPcoord$SNPid),]
-    expect_equal(snpPhysPos_newVcf$SNPid, snpPhysPos_ref$SNPid)
-    expect_equal(snpPhysPos_newVcf$physPos, snpPhysPos_ref$physPos)
+      # individual names
+      crossTable <- readCrossTable(crossTableFile)
+      expect_equal(nrow(createdGeno@ped), nrow(crossTable) * nCross)
+      createdIndBaseName <- unique(gsub('-[0-9]*$', '', createdGeno@ped$id))
+      expect_equal(sort(createdIndBaseName), sort(crossTable$names))
 
-  })
+      # SNPs: check original and new vcf files' snp position are the same
+      g <- readPhasedGeno(phasedGenoFile)
+      snpPhysPos_newVcf <- createdPhasedGeno$SNPcoord[order(createdPhasedGeno$SNPcoord$SNPid),]
+      snpPhysPos_ref <- g$SNPcoord[order(g$SNPcoord$SNPid),]
+      expect_equal(snpPhysPos_newVcf$SNPid, snpPhysPos_ref$SNPid)
+      expect_equal(snpPhysPos_newVcf$physPos, snpPhysPos_ref$physPos)
+
+      if (grepl('missingPhysPos', names(crossigSimDataList)[i])) {
+        expect_true(all(is.na(createdPhasedGeno$SNPcoord$physPos)))
+      }
+    })
+  }
 
   test_that('crossingSimulation with downloaded files', {
     as_url <- function(file) {
@@ -537,69 +569,58 @@ capture.output({
              "physical position and by linkage map position."))
   })
 
-  missingPhysPosSNPfile <- '../data/breedingGame_SNPcoord_missingPhysPos.csv'
-  test_that('crossingSimulation missing PhysPos SNPs', {
-    expect_error({
-      createdFile <- crossingSimulation(
-        genoFile = phasedGenoFile,
-        crossTableFile = crossTableFile,
-        SNPcoordFile = missingPhysPosSNPfile,
-        nCross = nCross,
-        outFile = outFile)
-    }, NA)
-    # SNPs: check original and new vcf files' snp position are the same
-    g <- readPhasedGeno(phasedGenoFile)
-    createdPhasedGeno <- readPhasedGeno(createdFile)
-    snpPhysPos_newVcf <- createdPhasedGeno$SNPcoord[order(createdPhasedGeno$SNPcoord$SNPid),]
-    snpPhysPos_ref <- g$SNPcoord[order(g$SNPcoord$SNPid),]
-    expect_equal(snpPhysPos_newVcf$SNPid, snpPhysPos_ref$SNPid)
-    expect_equal(snpPhysPos_newVcf$physPos, snpPhysPos_ref$physPos)
-  })
-
-  phasedGenoFile_missingPhysPos <- '../data/breedGame_phasedGeno_missingPos.vcf.gz'
-  test_that('crossingSimulation missing PhysPos in VCF', {
-    expect_error({
-      createdFile <- crossingSimulation(
-        genoFile = phasedGenoFile_missingPhysPos,
-        crossTableFile = crossTableFile,
-        SNPcoordFile = SNPcoordFile,
-        nCross = nCross,
-        outFile = outFile)
-    }, NA)
-    expect_error({
-      createdGeno <- readGenoData(createdFile)
-    }, NA)
-    expect_error({
-      createdPhasedGeno <- readPhasedGeno(createdFile)
-    }, NA)
-    expect_true(all(is.na(createdPhasedGeno$SNPcoord$physPos)))
-  })
-
 
 
   # calc_progenyBlupEstimation ----
-  genoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
-  crossTableFile <- '../../data/crossingTable/breedGame_small_crossTable.csv'
-  SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
-  markerEffectsFile <- '../../data/markerEffects/breedGame_markerEffects.csv'
-  outFile <- tempfile(fileext = ".json")
+  progBlupDataList <- list(
+    completeDta = list(
+      genoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
+      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
+      SNPcoordFile = '../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
+      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
+      outFile = tempfile(fileext = ".json")
+    ),
+    missingSNPid = list(
+      genoFile = '../data/breedGame_phasedGeno_missingIds.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingIds.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
+      markerEffectsFile = '../data/breedGame_markerEffects_imputedSNPid.csv',
+      outFile = tempfile(fileext = ".json")
+    ),
+    missingPhysPos = list(
+      genoFile = '../data/breedGame_phasedGeno_missingPos.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingPhysPos.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
+      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
+      outFile = tempfile(fileext = ".json")
+    )
+  )
 
-  test_that('calc_progenyBlupEstimation', {
-    expect_error({
-      projBlups <- calc_progenyBlupEstimation(
-        genoFile = genoFile,
-        crossTableFile = crossTableFile,
-        SNPcoordFile = SNPcoordFile,
-        markerEffectsFile = markerEffectsFile,
-        outFile = outFile
-      )
-    }, NA)
+  for (i in seq_along(progBlupDataList)) {
 
-    expect_is(projBlups, "data.frame")
-    expect_identical(colnames(projBlups),
-                     c("ind1", "ind2", "blup_var", "blup_exp"))
+    genoFile <- progBlupDataList[[i]]$genoFile
+    crossTableFile <-  progBlupDataList[[i]]$crossTableFile
+    SNPcoordFile <-  progBlupDataList[[i]]$SNPcoordFile
+    markerEffectsFile <-  progBlupDataList[[i]]$markerEffectsFile
+    outFile <-  progBlupDataList[[i]]$outFile
+
+    test_that(paste('calc_progenyBlupEstimation -', names(progBlupDataList)[i]), {
+      expect_error({
+        projBlups <- calc_progenyBlupEstimation(
+          genoFile = genoFile,
+          crossTableFile = crossTableFile,
+          SNPcoordFile = SNPcoordFile,
+          markerEffectsFile = markerEffectsFile,
+          outFile = outFile
+        )
+      }, NA)
+
+      expect_is(projBlups, "data.frame")
+      expect_identical(colnames(projBlups),
+                       c("ind1", "ind2", "blup_var", "blup_exp"))
     })
 
+  }
 
 
   # draw_progBlupsPlot ----
@@ -615,9 +636,9 @@ capture.output({
 
       for (s in c('asc', 'dec', '???')) {
         expect_error({
-        p1 <- draw_progBlupsPlot(progEstimFile = file,
-                                 sorting = s,
-                                 outFile = tmpF)
+          p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                   sorting = s,
+                                   outFile = tmpF)
         }, NA)
       }
 
@@ -625,4 +646,4 @@ capture.output({
   }
 
 
-  })
+})
