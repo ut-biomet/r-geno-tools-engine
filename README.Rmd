@@ -119,11 +119,12 @@ renv::restore()
 
 ### usage
 
-To use the engine from `R` you can execute the `R-geno-tools-Engine.R` file with the `Rscript` command.
+To use the engine from `R`, move to the location of the engine and execute the `R-geno-tools-Engine.R` file with the `Rscript` command.
 
-From a bash terminal
+From a bash terminal:
 
 ```sh
+cd /path/to/r-geno-tools-engine
 Rscript ./r-geno-tools-engine.R <subcommand> --param1 valueOfParam1 --param2 valueOfParam2 ...
 ```
 
@@ -137,6 +138,13 @@ and
 
 ```
 Rscript ./r-geno-tools-engine.R <subcommand> --help
+```
+
+If you want to use the engine from another location, you need to set an environment variable named `RGENOROOT` specifying the location of the engine. For example:
+
+```sh
+export RGENOROOT='/path/to/r-geno-tools-engine'
+Rscript /path/to/r-geno-tools-engine/r-geno-tools-engine.R --help
 ```
 
 

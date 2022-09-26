@@ -10,12 +10,16 @@
 
 
 capture_output({
-  setwd('../..')
+  Sys.setenv(RGENOROOT = normalizePath('../..'))
+
+  rGenoCommand <- paste0("Rscript ",
+                         Sys.getenv('RGENOROOT'),
+                         "/r-geno-tools-engine.R")
 
   # help ----
   test_that('engine help', {
     expect_error({
-      x <- system("Rscript ./r-geno-tools-engine.R",
+      x <- system(rGenoCommand,
                   intern = FALSE,
                   ignore.stdout = TRUE)
     }, NA)
@@ -23,7 +27,7 @@ capture_output({
   })
 
   # all commands help ----
-  x <- system("Rscript ./r-geno-tools-engine.R",
+  x <- system(rGenoCommand,
               intern = TRUE)
   x <- x[which(grepl('Available commands', x)) + 1]
   x <- gsub('[^\\w,\\-]', '', x, perl = TRUE)
@@ -32,7 +36,7 @@ capture_output({
   for (cmd in cmds) {
     test_that(paste('help:', cmd), {
       expect_error({
-        x <- system(paste("Rscript ./r-geno-tools-engine.R", cmd),
+        x <- system(paste(rGenoCommand, cmd),
                     intern = FALSE,
                     ignore.stdout = TRUE)
       }, NA)
@@ -42,16 +46,16 @@ capture_output({
 
   # gwas ----
   test_that('gwas', {
-    cmd <- paste('Rscript ./r-geno-tools-engine.R gwas',
-                 '--genoFile "data/geno/testMarkerData01.vcf"',
-                 '--phenoFile "data/pheno/testPhenoData01.csv"',
+    cmd <- paste(rGenoCommand, 'gwas',
+                 '--genoFile "$RGENOROOT/data/geno/testMarkerData01.vcf"',
+                 '--phenoFile "$RGENOROOT/data/pheno/testPhenoData01.csv"',
                  '--trait "Flowering.time.at.Arkansas"',
                  '--test "score"',
                  '--fixed 0',
                  '--response "quantitative"',
                  '--thresh-maf 0.05',
                  '--thresh-callrate 0.95',
-                 '--outFile "tests/testthat/testOutput/gwasRes.json"')
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/gwasRes.json"')
 
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -63,12 +67,12 @@ capture_output({
   # gwas-manplot ----
   test_that('gwas-manplot', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R gwas-manplot',
-                 '--gwasFile "tests/testthat/testOutput/gwasRes.json"',
+    cmd <- paste(rGenoCommand, 'gwas-manplot',
+                 '--gwasFile "$RGENOROOT/tests/testthat/testOutput/gwasRes.json"',
                  '--adj-method "bonferroni"',
                  '--thresh-p 0.05',
                  '--filter-nPoints 3000',
-                 '--outFile "tests/testthat/testOutput/manPlot.html"')
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/manPlot.html"')
 
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -82,11 +86,11 @@ capture_output({
   # gwas-adjResults ----
   test_that('gwas-adjResults', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R gwas-adjresults',
-                 '--gwasFile "tests/testthat/testOutput/gwasRes.json"',
+    cmd <- paste(rGenoCommand, 'gwas-adjresults',
+                 '--gwasFile "$RGENOROOT/tests/testthat/testOutput/gwasRes.json"',
                  '--adj-method "bonferroni"',
                  '--filter-nPoints 3000',
-                 '--outFile "tests/testthat/testOutput/gwasRes_adj.json"')
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/gwasRes_adj.json"')
 
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -100,11 +104,11 @@ capture_output({
   # ldplot ----
   test_that('ldplot', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R ldplot',
-                 '--genoFile "data/geno/testMarkerData01.vcf"',
+    cmd <- paste(rGenoCommand, 'ldplot',
+                 '--genoFile "$RGENOROOT/data/geno/testMarkerData01.vcf"',
                  '--from 42',
                  '--to 62',
-                 '--outFile "tests/testthat/testOutput/ldplot.png"')
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/ldplot.png"')
 
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -117,9 +121,9 @@ capture_output({
   # relmat-ped ----
   test_that('relmat-ped', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-ped',
-                 '--pedFile "data/pedigree/testPedData_char.csv"',
-                 '--outFile "tests/testthat/testOutput/pedRelMat.json"')
+    cmd <- paste(rGenoCommand, 'relmat-ped',
+                 '--pedFile "$RGENOROOT/data/pedigree/testPedData_char.csv"',
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/pedRelMat.json"')
 
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -130,9 +134,9 @@ capture_output({
   # relmat-geno ----
   test_that('relmat-geno', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-geno',
-                 '--genoFile "data/geno/breedGame_geno.vcf.gz"',
-                 '--outFile "tests/testthat/testOutput/genoRelMat.json"')
+    cmd <- paste(rGenoCommand, 'relmat-geno',
+                 '--genoFile "$RGENOROOT/data/geno/breedGame_geno.vcf.gz"',
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/genoRelMat.json"')
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
     }, NA)
@@ -142,14 +146,14 @@ capture_output({
   # relmat-combined ----
   test_that('relmat-combined', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-combined',
-                 '--ped-relmatFile data/results/breedGame_pedRelMat.csv',
-                 '--geno-relmatFile data/results/breedGame_genoRelMat.csv',
+    cmd <- paste(rGenoCommand, 'relmat-combined',
+                 '--ped-relmatFile $RGENOROOT/data/results/breedGame_pedRelMat.csv',
+                 '--geno-relmatFile $RGENOROOT/data/results/breedGame_genoRelMat.csv',
                  # '--combine-method Legarra',
                  '--combine-method Martini',
                  '--tau 1.3',
                  '--omega 0.7',
-                 '--outFile "tests/testthat/testOutput/genoRelMat.json"')
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/genoRelMat.json"')
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
     }, NA)
@@ -162,9 +166,9 @@ capture_output({
   # relmat-heatmap ----
   test_that('relmat-heatmap', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R relmat-heatmap',
-                 '--relmatFile "tests/testthat/testOutput/pedRelMat.json"',
-                 '--outFile "tests/testthat/testOutput/relMat.png"')
+    cmd <- paste(rGenoCommand, 'relmat-heatmap',
+                 '--relmatFile "$RGENOROOT/tests/testthat/testOutput/pedRelMat.json"',
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/relMat.png"')
 
     expect_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -177,9 +181,9 @@ capture_output({
   # pedNetwork ----
   test_that('pedNetwork', {
 
-    cmd <- paste('Rscript ./r-geno-tools-engine.R pedNetwork',
-                 '--pedFile "data/pedigree/testPedData_char.csv"',
-                 '--outFile "tests/testthat/testOutput/pedNet.html"')
+    cmd <- paste(rGenoCommand, 'pedNetwork',
+                 '--pedFile "$RGENOROOT/data/pedigree/testPedData_char.csv"',
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/pedNet.html"')
 
 
     expect_error({
@@ -194,11 +198,11 @@ capture_output({
   test_that('crossing-simulation', {
 
     cmd <- paste(
-      'Rscript ./r-geno-tools-engine.R crossing-simulation',
-      '--genoFile "data/geno/breedGame_phasedGeno.vcf.gz"',
-      '--crossTableFile "data/crossingTable/breedGame_crossTable.csv"',
-      '--SNPcoordFile "data/SNPcoordinates/breedingGame_SNPcoord.csv"',
-      '--outFile "tests/testthat/testOutput/crossSim.vcf.gz"'
+      rGenoCommand, 'crossing-simulation',
+      '--genoFile "$RGENOROOT/data/geno/breedGame_phasedGeno.vcf.gz"',
+      '--crossTableFile "$RGENOROOT/data/crossingTable/breedGame_crossTable.csv"',
+      '--SNPcoordFile "$RGENOROOT/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
+      '--outFile "$RGENOROOT/tests/testthat/testOutput/crossSim.vcf.gz"'
     )
 
     expect_error({
@@ -211,12 +215,12 @@ capture_output({
   test_that('progeny-blup-calculation', {
 
     cmd <- paste(
-      'Rscript ./r-geno-tools-engine.R progeny-blup-calculation',
-      '--genoFile "data/geno/breedGame_phasedGeno.vcf.gz"',
-      '--crossTableFile "data/crossingTable/breedGame_small_crossTable.csv"',
-      '--SNPcoordFile "data/SNPcoordinates/breedingGame_SNPcoord.csv"',
-      '--markerEffectsFile "data/markerEffects/breedGame_markerEffects.csv"',
-      '--outFile "tests/testthat/testOutput/progBlups.json"'
+      rGenoCommand, 'progeny-blup-calculation',
+      '--genoFile "$RGENOROOT/data/geno/breedGame_phasedGeno.vcf.gz"',
+      '--crossTableFile "$RGENOROOT/data/crossingTable/breedGame_small_crossTable.csv"',
+      '--SNPcoordFile "$RGENOROOT/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
+      '--markerEffectsFile "$RGENOROOT/data/markerEffects/breedGame_markerEffects.csv"',
+      '--outFile "$RGENOROOT/tests/testthat/testOutput/progBlups.json"'
     )
 
     expect_error({
@@ -230,9 +234,9 @@ capture_output({
   test_that('progeny-blup-plot', {
 
     cmd <- paste(
-      'Rscript ./r-geno-tools-engine.R progeny-blup-plot',
-      '--progeniesBlupFile "tests/testthat/testOutput/progBlups.json"',
-      '--outFile "tests/testthat/testOutput/blupPlot.html"'
+      rGenoCommand, 'progeny-blup-plot',
+      '--progeniesBlupFile "$RGENOROOT/tests/testthat/testOutput/progBlups.json"',
+      '--outFile "$RGENOROOT/tests/testthat/testOutput/blupPlot.html"'
     )
 
     expect_error({

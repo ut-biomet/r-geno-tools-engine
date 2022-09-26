@@ -7,9 +7,18 @@
 # Main script of R-geno-tools-enigne
 
 
-library(argparse)
+if (nzchar(Sys.getenv("RGENOROOT"))) {
+  projectRoot <- Sys.getenv("RGENOROOT")
+} else {
+  projectRoot <- getwd()
+}
+
+# activate renv ----
+renv::activate(projectRoot)
+
 
 # Create parser ----
+library(argparse)
 formatter_class <- "lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=42, width=100)"
 main_parser = ArgumentParser(
   prog = './r-geno-tools-engine.R',
@@ -23,7 +32,7 @@ main_subparsers = main_parser$add_subparsers(prog = './r-geno-tools-engine.R',
                                              dest = "command")
 
 # load argument descriptions
-source('src/commandArgs.R')
+source(file.path(projectRoot, 'src/commandArgs.R'))
 parserList <- c() # to keep names of subcommands
 
 ## GWAS gwas ----
@@ -406,7 +415,7 @@ suppressPackageStartupMessages({
 # source R functions:
 invisible(
   sapply(FUN = source,
-         X = list.files("src", pattern = ".R$",full.names = T))
+         X = list.files(file.path(projectRoot, "src"), pattern = ".R$", full.names = T))
 )
 
 if (args$command == "gwas") {
