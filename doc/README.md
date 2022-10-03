@@ -721,7 +721,7 @@ Argument      |Description
 `crossTableUrl`     |     URL of a crossing table file
 `SNPcoordFile`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs
 `SNPcoordUrl`     |     URL of a SNP coordinate file
-`markerEffectsFile`     |     path of the marker effects file (`csv` file). This `.csv` file should have 2 named columns: - `SNPid`: Marker id - `effects`: effect of the corresponding marker
+`markerEffectsFile`     |     path of the marker effects file (`csv` or `json` file).
 `markerEffectsUrl`     |     URL of a marker effect file
 `outFile`     |     `.json` file path where to save the data. If the file already exists, it will be overwritten.
 
@@ -1045,7 +1045,7 @@ calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
 Argument      |Description
 ------------- |----------------
 `SNPcoord`     |     SNP coordinate data.frame return by `readSNPcoord`
-`markerEffects`     |     data.frame of the markers effects return by `readMarkerEffects`
+`markerEffects`     |     the markers effects return by `readMarkerEffects`
 `geneticCovar`     |     list of the genetic variance covariance matrices return by `calcProgenyGenetCovar`
 
 
@@ -1079,7 +1079,7 @@ Argument      |Description
 `haplo`     |     haplotypes of individuals ("haplotypes" element of the list return by `readPhasedGeno` function)
 `p1.id`     |     id of the first parent
 `p2.id`     |     id of the second parent
-`markerEffects`     |     data.frame of the markers effects return by `readMarkerEffects`
+`markerEffects`     |     the markers effects return by `readMarkerEffects`
 
 
 ## Value
@@ -1381,7 +1381,7 @@ downloadMarkerEffects(url)
 
 Argument      |Description
 ------------- |----------------
-`url`     |     url of the marker effects file (`csv` file). This `.csv` file should have 2 named columns: - `SNPid`: Marker id - `effects`: effect of the corresponding marker
+`url`     |     url of the marker effects file (`csv`, or `json` file).
 
 
 ## Value
@@ -1732,12 +1732,95 @@ readMarkerEffects(file)
 
 Argument      |Description
 ------------- |----------------
-`file`     |     path of the marker effects file (`csv` file). This `.csv` file should have 2 named columns: - `SNPid`: Marker id - `effects`: effect of the corresponding marker
+`file`     |     path of the marker effects file (`csv`, or `json` file)
+
+
+## Details
+
+For `.csv`, the file file should
+ have 2 named columns:
+ - `SNPid`: Marker id
+ - `effects`: effect of the corresponding marker
+ one can specify the intercept using a "--INTERCEPT--" as SNPid.
+ 
+ For `.json`, the file should
+ have 2 Key-value pairs:
+ - `intercept`: a number with the value of the intercept.
+ - `coefficient`: a nested object with SNPids as keys and their corresponding
+ effects as values.
+ For example :
+ list("\n", "  \"intercept\": 100,\n", "  \"coefficients\": ", list("\n", "    \"SNP01\": 1.02e-06,\n", "    \"SNP02\": 0.42,\n", "    \"SNP03\": 0.0\n", "  "), "\n")
 
 
 ## Value
 
-data.frame of 1 columns named `effects` with the marker ids as
+list of 2 elements:
+ `intercept`: the value of the intercept,
+ `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
+ row names.
+
+
+# `readMarkerEffects_csv`
+
+Read marker effects CSV file
+
+
+## Description
+
+Read marker effects CSV file
+
+
+## Usage
+
+```r
+readMarkerEffects_csv(file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`file`     |     path of the marker effects file (`csv` file). This `.csv` file should have 2 named columns: - `SNPid`: Marker id - `effects`: effect of the corresponding marker one can specify the intercept using a "--INTERCEPT--" as SNPid.
+
+
+## Value
+
+list of 2 elements:
+ `intercept`: the value of the intercept,
+ `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
+ row names.
+
+
+# `readMarkerEffects_json`
+
+Read marker effects JSON file
+
+
+## Description
+
+Read marker effects JSON file
+
+
+## Usage
+
+```r
+readMarkerEffects_json(file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`file`     |     path of the marker effects file (`json` file). This `.json` file should have 2 Key-value pairs: - `intercept`: a number with the value of the intercept. - `coefficient`: a nested object with SNPids as keys and their corresponding effects as values. For example : list("\n", "  \"intercept\": 100,\n", "  \"coefficients\": ", list("\n", "    \"SNP01\": 1.02e-06,\n", "    \"SNP02\": 0.42,\n", "    \"SNP03\": 0.0\n", "  "), "\n")
+
+
+## Value
+
+list of 2 elements:
+ `intercept`: the value of the intercept,
+ `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
  row names.
 
 

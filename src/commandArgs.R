@@ -240,12 +240,25 @@ arg$SNPcoordFile$type = 'character'
 
 # markersEffects ----
 arg$markersEffectsFile$flag = '--markerEffectsFile'
-arg$markersEffectsFile$help = paste("path of the marker effects file",
-                                    "(`csv` file). This `.csv` file should",
-                                    "have 2 named columns:\\n",
-                                    "- `SNPid`: Marker id\\n",
-                                    "- `effects`: effect of the corresponding",
-                                    "marker\\n")
+arg$markersEffectsFile$help = paste(
+  "path of the marker effects file (`csv`, or `json` file).\\n",
+  "For `.csv`, the file file should have 2 named columns:\\n",
+  "  - `SNPid`: Marker id\\n",
+  "  - `effects`: effect of the corresponding marker\\n",
+  "One can specify the intercept using \"--INTERCEPT--\" as SNPid.\\n",
+  "For `.json`, the file should have 2 Key-value pairs:\\n",
+  "  - `intercept`: a number with the value of the intercept.\\n",
+  "  - `coefficient`: a nested object with SNPids as keys and their",
+  "corresponding effects as values.\\n",
+  "For example :\\n",
+  ' {\\n',
+  '  "intercept": 100,\\n',
+  '  "coefficients": {\\n',
+  '     "SNP01": 1.02e-06,\\n',
+  '     "SNP02": 0.42,\\n',
+  '    "SNP03": 0.0\\n',
+  '  }\\n',
+  ' })\\n')
 arg$markersEffectsFile$type = 'character'
 
 

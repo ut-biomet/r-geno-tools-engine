@@ -574,20 +574,28 @@ capture_output({
 
 
   # readMarkerEffects ----
-  markerEffectsFiles <- '../../data/markerEffects/breedGame_markerEffects.csv'
+  markerEffectsFiles <- c('../../data/markerEffects/breedGame_markerEffects.csv',
+                          '../../data/markerEffects/breedGame_markerEffects.json',
+                          '../data/markerEffects_scientificNotation.json')
   for (file in markerEffectsFiles) {
     test_that(paste('readMarkerEffects', basename(file)), {
       expect_error({
         markerEff <- readMarkerEffects(file)
       }, NA)
-      expect_is(markerEff, 'data.frame')
-      expect_equal(colnames(markerEff),
+      expect_is(markerEff, 'list')
+      expect_equal(names(markerEff),
+                   c('intercept', 'SNPeffects'))
+      expect_equal(colnames(markerEff$SNPeffects),
                    "effects")
-      expect_equal(row.names(markerEff),
-                   read.csv(file)$SNPid)
-      expect_true(is.numeric(markerEff$effects))
-      expect_true(!any(is.na(markerEff)))
+      if (identical(tools::file_ext(file), 'csv')) {
+        expect_equal(row.names(markerEff$SNPeffects),
+                     read.csv(file)$SNPid)
+      }
+      expect_true(is.numeric(markerEff$SNPeffects$effects))
+      expect_true(is.numeric(markerEff$intercept))
+      expect_true(!any(is.na(markerEff$SNPeffects)))
     })
+
     # downloadMarkerEffects ----
     test_that(paste('downloadMarkerEffects', basename(file)), {
       d_file <- normalizePath(file)
@@ -595,13 +603,18 @@ capture_output({
       expect_error({
         markerEff <- downloadMarkerEffects(d_file)
       }, NA)
-      expect_is(markerEff, 'data.frame')
-      expect_equal(colnames(markerEff),
+      expect_is(markerEff, 'list')
+      expect_equal(names(markerEff),
+                   c('intercept', 'SNPeffects'))
+      expect_equal(colnames(markerEff$SNPeffects),
                    "effects")
-      expect_equal(row.names(markerEff),
-                   read.csv(file)$SNPid)
-      expect_true(is.numeric(markerEff$effects))
-      expect_true(!any(is.na(markerEff)))
+      if (identical(tools::file_ext(file), 'csv')) {
+        expect_equal(row.names(markerEff$SNPeffects),
+                     read.csv(file)$SNPid)
+      }
+      expect_true(is.numeric(markerEff$SNPeffects$effects))
+      expect_true(is.numeric(markerEff$intercept))
+      expect_true(!any(is.na(markerEff$SNPeffects)))
     })
   }
 

@@ -823,10 +823,7 @@ crossingSimulation <- function(genoFile = NULL,
 #' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
 #' - `SNPid`: SNP's IDs
 #' @param SNPcoordUrl URL of a SNP coordinate file
-#' @param markerEffectsFile path of the marker effects file (`csv` file). This `.csv` file should
-#' have 2 named columns:
-#' - `SNPid`: Marker id
-#' - `effects`: effect of the corresponding marker
+#' @param markerEffectsFile path of the marker effects file (`csv` or `json` file).
 #' @param markerEffectsUrl URL of a marker effect file
 #' @param outFile `.json` file path where to save the data. If the file already exists,
 #' it will be overwritten.
@@ -894,7 +891,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 
   logger$log("Check SNPs' ids consistency between",
              "SNPcoordinate and markerEffects file ...")
-  if (!all(SNPcoord$SNPid %in% row.names(markerEffects))) {
+  if (!all(SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects))) {
     stop("Missing marker effects for some SNPs of the genetic data.")
   }
   logger$log("Check SNPs' ids consistency between",
@@ -931,7 +928,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
     geneticCovar <- calcProgenyGenetCovar(SNPcoord, r, g$haplotypes, p1.id, p2.id)
     blupVar <- calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
     blupExp <- calcProgenyBlupExpected(SNPcoord, g$haplotypes,
-                                p1.id, p2.id, markerEffects)
+                                       p1.id, p2.id, markerEffects)
 
     blupVarExp$blup_var[i] <- blupVar
     blupVarExp$blup_exp[i] <- blupExp

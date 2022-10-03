@@ -80,14 +80,14 @@ calcProgenyGenetCovar <- function(SNPcoord, r, haplo, p1.id, p2.id) {
 #' Calculate the BULP variance of the progeny
 #'
 #' @param SNPcoord SNP coordinate data.frame return by `readSNPcoord`
-#' @param markerEffects data.frame of the markers effects return by `readMarkerEffects`
+#' @param markerEffects the markers effects return by `readMarkerEffects`
 #' @param geneticCovar list of the genetic variance covariance matrices return by
 #' `calcProgenyGenetCovar`
 #'
 #' @return numeric
 calcProgenyBlupVariance <- function(SNPcoord, markerEffects, geneticCovar) {
   blupVar <- lapply(unique(SNPcoord$chr), function(chr){
-    eff <- markerEffects[row.names(geneticCovar[[chr]]), ]
+    eff <- markerEffects$SNPeffects[row.names(geneticCovar[[chr]]), ]
     as.numeric(t(eff) %*% geneticCovar[[chr]] %*% eff)
   })
   blupVar <- sum(unlist(blupVar))
@@ -101,7 +101,7 @@ calcProgenyBlupVariance <- function(SNPcoord, markerEffects, geneticCovar) {
 #' return by `readPhasedGeno` function)
 #' @param p1.id id of the first parent
 #' @param p2.id id of the second parent
-#' @param markerEffects data.frame of the markers effects return by `readMarkerEffects`
+#' @param markerEffects the markers effects return by `readMarkerEffects`
 #'
 #' @return numeric
 calcProgenyBlupExpected <- function(SNPcoord, haplo, p1.id, p2.id, markerEffects) {
@@ -111,10 +111,11 @@ calcProgenyBlupExpected <- function(SNPcoord, haplo, p1.id, p2.id, markerEffects
     haplo_p1 <- haplo[SNPs, p1.id]
     haplo_p2 <- haplo[SNPs, p2.id]
 
-    eff <- markerEffects[SNPs, ]
+    eff <- markerEffects$SNPeffects[SNPs, ]
 
     0.5 * eff %*% (haplo_p1[,1] + haplo_p1[,2] + haplo_p2[,1] + haplo_p2[,2])
   })
-  blupExp <- sum(unlist(blupExp))
+  blupExp <- sum(unlist(blupExp)) + markerEffects$intercept
   blupExp
 }
+

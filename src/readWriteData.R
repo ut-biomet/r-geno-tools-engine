@@ -246,10 +246,7 @@ downloadSNPcoord <- function(url) {
 
 #' Download marker effects file
 #'
-#' @param url url of the marker effects file (`csv` file). This `.csv` file should
-#' have 2 named columns:
-#' - `SNPid`: Marker id
-#' - `effects`: effect of the corresponding marker
+#' @param url url of the marker effects file (`csv`, or `json` file).
 #'
 #' @return data.frame of 1 columns named `effects` with the marker ids as
 #' row names.
@@ -258,7 +255,7 @@ downloadMarkerEffects <- function(url) {
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "markerEffects",
                         tmpdir = tempdir(),
-                        fileext = ".csv")
+                        fileext = paste0('.', tools::file_ext(url)))
   logger$log("Download marker effects file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -916,30 +913,74 @@ readGWAS <- function(file) {
 
 #' Read marker effects file
 #'
-#' @param file path of the marker effects file (`csv` file). This `.csv` file should
+#' @param file path of the marker effects file (`csv`, or `json` file)
+#'
+#' @details For `.csv`, the file file should
 #' have 2 named columns:
 #' - `SNPid`: Marker id
 #' - `effects`: effect of the corresponding marker
+#' one can specify the intercept using a "--INTERCEPT--" as SNPid.
 #'
-#' @return data.frame of 1 columns named `effects` with the marker ids as
+#' For `.json`, the file should
+#' have 2 Key-value pairs:
+#' - `intercept`: a number with the value of the intercept.
+#' - `coefficient`: a nested object with SNPids as keys and their corresponding
+#' effects as values.
+#' For example :
+#' {
+#'   "intercept": 100,
+#'   "coefficients": {
+#'     "SNP01": 1.02e-06,
+#'     "SNP02": 0.42,
+#'     "SNP03": 0.0
+#'   }
+#' }
+#'
+#' @return list of 2 elements:
+#' `intercept`: the value of the intercept,
+#' `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
 #' row names.
 readMarkerEffects <- function(file) {
   logger <- Logger$new("r-readMarkerEffects()")
 
-  logger$log('Marker effects table file ...')
+  logger$log('Marker effects file ...')
   if (!file.exists(file)) {
     stop("Marker effects file do not exists")
   }
-  if (!identical(tools::file_ext(file), 'csv')) {
-    stop('Marker effects file should be a `.csv` file.')
+  if (identical(tools::file_ext(file), 'csv')) {
+    return(readMarkerEffects_csv(file))
+  } else if (identical(tools::file_ext(file), 'json')) {
+    return(readMarkerEffects_json(file))
+  } else {
+    stop('Marker effects file should be a `.csv`, or `.json` file.')
   }
+}
+
+
+
+#' Read marker effects CSV file
+#'
+#' @param file path of the marker effects file (`csv` file). This `.csv` file should
+#' have 2 named columns:
+#' - `SNPid`: Marker id
+#' - `effects`: effect of the corresponding marker
+#' one can specify the intercept using a "--INTERCEPT--" as SNPid.
+#'
+#' @return list of 2 elements:
+#' `intercept`: the value of the intercept,
+#' `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
+#' row names.
+readMarkerEffects_csv <- function(file) {
+  logger <- Logger$new("r-readMarkerEffects_csv()")
+
+  logger$log('Read marker effects file ...')
   markerEffects <- read.csv(file,
                             header = TRUE,
                             stringsAsFactors = FALSE)
-  logger$log('Marker effects table file DONE')
+  logger$log('Read marker effects file DONE')
 
 
-  logger$log('Check marker effects coordinates file ...')
+  logger$log('Check marker effects file ...')
   expectedColumns <- c('SNPid', 'effects')
   if (!all(colnames(markerEffects) %in% expectedColumns)) {
     stop('Marker effects file should have a header specifying those',
@@ -978,12 +1019,78 @@ readMarkerEffects <- function(file) {
   }
   logger$log('Check marker effects file DONE')
 
+  # read intercept
+  interceptId <- which(markerEffects$SNPid == '--INTERCEPT--')
+  if (all.equal(interceptId, numeric(0))) {
+    intercept <- 0
+  } else {
+    intercept <- markerEffects$effects[interceptId]
+    markerEffects <- markerEffects[-interceptId,]
+  }
+
   # reshape the markerEffects data.frame
   row.names(markerEffects) <- markerEffects$SNPid
   markerEffects <- markerEffects[, 'effects', drop = FALSE]
-  return(markerEffects)
+
+  return(list(
+    intercept = intercept,
+    SNPeffects = markerEffects
+  ))
 }
 
+
+#' Read marker effects JSON file
+#'
+#' @param file path of the marker effects file (`json` file). This `.json` file should
+#' have 2 Key-value pairs:
+#' - `intercept`: a number with the value of the intercept.
+#' - `coefficient`: a nested object with SNPids as keys and their corresponding
+#' effects as values.
+#' For example :
+#' {
+#'   "intercept": 100,
+#'   "coefficients": {
+#'     "SNP01": 1.02e-06,
+#'     "SNP02": 0.42,
+#'     "SNP03": 0.0
+#'   }
+#' }
+#'
+#' @return list of 2 elements:
+#' `intercept`: the value of the intercept,
+#' `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
+#' row names.
+readMarkerEffects_json <- function(file) {
+  logger <- Logger$new("r-readMarkerEffects_json()")
+
+  logger$log('Read marker effects file ...')
+  rawMarkerEffects <- jsonlite::fromJSON(file)
+  logger$log('Read marker effects file DONE')
+
+  logger$log('Check marker effects file ...')
+  expectedFields <- c('intercept', 'coefficients')
+  if (!all(names(rawMarkerEffects) %in% expectedFields)) {
+    stop('Marker effects `json` file should keys named:`',
+         paste(expectedFields, collapse = '`, `'),
+         '`. The detected columns names are: ',
+         paste(names(rawMarkerEffects), collapse = '`, `'), '`.'
+    )
+  }
+  # missing values
+  coef <- unlist(rawMarkerEffects$coefficients)
+  snpIds <- names(rawMarkerEffects$coefficients)
+  if (length(coef) != length(snpIds)) {
+    stop('Marker effects should not have any null values')
+  }
+  logger$log('Check marker effects file DONE')
+
+  markerEffects <- list(
+    intercept = rawMarkerEffects$intercept,
+    SNPeffects = data.frame(effects = coef,
+                            row.names = snpIds)
+  )
+  return(markerEffects)
+}
 
 
 #' Read progeny BLUP estimation file
