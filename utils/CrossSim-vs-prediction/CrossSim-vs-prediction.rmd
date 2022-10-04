@@ -1,0 +1,312 @@
+---
+title: "Crossing simulation vs Predictions"
+author: "Julien Diot"
+date: "`r format(Sys.time(), '%Y/%m/%d')`"
+colorlinks: true
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    number_sections: TRUE
+    code_folding: show
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitStartTime <- Sys.time()
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      include = TRUE,
+                      warning = TRUE,
+                      message = TRUE,
+                      cache = FALSE, # save chunks output
+                      results = "hold", # display chunk output in one block
+                      
+                      # df_print paged options
+                      rows.print = 10,
+                      max.print = Inf,
+                      
+                      
+                      # format
+                      tidy = FALSE, # format code with 'tidy_source()'
+                      tidy.opts = list(width.cutoff = 80),
+                      strip.white = TRUE, #remove the white lines in the beginning or end of a source chunk
+                      
+                      fig.align = "center",
+                      fig.width = 9,
+                      fig.height = 5)
+
+knitr::opts_knit$set(# root.dir = '/tmp', # change wd of all chunks
+                     progress = TRUE,
+                     verbose = FALSE,
+                     width = 80
+                     )
+
+```
+
+```{css echo=FALSE, eval = TRUE}
+.note {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #afafaf;
+  border-radius: 4px;
+
+  background-color: #eeeeee;
+  padding: 10px;
+  margin: 10px;
+}
+.note:before {
+  content: "Note:";
+  margin: 15px;
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.NOTE {
+  border-style: solid;
+  border-width: 1px;
+  border-color: #b30027;
+  border-radius: 4px;
+
+  background-color: #eeeeee;
+  padding: 10px;
+  margin: 10px;
+  color: #ff5151;
+}
+.NOTE:before {
+  content: "Important Note:";
+  margin: 15px;
+  font-style: italic;
+  text-decoration: underline;
+}
+
+/* footer ------ */
+.footer {
+  color: #afafaf;
+
+  /* a { */
+  /*   color: #399b00; */
+  /* } */
+}
+```
+
+### Packages / R-options: {.unnumbered}
+
+```{r pkgs_options, results='hide'}
+.libPaths('~/R/x86_64-pc-linux-gnu-library/4.1/')
+suppressPackageStartupMessages({
+  library(plotly)
+  library(gaston)
+  library(dplyr)
+})
+# load engine's functions
+sapply(FUN = source,
+       X = list.files("../../src",
+                      pattern = ".R$",
+                      full.names = T))
+
+#  R options
+options(max.print = 20)
+```
+
+# Get data
+
+## Inputs
+
+```{r}
+genoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
+crossTableFile <- '../../data/crossingTable/breedGame_small_crossTable.csv'
+SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
+markerEffectsFile <- '../../data/markerEffects/breedGame_markerEffects.csv'
+```
+
+## Predictions
+
+```{r, results='hide'}
+predictions <- calc_progenyBlupEstimation(
+  genoFile = genoFile,
+  crossTableFile = crossTableFile,
+  SNPcoordFile = SNPcoordFile,
+  markerEffectsFile = markerEffectsFile,
+  # outFile = outFile
+)
+predictions$Cross <- paste0(predictions$ind1, '_X_', predictions$ind2)
+```
+
+## Crossing simulation
+
+```{r, results='hide'}
+set.seed(1234)
+markerEffects <- readMarkerEffects(markerEffectsFile)
+crossSimOutFile <- crossingSimulation(
+  genoFile = genoFile,
+  crossTableFile = crossTableFile,
+  SNPcoordFile = SNPcoordFile,
+  nCross = 100)
+simulation <- gaston::read.vcf(crossSimOutFile)
+simulation <- gaston::as.matrix(simulation)
+simulation <- simulation[, row.names(markerEffects$SNPeffects)]
+
+simulation <- data.frame(
+  simBV = as.vector(simulation %*% as.matrix(markerEffects$SNPeffects)),
+  Cross = as.factor(sub('-\\d+$', '', row.names(simulation)))
+)
+```
+
+
+# Simulation VS Predictions
+
+```{r}
+p <- plot_ly() 
+
+# add boxplot of simulated BV
+p <- p %>% add_boxplot(data = simulation,
+                       x = ~Cross,
+                       y = ~simBV,
+                       name = "Boxplot Simulated BV")
+# add jittered markers of simulated BV
+p <- p %>% add_boxplot(data = simulation,
+                       x = ~Cross,
+                       y = ~simBV,
+                       line = list(color = 'rgba(0,0,0,0)'),
+                       marker = list(color = 'rgb(31, 119, 180)'),
+                       fillcolor = 'rgba(0,0,0,0)',
+                       name = "Markers Simulated BV",
+                       boxpoints = "all",
+                       pointpos = 0,
+                       jitter = 1,
+                       hoverinfo = 'text',
+                       text = apply(simulation, 1, function(l) {
+                         paste(names(l), ":", l, collapse = "\n")
+                       }))
+
+
+# add predicted BV
+p <- p %>% add_markers(
+  data = predictions,
+  x = ~Cross,
+  y = ~blup_exp,
+  marker = list(color = 'rgb(255,0,0)'),
+  name = "Predicted BV",
+  error_y = ~ list(array = sqrt(blup_var),
+                   type = 'data',
+                   color = '#000000'),
+  hoverinfo = 'text',
+  text = apply(predictions, 1, function(l) {
+    paste(names(l), ":", l, collapse = "\n")
+  })
+)
+
+p
+```
+
+
+## Test observed mean
+
+```{r}
+alpha <- 0.05
+beta <- 0.95
+pred_vs_sim <- full_join(simulation, predictions, by = "Cross") %>% 
+  filter(Cross != "Coll0659_X_Coll0425") %>% 
+  group_by(Cross) %>%
+  summarise(obs_mean =  mean(simBV),
+            blup_exp = unique(blup_exp),
+            p.value = t.test(x = simBV, mu = unique(blup_exp))$p.value,
+            delta = power.t.test(n = 100, power = beta, sd = sqrt(unique(blup_var)), sig.level = alpha)$delta)
+pred_vs_sim$adj.p.val <- p.adjust(pred_vs_sim$p.value, method = "bonferroni")
+pred_vs_sim
+
+idLine <- data.frame(mean = c(min(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) - 1,
+                                max(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) + 1),
+                     var = c(min(c(pred_vs_sim$blup_var, pred_vs_sim$sim_var)) - 1,
+                                max(c(pred_vs_sim$blup_var, pred_vs_sim$sim_var)) + 1))
+
+rmse <- sqrt(mean((pred_vs_sim$blup_exp - pred_vs_sim$obs_mean)^2))
+```
+
+- RMSE = `r rmse`
+
+```{r}
+#plot mean
+plot_ly(type = "scatter",
+        mode = "markers",
+        data = pred_vs_sim,
+        x = ~blup_exp,
+        y = ~obs_mean,
+        name = "Observed mean vs prediction",
+        hoverinfo = 'text',
+        text = apply(pred_vs_sim, 1, function(l) {
+          paste(names(l), ":", l, collapse = "\n")
+        })
+) %>%
+  add_lines(inherit = FALSE,
+            x = idLine$mean,
+            y = idLine$mean,
+            name = "Identity line")
+```
+
+
+## Test normality
+
+```{r}
+pred_vs_sim <- full_join(simulation, predictions, by = "Cross") %>% 
+  filter(Cross != "Coll0659_X_Coll0425") %>% 
+  group_by(Cross) %>%
+  summarise(obs_var = var(simBV),
+            blup_var = unique(blup_var),
+            p.value = ks.test(simBV, "pnorm", mean = unique(blup_exp), sd=sqrt(unique(blup_var)))$p.value)
+pred_vs_sim$adj.p.val <- p.adjust(pred_vs_sim$p.value, method = "bonferroni")
+pred_vs_sim
+```
+
+
+
+
+
+
+
+# Appendix {.unnumbered}
+
+<details>
+<summary style="margin-bottom: 10px;">Session Information (click to expand)</summary>
+<!-- Place an empty line before the chunk ! -->
+
+```{r sessionInfo, echo=FALSE}
+  options(max.print = 10000)
+  cat("Document generated in:\n")
+  print(Sys.time() - knitStartTime)
+  if (Sys.info()["sysname"] == "Linux") {
+    cat("\nCPU: ")
+    cat(unique(system("awk -F': ' '/model name/{print $2}' /proc/cpuinfo", intern = T)))
+    cat("\nMemory total size: ")
+    cat(as.numeric(system("awk '/MemTotal/ {print $2}' /proc/meminfo", intern = T))*10^(-6), "GB")
+  }
+  cat("\n\n\nSession information:\n")
+  print(sessionInfo(), locale = FALSE)
+```
+
+</details>
+
+```{r results='asis'}
+shiny::HTML('&nbsp;
+<!-- Add icon/font library -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+
+<div class="footer" style="font-family: Lato">
+    <hr />
+    <p style="text-align: center;"><a href="https://github.com/juliendiot42">Julien Diot</a></p>
+    <p style="text-align: center;"><span style="color: #808080;"><em>juliendiot@ut-biomet.org</em></span></p>
+
+<!-- Add font awesome icons -->
+    <p style="text-align: center;">
+        <a href="https://github.com/juliendiot42" class="fab fa-github"></a>
+        <a href="https://www.linkedin.com/in/julien-diot-949592107/" class="fab fa-linkedin"></a>
+        <a href="https://orcid.org/0000-0002-8738-2034" class="fab fa-orcid"></a>
+        <a href="https://keybase.io/juliendiot" class="fab fa-keybase"></a>
+    </p>
+</div>
+&nbsp;')
+```
