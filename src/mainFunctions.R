@@ -968,10 +968,14 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 #' @param outFile outFile path of the file containing the plot. If `NULL`, the
 #' output will not be written in any file. By default write in an temporary
 #' file.
+#' @param y_axisName The Y axis name (default = "genetic values")
+#' @param errorBarInterval length of XX\% interval of interest represented by the error bars (default=0.95)
 #'
 #' @return plotly graph
 draw_progBlupsPlot <- function(progEstimFile = NULL,
                                progEstimUrl = NULL,
+                               errorBarInterval= 0.95,
+                               y_axisName = "Genetic values",
                                sorting = 'alpha',
                                outFile = tempfile(fileext = ".html")) {
   logger <- Logger$new("r-draw_progBlupsPlot()")
@@ -1002,7 +1006,7 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
   logger$log("Get data DONE")
 
   logger$log("Draw progenies' blup plot ...")
-  p <- plotBlup(progBlup, sorting = sorting)
+  p <- plotBlup(progBlup, sorting = sorting, y_axisName = y_axisName, errorBarInterval = errorBarInterval)
   logger$log("Draw progenies' blup plot DONE")
 
   if (!is.null(outFile)) {

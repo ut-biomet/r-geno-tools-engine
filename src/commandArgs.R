@@ -310,3 +310,20 @@ arg$sorting$help = paste(
   "(from left to right)\\n",
   "Default is :", arg$sorting$default)
 arg$sorting$type = 'character'
+
+# errorBarInterval ----
+arg$errorBarInterval$flag = '--error-bar-interval'
+arg$errorBarInterval$default = 0.95
+arg$errorBarInterval$help = paste(
+  "Length of interval of interest represented by the error bars.",
+  "Values between 0 and 1, eg. 0.95 give the 95 percent interval.",
+  "Default is :", arg$errorBarInterval$default)
+arg$errorBarInterval$type = 'double'
+
+# y_axisName ----
+arg$y_axisName$flag = '--y-axis-name'
+arg$y_axisName$default = "Genetic values"
+arg$y_axisName$help = paste(
+  "Name of the Y axis of the plot.",
+  "Default is :", arg$y_axisName$default)
+arg$y_axisName$type = 'character'

@@ -18,7 +18,7 @@ sapply(FUN = source,
 
 
 
-# GWAS
+# GWAS ----
 genoF <- 'data/geno/testMarkerData01.vcf.gz'
 phenoF <- 'data/pheno/testPhenoData01.csv'
 
@@ -42,7 +42,7 @@ manPlot(gwas = res_gwas,
 
 
 
-# relmat
+# relmat ----
 genoF <- 'data/geno/breedGame_geno.vcf.gz'
 calc_genoRelMAt(genoFile = genoF)
 
@@ -59,7 +59,7 @@ draw_relHeatmap(relMatFile = "/tmp/RtmpNDRRPq/file2873b580e67cb.csv",
 
 
 
-# ped network
+# ped network ----
 ped <- "data/pedigree/breedGame_pedigree.csv"
 
 p <- readPedData(ped)
@@ -93,10 +93,21 @@ progenyBlups <- calc_progenyBlupEstimation(
 )
 
 
-plotBlup(progenyBlups)
+plotBlup(progenyBlups, y_axisName = "GV", errorBarInterval = 0.95)
 
 graphFile <- tempfile(fileext = ".html")
-p <- draw_progBlupsPlot(outFile, sorting = 'alpha', outFile = graphFile)
+
+p <- draw_progBlupsPlot(outFile,
+                        sorting = 'alpha',
+                        traitName = "Pheno Trait",
+                        errorBarInterval = 0.95,
+                        outFile = graphFile)
+p
+
+
+
+
+
 
 
 # crossing simulation ----

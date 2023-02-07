@@ -385,6 +385,14 @@ prog_blup_plot$add_argument(arg$sorting$flag,
                             help = arg$sorting$help,
                             type = arg$sorting$type,
                             default = arg$sorting$default)
+prog_blup_plot$add_argument(arg$errorBarInterval$flag,
+                            help = arg$errorBarInterval$help,
+                            type = arg$errorBarInterval$type,
+                            default = arg$errorBarInterval$default)
+prog_blup_plot$add_argument(arg$y_axisName$flag,
+                            help = arg$y_axisName$help,
+                            type = arg$y_axisName$type,
+                            default = arg$y_axisName$default)
 prog_blup_plot$add_argument(arg$outFile$flag,
                             help = arg$outFile$help,
                             type = arg$outFile$type,
@@ -524,9 +532,12 @@ if (args$command == "gwas") {
   )
   quit(save = "no", status = 0)
 } else if (args$command == 'progeny-blup-plot') {
+  # progeny-blup-plot ----
   p <- draw_progBlupsPlot(
     progEstimFile = args$progeniesBlupFile,
     sorting = args$sorting,
+    errorBarInterval = args$error_bar_interval,
+    y_axisName = args$y_axis_name,
     outFile = args$outFile
   )
   quit(save = "no", status = 0)

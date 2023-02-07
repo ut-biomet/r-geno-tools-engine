@@ -475,12 +475,12 @@ pedNetwork <- function(ped) {
 #'   - "dec": sort the BLUP expected value in decreasing order (from left to right)
 #'   - any other value will sort the individuals in alphabetical order (from left to right)
 #' @param y_axisName Name of the Y axis (default = "genetic values")
-#' @param centralIntervalLenght length of XX\% interval of interest represented by the error bars (default=0.95)
+#' @param errorBarInterval length of XX\% interval of interest represented by the error bars (default=0.95)
 #' @return plotly graph
 plotBlup <- function(blupDta,
                      sorting = 'alpha',
                      y_axisName = "Genetic values",
-                     centralIntervalLenght = 0.95) {
+                     errorBarInterval = 0.95) {
   logger <- Logger$new("r-plotBlup()")
 
   ### Check input ----
@@ -522,10 +522,10 @@ plotBlup <- function(blupDta,
   logger$log('draw plot ...')
 
   # Calculate the length of the error bar.
-  # Calculation based on the value of `centralIntervalLenght`
+  # Calculation based on the value of `errorBarInterval`
   # (eg. 0.95 -> 95% of the data are included in this interval centered on the
   # expected value)
-  quantileOfinterest <- (1 - centralIntervalLenght)/2
+  quantileOfinterest <- (1 - errorBarInterval)/2
   mean <- blupDta$blup_exp
   sd <- sqrt(blupDta$blup_var)
   quantileMin <- qnorm(quantileOfinterest, mean, sd)
@@ -562,7 +562,7 @@ plotBlup <- function(blupDta,
   # plot
   legend <- paste0('Progenies expected values\n',
                   '(Error bars represent a ',
-                  centralIntervalLenght*100,
+                  errorBarInterval*100,
                   '% interval)')
   p <- plotly::plot_ly(
     type = 'scatter',

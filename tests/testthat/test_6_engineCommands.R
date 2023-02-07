@@ -236,6 +236,8 @@ capture_output({
     cmd <- paste(
       rGenoCommand, 'progeny-blup-plot',
       '--progeniesBlupFile "$RGENOROOT/tests/testthat/testOutput/progBlups.json"',
+      '--y-axis-name "Phenotypic trait"',
+      '--error-bar-interval 0.95',
       '--outFile "$RGENOROOT/tests/testthat/testOutput/blupPlot.html"'
     )
 
