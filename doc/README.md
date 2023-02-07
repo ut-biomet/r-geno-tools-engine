@@ -936,7 +936,12 @@ X axis is the crosses, and Y axis the blups. The points are located at the
 ## Usage
 
 ```r
-plotBlup(blupDta, sorting = "alpha")
+plotBlup(
+  blupDta,
+  sorting = "alpha",
+  y_axisName = "Genetic values",
+  centralIntervalLenght = 0.95
+)
 ```
 
 
@@ -946,6 +951,8 @@ Argument      |Description
 ------------- |----------------
 `blupDta`     |     data.frame of 4 columns: "ind1", "ind2", "blup_exp", "blup_var"
 `sorting`     |     method to sort the individuals (X axis) can be: - "asc": sort the BLUP expected value in ascending order (from left to right) - "dec": sort the BLUP expected value in decreasing order (from left to right) - any other value will sort the individuals in alphabetical order (from left to right)
+`y_axisName`     |     Name of the Y axis (default = "genetic values")
+`centralIntervalLenght`     |     length of XX% interval of interest represented by the error bars (default=0.95)
 
 
 ## Value

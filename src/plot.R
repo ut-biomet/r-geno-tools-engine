@@ -474,9 +474,13 @@ pedNetwork <- function(ped) {
 #'   - "asc": sort the BLUP expected value in ascending order (from left to right)
 #'   - "dec": sort the BLUP expected value in decreasing order (from left to right)
 #'   - any other value will sort the individuals in alphabetical order (from left to right)
-#'
+#' @param y_axisName Name of the Y axis (default = "genetic values")
+#' @param centralIntervalLenght length of XX\% interval of interest represented by the error bars (default=0.95)
 #' @return plotly graph
-plotBlup <- function(blupDta, sorting = 'alpha') {
+plotBlup <- function(blupDta,
+                     sorting = 'alpha',
+                     y_axisName = "Genetic values",
+                     centralIntervalLenght = 0.95) {
   logger <- Logger$new("r-plotBlup()")
 
   ### Check input ----
@@ -512,24 +516,74 @@ plotBlup <- function(blupDta, sorting = 'alpha') {
   }
   logger$log('sort x axis DONE')
 
+
+
   # draw graph ----
   logger$log('draw plot ...')
+
+  # Calculate the length of the error bar.
+  # Calculation based on the value of `centralIntervalLenght`
+  # (eg. 0.95 -> 95% of the data are included in this interval centered on the
+  # expected value)
+  quantileOfinterest <- (1 - centralIntervalLenght)/2
+  mean <- blupDta$blup_exp
+  sd <- sqrt(blupDta$blup_var)
+  quantileMin <- qnorm(quantileOfinterest, mean, sd)
+  quantileMax <- qnorm(1 - quantileOfinterest, mean, sd)
+  errorBarHalfLenght <- (quantileMax - quantileMin)/2
+  quantileMinName <- paste0("Quantile ", quantileOfinterest*100,'%')
+  quantileMaxName <- paste0("Quantile ", (1-quantileOfinterest)*100,'%')
+
+  # new values to show
+  blupDta[, "Standard deviation"] <- sd
+  blupDta[, quantileMinName] <- quantileMin
+  blupDta[, quantileMaxName] <- quantileMax
+
+  # update columns names
+  colnames(blupDta)[colnames(blupDta) == "ind1"] <- "Parent 1"
+  colnames(blupDta)[colnames(blupDta) == "ind2"] <- "Parent 2"
+  colnames(blupDta)[colnames(blupDta) == "blup_exp"] <- "Expected value"
+  colnames(blupDta)[colnames(blupDta) == "blup_var"] <- "Variance"
+  colnames(blupDta)[colnames(blupDta) == "cross"] <- "Cross"
+
+  tooltipValuesOrder <- c(
+    "Cross",
+    "Parent 1",
+    "Parent 2",
+    "Expected value",
+    "Variance",
+    "Standard deviation",
+    quantileMinName,
+    quantileMaxName)
+
+  blupDta <- blupDta[, tooltipValuesOrder]
+
+
+  # plot
+  legend <- paste0('Progenies expected values\n',
+                  '(Error bars represent a ',
+                  centralIntervalLenght*100,
+                  '% interval)')
   p <- plotly::plot_ly(
-    data = blupDta,
-    x = ~ cross,
-    y = ~ blup_exp,
     type = 'scatter',
     mode = 'markers',
-    error_y = ~ list(array = sqrt(blup_var),
-                     type = 'data',
-                     color = '#000000'),
+    name = legend,
+    data = blupDta,
+    x = ~ Cross,
+    y = ~ `Expected value`,
+    error_y = ~ list(
+      name = "Error",
+      array = errorBarHalfLenght,
+      type = 'data',
+      color = '#000000'),
     hoverinfo = 'text',
     text = apply(blupDta, 1, function(l) {
       paste(names(l), ":", l, collapse = "\n")
     })
   )
   p <- plotly::layout(p,
-    yaxis = list(title = "Blup"),
+    showlegend=T,
+    yaxis = list(title = y_axisName),
     xaxis = list(title = "Cross")
   )
   logger$log('draw plot DONE')
