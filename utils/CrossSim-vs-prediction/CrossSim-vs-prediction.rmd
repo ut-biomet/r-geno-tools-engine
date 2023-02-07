@@ -150,7 +150,7 @@ simulation <- gaston::as.matrix(simulation)
 simulation <- simulation[, row.names(markerEffects$SNPeffects)]
 
 simulation <- data.frame(
-  simBV = as.vector(simulation %*% as.matrix(markerEffects$SNPeffects)),
+  simBV = as.vector(simulation %*% as.matrix(markerEffects$SNPeffects)) + markerEffects$intercept,
   Cross = as.factor(sub('-\\d+$', '', row.names(simulation)))
 )
 ```
@@ -165,15 +165,15 @@ p <- plot_ly()
 p <- p %>% add_boxplot(data = simulation,
                        x = ~Cross,
                        y = ~simBV,
-                       name = "Boxplot Simulated BV")
+                       name = "Boxplot of Simulated individuals' BV")
 # add jittered markers of simulated BV
 p <- p %>% add_boxplot(data = simulation,
                        x = ~Cross,
                        y = ~simBV,
                        line = list(color = 'rgba(0,0,0,0)'),
-                       marker = list(color = 'rgb(31, 119, 180)'),
+                       marker = list(color = 'rgba(31, 119, 180, 0.5)'),
                        fillcolor = 'rgba(0,0,0,0)',
-                       name = "Markers Simulated BV",
+                       name = "Simulated individuals' BV",
                        boxpoints = "all",
                        pointpos = 0,
                        jitter = 1,
@@ -189,8 +189,8 @@ p <- p %>% add_markers(
   x = ~Cross,
   y = ~blup_exp,
   marker = list(color = 'rgb(255,0,0)'),
-  name = "Predicted BV",
-  error_y = ~ list(array = sqrt(blup_var),
+  name = "Theoretical BV",
+  error_y = ~ list(array = 2*sqrt(blup_var),
                    type = 'data',
                    color = '#000000'),
   hoverinfo = 'text',
@@ -213,6 +213,8 @@ pred_vs_sim <- full_join(simulation, predictions, by = "Cross") %>%
   group_by(Cross) %>%
   summarise(obs_mean =  mean(simBV),
             blup_exp = unique(blup_exp),
+            obs_var = var(simBV),
+            blup_var = unique(blup_var),
             p.value = t.test(x = simBV, mu = unique(blup_exp))$p.value,
             delta = power.t.test(n = 100, power = beta, sd = sqrt(unique(blup_var)), sig.level = alpha)$delta)
 pred_vs_sim$adj.p.val <- p.adjust(pred_vs_sim$p.value, method = "bonferroni")
@@ -220,8 +222,8 @@ pred_vs_sim
 
 idLine <- data.frame(mean = c(min(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) - 1,
                                 max(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) + 1),
-                     var = c(min(c(pred_vs_sim$blup_var, pred_vs_sim$sim_var)) - 1,
-                                max(c(pred_vs_sim$blup_var, pred_vs_sim$sim_var)) + 1))
+                     var = c(min(c(pred_vs_sim$blup_var, pred_vs_sim$obs_var)) - 1,
+                                max(c(pred_vs_sim$blup_var, pred_vs_sim$obs_var)) + 1))
 
 rmse <- sqrt(mean((pred_vs_sim$blup_exp - pred_vs_sim$obs_mean)^2))
 ```
@@ -262,6 +264,28 @@ pred_vs_sim
 ```
 
 
+
+
+
+
+```{r}
+#plot var
+plot_ly(type = "scatter",
+        mode = "markers",
+        data = pred_vs_sim,
+        x = ~blup_var,
+        y = ~obs_var,
+        name = "Observed variance vs prediction",
+        hoverinfo = 'text',
+        text = apply(pred_vs_sim, 1, function(l) {
+          paste(names(l), ":", l, collapse = "\n")
+        })
+) %>%
+  add_lines(inherit = FALSE,
+            x = idLine$var,
+            y = idLine$var,
+            name = "Identity line")
+```
 
 
 
