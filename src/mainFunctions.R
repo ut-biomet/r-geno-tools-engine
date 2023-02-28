@@ -918,7 +918,6 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 
   # calculation for each couple
   logger$log("BLUP variance and expected value calculation for each crosses ...")
-  iter <- 1
   nCrosses <- nrow(crossTable)
   for (i in seq(nCrosses)) {
     logger$log(paste0("Calculating cross: ", i, "/", nCrosses))

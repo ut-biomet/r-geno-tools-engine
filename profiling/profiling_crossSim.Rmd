@@ -1,0 +1,416 @@
+---
+title: "Crossing Simulation Profiling"
+author: "Julien Diot"
+date: "`r format(Sys.time(), '%Y/%m/%d')`"
+colorlinks: true
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    number_sections: TRUE
+    code_folding: hide
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitStartTime <- Sys.time()
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      include = TRUE,
+                      warning = TRUE,
+                      message = TRUE,
+                      cache = FALSE, # save chunks output
+                      results = "hold", # display chunk output in one block
+                      
+                      # df_print paged options
+                      rows.print = 10,
+                      max.print = Inf,
+                      
+                      
+                      # format
+                      tidy = FALSE, # format code with 'tidy_source()'
+                      tidy.opts = list(width.cutoff = 80),
+                      strip.white = TRUE, #remove the white lines in the beginning or end of a source chunk
+                      
+                      fig.align = "center",
+                      fig.width = 9,
+                      fig.height = 5)
+
+knitr::opts_knit$set(# root.dir = '/tmp', # change wd of all chunks
+                     progress = TRUE,
+                     verbose = FALSE,
+                     width = 80
+                     )
+
+```
+
+### Packages / R-options: {.unnumbered}
+
+```{r pkgs_options, results='hide'}
+suppressPackageStartupMessages({
+  # library(pbapply)
+  library(pbmcapply)
+  library(parallel)
+  library(microbenchmark)
+  library(dplyr)
+  library(plotly)
+})
+
+
+# load engines' functions
+sapply(FUN = source,
+       X = list.files("../src",
+                      pattern = ".R$",
+                      full.names = T))
+
+#  R options
+options(max.print = 20)
+```
+
+
+# Introduction
+
+We want to check the time taken by the crossing simulation according to genetic data size and number of crosses.
+
+The variable that can influence the most the simulation time are:
+
+- the genotype size
+- the number of different couples
+- optionally: the number of progeny for each couples (not needed for theoretical calculation with `calc_progenyBlupEstimation`)
+- optionally: the chromosomes length in Morgan (the longer, the higher number of crossing over), but this cannot be controlled.
+
+
+
+
+# Profiling crossing simulation
+
+## Load genetic data
+
+```{r loadGenoDta}
+phasedGenoFile <- '../data/geno/breedGame_phasedGeno.vcf.gz'
+SNPcoordFile <- '../data/SNPcoordinates/breedingGame_SNPcoord.csv'
+markerEffectsFile <- '../data/markerEffects/breedGame_markerEffects.json'
+
+g <- readPhasedGeno(phasedGenoFile)
+SNPcoord <- readSNPcoord(SNPcoordFile)
+markerEffects <- readMarkerEffects(markerEffectsFile)
+```
+
+We have at our disposal:
+
+- genotype of `r nrow(g$haplo)` SNPs
+- `r ncol(g$haplo)/2` individuals
+
+
+# Setup
+
+## Parameters
+
+```{r profSetup}
+nCores <- 10 # number of cores on which the simulations are run in parallel
+nRepetition <- 4 # number of repetition for each scenario
+
+nValues <- 4 # number of different values taken by each parameters
+
+genoSize_max <- nrow(g$haplotypes)
+genoSize_min <- round(genoSize_max / nValues)
+genoSize <- round(seq(genoSize_min, genoSize_max, length.out = nValues))
+
+nCouples_max <- 100 # choose(n = ncol(g$haplotypes)/2, 2)
+nCouples_min <- 10 # nCouples_max / nParams_allCombinations 
+nCouples <- round(seq(nCouples_min, nCouples_max, length.out = nValues))
+
+nProgeny_max <- 20
+nProgeny_min <- 10 # nProgeny_max / nParams_allCombinations
+nProgeny <- round(seq(nProgeny_min, nProgeny_max, length.out = nValues))
+
+
+```
+
+
+## Profiling functions
+
+It is hard to use directly the simulation function form the engine because I would need to create input file for each scenario. It will instead use a function similar to the one used in the engine, which will be easier to manage for this profiling. It will return information about the simulation time. 
+
+> **NOTE: The loading time of phased genotype will not be taken in account in the profiling !**
+
+
+```{r profFun_simul}
+profileTime_simul <- function(genoSize, nCouples, nProgeny, haplo, SNPcoord){
+  # setup simulation data
+  ## Sample SNP's genotype
+  selectedSNP <- sample(SNPcoord$SNPid, genoSize)
+  haplo <- haplo[selectedSNP, ]
+  SNPcoord <- SNPcoord[SNPcoord$SNPid %in% selectedSNP, ]
+
+  ## create crossing table
+  allInds <- gsub('_[12]$', '', colnames(haplo)[1:(ncol(haplo)/2)])
+  crossTable <- expand.grid(allInds, allInds)
+  crossTable <- crossTable[1:(nrow(crossTable)/2),]
+  crossTable <- crossTable[sample(nrow(crossTable), nCouples),]
+  colnames(crossTable) <- c('ind1', 'ind2')
+  crossTable$n <- nProgeny
+  crossTable$names <- paste(crossTable$ind1, '_x_', crossTable$ind2)
+
+  # simulation
+  t <- Sys.time()
+  parentPopulation <- initializeSimulation(haplotypes = haplo,
+                                           SNPcoord = SNPcoord)
+  simulatedIndividuals <- breedSimulatR::makeCrosses(crosses = crossTable,
+                                                     pop = parentPopulation)
+  simulatedPop <- breedSimulatR::population$new(inds = simulatedIndividuals,
+                                                verbose = FALSE)
+  simulatedPop$writeVcf(tempfile(fileext = '.vcf.gz'))
+  simTime <- difftime(Sys.time(), t, units = 's')
+
+  return(as.numeric(simTime))
+}
+```
+
+
+
+```{r profFun_theory}
+profileTime_theory <- function(genoSize, nCouples, haplo, SNPcoord, markerEffects){
+
+  # setup simulation data
+  ## Sample SNP's genotype
+  selectedSNP <- sample(SNPcoord$SNPid, genoSize)
+  haplo <- haplo[selectedSNP, ]
+  SNPcoord <- SNPcoord[SNPcoord$SNPid %in% selectedSNP, ]
+  markerEffects$SNPeffects <- markerEffects$SNPeffects[SNPcoord$SNPid %in% selectedSNP,, drop = FALSE]
+
+  ## create crossing table
+  allInds <- gsub('_[12]$', '', colnames(haplo)[1:(ncol(haplo)/2)])
+  crossTable <- expand.grid(allInds, allInds)
+  crossTable <- crossTable[1:(nrow(crossTable)/2),]
+  crossTable <- crossTable[sample(nrow(crossTable), nCouples),]
+  colnames(crossTable) <- c('ind1', 'ind2')
+
+  # calculation:
+  t <- Sys.time()
+  # calculate recombination rate
+  r <- calcRecombRate(SNPcoord)
+  
+  # initialize results data.frame
+  blupVarExp <- crossTable[, c('ind1', 'ind2')]
+  blupVarExp$blup_var <- NA
+  blupVarExp$blup_exp <- NA
+  
+  # calculation for each couple
+  nCrosses <- nrow(crossTable)
+  for (i in seq(nCrosses)) {
+    p1.id <- which(grepl(crossTable$ind1[i], colnames(haplo)))
+    p2.id <- which(grepl(crossTable$ind2[i], colnames(haplo)))
+
+    geneticCovar <- calcProgenyGenetCovar(SNPcoord, r, haplo, p1.id, p2.id)
+    blupVar <- calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
+    blupExp <- calcProgenyBlupExpected(SNPcoord, haplo,
+                                       p1.id, p2.id, markerEffects)
+
+    blupVarExp$blup_var[i] <- blupVar
+    blupVarExp$blup_exp[i] <- blupExp
+  }
+  
+  simTime <- difftime(Sys.time(), t, units = 's')
+
+  return(as.numeric(simTime))
+}
+```
+
+
+
+## Profiling 
+
+### Crossing simulation
+
+```{r runProf_sim, eval=TRUE}
+set.seed(2022)
+
+# prepare simulation parameters for mapply
+simulParams_simul <- expand.grid(genoSize = genoSize,
+                           nCouples = nCouples,
+                           nProgeny = nProgeny)
+simulParams_simul <- simulParams_simul[rep(seq_len(nrow(simulParams_simul)), each = nRepetition),]
+simulParams_simul <- as.list(simulParams_simul[sample(nrow(simulParams_simul)), ])
+
+
+# simTimes <- mcmapply(profileTime_simul,
+simTime <- pbmcmapply(profileTime_simul,
+                     genoSize = simulParams_simul$genoSize,
+                     nCouples = simulParams_simul$nCouples,
+                     nProgeny = simulParams_simul$nProgeny,
+                     MoreArgs = list(haplo = g$haplotypes,
+                                     SNPcoord = SNPcoord),
+                     mc.cores = nCores)
+if (!is.null(ncol(simTime))) {
+  simTime <- t(simTime)
+}
+
+simulParams_simul <- as.data.frame(simulParams_simul)
+results <- cbind(simulParams_simul, simTime)
+results <- results[order(results$simTime),]
+write.csv(results, 'profilingResults_crossSim.csv', quote = F, row.names = F)
+```
+
+
+### Theoritical calculation
+
+```{r runProf_theory, eval=TRUE}
+set.seed(2022)
+
+# prepare simulation parameters for mapply
+# prepare simulation parameters for mapply
+simulParams_theory <- expand.grid(genoSize = genoSize,
+                                  nCouples = nCouples)
+simulParams_theory <- simulParams_theory[rep(seq_len(nrow(simulParams_theory)), each = nRepetition),]
+simulParams_theory <- as.list(simulParams_theory[sample(nrow(simulParams_theory)), ])
+
+profileTime_theory(genoSize = simulParams_theory$genoSize[1],
+                   nCouples = simulParams_theory$nCouples[1],
+                   haplo = g$haplotypes,
+                   SNPcoord = SNPcoord,
+                   markerEffects = markerEffects)
+
+
+# simTimes <- mcmapply(profileTime_theory,
+simTime <- pbmcmapply(profileTime_theory,
+                      genoSize = simulParams_theory$genoSize,
+                      nCouples = simulParams_theory$nCouples,
+                      MoreArgs = list(haplo = g$haplotypes,
+                                      SNPcoord = SNPcoord,
+                                      markerEffects = markerEffects),
+                      mc.cores = nCores)
+if (!is.null(ncol(simTime))) {
+  simTime <- t(simTime)
+}
+
+simulParams_theory <- as.data.frame(simulParams_theory)
+results <- cbind(simulParams_theory, simTime)
+results <- results[order(results$simTime),]
+write.csv(results, 'profilingResults_theory.csv', quote = F, row.names = F)
+```
+
+# Analyse profiling Crossing Simulation
+
+```{r readProfDta_sim}
+dta <- read.csv('profilingResults_crossSim.csv')
+```
+
+## Summary
+
+```{r simTimeSummary_sim}
+simTimeSummary <- dta %>% group_by(genoSize, nCouples, nProgeny) %>% summarise(
+  meanTime = mean(simTime),
+  nObs = n()
+)
+simTimeSummary[order(simTimeSummary$meanTime),]
+```
+
+## Plots
+
+```{r plot1_sim}
+p <- plot_ly(type = "scatter",
+        mode = "markers",
+        data = dta,
+        x = ~genoSize,
+        y = ~simTime,
+        color = ~as.factor(nCouples),
+        symbol = ~nProgeny,
+        hoverinfo = 'text',
+        text = apply(dta, 1, function(l) {
+          paste(names(l), ":", l, collapse = "\n")
+        })
+)
+
+p %>% layout(xaxis = list(type = "log"),
+             yaxis = list(type = "log"))
+```
+
+
+```{r plot2_sim}
+p <- plot_ly(mode = "markers",
+        data = dta,
+        x = ~genoSize,
+        y = ~nProgeny,
+        z = ~simTime,
+        color = ~as.factor(nCouples))
+p
+```
+
+
+
+
+# Analyse profiling therory
+```{r readProfDta_theory}
+dta <- read.csv('profilingResults_theory.csv')
+```
+
+
+## Summary
+
+```{r simTimeSummary_theory}
+simTimeSummary <- dta %>% group_by(genoSize, nCouples) %>% summarise(
+  meanTime = mean(simTime),
+  nObs = n()
+)
+simTimeSummary[order(simTimeSummary$meanTime),]
+```
+
+## Plots
+
+
+
+```{r plot1_theory}
+p <- plot_ly(type = "scatter",
+        mode = "markers",
+        data = dta,
+        x = ~genoSize,
+        y = ~simTime,
+        color = ~as.factor(nCouples),
+        hoverinfo = 'text',
+        text = apply(dta, 1, function(l) {
+          paste(names(l), ":", l, collapse = "\n")
+        })
+) 
+p
+
+p %>% layout(#xaxis = list(type = "log"))
+             yaxis = list(type = "log"))
+
+```
+
+
+```{r plot2_theory}
+p <- plot_ly(mode = "markers",
+        data = dta,
+        x = ~genoSize,
+        y = ~nCouples,
+        z = ~simTime)
+p
+```
+
+
+
+# Appendix {.unnumbered}
+
+<details>
+<summary style="margin-bottom: 10px;">Session Information (click to expand)</summary>
+<!-- Place an empty line before the chunk ! -->
+
+```{r sessionInfo, echo=FALSE}
+  options(max.print = 10000)
+  cat("Document generated in:\n")
+  print(Sys.time() - knitStartTime)
+  if (Sys.info()["sysname"] == "Linux") {
+    cat("\nCPU: ")
+    cat(unique(system("awk -F': ' '/model name/{print $2}' /proc/cpuinfo", intern = T)))
+    cat("\nMemory total size: ")
+    cat(as.numeric(system("awk '/MemTotal/ {print $2}' /proc/meminfo", intern = T))*10^(-6), "GB")
+  }
+  cat("\n\n\nSession information:\n")
+  print(sessionInfo(), locale = FALSE)
+```
+
+</details>
