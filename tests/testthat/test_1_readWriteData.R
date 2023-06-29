@@ -7,7 +7,7 @@
 
 capture_output({
 
-  genoFiles <- c("../../data/geno/testMarkerData01.vcf",
+  genoFiles <- c("../data/small-vcf-file.vcf",
                  "../../data/geno/testMarkerData01.vcf.gz")
 
   for (file in genoFiles) {

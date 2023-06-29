@@ -1,6 +1,7 @@
 readmeTemp/
 # large data
 *.vcf
+!tests/data/small-vcf-file.vcf
 
 # History files
 .Rhistory

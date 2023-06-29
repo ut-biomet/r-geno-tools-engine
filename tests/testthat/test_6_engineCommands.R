@@ -47,7 +47,7 @@ capture_output({
   # gwas ----
   test_that('gwas', {
     cmd <- paste(rGenoCommand, 'gwas',
-                 '--genoFile "$RGENOROOT/data/geno/testMarkerData01.vcf"',
+                 '--genoFile "$RGENOROOT/data/geno/testMarkerData01.vcf.gz"',
                  '--phenoFile "$RGENOROOT/data/pheno/testPhenoData01.csv"',
                  '--trait "Flowering.time.at.Arkansas"',
                  '--test "score"',
@@ -105,7 +105,7 @@ capture_output({
   test_that('ldplot', {
 
     cmd <- paste(rGenoCommand, 'ldplot',
-                 '--genoFile "$RGENOROOT/data/geno/testMarkerData01.vcf"',
+                 '--genoFile "$RGENOROOT/data/geno/testMarkerData01.vcf.gz"',
                  '--from 42',
                  '--to 62',
                  '--outFile "$RGENOROOT/tests/testthat/testOutput/ldplot.png"')
