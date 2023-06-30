@@ -64,7 +64,7 @@ capture_output({
                         response = resp,
                         thresh_maf = 0.05,
                         thresh_callrate = 0.95)
-        for (chr in c(NA, sample(2, unique(resGwas$chr)))) {
+        for (chr in c(NA, sample(unique(resGwas$chr), 2))) {
           for (interactive in c(TRUE, FALSE)) {
             testName <- paste("manPlot", resp, test, paste0("chr:", chr),
                               paste0('inter:', interactive), sep = "-")

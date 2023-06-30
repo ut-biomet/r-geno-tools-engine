@@ -1,4 +1,4 @@
-FROM rstudio/r-base:4.1-focal
+FROM rstudio/r-base:4.3.0-focal
 LABEL maintainer="Julien Diot <juliendiot@ut-biomet.org>"
 
 
@@ -20,7 +20,7 @@ RUN apt-get update --allow-releaseinfo-change && apt-get install -y \
 
 # install R packages dependencies ---
 # install renv package
-ENV RENV_VERSION 0.14.0
+ENV RENV_VERSION 0.17.3
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
 
@@ -29,7 +29,11 @@ WORKDIR ${RGENOROOT}
 
 # install deps using renv
 COPY renv.lock renv.lock
-RUN R -e 'renv::init()'
+RUN mkdir -p renv
+COPY .Rprofile .Rprofile
+COPY renv/activate.R renv/activate.R
+COPY renv/settings.json renv/settings.json
+RUN R -e 'renv::restore()'
 
 
 # get application code
