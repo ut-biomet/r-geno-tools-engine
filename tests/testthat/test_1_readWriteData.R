@@ -576,7 +576,10 @@ capture_output({
   # readMarkerEffects ----
   markerEffectsFiles <- c('../../data/markerEffects/breedGame_markerEffects.csv',
                           '../../data/markerEffects/breedGame_markerEffects.json',
-                          '../data/markerEffects_scientificNotation.json')
+                          '../data/markerEffects_scientificNotation.json',
+                          '../../data/markerEffects/breedGame_markerEffects_1namedTrait.json',
+                          '../../data/markerEffects/breedGame_markerEffects_2traits.json',
+                          '../../data/markerEffects/breedGame_markerEffects_2traits.csv')
   for (file in markerEffectsFiles) {
     test_that(paste('readMarkerEffects', basename(file)), {
       expect_error({
@@ -585,15 +588,13 @@ capture_output({
       expect_is(markerEff, 'list')
       expect_equal(names(markerEff),
                    c('intercept', 'SNPeffects'))
-      expect_equal(colnames(markerEff$SNPeffects),
-                   "effects")
       if (identical(tools::file_ext(file), 'csv')) {
         expect_equal(row.names(markerEff$SNPeffects),
                      read.csv(file)$SNPid)
       }
-      expect_true(is.numeric(markerEff$SNPeffects$effects))
       expect_true(is.numeric(markerEff$intercept))
       expect_true(!any(is.na(markerEff$SNPeffects)))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects))
     })
 
     # downloadMarkerEffects ----
@@ -606,15 +607,13 @@ capture_output({
       expect_is(markerEff, 'list')
       expect_equal(names(markerEff),
                    c('intercept', 'SNPeffects'))
-      expect_equal(colnames(markerEff$SNPeffects),
-                   "effects")
       if (identical(tools::file_ext(file), 'csv')) {
         expect_equal(row.names(markerEff$SNPeffects),
                      read.csv(file)$SNPid)
       }
-      expect_true(is.numeric(markerEff$SNPeffects$effects))
       expect_true(is.numeric(markerEff$intercept))
       expect_true(!any(is.na(markerEff$SNPeffects)))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects))
     })
   }
 

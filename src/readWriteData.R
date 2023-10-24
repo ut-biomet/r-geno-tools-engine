@@ -981,14 +981,8 @@ readMarkerEffects_csv <- function(file) {
 
 
   logger$log('Check marker effects file ...')
-  expectedColumns <- c('SNPid', 'effects')
-  if (!all(colnames(markerEffects) %in% expectedColumns)) {
-    stop('Marker effects file should have a header specifying those',
-         ' columns: `',
-         paste(expectedColumns, collapse = '`, `'),
-         '`. The detected columns names are: ',
-         paste(colnames(markerEffects), collapse = '`, `'), '`.'
-    )
+  if (!identical(colnames(markerEffects)[1], "SNPid")) {
+    stop('Marker effects file should have as first column `SNPid`')
   }
   if (nrow(markerEffects) == 0) {
     stop('Marker effects file should have at least one row')
@@ -1005,7 +999,7 @@ readMarkerEffects_csv <- function(file) {
     warning(sum(dupRows),
             'duplicated rows found in the marker effects file. ',
             'They will be removed.')
-    SNPcoord <- SNPcoord[!dupRows,]
+    markerEffects <- markerEffects[!dupRows,]
   }
 
   # check unicity of SNPids
@@ -1014,7 +1008,7 @@ readMarkerEffects_csv <- function(file) {
     msg <- paste(
       length(duplicatedIds),
       'duplicated SNPs\' id detected in the marker effects file:',
-      paste(SNPcoord$SNPid[duplicatedIds], collapse = ', '))
+      paste(markerEffects$SNPid[duplicatedIds], collapse = ', '))
     stop(msg)
   }
   logger$log('Check marker effects file DONE')
@@ -1022,15 +1016,16 @@ readMarkerEffects_csv <- function(file) {
   # read intercept
   interceptId <- which(markerEffects$SNPid == '--INTERCEPT--')
   if (all.equal(interceptId, numeric(0))) {
-    intercept <- 0
+    intercept <- rep(0, ncol(markerEffects) - 1)
+    names(intercept) <- colnames(markerEffects)[-1]
   } else {
-    intercept <- markerEffects$effects[interceptId]
+    intercept <- markerEffects[interceptId, -1]
     markerEffects <- markerEffects[-interceptId,]
   }
 
   # reshape the markerEffects data.frame
   row.names(markerEffects) <- markerEffects$SNPid
-  markerEffects <- markerEffects[, 'effects', drop = FALSE]
+  markerEffects <- markerEffects[, -1, drop = FALSE]
 
   return(list(
     intercept = intercept,
@@ -1064,34 +1059,59 @@ readMarkerEffects_json <- function(file) {
   logger <- Logger$new("r-readMarkerEffects_json()")
 
   logger$log('Read marker effects file ...')
-  rawMarkerEffects <- jsonlite::fromJSON(file)
+  rawMarkerEffects_list <- jsonlite::fromJSON(file,
+                                              simplifyVector = FALSE)
   logger$log('Read marker effects file DONE')
-
-  logger$log('Check marker effects file ...')
-  expectedFields <- c('intercept', 'coefficients')
-  if (!all(names(rawMarkerEffects) %in% expectedFields)) {
-    stop('Marker effects `json` file should keys named:`',
-         paste(expectedFields, collapse = '`, `'),
-         '`. The detected columns names are: ',
-         paste(names(rawMarkerEffects), collapse = '`, `'), '`.'
-    )
+  if (length(rawMarkerEffects_list[[1]]) != 2) {
+    rawMarkerEffects_list <- list(unknownTrait = rawMarkerEffects_list)
   }
-  # missing values
-  coef <- unlist(rawMarkerEffects$coefficients)
-  snpIds <- names(rawMarkerEffects$coefficients)
-  if (length(coef) != length(snpIds)) {
-    stop('Marker effects should not have any null values')
-  }
-  logger$log('Check marker effects file DONE')
 
   markerEffects <- list(
-    intercept = rawMarkerEffects$intercept,
-    SNPeffects = data.frame(effects = coef,
-                            row.names = snpIds)
+    intercept = c(),
+    SNPeffects = data.frame()
   )
+  expectedFields <- c('intercept', 'coefficients')
+
+  for (trait in names(rawMarkerEffects_list)) {
+    mark_eff <- rawMarkerEffects_list[[trait]]
+
+    if (!all(names(mark_eff) %in% expectedFields)) {
+      stop('Marker effects `json` file should keys named:`',
+           paste(expectedFields, collapse = '`, `'),
+           '`. The detected columns names are: ',
+           paste(names(mark_eff), collapse = '`, `'), '`.'
+      )
+    }
+
+    # missing values
+    coef <- unlist(mark_eff$coefficients)
+    snpIds <- names(mark_eff$coefficients)
+    if (length(coef) != length(snpIds)) {
+      stop('Marker effects should not have any null values')
+    }
+
+    markerEffects$intercept <- c(markerEffects$intercept,
+                                 mark_eff$intercept)
+    names(markerEffects$intercept)[length(markerEffects$intercept)] <- trait
+
+    if (nrow(markerEffects$SNPeffects) > 0) {
+      markerEffects$SNPeffects <- merge(
+        markerEffects$SNPeffects,
+        data.frame(effects = coef,
+                   row.names = snpIds),
+        by = "row.names"
+      )
+      row.names(markerEffects$SNPeffects) <- markerEffects$SNPeffects$Row.names
+      markerEffects$SNPeffects <- markerEffects$SNPeffects[, -1]
+      colnames(markerEffects$SNPeffects)[ncol(markerEffects$SNPeffects)] <- trait
+    } else {
+      markerEffects$SNPeffects <- data.frame(effects = coef,
+                                             row.names = snpIds)
+      colnames(markerEffects$SNPeffects) <- trait
+    }
+  }
   return(markerEffects)
 }
-
 
 #' Read progeny BLUP estimation file
 #'
