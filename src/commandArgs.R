@@ -134,7 +134,7 @@ arg$response$type = 'character'
 
 # trait ----
 arg$trait$flag = '--trait'
-arg$trait$help = 'Name of the trait to analyze. Must be a column name of the phenotypic file.'
+arg$trait$help = 'Name of the trait to analyze. (Must be a column name of the phenotypic file for GWAS)'
 arg$trait$type = 'character'
 
 

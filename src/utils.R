@@ -215,19 +215,29 @@ createResultExample <- function() {
                   outFile = 'data/results/relationshipHeatmap.png')
 
 
-  # create progeny blup estimation results
+  # create progeny blup estimation results ----
   cat('create progeny blup estimation results ----\n')
   genoFile <- 'data/geno/breedGame_phasedGeno.vcf.gz'
   crossTableFile <- 'data/crossingTable/breedGame_small_crossTable.csv'
   SNPcoordFile <- 'data/SNPcoordinates/breedingGame_SNPcoord.csv'
-  markerEffectsFiles <- 'data/markerEffects/breedGame_markerEffects.csv'
+  markerEffectsFile <- 'data/markerEffects/breedGame_markerEffects.csv'
   outFile <- 'data/results/progenyBlupEstimation.json'
 
   calc_progenyBlupEstimation(
     genoFile = genoFile,
     crossTableFile = crossTableFile,
     SNPcoordFile = SNPcoordFile,
-    markerEffectsFiles = markerEffectsFiles,
+    markerEffectsFile = markerEffectsFile,
+    outFile = outFile
+  )
+
+  markerEffectsFile <- 'data/markerEffects/breedGame_markerEffects_2traits.json'
+  outFile <- 'data/results/progenyBlupEstimation_2traits.json'
+  calc_progenyBlupEstimation(
+    genoFile = genoFile,
+    crossTableFile = crossTableFile,
+    SNPcoordFile = SNPcoordFile,
+    markerEffectsFile = markerEffectsFile,
     outFile = outFile
   )
 

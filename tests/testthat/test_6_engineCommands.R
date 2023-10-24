@@ -213,7 +213,6 @@ capture_output({
 
   # progeny-blup-calculation ----
   test_that('progeny-blup-calculation', {
-
     cmd <- paste(
       rGenoCommand, 'progeny-blup-calculation',
       '--genoFile "$RGENOROOT/data/geno/breedGame_phasedGeno.vcf.gz"',
@@ -229,10 +228,25 @@ capture_output({
     expect_equal(x, 0)
   })
 
+  test_that('progeny-blup-calculation (multi-trait marker effect)', {
+    cmd <- paste(
+      rGenoCommand, 'progeny-blup-calculation',
+      '--genoFile "$RGENOROOT/data/geno/breedGame_phasedGeno.vcf.gz"',
+      '--crossTableFile "$RGENOROOT/data/crossingTable/breedGame_small_crossTable.csv"',
+      '--SNPcoordFile "$RGENOROOT/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
+      '--markerEffectsFile "$RGENOROOT/data/markerEffects/breedGame_markerEffects_2traits.json"',
+      '--outFile "$RGENOROOT/tests/testthat/testOutput/progBlups_2traits.json"'
+    )
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
 
   # progeny-blup-plot ----
   test_that('progeny-blup-plot', {
-
     cmd <- paste(
       rGenoCommand, 'progeny-blup-plot',
       '--progeniesBlupFile "$RGENOROOT/tests/testthat/testOutput/progBlups.json"',
@@ -247,6 +261,21 @@ capture_output({
     expect_equal(x, 0)
   })
 
+  test_that('progeny-blup-plot (multi-trait file)', {
+    cmd <- paste(
+      rGenoCommand, 'progeny-blup-plot',
+      '--progeniesBlupFile "$RGENOROOT/tests/testthat/testOutput/progBlups_2traits.json"',
+      '--y-axis-name "Phenotypic trait"',
+      '--error-bar-interval 0.95',
+      '--trait "trait1"',
+      '--outFile "$RGENOROOT/tests/testthat/testOutput/blupPlot.html"'
+    )
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
 
 
 })

@@ -912,9 +912,14 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   r <- calcRecombRate(SNPcoord)
 
   # initialize results data.frame
-  blupVarExp <- crossTable[, c('ind1', 'ind2')]
-  blupVarExp$blup_var <- NA
-  blupVarExp$blup_exp <- NA
+  traits <- names(markerEffects$intercept)
+  blupVarExp <- lapply(traits, function(t){
+    df <- crossTable[, c('ind1', 'ind2')]
+    df$blup_var <- NA
+    df$blup_exp <- NA
+    df
+  })
+  names(blupVarExp) <- traits
 
   # calculation for each couple
   logger$log("BLUP variance and expected value calculation for each crosses ...")
@@ -928,16 +933,18 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
     blupVar <- calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
     blupExp <- calcProgenyBlupExpected(SNPcoord, g$haplotypes,
                                        p1.id, p2.id, markerEffects)
+    for (trait in traits) {
+      blupVarExp[[trait]]$blup_var[i] <- blupVar[trait]
+      blupVarExp[[trait]]$blup_exp[i] <- blupExp[trait]
+    }
 
-    blupVarExp$blup_var[i] <- blupVar
-    blupVarExp$blup_exp[i] <- blupExp
+
   }
   logger$log("BLUP variance and expected value calculation for each crosses DONE")
-
   # save and return results
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    file <- save_dataFrame_as_json(blupVarExp, file = outFile)
+    file <- save_blupVarExp_as_json(blupVarExp, file = outFile)
     logger$log("Save results DONE")
   } else {
     file <- NULL
@@ -976,6 +983,7 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
                                errorBarInterval= 0.95,
                                y_axisName = "Genetic values",
                                sorting = 'alpha',
+                               trait = NULL,
                                outFile = tempfile(fileext = ".html")) {
   logger <- Logger$new("r-draw_progBlupsPlot()")
 
@@ -1005,7 +1013,10 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
   logger$log("Get data DONE")
 
   logger$log("Draw progenies' blup plot ...")
-  p <- plotBlup(progBlup, sorting = sorting, y_axisName = y_axisName, errorBarInterval = errorBarInterval)
+  p <- plotBlup(progBlup, sorting = sorting,
+                y_axisName = y_axisName,
+                errorBarInterval = errorBarInterval,
+                trait = trait)
   logger$log("Draw progenies' blup plot DONE")
 
   if (!is.null(outFile)) {

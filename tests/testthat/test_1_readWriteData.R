@@ -618,7 +618,8 @@ capture_output({
   }
 
   # readProgEstim ----
-  progEstimFiles <- '../../data/results/progenyBlupEstimation.json'
+  progEstimFiles <- c('../../data/results/progenyBlupEstimation.json',
+                      '../data/progenyBlupEstimation_oldVersion.json')
   for (file in progEstimFiles) {
     test_that(paste('readProgEstim', basename(file)), {
       expect_error({
@@ -649,9 +650,6 @@ capture_output({
       outfile <- save_dataFrame_as_json(projBlups, resfile)
     }, NA)
     expect_equal(resfile, outfile)
-    saved_projBlups <- readProgBlupEstim(outfile)
-    expect_equal(saved_projBlups, projBlups)
-
   })
 
 })

@@ -593,6 +593,13 @@ capture.output({
       crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
       markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
       outFile = tempfile(fileext = ".json")
+    ),
+    completeDta_severalTraits = list(
+      genoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
+      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
+      SNPcoordFile = '../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
+      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects_2traits.json',
+      outFile = tempfile(fileext = ".json")
     )
   )
 
@@ -615,16 +622,19 @@ capture.output({
         )
       }, NA)
 
-      expect_is(projBlups, "data.frame")
-      expect_identical(colnames(projBlups),
-                       c("ind1", "ind2", "blup_var", "blup_exp"))
+      expect_is(projBlups, "list")
+      lapply(projBlups, function(df){
+        expect_identical(colnames(df),
+                         c("ind1", "ind2", "blup_var", "blup_exp"))
+      })
     })
 
   }
 
 
   # draw_progBlupsPlot ----
-  progEstimFiles <- '../../data/results/progenyBlupEstimation.json'
+  progEstimFiles <- c('../../data/results/progenyBlupEstimation.json',
+                      '../data/progenyBlupEstimation_oldVersion.json')
   for (file in progEstimFiles) {
     test_that(paste("draw_progBlupsPlot", basename(file)), {
 
@@ -641,9 +651,29 @@ capture.output({
                                    outFile = tmpF)
         }, NA)
       }
-
     })
   }
 
+  progEstimFiles_severalTraits <- '../../data/results/progenyBlupEstimation_2traits.json'
+  for (file in progEstimFiles_severalTraits) {
+    test_that(paste("draw_progBlupsPlot several traits", basename(file)), {
+
+      tmpF <- tempfile(fileext = ".html")
+      expect_error({
+        p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                 trait = 'trait1',
+                                 outFile = tmpF)
+      }, NA)
+
+      for (s in c('asc', 'dec', '???')) {
+        expect_error({
+          p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                   sorting = s,
+                                   trait = 'trait1',
+                                   outFile = tmpF)
+        }, NA)
+      }
+    })
+  }
 
 })

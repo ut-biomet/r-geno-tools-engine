@@ -469,22 +469,38 @@ pedNetwork <- function(ped) {
 #' X axis is the crosses, and Y axis the blups. The points are located at the
 #' expected value and the error bar length is the standard deviation.
 #'
-#' @param blupDta data.frame of 4 columns: "ind1", "ind2", "blup_exp", "blup_var"
+#' @param blupDta list of data.frame of 4 columns: "ind1", "ind2", "blup_exp", "blup_var"
 #' @param sorting method to sort the individuals (X axis) can be:
 #'   - "asc": sort the BLUP expected value in ascending order (from left to right)
 #'   - "dec": sort the BLUP expected value in decreasing order (from left to right)
 #'   - any other value will sort the individuals in alphabetical order (from left to right)
-#' @param y_axisName Name of the Y axis (default = "genetic values")
+#' @param y_axisName Name of the Y axis (default = `trait`)
 #' @param errorBarInterval length of XX\% interval of interest represented by the error bars (default=0.95)
+#' @param trait name of the trait to plot. This should be a name of the blupDta list. (optional if only one trait in `blupDta`, it will be set to the name of this trait)
 #' @return plotly graph
 plotBlup <- function(blupDta,
                      sorting = 'alpha',
-                     y_axisName = "Genetic values",
-                     errorBarInterval = 0.95) {
+                     y_axisName = NULL,
+                     errorBarInterval = 0.95,
+                     trait = NULL) {
   logger <- Logger$new("r-plotBlup()")
 
   ### Check input ----
   logger$log('Check inputs ...')
+
+  if (!is.list(blupDta)) {
+    stop('`blupDta` must be a list')
+  }
+
+  if (length(blupDta) == 1 && is.null(trait)) {
+    trait <- names(blupDta)
+  } else {
+    if (!trait %in% names(blupDta)) {
+      stop('`trait` must be a name of the list `blupDta`')
+    }
+  }
+  blupDta <- blupDta[[trait]]
+
   expectedColumns <- c("ind1", "ind2", "blup_exp", "blup_var")
   if (!all(expectedColumns %in% colnames(blupDta))) {
     stop('`blupDta` must conntains the folowing columns: ',
@@ -581,6 +597,11 @@ plotBlup <- function(blupDta,
       paste(names(l), ":", l, collapse = "\n")
     })
   )
+
+  if (is.null(y_axisName)) {
+    y_axisName <- trait
+  }
+
   p <- plotly::layout(p,
     showlegend=T,
     yaxis = list(title = y_axisName),
