@@ -464,7 +464,7 @@ pedNetwork <- function(ped) {
 
 
 
-#' Draw a plotly graph of blups data
+#' Draw a plotly graph of blups data for 1 trait
 #'
 #' X axis is the crosses, and Y axis the blups. The points are located at the
 #' expected value and the error bar length is the standard deviation.
@@ -478,37 +478,44 @@ pedNetwork <- function(ped) {
 #' @param errorBarInterval length of XX\% interval of interest represented by the error bars (default=0.95)
 #' @param trait name of the trait to plot. This should be a name of the blupDta list. (optional if only one trait in `blupDta`, it will be set to the name of this trait)
 #' @return plotly graph
-plotBlup <- function(blupDta,
-                     sorting = 'alpha',
-                     y_axisName = NULL,
-                     errorBarInterval = 0.95,
-                     trait = NULL) {
-  logger <- Logger$new("r-plotBlup()")
+plotBlup_1trait <- function(blupDta,
+                            sorting = 'alpha',
+                            y_axisName = NULL,
+                            errorBarInterval = 0.95,
+                            trait = NULL) {
+  logger <- Logger$new("r-plotBlup_1trait()")
 
   ### Check input ----
   logger$log('Check inputs ...')
-
   if (!is.list(blupDta)) {
     stop('`blupDta` must be a list')
   }
 
-  if (length(blupDta) == 1 && is.null(trait)) {
-    trait <- names(blupDta)
-  } else {
-    if (!trait %in% names(blupDta)) {
-      stop('`trait` must be a name of the list `blupDta`')
+  traits <- lapply(blupDta, function(blupDta_cross){
+    if (!all(c("blup_exp","blup_var") %in% names(blupDta_cross))) {
+      stop("unexpected format for `blupDta`")
     }
+    if (!identical(names(blupDta_cross$blup_exp),
+                   names(blupDta_cross$blup_var))) {
+      stop("`blup_exp` & `blup_var` must have the same trait names")
+    }
+    names(blupDta_cross$blup_exp)
+  })
+  if (!all(sapply(traits, identical, y = traits[[1]]))) {
+    stop("traits must be the same for all crosses")
   }
-  blupDta <- blupDta[[trait]]
+  traits <- traits[[1]]
 
-  expectedColumns <- c("ind1", "ind2", "blup_exp", "blup_var")
-  if (!all(expectedColumns %in% colnames(blupDta))) {
-    stop('`blupDta` must conntains the folowing columns: ',
-         paste(expectedColumns, collapse = ', '))
+  if (length(traits) > 1 && is.null(trait)) {
+    stop('several traits found in `blupDta`, please specify `trait`')
   }
-  if (nrow(blupDta) == 0) {
-    stop('`blupDta` do not contain any row')
+  if (length(traits) == 1 && is.null(trait)) {
+    trait <- traits
   }
+  if (!trait %in% traits) {
+    stop('`trait` must be a name of the list `blupDta`')
+  }
+
   expectedSort <- c('alpha', 'asc', 'dec')
   if (!sorting %in% expectedSort) {
     logger$log('Sorting method not recognised, ',
@@ -518,10 +525,19 @@ plotBlup <- function(blupDta,
   logger$log('Check inputs DONE')
 
 
+  blupDta <- do.call(rbind, lapply(blupDta, function(blupDta_cross){
+    data.frame(
+      ind1 = blupDta_cross$ind1,
+      ind2 = blupDta_cross$ind2,
+      blup_exp = blupDta_cross$blup_exp[[trait]],
+      blup_var = blupDta_cross$blup_var[[trait]]
+    )
+  }))
   # get cross' names ----
   blupDta$cross <- paste0(blupDta$ind1,
                           '_X_',
                           blupDta$ind2)
+
 
   # sort x axis values ----
   logger$log('sort x axis ...')
@@ -611,5 +627,17 @@ plotBlup <- function(blupDta,
 
   # return output
   p
+
+}
+
+
+
+
+
+plotBlup_2traits <- function(blupDta,
+                                 sorting = 'alpha',
+                                 x_trait = NULL,
+                                 y_trait = NULL,
+                                 errorBarInterval = 0.95) {
 
 }

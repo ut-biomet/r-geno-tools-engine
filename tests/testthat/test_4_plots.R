@@ -239,20 +239,21 @@ capture_output({
   }
 
 
-  # plotBlup ----
-  progEstimFiles <- '../../data/results/progenyBlupEstimation.json'
+  # plotBlup_1trait ----
+  progEstimFiles <- c('../../data/results/progenyBlupEstimation.json',
+                      '../data/progenyBlupEstimation_oldVersion.json')
   for (file in progEstimFiles) {
-    test_that(paste("plotBlup", basename(file)), {
+    test_that(paste("plotBlup_1trait", basename(file)), {
       progBlup <- readProgBlupEstim(file)
       expect_error({
-        p <- plotBlup(progBlup)
+        p <- plotBlup_1trait(progBlup)
       }, NA)
       expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
       expect_type(p$x$visdat[[1]]()$Cross, 'character')
 
       for (s in c('asc', 'dec', '???')) {
         expect_error({
-          p <- plotBlup(progBlup, sorting = s)
+          p <- plotBlup_1trait(progBlup, sorting = s)
         }, NA)
         if (s != '???') {
           expect_s3_class(p$x$visdat[[1]]()$Cross, 'factor')
@@ -263,7 +264,4 @@ capture_output({
 
     })
   }
-
-
-
 })
