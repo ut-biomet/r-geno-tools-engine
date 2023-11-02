@@ -613,7 +613,7 @@ capture.output({
 
     test_that(paste('calc_progenyBlupEstimation -', names(progBlupDataList)[i]), {
       expect_error({
-        projBlups <- calc_progenyBlupEstimation(
+        projBlups_list <- calc_progenyBlupEstimation(
           genoFile = genoFile,
           crossTableFile = crossTableFile,
           SNPcoordFile = SNPcoordFile,
@@ -622,10 +622,11 @@ capture.output({
         )
       }, NA)
 
-      expect_is(projBlups, "list")
-      lapply(projBlups, function(df){
-        expect_identical(colnames(df),
-                         c("ind1", "ind2", "blup_var", "blup_exp"))
+      expect_is(projBlups_list, "list")
+      lapply(projBlups_list, function(projBlups){
+        expect_is(projBlups, "list")
+        expect_identical(names(projBlups),
+                         c("ind1", "ind2", "blup_exp", "blup_var", "cov"))
       })
     })
 

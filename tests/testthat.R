@@ -17,6 +17,9 @@ invisible(
 # test_file("tests/testthat/test_2_gwas.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
+# test_file("tests/testthat/test_2_progBlupEstim.R",
+#           stop_on_failure = TRUE,
+#           stop_on_warning = FALSE)
 # test_file("tests/testthat/test_2_relationshipMatrix.R",
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)

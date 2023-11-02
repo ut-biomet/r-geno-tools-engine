@@ -911,35 +911,41 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   # calculate recombination rate
   r <- calcRecombRate(SNPcoord)
 
-  # initialize results data.frame
-  traits <- names(markerEffects$intercept)
-  blupVarExp <- lapply(traits, function(t){
-    df <- crossTable[, c('ind1', 'ind2')]
-    df$blup_var <- NA
-    df$blup_exp <- NA
-    df
-  })
-  names(blupVarExp) <- traits
+  # initialize results
+  nCrosses <- nrow(crossTable)
+  blupVarExp <- vector(mode = 'list', length = nCrosses)
+  names(blupVarExp) <- crossTable$names
 
   # calculation for each couple
   logger$log("BLUP variance and expected value calculation for each crosses ...")
-  nCrosses <- nrow(crossTable)
   for (i in seq(nCrosses)) {
     logger$log(paste0("Calculating cross: ", i, "/", nCrosses))
     p1.id <- which(grepl(crossTable$ind1[i], colnames(g$haplotypes)))
     p2.id <- which(grepl(crossTable$ind2[i], colnames(g$haplotypes)))
 
-    geneticCovar <- calcProgenyGenetCovar(SNPcoord, r, g$haplotypes, p1.id, p2.id)
-    blupVar <- calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
-    blupExp <- calcProgenyBlupExpected(SNPcoord, g$haplotypes,
-                                       p1.id, p2.id, markerEffects)
-    for (trait in traits) {
-      blupVarExp[[trait]]$blup_var[i] <- blupVar[trait]
-      blupVarExp[[trait]]$blup_exp[i] <- blupExp[trait]
+    blupExp <- calcProgenyBlupExpected(SNPcoord,
+                                       g$haplotypes,
+                                       p1.id,
+                                       p2.id,
+                                       markerEffects)
+    blupCovar <- calcProgenyBlupCovariance(SNPcoord = SNPcoord,
+                                           r = r,
+                                           haplo = g$haplotypes,
+                                           p1.id = p1.id,
+                                           p2.id = p2.id,
+                                           markerEffects = markerEffects,
+                                           blupExpectedValues = blupExp)
+    blupVar <- diag(blupCovar)
+
+    blupVarExp[[i]]$ind1 <- crossTable$ind1[i]
+    blupVarExp[[i]]$ind2 <- crossTable$ind2[i]
+    for (trait in names(blupExp)) {
+      blupVarExp[[i]]$blup_exp[[trait]] <- blupExp[[trait]]$sum
+      blupVarExp[[i]]$blup_var[[trait]] <- blupVar[trait]
     }
-
-
+    blupVarExp[[i]]$cov <- blupCovar
   }
+
   logger$log("BLUP variance and expected value calculation for each crosses DONE")
   # save and return results
   if (!is.null(outFile)) {
@@ -1013,10 +1019,10 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
   logger$log("Get data DONE")
 
   logger$log("Draw progenies' blup plot ...")
-  p <- plotBlup(progBlup, sorting = sorting,
-                y_axisName = y_axisName,
-                errorBarInterval = errorBarInterval,
-                trait = trait)
+  p <- plotBlup_1trait(progBlup, sorting = sorting,
+                       y_axisName = y_axisName,
+                       errorBarInterval = errorBarInterval,
+                       trait = trait)
   logger$log("Draw progenies' blup plot DONE")
 
   if (!is.null(outFile)) {
@@ -1026,5 +1032,4 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
     logger$log("Save results DONE")
   }
   p
-
 }
