@@ -402,6 +402,49 @@ prog_blup_plot$add_argument(arg$outFile$flag,
                             type = arg$outFile$type,
                             required = TRUE)
 
+## progeny-blup-plot-2-traits ----
+prog_blup_plot_2_traits = main_subparsers$add_parser(
+  "progeny-blup-plot-2-traits",
+  help = "Draw a plot of the progenies BLUPs' expected values for 2 traits with prediction ellipses",
+  description = paste(
+    "Draw a plot of the progenies BLUPs' expected values with prediction ellipses.",
+    "The points are located at the expected value and the ellipses",
+    "size represent the `--confidenceLevel` prediction interval (default 95%)."
+  ),
+  formatter_class = formatter_class)
+
+prog_blup_plot_2_traits$add_argument(arg$progeniesBlupFile$flag,
+                                     help = arg$progeniesBlupFile$help,
+                                     type = arg$progeniesBlupFile$type,
+                                     required = TRUE)
+prog_blup_plot_2_traits$add_argument(arg$x_trait$flag,
+                                     help = arg$x_trait$help,
+                                     type = arg$x_trait$type,
+                                     required = TRUE)
+prog_blup_plot_2_traits$add_argument(arg$y_trait$flag,
+                                     help = arg$y_trait$help,
+                                     type = arg$y_trait$type,
+                                     required = TRUE)
+prog_blup_plot_2_traits$add_argument(arg$confidenceLevel$flag,
+                                     help = arg$confidenceLevel$help,
+                                     type = arg$confidenceLevel$type,
+                                     default = arg$confidenceLevel$default)
+prog_blup_plot_2_traits$add_argument(arg$x_suffix$flag,
+                                     help = arg$x_suffix$help,
+                                     type = arg$x_suffix$type,
+                                     default = arg$x_suffix$default)
+prog_blup_plot_2_traits$add_argument(arg$y_suffix$flag,
+                                     help = arg$y_suffix$help,
+                                     type = arg$y_suffix$type,
+                                     default = arg$y_suffix$default)
+prog_blup_plot_2_traits$add_argument(arg$ellipses_npoints$flag,
+                                     help = arg$ellipses_npoints$help,
+                                     type = arg$ellipses_npoints$type,
+                                     default = arg$ellipses_npoints$default)
+prog_blup_plot_2_traits$add_argument(arg$outFile$flag,
+                                     help = arg$outFile$help,
+                                     type = arg$outFile$type,
+                                     required = TRUE)
 
 
 
@@ -546,6 +589,22 @@ if (args$command == "gwas") {
     errorBarInterval = args$error_bar_interval,
     y_axisName = args$y_axis_name,
     trait = args$trait,
+    outFile = args$outFile
+  )
+  quit(save = "no", status = 0)
+} else if (args$command == 'progeny-blup-plot-2-traits') {
+  # progeny-blup-plot-2-traits ----
+  if (identical(args$trait, "")) {
+    args$trait <- NULL
+  }
+  p <- draw_progBlupsPlot_2traits(
+    progEstimFile = args$progeniesBlupFile,
+    x_trait = args$x_trait,
+    y_trait = args$y_trait,
+    confidenceLevel = args$confidence_level,
+    x_suffix = args$x_suffix,
+    y_suffix = args$y_suffix,
+    ellipses_npoints = args$ellipses_npoints,
     outFile = args$outFile
   )
   quit(save = "no", status = 0)

@@ -1,5 +1,5 @@
 ---
-title: "Crossing simulation vs Predictions"
+title: "Crossing simulation vs blup_estimations"
 author: "Julien Diot"
 date: "`r format(Sys.time(), '%Y/%m/%d')`"
 colorlinks: true
@@ -95,7 +95,6 @@ knitr::opts_knit$set(# root.dir = '/tmp', # change wd of all chunks
 ### Packages / R-options: {.unnumbered}
 
 ```{r pkgs_options, results='hide'}
-.libPaths('~/R/x86_64-pc-linux-gnu-library/4.1/')
 suppressPackageStartupMessages({
   library(plotly)
   library(gaston)
@@ -119,20 +118,19 @@ options(max.print = 20)
 genoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
 crossTableFile <- '../../data/crossingTable/breedGame_small_crossTable.csv'
 SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
-markerEffectsFile <- '../../data/markerEffects/breedGame_markerEffects.csv'
+markerEffectsFile <- '../../data/markerEffects/breedGame_markerEffects_2traits.json'
 ```
 
-## Predictions
+## blup_estimations
 
 ```{r, results='hide'}
-predictions <- calc_progenyBlupEstimation(
+blup_estimations <- calc_progenyBlupEstimation(
   genoFile = genoFile,
   crossTableFile = crossTableFile,
   SNPcoordFile = SNPcoordFile,
   markerEffectsFile = markerEffectsFile,
   # outFile = outFile
 )
-predictions$Cross <- paste0(predictions$ind1, '_X_', predictions$ind2)
 ```
 
 ## Crossing simulation
@@ -144,71 +142,76 @@ crossSimOutFile <- crossingSimulation(
   genoFile = genoFile,
   crossTableFile = crossTableFile,
   SNPcoordFile = SNPcoordFile,
-  nCross = 100)
-simulation <- gaston::read.vcf(crossSimOutFile)
-simulation <- gaston::as.matrix(simulation)
-simulation <- simulation[, row.names(markerEffects$SNPeffects)]
+  nCross = 500)
+simulated_genotypes <- gaston::read.vcf(crossSimOutFile)
+simulated_genotypes <- gaston::as.matrix(simulated_genotypes)
+simulated_genotypes <- simulated_genotypes[, row.names(markerEffects$SNPeffects)]
 
 simulation <- data.frame(
-  simBV = as.vector(simulation %*% as.matrix(markerEffects$SNPeffects)) + markerEffects$intercept,
-  Cross = as.factor(sub('-\\d+$', '', row.names(simulation)))
+  simBV_1 = as.vector(simulated_genotypes %*% as.matrix(markerEffects$SNPeffects[,1])) + markerEffects$intercept[1],
+  simBV_2 = as.vector(simulated_genotypes %*% as.matrix(markerEffects$SNPeffects[,2])) + markerEffects$intercept[2],
+  Cross = as.factor(sub('-\\d+$', '', row.names(simulated_genotypes)))
 )
+colnames(simulation)[1] <- paste0("simBV_", names(markerEffects$intercept)[1])
+colnames(simulation)[2] <- paste0("simBV_", names(markerEffects$intercept)[2])
 ```
 
 
-# Simulation VS Predictions
+# 1 Trait
 
 ```{r}
-p <- plot_ly() 
+trait <- "trait1"
 
-# add boxplot of simulated BV
-p <- p %>% add_boxplot(data = simulation,
-                       x = ~Cross,
-                       y = ~simBV,
-                       name = "Boxplot of Simulated individuals' BV")
+simulation_t1 <- simulation[, c(paste0("simBV_", trait), "Cross")]
+colnames(simulation_t1)[1] <- "simBV"
+
+
+blup_estimations_t1 <- do.call(rbind, lapply(blup_estimations, function(blup_estim){
+  data.frame(
+    ind1 = blup_estim$ind1,
+    ind2 = blup_estim$ind2,
+    Cross = paste0(blup_estim$ind1, "_X_", blup_estim$ind2),
+    blup_exp = blup_estim$blup_exp[[trait]],
+    blup_var = blup_estim$blup_var[[trait]]
+  )
+}))
+```
+
+
+## simulation VS blup estimations
+
+```{r}
+p <- plotBlup_1trait(blup_estimations,
+                     trait = "trait1",
+                     y_axisName = "GV",
+                     errorBarInterval = 0.95)
+
 # add jittered markers of simulated BV
-p <- p %>% add_boxplot(data = simulation,
+p <- p %>% add_boxplot(data = simulation_t1,
                        x = ~Cross,
                        y = ~simBV,
                        line = list(color = 'rgba(0,0,0,0)'),
-                       marker = list(color = 'rgba(31, 119, 180, 0.5)'),
+                       # marker = list(color = 'rgba(31, 119, 180, 0.5)'),
                        fillcolor = 'rgba(0,0,0,0)',
                        name = "Simulated individuals' BV",
                        boxpoints = "all",
                        pointpos = 0,
                        jitter = 1,
                        hoverinfo = 'text',
-                       text = apply(simulation, 1, function(l) {
+                       text = apply(simulation_t1, 1, function(l) {
                          paste(names(l), ":", l, collapse = "\n")
                        }))
-
-
-# add predicted BV
-p <- p %>% add_markers(
-  data = predictions,
-  x = ~Cross,
-  y = ~blup_exp,
-  marker = list(color = 'rgb(255,0,0)'),
-  name = "Theoretical BV",
-  error_y = ~ list(array = 2*sqrt(blup_var),
-                   type = 'data',
-                   color = '#000000'),
-  hoverinfo = 'text',
-  text = apply(predictions, 1, function(l) {
-    paste(names(l), ":", l, collapse = "\n")
-  })
-)
 
 p
 ```
 
 
-## Test observed mean
+### Test observed mean
 
 ```{r}
 alpha <- 0.05
 beta <- 0.95
-pred_vs_sim <- full_join(simulation, predictions, by = "Cross") %>% 
+pred_vs_sim <- full_join(simulation_t1, blup_estimations_t1, by = "Cross") %>% 
   filter(Cross != "Coll0659_X_Coll0425") %>% 
   group_by(Cross) %>%
   summarise(obs_mean =  mean(simBV),
@@ -250,10 +253,10 @@ plot_ly(type = "scatter",
 ```
 
 
-## Test normality
+### Test normality
 
 ```{r}
-pred_vs_sim <- full_join(simulation, predictions, by = "Cross") %>% 
+pred_vs_sim <- full_join(simulation_t1, blup_estimations_t1, by = "Cross") %>% 
   filter(Cross != "Coll0659_X_Coll0425") %>% 
   group_by(Cross) %>%
   summarise(obs_var = var(simBV),
@@ -288,6 +291,51 @@ plot_ly(type = "scatter",
 ```
 
 
+
+# 2 Traits
+
+## simulation VS blup estimations
+
+```{r}
+p <- plotBlup_2traits(blupDta = blup_estimations,
+                      x_trait = 'trait1',
+                      y_trait = 'trait2',
+                      confidenceLevel = 0.95)
+
+# add markers of simulated BV
+p <- p %>% add_markers(inherit = FALSE,
+                       data = simulation,
+                       x = ~simBV_trait1,
+                       y = ~simBV_trait2,
+                       opacity = 0.5,
+                       marker = list(symbol = 2),
+                       color = sub("_X_", " X ", simulation$Cross))
+p
+```
+
+
+```{r}
+cross_to_keep <- c("F2_0001.0001_X_F2_0002.0059",
+                   "F2_0001.0009_X_F4_0001.0147",
+                   "F4_0001.0092_X_F4_0001.0185")
+
+p <- plotBlup_2traits(blupDta = blup_estimations[names(blup_estimations) %in% cross_to_keep],
+                      x_trait = 'trait1',
+                      y_trait = 'trait2',
+                      confidenceLevel = 0.95)
+
+
+simulation_filtered <- simulation[simulation$Cross %in% cross_to_keep,]
+# add jittered markers of simulated BV
+p <- p %>% add_markers(inherit = FALSE,
+                       data = simulation_filtered,
+                       x = ~simBV_trait1,
+                       y = ~simBV_trait2,
+                       opacity = 0.5,
+                       marker = list(symbol = 2),
+                       color = sub("_X_", " X ", simulation_filtered$Cross))
+p
+```
 
 
 

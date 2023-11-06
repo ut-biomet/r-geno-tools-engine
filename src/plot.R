@@ -633,11 +633,123 @@ plotBlup_1trait <- function(blupDta,
 
 
 
-
+#' Draw a plotly graph of blups data for 2 traits
+#'
+#' The points are located at the expected value and the ellipses
+#' size represent the `confidenceLevel` prediction interval.
+#'
+#' @param blupDta list returned by calc_progenyBlupEstimation
+#' @param x_trait name of the trait to show on the x axis
+#' @param y_trait name of the trait to show on the y axis
+#' @param confidenceLevel level of the prediction ellipses (default 0.95, ie 95%
+#' ellypses)
+#' @param x_suffix suffix to add to the x axis's name
+#' @param y_suffix suffix to add to the y axis's name
+#' @param ellipses_npoints number of points used to draw the ellipses (default 100)
+#' @return plotly graph
 plotBlup_2traits <- function(blupDta,
-                                 sorting = 'alpha',
-                                 x_trait = NULL,
-                                 y_trait = NULL,
-                                 errorBarInterval = 0.95) {
+                             x_trait,
+                             y_trait,
+                             confidenceLevel = 0.95,
+                             x_suffix = "",
+                             y_suffix = "",
+                             ellipses_npoints = 100) {
 
+  logger <- Logger$new("r-plotBlup_2traits()")
+
+  ### Check input ----
+  logger$log('Check inputs ...')
+  if (!is.list(blupDta)) {
+    stop('`blupDta` must be a list')
+  }
+
+  traits <- lapply(blupDta, function(blupDta_cross){
+    if (!all(c("blup_exp","blup_var") %in% names(blupDta_cross))) {
+      stop("unexpected format for `blupDta`")
+    }
+    if (!identical(names(blupDta_cross$blup_exp),
+                   names(blupDta_cross$blup_var))) {
+      stop("`blup_exp` & `blup_var` must have the same trait names")
+    }
+    names(blupDta_cross$blup_exp)
+  })
+  if (!all(sapply(traits, identical, y = traits[[1]]))) {
+    stop("traits must be the same for all crosses")
+  }
+  traits <- traits[[1]]
+
+  if (!all(c(x_trait, y_trait) %in% traits)) {
+    stop('`x_trait` and `y_trait` must be specified in `blupDta`')
+  }
+  logger$log('Check inputs DONE')
+
+
+  ### Draw plot ----
+  logger$log('draw plot ...')
+  p <- plotly::plot_ly(type = "scatter",
+               mode = "markers",
+               colors = "Set3")
+  for (blupDta_cross in blupDta) {
+    cov <- as.matrix(blupDta_cross$cov[c(x_trait, y_trait),
+                                       c(x_trait, y_trait)])
+    center <- c(blupDta_cross$blup_exp[[x_trait]],
+                blupDta_cross$blup_exp[[y_trait]])
+    cross <- paste0(blupDta_cross$ind1, " X ", blupDta_cross$ind2)
+
+    ellipse_dta <- ellipse::ellipse(cov,
+                                    centre = center,
+                                    level = confidenceLevel,
+                                    npoints = ellipses_npoints)
+
+    ellipse_dta <- data.frame(
+      x = unlist(ellipse_dta[, 1]),
+      y = unlist(ellipse_dta[, 2])
+    )
+    colnames(ellipse_dta) <- c(x_trait, y_trait)
+
+    center <- as.data.frame(t(center))
+    colnames(center) <- paste0("expeced value ", c(x_trait, y_trait))
+    center$`parent 1` <- blupDta_cross$ind1
+    center$`parent 2` <- blupDta_cross$ind2
+    center$cross <- cross
+    center[, paste0("variance ", x_trait)] <- blupDta_cross$blup_var[x_trait]
+    center[, paste0("variance ", y_trait)] <- blupDta_cross$blup_var[y_trait]
+    center[, paste0("covariance ", x_trait, "/", y_trait)] <- blupDta_cross$cov[x_trait, y_trait]
+
+    ellipse_dta$cross <- cross
+
+    p <- plotly::add_markers(
+      p,
+      data = center,
+      x = center[, paste0("expeced value ", x_trait)],
+      y = center[, paste0("expeced value ", y_trait)],
+      color = ~cross,
+      hoverinfo = "text",
+      text = apply(center, 1, function(l) {
+        paste(names(l), ":", l, collapse = "\n")
+      })
+    )
+    p <- plotly::add_trace(
+      p,
+      type = "scatter",
+      mode = "lines",
+      inherit = FALSE,
+      data = ellipse_dta,
+      x = ellipse_dta[, x_trait],
+      y = ellipse_dta[, y_trait],
+      color = ~cross,
+      hoverinfo = "text",
+      text = paste0(100 * confidenceLevel,
+                    "% ellipse\nCross: ",
+                    ellipse_dta$cross)
+    )
+  }
+  p <- plotly::layout(
+    p,
+    xaxis = list(title = paste(x_trait, x_suffix)),
+    yaxis = list(title = paste(y_trait, y_suffix))
+  )
+
+  logger$log('draw plot DONE')
+  p
 }

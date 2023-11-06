@@ -16,5 +16,6 @@ capture_output({
     expect_true(compareVersion("2.5.0", as.character(packageVersion("R6"))) != 1)
     expect_true(compareVersion("4.9.3", as.character(packageVersion("plotly"))) != 1)
     expect_true(compareVersion("0.4", as.character(packageVersion("networkD3"))) != 1)
+    expect_true(compareVersion("0.5.0", as.character(packageVersion("ellipse"))) != 1)
   })
 })

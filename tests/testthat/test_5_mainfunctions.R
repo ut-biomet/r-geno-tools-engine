@@ -677,4 +677,23 @@ capture.output({
     })
   }
 
+
+  # draw_progBlupsPlot_2traits ----
+  for (file in progEstimFiles_severalTraits) {
+    test_that(paste("draw_progBlupsPlot_2traits several traits", basename(file)), {
+
+      tmpF <- tempfile(fileext = ".html")
+      expect_error({
+        p1 <- draw_progBlupsPlot_2traits(progEstimFile = file,
+                                         x_trait = 'trait1',
+                                         y_trait = 'trait2',
+                                         confidenceLevel = 0.95,
+                                         x_suffix = "",
+                                         y_suffix = "",
+                                         ellipses_npoints = 100,
+                                         outFile = tmpF)
+      }, NA)
+    })
+  }
+
 })

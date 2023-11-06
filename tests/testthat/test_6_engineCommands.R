@@ -277,5 +277,24 @@ capture_output({
     expect_equal(x, 0)
   })
 
+  test_that('progeny-blup-plot-2-traits', {
+    cmd <- paste(
+      rGenoCommand, 'progeny-blup-plot-2-traits',
+      '--progeniesBlupFile "$RGENOROOT/tests/testthat/testOutput/progBlups_2traits.json"',
+      '--x-trait "trait1"',
+      '--y-trait "trait2"',
+      '--confidence-level 0.95',
+      '--outFile "$RGENOROOT/tests/testthat/testOutput/blupPlot_2traits.html"'
+    )
+
+    expect_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+    }, NA)
+    expect_equal(x, 0)
+  })
+
+
+
+
 
 })

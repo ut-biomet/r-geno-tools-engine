@@ -231,6 +231,14 @@ createResultExample <- function() {
     outFile = outFile
   )
 
+  outFile_plot <- 'data/results/progenyBlupEstimation_plot.html'
+  draw_progBlupsPlot(progEstimFile = outFile,
+                     errorBarInterval= 0.95,
+                     y_axisName = "Genetic values",
+                     sorting = 'alpha',
+                     trait = "trait1",
+                     outFile = outFile_plot)
+
   markerEffectsFile <- 'data/markerEffects/breedGame_markerEffects_2traits.json'
   outFile <- 'data/results/progenyBlupEstimation_2traits.json'
   calc_progenyBlupEstimation(
@@ -240,6 +248,17 @@ createResultExample <- function() {
     markerEffectsFile = markerEffectsFile,
     outFile = outFile
   )
+
+
+  outFile_plot <- 'data/results/progenyBlupEstimation_plot_2traits.html'
+  draw_progBlupsPlot_2traits(progEstimFile = outFile,
+                             x_trait = 'trait1',
+                             y_trait = 'trait2',
+                             confidenceLevel = 0.95,
+                             x_suffix = "",
+                             y_suffix = "",
+                             ellipses_npoints = 100,
+                             outFile = outFile_plot)
 
 
 

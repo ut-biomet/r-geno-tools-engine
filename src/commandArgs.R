@@ -327,3 +327,48 @@ arg$y_axisName$help = paste(
   "Name of the Y axis of the plot.",
   "Default is :", arg$y_axisName$default)
 arg$y_axisName$type = 'character'
+
+# x_trait ----
+arg$x_trait$flag = '--x-trait'
+arg$x_trait$help = paste("Name of the trait to show on the X axis of the plot.")
+arg$x_trait$type = 'character'
+
+
+# y_trait ----
+arg$y_trait$flag = '--y-trait'
+arg$y_trait$help = paste("Name of the trait to show on the Y axis of the plot.")
+arg$y_trait$type = 'character'
+
+# confidenceLevel ----
+arg$confidenceLevel$flag = '--confidence-level'
+arg$confidenceLevel$default = 0.95
+arg$confidenceLevel$help = paste(
+  "Size of the region represented by the ellipses.",
+  "Values between 0 and 1, eg. 0.95 give the 95 percent interval.",
+  "Default is :", arg$confidenceLevel$default)
+arg$confidenceLevel$type = 'double'
+
+# x_suffix ----
+arg$x_suffix$flag = '--x-suffix'
+arg$x_suffix$default = ""
+arg$x_suffix$help = paste(
+  "Optional suffix to add to the name of the X axis of the plot.",
+  "Default is :", arg$x_suffix$default)
+arg$x_suffix$type = 'character'
+
+# y_suffix ----
+arg$y_suffix$flag = '--y-suffix'
+arg$y_suffix$default = ""
+arg$y_suffix$help = paste(
+  "Optional suffix to add to the name of the Y axis of the plot.",
+  "Default is :", arg$y_suffix$default)
+arg$y_suffix$type = 'character'
+
+# ellipses_npoints ----
+arg$ellipses_npoints$flag = '--ellipses-npoints'
+arg$ellipses_npoints$default = 100
+arg$ellipses_npoints$help = paste(
+  "Number of points to use to draw the ellipses.",
+  "Default is :", arg$ellipses_npoints$default)
+arg$ellipses_npoints$type = 'integer'
+

@@ -264,4 +264,24 @@ capture_output({
 
     })
   }
+
+
+
+  # plotBlup_2trait ----
+  progEstimFiles <- c('../../data/results/progenyBlupEstimation_2traits.json')
+  for (file in progEstimFiles) {
+    test_that(paste("plotBlup_2trait", basename(file)), {
+      progBlup <- readProgBlupEstim(file)
+      expect_error({
+        p <- plotBlup_2traits(blupDta = progBlup,
+                              x_trait = "trait1",
+                              y_trait = "trait2",
+                              confidenceLevel = 0.95,
+                              x_suffix = "",
+                              y_suffix = "",
+                              ellipses_npoints = 100)
+      }, NA)
+      expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
+    })
+  }
 })
