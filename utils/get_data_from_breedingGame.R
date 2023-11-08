@@ -90,3 +90,45 @@ pheno <- pheno[, c('ind', 'plot', 'trait1', 'trait2')]
 phenoFile <- paste0(baseFolder, '/breedGame_pheno.csv')
 write.csv(pheno, phenoFile,
           na = '', row.names = F)
+
+# get markerEffects ----
+
+baseFolder <- '~/Desktop/data'
+load(paste0(baseFolder, "/truth/g0.RData"))
+load(paste0(baseFolder, "/truth/p0.RData"))
+p0$mu
+trueMarkerEffects <- p0$Beta
+
+
+markerEffects <- readMarkerEffects(file = './data/markerEffects/breedGame_markerEffects.csv')
+markerEffects <- readMarkerEffects(file = './data/markerEffects/breedGame_markerEffects.json')
+
+
+
+head(trueMarkerEffects[rownames(markerEffects$SNPeffects),])
+head(markerEffects$SNPeffects)
+
+markerEffects2traits <- list(
+  intercept = p0$mu,
+  SNPeffects = trueMarkerEffects[rownames(markerEffects$SNPeffects),]
+)
+
+jsonList <- lapply(names(markerEffects2traits$intercept), function(trait){
+  coefList <- as.list(markerEffects2traits$SNPeffects[, trait, drop = FALSE])
+  names(coefList) <- row.names(markerEffects2traits$SNPeffects)
+  list(
+    intercept = p0$mu[trait],
+    coefficients = coefList
+  )
+})
+names(jsonList) <- names(markerEffects2traits$intercept)
+
+outFile <- 'data/markerEffects/breedGame_markerEffects_2traits.json'
+(jsondta <- jsonlite::toJSON(jsonList,
+                            auto_unbox = TRUE,
+                            pretty = T,
+                            digits = NA,
+                            na = 'string'))
+
+writeLines(jsondta, con = outFile)
+
