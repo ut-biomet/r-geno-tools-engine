@@ -723,6 +723,34 @@ Var(G) &= \frac{1}{4} \sum_{jk} e_je_k (1-2r_{jk})(z_{1jk} + z_{2jk}) \\
 \end{align}
 $$
 
+When considering 2 traits $a$ and $b$ we have:
+
+$$Cov(G_a;G_b) = \sum_{m}\sum_{k} eff_{a_m} eff_{b_k} ( \mathbb{E}(X_{1m} X_{1k}) +  \mathbb{E}(X_{1m} X_{2k}) +  \mathbb{E}(X_{2m} X_{1k}) +  \mathbb{E}(X_{2m} X_{2k})) - \mathbb{ \mathbb{E}}(G_a)\mathbb{ \mathbb{E}}(G_b)$$
+
+With:
+
+$$
+\begin{eqnarray}
+ \mathbb{E}(X_{1m} X_{1k}) &=& \frac{1}{4}(2x_{1mM}x_{1kM} 
++ 2x_{1mP}x_{1kP}) 
+- \frac{r_{X_{1m}X_{1k}}}{2}
+(x_{1mM} x_{1kM} - x_{1mM} x_{1kP} - x_{1mP} x_{1kM} + x_{1mP} x_{1kP})\\
+ \mathbb{E}(X_{2m} X_{2k}) &=& \frac{1}{4}(2x_{2mM}x_{2kM} 
++ 2x_{2mP}x_{2kP}) 
+- \frac{r_{X_{2m}X_{2k}}}{2}
+(x_{2mM} x_{2kM} - x_{2mM} x_{2kP} - x_{2mP} x_{2kM} + x_{2mP} x_{2kP})\\
+ \mathbb{E}(X_{1m} X_{2k}) &=& \frac{1}{4} (
+x_{1mM} x_{2kM} 
++ x_{1mM} x_{2kP} 
++ x_{1mP} x_{2kM} 
++ x_{1mP} x_{2kP} )\\
+ \mathbb{E}(X_{2m} X_{1k}) &=& \frac{1}{4} (
+x_{2mM} x_{1kM} 
++ x_{2mM} x_{1kP} 
++ x_{2mP} x_{1kM} 
++ x_{2mP} x_{1kP} )
+\end{eqnarray}
+$$
 
 
 <details><summary>Proof</summary>
@@ -942,8 +970,25 @@ Cov(a'X) &= a'Cov(X)a \\
 \end{align}
 $$
 
+##### Covariance of the genetic values
 
 
+$$Cov(G_a;G_b) = E(G_a G_b) - E(G_a) E(G_b)$$
+
+$$G_a G_b = \sum_{m}\sum_{k} eff_{a_m}(X_{1m} + X_{2m}) \times eff_{b_k}(X_{1k} + X_{2k})$$
+
+$$\begin{eqnarray}
+E(G_a G_b) &=& \sum_{m}\sum_{k} E(eff_{a_m}(X_{1m} + X_{2m}) \times eff_{b_k}(X_{1k} + X_{2k}))\\
+&=& \sum_{m}\sum_{k} eff_{a_m} eff_{b_k} E((X_{1m} + X_{2m}) \times (X_{1k} + X_{2k}))
+\end{eqnarray}$$
+
+
+$$\begin{eqnarray}
+(X_{1m} + X_{2m}) \times (X_{1k} + X_{2k}) &=& X_{1m} X_{1k} + X_{1m} X_{2k} + X_{2m} X_{1k} + X_{2m} X_{2k}\\
+E((X_{1m} + X_{2m}) \times (X_{1k} + X_{2k})) &=& E(X_{1m} X_{1k}) + E(X_{1m} X_{2k}) + E(X_{2m} X_{1k}) + E(X_{2m} X_{2k})
+\end{eqnarray}$$
+
+$E(X_{im} X_{jk}) (i,j \in [1;2]^2)$ etc... were already calculated before (split all possible values and probability for $X_{im}$ or $X_{jk}$)
 
 </details>
 
@@ -978,6 +1023,7 @@ calc_progenyBlupEstimation(
 
 #### Plot
 
+##### 1 trait
 
 ```sh
 docker run --rm -v "$PWD"/data/:/data \
@@ -998,6 +1044,32 @@ plot <- draw_progBlupsPlot(
 ```
 
 ![progBlupPlot](README_files/progBlupPlot.png)
+
+
+##### 2 traits
+
+```sh
+docker run --rm -v "$PWD"/data/:/data \
+    -v "$PWD"/readmeTemp:/out rgenotoolsengine \
+    progeny-blup-plot-2-traits \
+    --progeniesBlupFile "/data/results/progenyBlupEstimation_2traits.json" \
+    --x-trait "trait1"
+    --y-trait "trait2"
+    --outFile "/out/progBlupsPlot.html"
+```
+
+**Main function**
+
+```{r progeny-blup-plot-2-traits}
+plot <- draw_progBlupsPlot_2traits(
+  progEstimFile = 'data/results/progenyBlupEstimation_2traits.json',
+  x_trait = "trait1",
+  y_trait = "trait2",
+  outFile = tempfile(fileext = ".html")
+)
+```
+
+![progBlupPlot-2-traits](README_files/progBlupPlot-2-traits.png)
 
 
 
