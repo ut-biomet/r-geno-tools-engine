@@ -457,7 +457,7 @@ readPhenoData <- function(file, ind.names = 1, ...) {
     stop("Phenotypic file do not exists")
   }
   logger$log("Read phenotypic file ... ")
-  dta <- read.csv(file, ...)
+  dta <- read.csv(file, check.names = FALSE, ...)
   logger$log("Read phenotypic file DONE ")
 
   logger$log("Check individuals unicity ...")
