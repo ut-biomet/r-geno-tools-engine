@@ -13,9 +13,6 @@ if (nzchar(Sys.getenv("RGENOROOT"))) {
   projectRoot <- getwd()
 }
 
-# activate renv ----
-renv::activate(projectRoot)
-
 
 # Create parser ----
 library(argparse)
@@ -523,7 +520,7 @@ if (args$command == "gwas") {
 
 } else if (args$command == "relmat-ped") {
   # relmat-ped ----
-  relMat <- calc_pedRelMAt(pedFile = args$pedFile,
+  relMat <- calc_pedRelMat(pedFile = args$pedFile,
                            unknown_string = args$unknown_string,
                            header = !args$no_header,
                            outFile = args$outFile)
@@ -531,7 +528,7 @@ if (args$command == "gwas") {
 
 } else if (args$command == "relmat-geno") {
   # relmat-geno ----
-  relMat <- calc_genoRelMAt(genoFile = args$genoFile,
+  relMat <- calc_genoRelMat(genoFile = args$genoFile,
                             outFile = args$outFile)
   quit(save = 'no', status = 0)
 

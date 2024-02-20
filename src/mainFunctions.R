@@ -37,13 +37,23 @@ run_gwas <- function(genoFile = NULL,
                      phenoUrl = NULL,
                      trait,
                      test,
-                     fixed = 0,
+                     fixed = NULL,
                      response = "quantitative",
                      thresh_maf,
                      thresh_callrate,
                      outFile = tempfile(fileext = ".json")){
 
   logger <- Logger$new("r-run_gwas()")
+
+  check_test(test)
+  check_fixed(fixed, test)
+  if (test %in% c("wald", "lrt") && is.null(fixed)) {
+    fixed <- 0
+  }
+  check_response(response)
+  check_thresh_maf(thresh_maf)
+  check_thresh_callrate(thresh_callrate)
+  check_outFile(outFile)
 
   logger$log("Get data ...")
   if (!is.null(genoFile) && !is.null(phenoFile)
@@ -55,9 +65,11 @@ run_gwas <- function(genoFile = NULL,
     data <- downloadData(genoUrl = genoUrl,
                          phenoUrl = phenoUrl)
   } else {
-    stop("Error: either genoFile and phenoFile or genoUrl and phenoUrl should be provided")
+    stop("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided")
   }
   logger$log("Get data DONE")
+
+  check_trait(trait, colnames(data$phenoData))
 
 
   logger$log("GWAS analysis ...")
@@ -138,20 +150,33 @@ draw_manhattanPlot <- function(gwasFile = NULL,
                                outFile = tempfile()) {
   logger <- Logger$new("r-draw_manhattanPlot()")
 
-  logger$log("Check outFile ...")
-  if (!is.null(outFile)) {
-    if (length(outFile) != 1) {
-      stop("Error: `outFile` must be of length 1.")
-    }
-    if (missing(outFile)) {
-      if (interactive) {
-        outFile <- paste0(outFile, '.html')
-      } else {
-        outFile <- paste0(outFile, '.png')
-      }
+  check_adj_method(adj_method)
+  check_interactive(interactive)
+
+  thresh_p <- as.numeric(thresh_p)
+  check_thresh_p(thresh_p)
+
+  filter_pAdj <- as.numeric(filter_pAdj)
+  check_filter_pAdj(filter_pAdj)
+
+  filter_nPoints <- as.numeric(filter_nPoints)
+  check_filter_nPoints(filter_nPoints)
+
+  filter_quant <- as.numeric(filter_quant)
+  check_filter_quant(filter_quant)
+
+  check_outFile(outFile)
+
+  ext <- tools::file_ext(outFile)
+  if (ext == "") {
+    if (interactive) {
+      outFile <- paste0(outFile, '.html')
+    } else {
+      outFile <- paste0(outFile, '.png')
     }
   }
-  logger$log("Check outFile DONE")
+  check_outFile(outFile)
+
 
   logger$log("Get data ...")
   if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
@@ -159,9 +184,11 @@ draw_manhattanPlot <- function(gwasFile = NULL,
   } else if (!is.null(gwasUrl) && is.null(gwasFile)) {
     gwas <- downloadGWAS(gwasUrl)
   } else {
-    stop("Error: either gwasFile or gwasUrl should be provided")
+    stop("Either `gwasFile` or `gwasUrl` should be provided")
   }
   logger$log("Get data DONE")
+
+  check_chr(chr, unique(gwas$chr))
 
   if (!interactive && !is.null(outFile)) {
     logger$log("Open connexion to draw the png plot ...")
@@ -230,13 +257,31 @@ run_resAdjustment <- function(gwasFile = NULL,
                               outFile = tempfile(fileext = ".json")){
   logger <- Logger$new("r-run_resAdjustment()")
 
+  check_adj_method(adj_method)
+  check_outFile(outFile)
+
+  filter_pAdj <- as.numeric(filter_pAdj)
+  check_filter_pAdj(filter_pAdj)
+
+  filter_nPoints <- as.numeric(filter_nPoints)
+  check_filter_nPoints(filter_nPoints)
+
+  filter_quant <- as.numeric(filter_quant)
+  check_filter_quant(filter_quant)
+
+
   logger$log("Get data ...")
   if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
     gwas <- readGWAS(gwasFile)
   } else if (!is.null(gwasUrl) && is.null(gwasFile)) {
     gwas <- downloadGWAS(gwasUrl)
   } else {
-    stop("Error: either gwasFile or gwasUrl should be provided")
+    engineError("Either `gwasFile` or `gwasUrl` should be provided",
+      extra = list(
+        gwasFile = gwasFile,
+        gwasUrl = gwasUrl,
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -281,6 +326,7 @@ run_resAdjustment <- function(gwasFile = NULL,
 #' @param from lower bound of the range of SNPs for which the LD is computed
 #' @param to upper bound of the range of SNPs for which the LD is computed
 #' @param outFile path of the png file to save the plot. If `NULL`, the image file will not be
+#' @param n_max maximum number of marker to show (to avoid unreadable plot)
 #' created. By default write in an tempoary `.png` file.
 #'
 #' @return path of the created file (or NULL if `file` is NULL)
@@ -288,8 +334,12 @@ draw_ldPlot <- function(genoFile = NULL,
                         genoUrl = NULL,
                         from,
                         to,
+                        n_max = 50,
                         outFile = tempfile(fileext = ".png")) {
   logger <- Logger$new("r-draw_ldPlot()")
+
+  check_from_to(from, to, n_max)
+  check_outFile(outFile)
 
   logger$log("Get data ...")
   if (!is.null(genoFile) &&  is.null(genoUrl)) {
@@ -297,7 +347,7 @@ draw_ldPlot <- function(genoFile = NULL,
   } else if (!is.null(genoUrl) && is.null(genoFile)) {
     geno <- downloadGenoData(genoUrl)
   } else {
-    stop("Error: either genoFile or genoUrl should be provided")
+    engineError("Either `genoFile` or `genoUrl` should be provided")
   }
   logger$log("Get data DONE")
 
@@ -335,13 +385,15 @@ draw_ldPlot <- function(genoFile = NULL,
 #' list of metadata of these analysis (pedigree fingerprint,
 #' number of individuals, creation time) and `file` path
 #' of the file containing the results.
-calc_pedRelMAt <- function(pedFile = NULL,
+calc_pedRelMat <- function(pedFile = NULL,
                            pedUrl = NULL,
                            unknown_string = "",
                            header = TRUE,
                            outFile = tempfile(fileext = ".csv"),
                            outFormat = tools::file_ext(outFile)) {
   logger <- Logger$new("r-calc_pedRelMAt()")
+
+  check_outFile(outFile)
 
   logger$log("Get data ...")
   if (!is.null(pedFile) &&  is.null(pedUrl)) {
@@ -353,7 +405,12 @@ calc_pedRelMAt <- function(pedFile = NULL,
                            unknown_string = unknown_string,
                            header = header)
   } else {
-    stop("Error: either `pedFile` or `pedUrl` should be provided")
+    engineError("Either `pedFile` or `pedUrl` should be provided",
+      extra = list(
+        pedFile = pedFile,
+        pedUrl= pedUrl,
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -404,11 +461,13 @@ calc_pedRelMAt <- function(pedFile = NULL,
 #' list of metadata of these analysis (pedigree fingerprint,
 #' number of individuals, creation time) and `file` path
 #' of the file containing the results.
-calc_genoRelMAt <- function(genoFile = NULL,
+calc_genoRelMat <- function(genoFile = NULL,
                             genoUrl = NULL,
                             outFile = tempfile(fileext = ".csv"),
                             outFormat = tools::file_ext(outFile)) {
   logger <- Logger$new("r-calc_genoRelMAt()")
+
+  check_outFile(outFile)
 
   logger$log("Get data ...")
   if (!is.null(genoFile) &&  is.null(genoUrl)) {
@@ -416,7 +475,12 @@ calc_genoRelMAt <- function(genoFile = NULL,
   } else if (!is.null(genoUrl) && is.null(genoFile)) {
     geno <- downloadGenoData(genoUrl)
   } else {
-    stop("Error: either genoFile or genoUrl should be provided")
+    engineError("Either `genoFile` or `genoUrl` should be provided",
+      extra = list(
+        genoFile = genoFile,
+        genoUrl = genoUrl,
+      )
+    )
   }
 
   logger$log("Calcualte genomic relationship matrix ...")
@@ -498,22 +562,42 @@ calc_combinedRelMat <- function(pedRelMatFile = NULL,
 
   logger <- Logger$new("r-calc_combinedRelMat()")
 
+  check_method(method, tau, omega)
+  if (method == "Martini") {check_tau_omega(tau, omega)}
+  check_outFile(outFile)
+
   logger$log("Get data ...")
   if (!is.null(pedRelMatFile) &&  is.null(pedRelMatUrl)) {
     ped_rm <- readRelMat(pedRelMatFile)
   } else if (!is.null(pedRelMatUrl) && is.null(pedRelMatFile)) {
     ped_rm <- downloadRelMat(pedRelMatUrl)
   } else {
-    stop("Error: either pedRelMatFile or pedRelMatUrl should be provided")
+    engineError("Either `pedRelMatFile` or `pedRelMatUrl` should be provided",
+      extra = list(
+        pedRelMatFile = pedRelMatFile,
+        pedRelMatUrl = pedRelMatUrl,
+      )
+    )
   }
   if (!is.null(genoRelMatFile) &&  is.null(genoRelMatUrl)) {
     geno_rm <- readRelMat(genoRelMatFile)
   } else if (!is.null(genoRelMatUrl) && is.null(genoRelMatFile)) {
     geno_rm <- downloadRelMat(genoRelMatUrl)
   } else {
-    stop("Error: either genoRelMatFile or genoRelMatUrl should be provided")
+    engineError("Either `genoRelMatFile` or `genoRelMatUrl` should be provided",
+      extra = list(
+        genoRelMatFile = genoRelMatFile,
+        genoRelMatUrl = genoRelMatUrl,
+      )
+    )
   }
   logger$log("Get data DONE")
+
+  if (!any(rownames(geno_rm) %in% rownames(ped_rm))) {
+    engineError(paste('No common individuals between genomic',
+                      'and pedigree relationship matrices.'),
+                extra = list(code = errorCode("INCONSISTENT_RELATIONSHIP_MATRICES")))
+  }
 
   logger$log("Calcualte combined relationship matrix ...")
   relMat <- combinedRelMat(ped_rm = ped_rm,
@@ -566,10 +650,13 @@ draw_relHeatmap <- function(relMatFile = NULL,
                             outFile = tempfile()) {
   logger <- Logger$new("r-draw_relHeatmap()")
 
+  check_interactive(interactive)
+  check_outFile(outFile)
+
   logger$log("Check outFile ...")
   if (!is.null(outFile)) {
     if (length(outFile) != 1) {
-      stop("Error: `outFile` must be of length 1.")
+      bad_argument("length(outFile)", must_be = "1", not = length(outFile))
     }
     if (missing(outFile)) {
       if (interactive) {
@@ -593,7 +680,7 @@ draw_relHeatmap <- function(relMatFile = NULL,
     }
     relMat <- downloadRelMat(url = relMatUrl, format = format)
   } else {
-    stop("Error: either `relMatFile` or `relMatFile` should be provided")
+    stop("Either `relMatFile` or `relMatFile` should be provided")
   }
   logger$log("Get data DONE")
 
@@ -666,7 +753,12 @@ draw_pedNetwork <- function(pedFile = NULL,
                            unknown_string = unknown_string,
                            header = header)
   } else {
-    stop("Error: either `pedFile` or `pedUrl` should be provided")
+    engineError("Either `pedFile` or `pedUrl` should be provided",
+      extra = list(
+        pedFile = pedFile,
+        pedUrl = pedUrl,
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -722,6 +814,10 @@ crossingSimulation <- function(genoFile = NULL,
                                outFile = tempfile(fileext = ".vcf.gz")) {
   logger <- Logger$new("r-crossingSimulation()")
 
+  check_outFile(outFile, expected_ext = "vcf.gz")
+  check_nCross(nCross)
+
+
   # load input data
   logger$log("Get data ...")
   if (!is.null(genoFile) &&  is.null(genoUrl)) {
@@ -729,7 +825,7 @@ crossingSimulation <- function(genoFile = NULL,
   } else if (is.null(genoFile) && !is.null(genoUrl)) {
     g <- downloadPhasedGeno(genoUrl)
   } else {
-    stop("Error: either `genoFile` or `genoUrl` should be provided")
+    engineError("Either `genoFile` or `genoUrl` should be provided")
   }
 
   if (!is.null(SNPcoordFile) &&  is.null(SNPcoordUrl)) {
@@ -737,7 +833,7 @@ crossingSimulation <- function(genoFile = NULL,
   } else if (is.null(SNPcoordFile) && !is.null(SNPcoordUrl)) {
     SNPcoord <- downloadSNPcoord(SNPcoordUrl)
   } else {
-    stop("Error: either `SNPcoordFile` or `SNPcoordUrl` should be provided")
+    stop("Either `SNPcoordFile` or `SNPcoordUrl` should be provided")
   }
 
   if (!is.null(crossTableFile) &&  is.null(crossTableUrl)) {
@@ -745,7 +841,7 @@ crossingSimulation <- function(genoFile = NULL,
   } else if (is.null(crossTableFile) && !is.null(crossTableUrl)) {
     crossTable <- downloadCrossTable(crossTableUrl)
   } else {
-    stop("Error: either `crossTableFile` or `crossTableUrl` should be provided")
+    stop("Either `crossTableFile` or `crossTableUrl` should be provided")
   }
   crossTable$n <- nCross
   logger$log("Get data DONE")
@@ -763,14 +859,6 @@ crossingSimulation <- function(genoFile = NULL,
   checkIndNamesConsistency(crossTable, g$haplotypes)
   logger$log("Check individuals' names consistency between",
              " `.vcf` and `.csv` file DONE")
-
-  logger$log("Check output file extention ...")
-  ext1 <- tools::file_ext(outFile)
-  ext2 <- tools::file_ext(tools::file_path_sans_ext(outFile))
-  if (ext1 != "gz" || ext2 != "vcf") {
-    stop('The output file must end by `.vcf.gz`')
-  }
-  logger$log("Check output file extention DONE")
 
 
 
@@ -830,15 +918,17 @@ crossingSimulation <- function(genoFile = NULL,
 #'
 #' @return data.frame containing the calculations results
 calc_progenyBlupEstimation <- function(genoFile = NULL,
-                                   genoUrl = NULL,
-                                   crossTableFile = NULL,
-                                   crossTableUrl = NULL,
-                                   SNPcoordFile = NULL,
-                                   SNPcoordUrl = NULL,
-                                   markerEffectsFile = NULL,
-                                   markerEffectsUrl = NULL,
-                                   outFile = tempfile(fileext = ".json")) {
+                                       genoUrl = NULL,
+                                       crossTableFile = NULL,
+                                       crossTableUrl = NULL,
+                                       SNPcoordFile = NULL,
+                                       SNPcoordUrl = NULL,
+                                       markerEffectsFile = NULL,
+                                       markerEffectsUrl = NULL,
+                                       outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-progenyBlupVarExp()")
+
+  check_outFile(outFile, ".json")
 
   # load input data
   logger$log("Get data ...")
@@ -847,7 +937,12 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   } else if (is.null(genoFile) && !is.null(genoUrl)) {
     g <- downloadPhasedGeno(genoUrl)
   } else {
-    stop("Error: either `genoFile` or `genoUrl` should be provided")
+    engineError("Either `genoFile` or `genoUrl` should be provided",
+      extra = list(
+        genoFile = genoFile,
+        genoUrl = genoUrl,
+      )
+    )
   }
 
   if (!is.null(SNPcoordFile) &&  is.null(SNPcoordUrl)) {
@@ -855,7 +950,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   } else if (is.null(SNPcoordFile) && !is.null(SNPcoordUrl)) {
     SNPcoord <- downloadSNPcoord(SNPcoordUrl)
   } else {
-    stop("Error: either `SNPcoordFile` or `SNPcoordUrl` should be provided")
+    stop("Either `SNPcoordFile` or `SNPcoordUrl` should be provided")
   }
 
   if (!is.null(crossTableFile) &&  is.null(crossTableUrl)) {
@@ -863,7 +958,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   } else if (is.null(crossTableFile) && !is.null(crossTableUrl)) {
     crossTable <- downloadCrossTable(crossTableUrl)
   } else {
-    stop("Error: either `crossTableFile` or `crossTableUrl` should be provided")
+    stop("Either `crossTableFile` or `crossTableUrl` should be provided")
   }
 
   if (!is.null(markerEffectsFile) &&  is.null(markerEffectsUrl)) {
@@ -871,7 +966,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   } else if (is.null(markerEffectsFile) && !is.null(markerEffectsUrl)) {
     markerEffects <- downloadMarkerEffects(markerEffectsUrl)
   } else {
-    stop("Error: either `markerEffectsFile` or `markerEffectsUrl` should be provided")
+    stop("Either `markerEffectsFile` or `markerEffectsUrl` should be provided")
   }
   logger$log("Get data DONE")
 
@@ -892,20 +987,20 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   logger$log("Check SNPs' ids consistency between",
              "SNPcoordinate and markerEffects file ...")
   if (!all(SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects))) {
-    stop("Missing marker effects for some SNPs of the genetic data.")
+    missingSNP <- which(!SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects))
+    msg <- paste('The SNPs coordinate file miss', length(missingSNP),
+                 'SNPs when compared with the provided marker effects.',)
+    engineError(msg,
+      extra = list(
+        "code" = errorCode("SNP_COORD_MISSING_SNP"),
+        "n_missing_SNP" = length(missingSNP),
+        "n_expected_SNP" = nrow(markerEffects$SNPeffects),
+        "missing_SNP" = missingSNP,
+        "reference" = "marker effects"
+    ))
   }
   logger$log("Check SNPs' ids consistency between",
              "SNPcoordinate and markerEffects file DONE")
-
-
-  if (!is.null(outFile)) {
-    logger$log("Check output file extention ...")
-    ext <- tools::file_ext(outFile)
-    if (ext != "json") {
-      stop('The output file must end by `.json`')
-    }
-    logger$log("Check output file extention DONE")
-  }
 
 
   # calculate recombination rate
@@ -993,20 +1088,18 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
                                outFile = tempfile(fileext = ".html")) {
   logger <- Logger$new("r-draw_progBlupsPlot()")
 
-  logger$log("Check outFile ...")
-  if (!is.null(outFile)) {
-    if (length(outFile) != 1) {
-      stop("Error: `outFile` must be of length 1.")
-    }
-    if (missing(outFile)) {
-      if (interactive) {
-        outFile <- paste0(outFile, '.html')
-      } else {
-        outFile <- paste0(outFile, '.png')
-      }
+  check_sorting(sorting)
+
+  ext <- tools::file_ext(outFile)
+  if (ext == "") {
+    if (interactive) {
+      outFile <- paste0(outFile, '.html')
+    } else {
+      outFile <- paste0(outFile, '.png')
     }
   }
-  logger$log("Check outFile DONE")
+  check_outFile(outFile)
+
 
   logger$log("Get data ...")
   if (!is.null(progEstimFile) &&  is.null(progEstimUrl)) {
@@ -1014,9 +1107,20 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
   } else if (!is.null(progEstimUrl) && is.null(progEstimFile)) {
     progBlup <- downloadProgBlupEstim(progEstimUrl)
   } else {
-    stop("Error: either progEstimFile or progEstimUrl should be provided")
+    stop("Either `progEstimFile` or `progEstimUrl` should be provided")
   }
   logger$log("Get data DONE")
+
+
+  available_traits <- sapply(progBlup, function(blupDta_cross) {
+    names(blupDta_cross$blup_exp)
+  })
+  if (!is.null(trait)) {
+    check_trait(trait, available_traits)
+  } else {
+    trait <- available_traits[1]
+  }
+
 
   logger$log("Draw progenies' blup plot ...")
   p <- plotBlup_1trait(progBlup, sorting = sorting,
@@ -1065,30 +1169,40 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
                                        outFile = tempfile(fileext = ".html")) {
   logger <- Logger$new("r-draw_progBlupsPlot_2traits()")
 
-  logger$log("Check outFile ...")
-  if (!is.null(outFile)) {
-    if (length(outFile) != 1) {
-      stop("Error: `outFile` must be of length 1.")
-    }
-    if (missing(outFile)) {
-      if (interactive) {
-        outFile <- paste0(outFile, '.html')
-      } else {
-        outFile <- paste0(outFile, '.png')
-      }
+  check_confidenceLevel(confidenceLevel)
+  check_suffix(x_suffix)
+  check_suffix(y_suffix)
+
+  ext <- tools::file_ext(outFile)
+  if (ext == "") {
+    if (interactive) {
+      outFile <- paste0(outFile, '.html')
+    } else {
+      outFile <- paste0(outFile, '.png')
     }
   }
-  logger$log("Check outFile DONE")
+  check_outFile(outFile)
 
   logger$log("Get data ...")
-  if (!is.null(progEstimFile) &&  is.null(progEstimUrl)) {
+  if (!is.null(progEstimFile) && is.null(progEstimUrl)) {
     progBlup <- readProgBlupEstim(progEstimFile)
   } else if (!is.null(progEstimUrl) && is.null(progEstimFile)) {
     progBlup <- downloadProgBlupEstim(progEstimUrl)
   } else {
-    stop("Error: either progEstimFile or progEstimUrl should be provided")
+    engineError("Either `progEstimFile` or `progEstimUrl` should be provided",
+      extra = list(
+        progEstimFile = progEstimFile,
+        progEstimUrl = progEstimUrl,
+      )
+    )
   }
   logger$log("Get data DONE")
+
+  available_traits <- sapply(progBlup, function(blupDta_cross) {
+    names(blupDta_cross$blup_exp)
+  })
+  check_trait(x_trait, available_traits)
+  check_trait(y_trait, available_traits)
 
   logger$log("Draw progenies' blup plot ...")
   p <- plotBlup_2traits(blupDta = progBlup,

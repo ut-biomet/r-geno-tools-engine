@@ -299,7 +299,7 @@ arg$progeniesBlupFile$type = 'character'
 
 # sorting ----
 arg$sorting$flag = '--sorting'
-arg$sorting$default = "alphabetical"
+arg$sorting$default = "alpha"
 arg$sorting$help = paste(
   "method to sort the individuals (X axis) can be:\\n",
   '- "asc": sort the BLUP expected value in ascending order',

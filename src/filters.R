@@ -21,25 +21,6 @@ filterGWAS <- function(gwas,
   logger <- Logger$new("r-filterGWAS()")
 
 
-  logger$log("Check parameters...")
-  if (!is.na(as.numeric(filter_pAdj))) {
-    filter_pAdj <- as.numeric(filter_pAdj)
-  } else {
-    stop('`filter_pAdj` should be a numeric value')
-  }
-  if (!is.na(as.numeric(filter_nPoints))) {
-    filter_nPoints <- as.numeric(filter_nPoints)
-  } else {
-    stop('`filter_nPoints` should be a numeric value')
-  }
-  if (!is.na(as.numeric(filter_quant))) {
-    filter_quant <- as.numeric(filter_quant)
-  } else {
-    stop('`thresh_p` should be a numeric value')
-  }
-  logger$log("Check parameters DONE")
-
-
   # filter results ----
   logger$log("Filter points ...")
   nTotalSnp <- nrow(gwas)
@@ -49,7 +30,7 @@ filterGWAS <- function(gwas,
       warning("gwas's p-values haven't been adjusted. Filtering according to",
               "p_ajd is not possible")
     } else if (filter_pAdj < 0 || filter_pAdj > 1) {
-      stop('filter_pAdj should be between 0  and 1')
+      bad_argument("filter_pAdj", expected = "between 0  and 1", not = filter_pAdj, "value")
     } else {
       gwas <- gwas[gwas$p_adj <= filter_pAdj,]
       if (nrow(gwas) == 0) {
@@ -63,7 +44,7 @@ filterGWAS <- function(gwas,
   # filter according to quantile
   if (nrow(gwas) != 0 && filter_quant != 1) {
     if (filter_quant < 0 || filter_quant > 1) {
-      stop('filter_quant should be between 0  and 1')
+      bad_argument('filter_quant', expected = "between 0  and 1", not = filter_quant, "value")
     }
     gwas <- gwas[order(gwas$p),]
     gwas <- gwas[seq_len(min(nrow(gwas),
@@ -78,7 +59,7 @@ filterGWAS <- function(gwas,
   # filter according to a fixed number of point
   if (nrow(gwas) != 0 && filter_nPoints < nrow(gwas)) {
     if (filter_nPoints < 0) {
-      stop('filter_nPoints should be a positive number')
+      bad_argument("filter_nPoints", expected = "a positive number", not = filter_nPoints, "value")
     }
     gwas <- gwas[order(gwas$p),]
     gwas <- gwas[seq_len(min(nrow(gwas), filter_nPoints)),]
