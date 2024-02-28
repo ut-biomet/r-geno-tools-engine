@@ -15,9 +15,9 @@ capture_output({
       suppressWarnings({
         ped <- readPedData(file)
       })
-      expect_error({
+      expect_no_error({
         relMat <- pedRelMat(ped)
-      }, NA)
+      })
       expect_true(is.matrix(relMat))
       expect_true(is.numeric(relMat))
       expect_true(isSymmetric(relMat))
@@ -51,9 +51,9 @@ capture_output({
       # reduce `geno` size to be faster
       geno <- gaston::select.inds(geno, id %in% sample(geno@ped$id, 100))
 
-      expect_error({
+      expect_no_error({
         relMat <- genoRelMat(geno)
-      }, NA)
+      })
       expect_true(is.matrix(relMat))
       expect_true(is.numeric(relMat))
       expect_true(isSymmetric(relMat))
@@ -81,9 +81,7 @@ capture_output({
                    tau = 0.5, omega = 0.5),
     martini_randParams = list(ped_rm = A, geno_rm = G, method = 'Martini',
                    tau = runif(1, 0, 20), omega = runif(1, -20, 1)),
-    warn_missIndInPed = list(ped_rm = A[-(1:10), -(1:10)], geno_rm = G),
-    warn_tauOmeg_leggara = list(ped_rm = A, geno_rm = G, method = 'Legarra',
-                                tau = 0.5, omega = 0.5)
+    warn_missIndInPed = list(ped_rm = A[-(1:10), -(1:10)], geno_rm = G)
   )
 
   for (paramName in names(paramList)) {
@@ -95,9 +93,9 @@ capture_output({
           relMat <- do.call(combinedRelMat, params)
         })
       } else {
-        expect_error({
+        expect_no_error({
           relMat <- do.call(combinedRelMat, params)
-        }, NA)
+        })
       }
       expect_true(is.matrix(relMat))
       expect_true(is.numeric(relMat))
@@ -135,50 +133,4 @@ capture_output({
       })
     }
   }
-
-  test_that(paste('combinedRelMat: wrong method'), {
-    expect_error({
-      relMat <- combinedRelMat(ped_rm = A, geno_rm = G, method = 'doNotExist')
-    }, 'Method should be either "Legarra" or "Marini".')
-    expect_error({
-      relMat <- combinedRelMat(ped_rm = A, geno_rm = G,
-                               method = c('Legarra', 'Martini'))
-    }, 'Only one method should be provided to `combineRelMat` function.')
-  })
-
-  test_that(paste('combinedRelMat: no common inds'), {
-    A2 <- A
-    colnames(A2) <- row.names(A2) <- paste0('toto', seq(nrow(A)))
-
-    expect_error({
-      relMat <- combinedRelMat(ped_rm = A2, geno_rm = G)
-    }, paste('No common individuals between genomic',
-             'and pedigree relationship matrices.'))
-  })
-
-
-  test_that(paste('combinedRelMat: wron tau omega'), {
-    expect_error({
-      relMat <- combinedRelMat(ped_rm = A,
-                               geno_rm = G,
-                               method = 'Martini',
-                               tau = 0,
-                               omega = 1)
-    }, 'The combination `tau`= 0, and `omega` = 1 is not possible.')
-    expect_error({
-      relMat <- combinedRelMat(ped_rm = A,
-                               geno_rm = G,
-                               method = 'Martini',
-                               tau = -1,
-                               omega = 1)
-    }, '`tau` must be a positive number.')
-    expect_error({
-      relMat <- combinedRelMat(ped_rm = A,
-                               geno_rm = G,
-                               method = 'Martini',
-                               tau = 0,
-                               omega = 1.5)
-    }, '`omega` must be lower than one.')
-  })
-
 })

@@ -16,9 +16,9 @@ capture_output({
     SNPcoord <- readSNPcoord(SNPcoordFile)
 
     # no error / no filter
-    expect_error({
+    expect_no_error({
       filteredSNPcoord <- checkAndFilterSNPcoord(SNPcoord, g$SNPcoord)
-    }, NA)
+    })
     expect_identical(filteredSNPcoord, SNPcoord)
 
     # additional SNP in user's SNP (should be removed)
@@ -37,10 +37,9 @@ capture_output({
 
     # missing SNP in user's SNP (error)
     SNPcoord_missingSNP <- SNPcoord[-nrow(SNPcoord),]
-    expect_error({
+    err <- expect_engineError({
       checkAndFilterSNPcoord(SNPcoord_missingSNP, g$SNPcoord)
-    }, paste("The SNPs coordinate file miss 1 genotype's SNPs:",
-             SNPcoord$SNPid[nrow(SNPcoord)]))
+    })
 
   })
 
@@ -54,32 +53,30 @@ capture_output({
     crossTable <- readCrossTable(crossTableFile)
 
     # no error
-    expect_error({
+    expect_no_error({
       checkIndNamesConsistency(crossTable, g$haplotypes)
-    }, NA)
+    })
     # parent not used in the crossing table (no error)
-     expect_error({
+     expect_no_error({
       checkIndNamesConsistency(crossTable[1:2,], g$haplotypes)
-    }, NA)
+    })
 
     # additional individual in the crossing table
     crossTable_addInds <- crossTable
-    crossTable_addInds[nrow(crossTable) + 1, ] <- list('doNotExist',
+    crossTable_addInds[nrow(crossTable) + 1, ] <- list('F1_additional_ind',
                                                        'F2_0001.0001',
                                                        'toto')
-    expect_error({
+    err <- expect_engineError({
       checkIndNamesConsistency(crossTable_addInds, g$haplotypes)
-    }, paste('1 individuals are defined in the crossing',
-             'table but not in the genoype file: doNotExist'))
+    })
 
     crossTable_addInds2 <- crossTable
     crossTable_addInds2[nrow(crossTable) + 1, ] <- list('F2_0001.0001',
-                                                        'doNotExist2',
+                                                        'F1_additional_ind2',
                                                         'toto')
-     expect_error({
+     err <- expect_engineError({
       checkIndNamesConsistency(crossTable_addInds2, g$haplotypes)
-    }, paste('1 individuals are defined in the crossing',
-             'table but not in the genoype file: doNotExist2'))
+    })
   })
 
 

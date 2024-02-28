@@ -37,14 +37,14 @@ capture_output({
       for (i in seq(nCrosses)) {
         p1.id <- which(grepl(crossTable$ind1[i], colnames(g$haplotypes)))
         p2.id <- which(grepl(crossTable$ind2[i], colnames(g$haplotypes)))
-        expect_error({
+        expect_no_error({
           blupExp <- calcProgenyBlupExpected(SNPcoord,
                                              g$haplotypes,
                                              p1.id,
                                              p2.id,
                                              markerEffects)
-        }, NA)
-        expect_error({
+        })
+        expect_no_error({
           blupCovar <- calcProgenyBlupCovariance(SNPcoord = SNPcoord,
                                                  r = r,
                                                  haplo = g$haplotypes,
@@ -52,11 +52,11 @@ capture_output({
                                                  p2.id = p2.id,
                                                  markerEffects = markerEffects,
                                                  blupExpectedValues = blupExp)
-        }, NA)
-        expect_error({
+        })
+        expect_no_error({
           geneticCovar <- calcProgenyGenetCovar(SNPcoord, r, g$haplotypes, p1.id, p2.id)
           blupVar <- calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
-        }, NA)
+        })
         expect_equal(diag(blupCovar), blupVar)
       }
     })

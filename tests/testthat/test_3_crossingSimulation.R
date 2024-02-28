@@ -16,9 +16,9 @@ capture_output({
     g <- readPhasedGeno(phasedGenoFile)
     SNPcoord <- checkAndFilterSNPcoord(readSNPcoord(SNPcoordFile), g$SNPcoord)
 
-    expect_error({
+    expect_no_error({
       parent_pop <- initializeSimulation(g$haplotypes, SNPcoord)
-    }, NA)
+    })
     expect_is(parent_pop, "population")
     expect_equal(parent_pop$nInd, ncol(g$haplotypes)/2)
 

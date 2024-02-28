@@ -711,6 +711,7 @@ readCrossTable <- function(file, header = TRUE) {
   logger$log('Read crossing table file ...')
   crossTable <- read.csv(file,
                   header = header,
+                  na.strings = "",
                   stringsAsFactors = FALSE)
   logger$log('Read crossing table file DONE')
 
@@ -860,7 +861,7 @@ readSNPcoord <- function(file) {
       must_be = "complete (no missing values)",
       extra = list(
         code = errorCode("BAD_SNPCOORD_MISSING_VALUE"),
-        column = "SNPid or (chr and physPos)"
+        columns = "SNPid or (chr and physPos)"
       )
     )
   }
@@ -1115,7 +1116,7 @@ readMarkerEffects_json <- function(file) {
       engineError(
         "Marker effects: bad json's keys",
         extra = list(
-          code = "BAD_MARKER_EFFECTS_JSON_KEYS",
+          code = errorCode("BAD_MARKER_EFFECTS_JSON_KEYS"),
           expected = expectedFields,
           provided = names(mark_eff)
         )

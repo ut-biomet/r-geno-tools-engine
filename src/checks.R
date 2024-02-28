@@ -306,7 +306,11 @@ check_file_extention <- function(file, expected_exts) {
 }
 
 
-check_outFile <- function(outFile, expected_exts = NULL, allow_existing = TRUE) {
+check_outFile <- function(outFile, expected_exts = NULL, allow_existing = TRUE, accept_null = FALSE) {
+
+  if (accept_null && is.null(outFile)) {
+    return(invisible(TRUE))
+  }
 
   if (length(outFile) != 1) {
     bad_argument("length(outFile)",
@@ -322,7 +326,8 @@ check_outFile <- function(outFile, expected_exts = NULL, allow_existing = TRUE) 
       bad_argument("outFile",
                    must_be = "innexistant",
                    n_skip_caller = 3,
-                   extra = list(code = errorCode("FILE_EXIST")))
+                   extra = list(code = errorCode("FILE_EXIST"),
+                                file = outFile))
     }
   }
 
@@ -426,6 +431,13 @@ check_thresh_p <- function(thresh_p) {
     bad_argument("length(thresh_p)",
                  must_be = '1',
                  not = length(thresh_p),
+                 n_skip_caller = 3,
+                 extra = list(code = errorCode(code)))
+  }
+  if (thresh_p <= 0 || thresh_p >= 1) {
+    bad_argument("thresh_p",
+                 must_be = 'between 0 and 1',
+                 not = thresh_p,
                  n_skip_caller = 3,
                  extra = list(code = errorCode(code)))
   }

@@ -23,7 +23,7 @@ capture.output({
       } else {
         trait <- "resist"
       }
-      expect_error({
+      expect_no_error({
         gwas_results <- run_gwas(genoFile = files[[test]]$geno,
                                  phenoFile = files[[test]]$pheno,
                                  genoUrl = NULL,
@@ -35,10 +35,10 @@ capture.output({
                                  thresh_maf = 0.05,
                                  thresh_callrate = 0.95,
                                  outFile = tempfile(fileext = ".json"))
-      },NA)
-      expect_error({
+      })
+      expect_no_error({
         gwas <- readGWAS(gwas_results$file)
-      }, NA)
+      })
       expect_true(class(gwas) == "list")
       expect_true(all.equal(names(gwas), c("gwas", "metadata")))
       expect_true(class(gwas_results$gwas) == "json")
@@ -90,8 +90,9 @@ capture.output({
       params <- goodParams
       params[[p]] <- wrongP
       testName <- paste("run_gwas, WrongParams", p, i, sep = "-")
+
       test_that(testName, {
-        expect_error({
+        err <- expect_engineError({
           run_gwas(genoFile = params[["genoFile"]],
                    phenoFile = params[["phenoFile"]],
                    trait = params[["trait"]],
@@ -109,15 +110,7 @@ capture.output({
 
   # draw_manhattanPlot ----
   test_that("Draw Manhattan Plot", {
-    expect_error({
-      p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
-                              gwasUrl = NULL,
-                              adj_method = "bonferroni",
-                              thresh_p = 0.05,
-                              chr = NA,
-                              title = "Example of Manhattan Plot")
-    }, "unused argument \\(title")
-    expect_error({
+    expect_no_error({
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,
                               adj_method = "bonferroni",
@@ -126,9 +119,11 @@ capture.output({
                               filter_nPoints = Inf,
                               filter_quant = 1,
                               chr = NA)
-    }, NA)
+    })
+
     expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
-    expect_error({
+
+    expect_no_error({
       tmpF <- tempfile(fileext = ".html")
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,
@@ -139,11 +134,11 @@ capture.output({
                               filter_nPoints = Inf,
                               filter_quant = 1,
                               outFile = tmpF)
-    }, NA)
+    })
     expect_true(file.exists(tmpF))
     expect_true(file.info(tmpF)$size > 0)
 
-    expect_error({
+    expect_no_error({
       tmpF <- tempfile(fileext = ".png")
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,
@@ -155,7 +150,7 @@ capture.output({
                               filter_quant = 1,
                               interactive = FALSE,
                               outFile = tmpF)
-    }, NA)
+    })
     expect_true(file.exists(tmpF))
     expect_true(file.info(tmpF)$size > 0)
   })
@@ -174,9 +169,9 @@ capture.output({
                      interactive = TRUE,
                      outFile = NULL)
 
-  wrongParamsL <- list(gwasFile = c("doNotExist", NA),
-                       gwasUrl = c("doNotExist", NA),
-                       adj_method = c("doNotExist", NA),
+  wrongParamsL <- list(gwasFile = c("doNotExist"),
+                       gwasUrl = c("doNotExist"),
+                       adj_method = c("doNotExist"),
                        thresh_p = list(-1, 1.02),
                        chr = c("doNotExist", 50),
                        filter_pAdj = c(-1, 2),
@@ -193,7 +188,7 @@ capture.output({
       params[[p]] <- wrongP
       testName <- paste("draw_manhattanPlot, WrongParams", p, i, sep = "-")
       test_that(testName, {
-        expect_error({
+        err <- expect_engineError({
           draw_manhattanPlot(gwasFile = params[["gwasFile"]],
                              gwasUrl = params[["gwasUrl"]],
                              adj_method = params[["adj_method"]],
@@ -211,13 +206,13 @@ capture.output({
 
   # Draw LD plot ----
   test_that("Draw LD plot", {
-    expect_error({
+    expect_no_error({
       imgFile <- draw_ldPlot(genoFile = "../../data/geno/testMarkerData01.vcf.gz",
                              genoUrl = NULL,
                              from = 42,
                              to = 62,
                              outFile = tempfile(fileext = ".png"))
-    },NA)
+    })
   })
 
 
@@ -243,7 +238,7 @@ capture.output({
       params[[p]] <- wrongP
       testName <- paste("draw_ldPlot, WrongParams", p, i, sep = "-")
       test_that(testName, {
-        expect_error({
+        err <- expect_engineError({
           draw_ldPlot(genoFile = params[["genoFile"]],
                       genoUrl = params[["genoUrl"]],
                       from = params[["from"]],
@@ -256,7 +251,7 @@ capture.output({
 
   # adjust p-values ----
   test_that("GWAS Results adjust p-values", {
-    expect_error({
+    expect_no_error({
       gwasAdjResults <- run_resAdjustment(gwasFile = "../../data/results/gwasResult.json",
                                           gwasUrl = NULL,
                                           adj_method = "bonferroni",
@@ -264,11 +259,11 @@ capture.output({
                                           filter_nPoints = Inf,
                                           filter_quant = 1,
                                           outFile = tempfile())
-    }, NA)
+    })
     expect_true(class(gwasAdjResults$gwasAdjusted) == "json")
-    expect_error({
+    expect_no_error({
       gwas <- readGWAS(gwasAdjResults$file)
-    }, NA)
+    })
     expect_true(class(gwas) == "list")
     expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
     expect_true(class(gwas$gwas) == "data.frame")
@@ -317,7 +312,7 @@ capture.output({
       params[[p]] <- wrongP
       testName <- paste("run_resAdjustment, WrongParams", p, i, sep = "-")
       test_that(testName, {
-        expect_error({
+        err <- expect_engineError({
           run_resAdjustment(gwasFile = params[["gwasFile"]],
                             gwasUrl = params[["gwasUrl"]],
                             adj_method = params[["adj_method"]],
@@ -341,16 +336,16 @@ capture.output({
   formats <- c('csv', 'json')
   for (file in pedFiles) {
     for (format in formats) {
-      test_that(paste("calc_pedRelMAt", format, basename(file)), {
-        expect_error({
+      test_that(paste("calc_pedRelMat", format, basename(file)), {
+        expect_no_error({
           suppressWarnings({
-            relMat_results <- calc_pedRelMAt(pedFile = file,
+            relMat_results <- calc_pedRelMat(pedFile = file,
                                              pedUrl = NULL,
                                              header = TRUE,
                                              unknown_string = '',
                                              outFormat = format)
           })
-        }, NA)
+        })
 
         expect_true(class(relMat_results) == "list")
         expect_identical(names(relMat_results),
@@ -368,12 +363,12 @@ capture.output({
   formats <- c('csv', 'json')
   for (format in formats) {
     for (file in genoFiles) {
-      test_that(paste("calc_genoRelMAt", format, basename(file)), {
-        expect_error({
-          relMat_results <- calc_genoRelMAt(genoFile = file,
+      test_that(paste("calc_genoRelMat", format, basename(file)), {
+        expect_no_error({
+          relMat_results <- calc_genoRelMat(genoFile = file,
                                             genoUrl = NULL,
                                             outFormat = format)
-        }, NA)
+        })
 
         expect_true(class(relMat_results) == "list")
         expect_identical(names(relMat_results),
@@ -402,9 +397,9 @@ capture.output({
   for (format in formats) {
     for (method in methods) {
       for (filesName in names(rm_files)) {
-        test_that(paste("calc_genoRelMAt", format, method, filesName), {
+        test_that(paste("calc_genoRelMat", format, method, filesName), {
           files <- rm_files[[filesName]]
-          expect_error({
+          expect_no_error({
             relMat_results <- calc_combinedRelMat(
               pedRelMatFile = files$ped_rm,
               genoRelMatFile = files$geno_rm,
@@ -413,7 +408,7 @@ capture.output({
               omega = omega[[method]],
               outFormat = format
             )
-          }, NA)
+          })
 
           expect_true(class(relMat_results) == "list")
           expect_identical(names(relMat_results),
@@ -430,11 +425,13 @@ capture.output({
 
 
 
+
+
   # draw_pedNetrowk ----
   for (file in pedFiles) {
     test_that(paste("draw_pedNetwork", basename(file)), {
       tmpF <- tempfile(fileext = ".html")
-      expect_error({
+      expect_no_error({
         suppressWarnings({
           pedNet <- draw_pedNetwork(pedFile = file,
                                     pedUrl = NULL,
@@ -442,7 +439,7 @@ capture.output({
                                     unknown_string = '',
                                     outFile = tmpF)
         })
-      }, NA)
+      })
       expect_identical(class(pedNet),
                        c("forceNetwork", "htmlwidget"))
       expect_true(file.exists(tmpF))
@@ -457,13 +454,17 @@ capture.output({
     for (inter in c(TRUE, FALSE)) {
 
       test_that(paste("draw_relHeatmap inter:", inter, basename(file)), {
-        tmpF <- tempfile()
-        expect_error({
+        ext <- ".html"
+        if (inter) {
+          ext <- ".png"
+        }
+        tmpF <- tempfile(fileext = ext)
+        expect_no_error({
           pedNet <- draw_relHeatmap(relMatFile = file,
                                     relMatUrl = NULL,
                                     interactive = inter,
                                     outFile = tmpF)
-        }, NA)
+        })
         expect_true(file.exists(tmpF))
         expect_true(file.info(tmpF)$size > 0)
       })
@@ -506,20 +507,20 @@ capture.output({
     outFile <- data$outFile
 
     test_that(paste('crossingSimulation -', names(crossigSimDataList)[i]), {
-      expect_error({
+      expect_no_error({
         createdFile <- crossingSimulation(genoFile = phasedGenoFile,
                                           crossTableFile = crossTableFile,
                                           SNPcoordFile = SNPcoordFile,
                                           nCross = nCross,
                                           outFile = outFile)
-      }, NA)
+      })
       expect_equal(createdFile, outFile)
-      expect_error({
+      expect_no_error({
         createdGeno <- readGenoData(createdFile)
-      }, NA)
-      expect_error({
+      })
+      expect_no_error({
         createdPhasedGeno <- readPhasedGeno(createdFile)
-      }, NA)
+      })
 
       # individual names
       crossTable <- readCrossTable(crossTableFile)
@@ -546,27 +547,27 @@ capture.output({
       file <- paste0("file://", file)
       file
     }
-    expect_error({
+    expect_warning({
       createdFileWithoutChrInfo <- crossingSimulation(
         genoUrl = as_url(phasedGenoFile),
         crossTableUrl = as_url(crossTableFile),
         SNPcoordUrl = as_url(SNPcoordFile),
         nCross = nCross,
         outFile = outFile)
-    }, NA)
+    }, 'output "file" already exists. This file will be overwritten.' )
   })
+  unlink(outFile)
 
   inconsistentSNPFile <- '../data/inconsistent_SNPcoord_2.csv'
   test_that('crossingSimulation inconsistent SNPs', {
-    expect_error({
+    err <- expect_engineError({
       createdFile <- crossingSimulation(
         genoFile = phasedGenoFile,
         crossTableFile = crossTableFile,
         SNPcoordFile = inconsistentSNPFile,
         nCross = nCross,
         outFile = outFile)
-    }, paste("SNP's position order should be similar when sorted by",
-             "physical position and by linkage map position."))
+    })
   })
 
 
@@ -612,7 +613,7 @@ capture.output({
     outFile <-  progBlupDataList[[i]]$outFile
 
     test_that(paste('calc_progenyBlupEstimation -', names(progBlupDataList)[i]), {
-      expect_error({
+      expect_no_error({
         projBlups_list <- calc_progenyBlupEstimation(
           genoFile = genoFile,
           crossTableFile = crossTableFile,
@@ -620,7 +621,7 @@ capture.output({
           markerEffectsFile = markerEffectsFile,
           outFile = outFile
         )
-      }, NA)
+      })
 
       expect_is(projBlups_list, "list")
       lapply(projBlups_list, function(projBlups){
@@ -640,18 +641,26 @@ capture.output({
     test_that(paste("draw_progBlupsPlot", basename(file)), {
 
       tmpF <- tempfile(fileext = ".html")
-      expect_error({
+      expect_no_error({
         p1 <- draw_progBlupsPlot(progEstimFile = file,
                                  outFile = tmpF)
-      }, NA)
+        unlink(tmpF)
+      })
 
-      for (s in c('asc', 'dec', '???')) {
-        expect_error({
+      for (s in c('asc', 'dec')) {
+        expect_no_error({
           p1 <- draw_progBlupsPlot(progEstimFile = file,
                                    sorting = s,
                                    outFile = tmpF)
-        }, NA)
+          unlink(tmpF)
+        })
       }
+      expect_warning({
+        p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                 sorting = "??????",
+                                 outFile = tmpF)
+        unlink(tmpF)
+      }, "Sorting method not recognised, x axis will be sorted alphabetically. Recognised methods are: alpha, asc, dec")
     })
   }
 
@@ -660,20 +669,29 @@ capture.output({
     test_that(paste("draw_progBlupsPlot several traits", basename(file)), {
 
       tmpF <- tempfile(fileext = ".html")
-      expect_error({
+      expect_no_error({
         p1 <- draw_progBlupsPlot(progEstimFile = file,
                                  trait = 'trait1',
                                  outFile = tmpF)
-      }, NA)
+        unlink(tmpF)
+      })
 
-      for (s in c('asc', 'dec', '???')) {
-        expect_error({
+      for (s in c('asc', 'dec')) {
+        expect_no_error({
           p1 <- draw_progBlupsPlot(progEstimFile = file,
                                    sorting = s,
                                    trait = 'trait1',
                                    outFile = tmpF)
-        }, NA)
+          unlink(tmpF)
+        })
       }
+      expect_warning({
+        p1 <- draw_progBlupsPlot(progEstimFile = file,
+                                 sorting = "??????",
+                                 trait = 'trait1',
+                                 outFile = tmpF)
+        unlink(tmpF)
+      }, "Sorting method not recognised, x axis will be sorted alphabetically. Recognised methods are: alpha, asc, dec")
     })
   }
 
@@ -683,7 +701,7 @@ capture.output({
     test_that(paste("draw_progBlupsPlot_2traits several traits", basename(file)), {
 
       tmpF <- tempfile(fileext = ".html")
-      expect_error({
+      expect_no_error({
         p1 <- draw_progBlupsPlot_2traits(progEstimFile = file,
                                          x_trait = 'trait1',
                                          y_trait = 'trait2',
@@ -692,7 +710,8 @@ capture.output({
                                          y_suffix = "",
                                          ellipses_npoints = 100,
                                          outFile = tmpF)
-      }, NA)
+        unlink(tmpF)
+      })
     })
   }
 

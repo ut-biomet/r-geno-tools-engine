@@ -1,6 +1,7 @@
 .direnv/
 
 readmeTemp/
+tests/testthat/testOutput/
 # large data
 *.vcf
 !tests/data/small-vcf-file.vcf

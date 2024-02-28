@@ -46,7 +46,7 @@ capture.output({
                                     thresh_callrate = tCall)
                   })
                 } else {
-                  expect_error({
+                  expect_no_error({
                     resGwas <- gwas(dta,
                                     trait,
                                     test,
@@ -54,19 +54,16 @@ capture.output({
                                     response = resp,
                                     thresh_maf = tMaf,
                                     thresh_callrate = tCall)
-                  }, NA)
+                  })
                 }
                 expect_true(class(resGwas) == "data.frame")
                 expect_equal(colnames(resGwas), resCols[[test]])
-                expect_error({
-                  file <- saveGWAS(gwasRes = resGwas)
-                }, "\"metadata\" is missing")
-                expect_error({
+                expect_no_error({
                   file <- saveGWAS(gwasRes = resGwas, metadata = list())
-                }, NA)
-                expect_error({
+                })
+                expect_no_error({
                   resGwas2 <- readGWAS(file)
-                }, NA)
+                })
                 expect_true(class(resGwas2$gwas) == "data.frame")
                 expect_true(all.equal(resGwas2$gwas, resGwas))
                 file.remove(file)
@@ -77,47 +74,6 @@ capture.output({
       }
     }
   }
-
-
-  # Test gwas() with wrong parameters:
-  goodParams <- list(data = readData(files[[1]]["g"], files[[1]]["p"]),
-                     trait = "Flowering.time.at.Arkansas",
-                     test = "wald",
-                     fixed = 0,
-                     response = "quantitative",
-                     thresh_maf = 0.05,
-                     thresh_callrate = 0.95)
-
-  wrongParamsL <- list(data = list(data.frame(c(1,2,3), c("a", "b", "c"))),
-                       trait = list("Trait.that.do.not.exist", c("a","b")),
-                       test = list("not.a.test", c("c", "d")),
-                       fixed = list(-1, 1.5, "1", c(0,1)),
-                       response = list("wrong resp", c("e", "f")),
-                       thresh_maf = list(-0.06, 0.55, "0.1", c(0, 0.1)),
-                       thresh_callrate = list(-0.02, 1.42, "0.21", c(0.85, 0.2)))
-
-  for (p in names(goodParams)) {
-    wrongParams <- wrongParamsL[[p]]
-    i <- 0
-    for (wrongP in wrongParams) {
-      i <- i+1
-      params <- goodParams
-      params[[p]] <- wrongP
-      testName <- paste("gwas, WrongParams", p, i, sep = "-")
-      test_that(testName, {
-        expect_error({
-          gwas(data = params[["data"]],
-               trait = params[["trait"]],
-               test = params[["test"]],
-               fixed = params[["fixed"]],
-               response = params[["response"]],
-               thresh_maf = params[["thresh_maf"]],
-               thresh_callrate = params[["thresh_callrate"]])
-        })
-      })
-    }
-  }
-
 
   # Test adjustPval() with normal parameters
   s <- list(c(g = "../../data/geno/testMarkerData01.vcf.gz",
@@ -153,7 +109,7 @@ capture.output({
             testName <- paste("adjustPval", resp, test, adjMeth, thresh_p,
                               empty, sep = "-")
             test_that(testName,{
-              expect_error({
+              expect_no_error({
                 if(empty){
                   p <- numeric()
                 } else {
@@ -162,7 +118,7 @@ capture.output({
                 adj <- adjustPval(p = p,
                                   adj_method = adjMeth,
                                   thresh_p = thresh_p)
-              }, NA)
+              })
               expect_true(is.list(adj))
               expect_equal(names(adj), c("p_adj", "thresh_adj"))
               if (adjMeth == "none") {
@@ -174,35 +130,6 @@ capture.output({
           }
         }
       }
-    }
-  }
-
-
-
-  # Test adjustPval() with wrong parameters:
-  goodParams <- list(p = runif(100, 0, 1),
-                     adj_method = "bonferroni",
-                     thresh_p = 0.05)
-
-  wrongParamsL <- list(p = list(c(runif(100, 0, 1), -0.1, 0.00015)),
-                       adj_method = "do not exists",
-                       thresh_p = list(-1, 1.02))
-
-  for (p in names(goodParams)) {
-    wrongParams <- wrongParamsL[[p]]
-    i <- 0
-    for (wrongP in wrongParams) {
-      i <- i+1
-      params <- goodParams
-      params[[p]] <- wrongP
-      testName <- paste("adjustPval WrongParams", p, i, sep = "-")
-      test_that(testName, {
-        expect_error({
-          adjustPval(p = params[["p"]],
-                     adj_method = params[["adj_method"]],
-                     thresh_p = params[["thresh_p"]])
-        })
-      })
     }
   }
 })

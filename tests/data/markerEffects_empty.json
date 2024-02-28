@@ -1,0 +1,10 @@
+{
+    "trait1": {
+        "intercept": 100,
+        "coefficients": {}
+    },
+    "trait2": {
+        "intercept": 42,
+        "coefficients": {}
+    }
+}

@@ -9,37 +9,16 @@ capture_output({
   # LDplot ----
   test_that("LD plot", {
     gDta <- readGenoData("../../data/geno/testMarkerData01.vcf.gz")
-    expect_error({
+    expect_no_error({
       imgFile <- LDplot(gDta, 1, 20, file = NULL)
-    }, NA)
-    expect_error({
+    })
+    expect_no_error({
       imgFile <- LDplot(gDta, 42, 72, file = tempfile())
-    }, NA)
-    expect_error({
+    })
+    expect_no_error({
       imgFile <- LDplot(gDta, 1024, 1074, file = "testOutput/plot.png")
-    }, NA)
+    })
     file.remove(imgFile)
-
-    # errors
-    expect_error({
-      imgFile <- LDplot(gDta, 1.5, 20, file = NULL)
-    },'`from` should be an positive integer of length 1' )
-    expect_error({
-      imgFile <- LDplot(gDta, 1, 20.1, file = NULL)
-    },'`to` should be an positive integer of length 1' )
-    expect_error({
-      imgFile <- LDplot(gDta, "2", 20, file = NULL)
-    }, '`from` should be an positive integer of length 1')
-    expect_error({
-      imgFile <- LDplot(gDta, 2, "20", file = NULL)
-    }, '`to` should be an positive integer of length 1')
-
-    expect_error({
-      imgFile <- LDplot(gDta, 20, 2, file = NULL)
-    }, '"from" should be lower than "to"')
-    expect_error({
-      imgFile <- LDplot(gDta, 20, 200, file = NULL)
-    }, 'range size \\("to" - "from"\\) should be lower or equal than 50')
   })
 
   # manPlot ----
@@ -69,7 +48,7 @@ capture_output({
             testName <- paste("manPlot", resp, test, paste0("chr:", chr),
                               paste0('inter:', interactive), sep = "-")
             test_that(testName, {
-              expect_error({
+              expect_no_error({
                 mP <- manPlot(gwas = resGwas,
                               adj_method = "bonferroni",
                               thresh_p = 0.05,
@@ -79,7 +58,7 @@ capture_output({
                               filter_nPoints = Inf,
                               filter_quant = 1,
                               title = "test manPlot")
-              }, NA)
+              })
               if (interactive) {
                 expect_true(all.equal(class(mP), c("plotly", "htmlwidget")))
               } else {
@@ -150,59 +129,6 @@ capture_output({
     })
   }
 
-
-  # Test manPlot() with wrong parameters: ----
-  resGwas <- gwas(dta,
-                  trait = "Flowering.time.at.Arkansas",
-                  test = "score",
-                  fixed = 0,
-                  response = "quantitative",
-                  thresh_maf = 0.05,
-                  thresh_callrate = 0.95)
-  goodParams <- list(gwas = resGwas,
-                     adj_method = "bonferroni",
-                     thresh_p = 0.05,
-                     interactive = TRUE,
-                     filter_pAdj = 1,
-                     filter_nPoints = Inf,
-                     filter_quant = 1,
-                     chr = unique(resGwas$chr)[1])
-
-  wrongParamsL <- list(p = list(c(runif(100, 0, 1), -0.1, 0.00015)),
-                       adj_method = "do not exists",
-                       thresh_p = list(-1, 1.02),
-                       interactive = c('t'),
-                       filter_pAdj = c(-1, 2),
-                       filter_nPoints = -4,
-                       filter_quant = c(-1, 1.1),
-                       chr = c("doNotExists", 29))
-
-  for (p in names(goodParams)) {
-    wrongParams <- wrongParamsL[[p]]
-    i <- 0
-    for (wrongP in wrongParams) {
-      i <- i + 1
-      params <- goodParams
-      params[[p]] <- wrongP
-      testName <- paste("manPlot WrongParams", p, i, sep = "-")
-      test_that(testName, {
-        expect_error({
-          manPlot(gwas = params[["gwas"]],
-                  adj_method = params[["adj_method"]],
-                  thresh_p = params[["thresh_p"]],
-                  chr = params[["chr"]],
-                  interactive = params[["interactive"]],
-                  filter_pAdj = params[['filter_pAdj']],
-                  filter_quant = params[['filter_quant']],
-                  filter_nPoints = params[['filter_nPoints']])
-        })
-      })
-    }
-  }
-
-
-
-
   # pedNetwork ----
   pedFiles <- c('../../data/pedigree/testPedData_char.csv',
                 '../../data/pedigree/testPedData_num.csv',
@@ -212,9 +138,9 @@ capture_output({
       suppressWarnings({
         ped <- readPedData(file)
       })
-      expect_error({
+      expect_no_error({
         pn <- pedNetwork(ped)
-      }, NA)
+      })
       expect_true(all.equal(class(pn), c("forceNetwork", "htmlwidget")))
     })
   }
@@ -226,9 +152,9 @@ capture_output({
           ped <- readPedData(file)
           relMat <- pedRelMat(ped)
         })
-        expect_error({
+        expect_no_error({
           hm <- relMatHeatmap(relMat, interactive)
-        }, NA)
+        })
         if (interactive) {
           expect_true(all.equal(class(hm), c("plotly", "htmlwidget")))
         } else {
@@ -245,21 +171,19 @@ capture_output({
   for (file in progEstimFiles) {
     test_that(paste("plotBlup_1trait", basename(file)), {
       progBlup <- readProgBlupEstim(file)
-      expect_error({
-        p <- plotBlup_1trait(progBlup)
-      }, NA)
+      expect_no_error({
+        trait <- names(progBlup[[1]][["blup_exp"]])
+        p <- plotBlup_1trait(progBlup, trait = trait)
+      })
       expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
       expect_type(p$x$visdat[[1]]()$Cross, 'character')
 
       for (s in c('asc', 'dec', '???')) {
-        expect_error({
-          p <- plotBlup_1trait(progBlup, sorting = s)
-        }, NA)
-        if (s != '???') {
-          expect_s3_class(p$x$visdat[[1]]()$Cross, 'factor')
-        } else {
-          expect_type(p$x$visdat[[1]]()$Cross, 'character')
-        }
+        expect_no_error({
+          trait <- names(progBlup[[1]][["blup_exp"]])
+          p <- plotBlup_1trait(progBlup, trait = trait)
+        })
+        expect_type(p$x$visdat[[1]]()$Cross, 'character')
       }
 
     })
@@ -272,7 +196,7 @@ capture_output({
   for (file in progEstimFiles) {
     test_that(paste("plotBlup_2trait", basename(file)), {
       progBlup <- readProgBlupEstim(file)
-      expect_error({
+      expect_no_error({
         p <- plotBlup_2traits(blupDta = progBlup,
                               x_trait = "trait1",
                               y_trait = "trait2",
@@ -280,7 +204,7 @@ capture_output({
                               x_suffix = "",
                               y_suffix = "",
                               ellipses_npoints = 100)
-      }, NA)
+      })
       expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
     })
   }

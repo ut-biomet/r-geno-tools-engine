@@ -25,9 +25,9 @@ capture_output({
 
   }
   test_that('filtering function default params', {
-    expect_error({
+    expect_no_error({
       filtdta <- filterGWAS(gwas = resGwas)
-    }, NA)
+    })
     expect_identical(filtdta, resGwas)
   })
 
@@ -42,12 +42,12 @@ capture_output({
                                 filter_quant = 1)
         })
       } else {
-        expect_error({
+        expect_no_error({
           filtdta <- filterGWAS(gwas = resGwas,
                                 filter_pAdj = filter,
                                 filter_nPoints = Inf,
                                 filter_quant = 1)
-        }, NA)
+        })
       }
       if (filter == 0) {
         expect_true(nrow(filtdta) == 0)
@@ -68,12 +68,12 @@ capture_output({
                                 filter_quant = 1)
         })
       } else {
-        expect_error({
+        expect_no_error({
           filtdta <- filterGWAS(gwas = resGwas,
                                 filter_pAdj = 1,
                                 filter_nPoints = filter,
                                 filter_quant = 1)
-        }, NA)
+        })
       }
       expect_equal(nrow(filtdta), filter)
     })
@@ -91,12 +91,12 @@ capture_output({
                                 filter_quant = filter)
         })
       } else {
-        expect_error({
+        expect_no_error({
           filtdta <- filterGWAS(gwas = resGwas,
                                 filter_pAdj = 1,
                                 filter_nPoints = Inf,
                                 filter_quant = filter)
-        }, NA)
+        })
       }
       expect_equal(nrow(filtdta), floor(nrow(resGwas) * filter))
     })
