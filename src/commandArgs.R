@@ -372,3 +372,8 @@ arg$ellipses_npoints$help = paste(
   "Default is :", arg$ellipses_npoints$default)
 arg$ellipses_npoints$type = 'integer'
 
+
+# json-errors ----
+arg$json_error$flag = '--json-errors'
+arg$json_error$default = FALSE
+arg$json_error$help = 'Write errors as json in stderr (default FALSE)'

@@ -142,6 +142,7 @@ capture_output({
                  '--pedFile "$RGENOROOT/data/pedigree/testPedData_char.csv"',
                  '--outFile "$RGENOROOT/tests/testthat/testOutput/pedRelMat.json"')
 
+
     expect_no_error({
       x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
     })
@@ -312,7 +313,42 @@ capture_output({
   })
 
 
+  test_that('Expected error RAW', {
+
+    cmd <- paste(rGenoCommand, 'pedNetwork',
+                 '--pedFile "/doNotExist"',
+                 '--outFile "$RGENOROOT/tests/testthat/testOutput/pedNet.html"')
+
+    expect_no_error({
+      x <- system(cmd, intern = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
+    })
+    expect_equal(x, 1)
+  })
 
 
+  test_that('Expected error JSON', {
+    args <- paste(paste0(Sys.getenv('RGENOROOT'), "/r-geno-tools-engine.R"),
+                  'pedNetwork',
+                  '--pedFile "/doNotExist"',
+                  '--outFile "$RGENOROOT/tests/testthat/testOutput/pedNet.html"',
+                  '--json-errors')
 
+    tmp_stderr <- tempfile(fileext = ".json")
+    tmp_stdout <- tempfile(fileext = ".log")
+
+    expect_no_error({
+      suppressWarnings({
+        x <- system2("Rscript", args, stderr = tmp_stderr, stdout = tmp_stdout)
+      })
+    })
+
+    expect_equal(x, 42)
+
+    expect_no_error({
+      jsonlite::fromJSON(tmp_stderr)
+    })
+
+    unlink(tmp_stderr)
+    unlink(tmp_stdout)
+  })
 })

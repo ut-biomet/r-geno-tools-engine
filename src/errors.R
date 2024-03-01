@@ -10,7 +10,7 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
   i <- n_skip_caller
   last_caller <- rlang::caller_call(i)
   while (!is.null(last_caller)) {
-    error_locations <- c(error_locations, last_caller)
+    error_locations <- c(error_locations, paste0(as.character(last_caller[1]), "(...)"))
     i <- i + 1
     last_caller <- rlang::caller_call(i)
   }
@@ -18,7 +18,6 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
   last_location <- error_locations[1]
   error_locations <- rev(error_locations)
   error_locations <- paste(error_locations, collapse = " -> ")
-  print(error_locations)
 
   message <- paste0("Error in ", last_location, ": ", message,"\nAdditional information:\n",
                     paste0("- ", unlist(lapply(names(extra), function(field) {
