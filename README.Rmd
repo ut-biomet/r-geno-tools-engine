@@ -6,7 +6,7 @@ output:
     ]
     toc: true
 ---
- 
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
@@ -48,7 +48,7 @@ docker run --rm --entrypoint="Rscript" rgenotoolsengine ./tests/testthat.R
 All tests should pass.
 
 
-# How to use r-geno-tools-engine 
+# How to use r-geno-tools-engine
 
 ## from Docker
 
@@ -100,10 +100,13 @@ dependencies packages installed.
 
 ### Install dependencies
 
-To install r-geno-tools-engine's packages dependencies, first install the [`renv`](https://rstudio.github.io/renv/articles/renv.html) package.
-Then this package will install automatically the dependencies:
+To install r-geno-tools-engine's packages dependencies through [`renv`](https://rstudio.github.io/renv/articles/renv.html) you can simply run:
 
-In an `R` console:
+```shell
+make deps
+```
+
+Or in an `R` console:
 
 ```R
 # open the repo as an Rstudio project
@@ -128,13 +131,13 @@ cd /path/to/r-geno-tools-engine
 Rscript ./r-geno-tools-engine.R <subcommand> --param1 valueOfParam1 --param2 valueOfParam2 ...
 ```
 
-See: 
+See:
 
 ```
 Rscript ./r-geno-tools-engine.R --help
 ```
 
-and 
+and
 
 ```
 Rscript ./r-geno-tools-engine.R <subcommand> --help
@@ -146,6 +149,43 @@ If you want to use the engine from another location, you need to set an environm
 export RGENOROOT='/path/to/r-geno-tools-engine'
 Rscript /path/to/r-geno-tools-engine/r-geno-tools-engine.R --help
 ```
+
+
+#### Error management
+
+There is a special option flag available, `--json-errors`, that will make this tool write errors information as json in `stderr` and will exit with status code of `42`, this can be usefull if you integrate this tool in others.
+
+For example:
+
+```sh
+Rscript ./r-geno-tools-engine.R relmat-ped --pedFile "this_file_do_not_exist.csv" --outFile "/out/pedRelMat.json"
+```
+
+```json
+{
+    "message":"Error in calc_pedRelMat(...): file not found\nAdditional information:\n- code : FILE_NOT_FOUND\n- file : doNotExist",
+    "extra":{
+        "code":"FILE_NOT_FOUND",
+        "file":"this_file_do_not_exist.csv",
+        "error_location":"calc_pedRelMat(...)",
+        "trace":"calc_pedRelMat(...)"
+    }
+}
+```
+
+The `extra` field will contains elements related to the specific errors (in this case, for example, the `file` that have not been found).
+
+Unexpected errors will also exit with an error code `42` and write information in `stderr` as json with the following informations:
+```json
+{
+    "message":"<error message>",
+    "extra":{
+        "code":"UNEXPECTED_ERROR",
+        "stacktrace":"<informations on error location>"
+    }
+}
+```
+
 
 
 ## As an R library
@@ -224,7 +264,7 @@ Finally, the result of a GWAS analysis is presented as a [Manhattan_plot](https:
 
 r-geno-tools-engine provides command line tools to do GWAS analysis.
 
-> Note: You can also check this [7min video](https://www.youtube.com/watch?v=sOP8WacfBM8) by Nuno Carvalho that explain GWAS very well. 
+> Note: You can also check this [7min video](https://www.youtube.com/watch?v=sOP8WacfBM8) by Nuno Carvalho that explain GWAS very well.
 
 
 
@@ -377,7 +417,7 @@ imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
                        genoUrl = NULL,
                        from = 42,
                        to = 62,
-                       outFile = tempfile(fileext = ".png")) 
+                       outFile = tempfile(fileext = ".png"))
 ```
 
 </details>
@@ -404,7 +444,7 @@ docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
 ```
 
 ```{r pedRelMat}
-calc_pedRelMAt(pedFile = 'data/pedigree/testPedData_char.csv',
+calc_pedRelMat(pedFile = 'data/pedigree/testPedData_char.csv',
                pedUrl = NULL,
                header = TRUE,
                unknown_string = '',
@@ -427,7 +467,7 @@ docker run --rm -v "$PWD"/data/geno/:/geno \
 
 
 ```{r genoRelMat}
-calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
+calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
                 genoUrl = NULL,
                 outFile = tempfile(fileext = ".json"))
 ```
@@ -435,13 +475,13 @@ calc_genoRelMAt(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 
 ### Combined relationship matrix
 
-This method allow to correct a pedigree relationship matrix using a genomic 
+This method allow to correct a pedigree relationship matrix using a genomic
 relationship matrix.
 
 2 methods are implemented:
 
 - `Legarra`: *Legarra, A, et al. 2009 A relationship matrix including full pedigree and genomic information. Journal of Dairy Science 92, 4656–4663*
-- `Martini`: *Martini, JW, et al. 2018 The effect of the H-1 scaling factors tau and omega on the structure of H in the single-step procedure. Genetics Selection Evolution 50(1), 16*. This method use additional parameters `tau` and `omega`. Martini's 
+- `Martini`: *Martini, JW, et al. 2018 The effect of the H-1 scaling factors tau and omega on the structure of H in the single-step procedure. Genetics Selection Evolution 50(1), 16*. This method use additional parameters `tau` and `omega`. Martini's
 method with `tau=1` and `omega=1` is equivalent to the `Legarra`'s method.
 
 ```sh
@@ -524,7 +564,7 @@ imgFile <- draw_pedNetwork(pedFile = "data/pedigree/testPedData_char.csv",
                            pedUrl = NULL,
                            unknown_string = '',
                            header = TRUE,
-                           outFile = tempfile(fileext = ".html")) 
+                           outFile = tempfile(fileext = ".html"))
 ```
 
 
@@ -540,7 +580,7 @@ imgFile <- draw_pedNetwork(pedFile = "data/pedigree/testPedData_char.csv",
 
 <details><summary>Click to see <strong>GitHub</strong> version</summary>
 This engine contain a simulation tool that can simulate the genotypes of
-some progeny given the phased genotypes of parental individuals. 
+some progeny given the phased genotypes of parental individuals.
 
 The for the simulation, the engine needs:
 
@@ -554,8 +594,8 @@ the engine simulate two gametogenesis, one from each parent:
 
 For each pair of chromosome:
 
-We drew the number of crossing-overs \$n_{co}\$ for each chromosome in a 
-Poisson distribution of rate \$l_{chr}\$, which is the length of the chromosome 
+We drew the number of crossing-overs \$n_{co}\$ for each chromosome in a
+Poisson distribution of rate \$l_{chr}\$, which is the length of the chromosome
 in Morgan:
 
 \$\$
@@ -568,14 +608,14 @@ in a uniform distribution along the length of the chromosome in Morgan.
 We had, the sampled positions \$pos_i\$ \n
 (\$\\forall i \\in [0,n_{co}+1 ] \$)
 of the crossing-overs so
-that \$pos_j < pos_{j+1}\$ (\$\\forall j \\in [0,n_{co}]\$) 
+that \$pos_j < pos_{j+1}\$ (\$\\forall j \\in [0,n_{co}]\$)
 with \$pos_0 = 0\$ and \$pos_{n_{co}+1} = l_{chr}\$.
 
 
 \$X\$ was the \$2\\times n_{snp_k}\$ matrix representing the genotype of the
 parent for the current pair of chromosomes \$k\$. Each individual represents one
-chromosome of the pair. \$Y\$ was the vector of length \${n_{snp}}_k\$ representing 
-the genotype of the gamete for the chromosome pair. We set \$[a,b] = [1, 2]\$ 
+chromosome of the pair. \$Y\$ was the vector of length \${n_{snp}}_k\$ representing
+the genotype of the gamete for the chromosome pair. We set \$[a,b] = [1, 2]\$
 or \$[2, 1]\$ with probability \$\\frac{1}{2}\$. \$Y\$ was then calculated as:
 
 $$
@@ -596,7 +636,7 @@ Genotype of the offspring is obtain by merging two gametes from its parents.
 <details><summary>Click to see <strong>GitLab</strong> version</summary>
 
 This engine contain a simulation tool that can simulate the genotypes of
-some progeny given the phased genotypes of parental individuals. 
+some progeny given the phased genotypes of parental individuals.
 
 The for the simulation, the engine needs:
 
@@ -610,19 +650,19 @@ the engine simulate two gametogenesis, one from each parent:
 
 For each pair of chromosome:
 
-- We drew the number of crossing-overs \$`n_{co}`\$ for each chromosome in a 
-Poisson distribution of rate \$`l_{chr}`\$, which is the length of the chromosome 
+- We drew the number of crossing-overs \$`n_{co}`\$ for each chromosome in a
+Poisson distribution of rate \$`l_{chr}`\$, which is the length of the chromosome
 in Morgan: \$`n_{co} \sim \text{Pois}(l_{chr})`\$
 - When \$`n_{co} \neq 0 `\$, we drew independently the positions of crossing-overs
 in a uniform distribution along the length of the chromosome in Morgan.
 We had, the sampled positions \$`pos_i`\$
 (\$`\forall i \in \llbracket 0,n_{co}+1 \rrbracket `\$) of the crossing-overs so
-that \$`pos_j < pos_{j+1}`\$ (\$`\forall j \in \llbracket0,n_{co}\rrbracket`\$) 
+that \$`pos_j < pos_{j+1}`\$ (\$`\forall j \in \llbracket0,n_{co}\rrbracket`\$)
 with \$`pos_0 = 0`\$ and \$`pos_{n_{co}+1} = l_{chr}`\$.
 - \$`X`\$ was the \$`2 \times {n_{snp}}_k`\$ matrix representing the genotype of the
 parent for the current pair of chromosomes \$`k`\$. Each individual represents one
-chromosome of the pair. \$Y\$ was the vector of length \$`{n_{snp}}_k`\$ representing 
-the genotype of the gamete for the chromosome pair. We set \$`[a,b] = [1, 2]`\$ 
+chromosome of the pair. \$Y\$ was the vector of length \$`{n_{snp}}_k`\$ representing
+the genotype of the gamete for the chromosome pair. We set \$`[a,b] = [1, 2]`\$
 or \$`[2, 1]`\$ with probability \$`\frac{1}{2}`\$. \$`Y`\$ was then calculated as:
 
 ```math
@@ -731,23 +771,23 @@ With:
 
 $$
 \begin{eqnarray}
- \mathbb{E}(X_{1m} X_{1k}) &=& \frac{1}{4}(2x_{1mM}x_{1kM} 
-+ 2x_{1mP}x_{1kP}) 
+ \mathbb{E}(X_{1m} X_{1k}) &=& \frac{1}{4}(2x_{1mM}x_{1kM}
++ 2x_{1mP}x_{1kP})
 - \frac{r_{X_{1m}X_{1k}}}{2}
 (x_{1mM} x_{1kM} - x_{1mM} x_{1kP} - x_{1mP} x_{1kM} + x_{1mP} x_{1kP})\\
- \mathbb{E}(X_{2m} X_{2k}) &=& \frac{1}{4}(2x_{2mM}x_{2kM} 
-+ 2x_{2mP}x_{2kP}) 
+ \mathbb{E}(X_{2m} X_{2k}) &=& \frac{1}{4}(2x_{2mM}x_{2kM}
++ 2x_{2mP}x_{2kP})
 - \frac{r_{X_{2m}X_{2k}}}{2}
 (x_{2mM} x_{2kM} - x_{2mM} x_{2kP} - x_{2mP} x_{2kM} + x_{2mP} x_{2kP})\\
  \mathbb{E}(X_{1m} X_{2k}) &=& \frac{1}{4} (
-x_{1mM} x_{2kM} 
-+ x_{1mM} x_{2kP} 
-+ x_{1mP} x_{2kM} 
+x_{1mM} x_{2kM}
++ x_{1mM} x_{2kP}
++ x_{1mP} x_{2kM}
 + x_{1mP} x_{2kP} )\\
  \mathbb{E}(X_{2m} X_{1k}) &=& \frac{1}{4} (
-x_{2mM} x_{1kM} 
-+ x_{2mM} x_{1kP} 
-+ x_{2mP} x_{1kM} 
+x_{2mM} x_{1kM}
++ x_{2mM} x_{1kP}
++ x_{2mP} x_{1kM}
 + x_{2mP} x_{1kP} )
 \end{eqnarray}
 $$
@@ -786,7 +826,7 @@ r_{xy} &\overset{def}{=} P(x_{iM}y_{iP} \cup x_{iP}y_{iM})\\
   &= P(x_{iM}y_{iP}) + P(x_{iP}y_{iM}) - P(x_{iM}y_{iP} \cap {ix}_Py_{iM})\\
   &= P(x_{iM}y_{iP}) + P(x_{iP}y_{iM}) - 0\\
 r_{xy} &= 2P(x_{iM}y_{iP}) = 2P(x_{iP}y_{iM})\\
-P(x_{iM}y_{iP}) = P(x_{iP}y_{iM}) &= \frac{r_{xy}}{2} 
+P(x_{iM}y_{iP}) = P(x_{iP}y_{iM}) &= \frac{r_{xy}}{2}
 \end{align}
 $$
 
@@ -855,21 +895,21 @@ We now calculate $Cov(X_i,Y_i) = \mathbb{E}(X_iY_i) - \mathbb{E}(X_i)\mathbb{E}(
 
 $$
 \begin{align}
-\mathbb{E}(X_iY_i) - \mathbb{E}(X_i)\mathbb{E}(Y_i) &= 
+\mathbb{E}(X_iY_i) - \mathbb{E}(X_i)\mathbb{E}(Y_i) &=
     \frac{1}{4}(2x_{iM}y_{iM} + 2x_{iP}y_{iP})
     - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})
     -\frac{1}{4}(x_{iM}y_{iM} + x_{iM}y_{iP} + x_{iP}y_{iM} + x_{iP}y_{iP})\\
-Cov(X_i,Y_i) &= 
+Cov(X_i,Y_i) &=
     \frac{1}{4}(2x_{iM}y_{iM} + 2x_{iP}y_{iP} - x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} - x_{iP}y_{iP})
     - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})\\
  &= \frac{1}{4}(x_{iM}y_{iM} + x_{iP}y_{iP} - x_{iM}y_{iP} - x_{iP}y_{iM} )
     - \frac{r_{xy}}{2}(x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP})\\
- &= \frac{1}{4}z_{ixy} - \frac{r_{xy}}{2}z_{ixy} \qquad\text{with: } z_{ixy} = x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP}\\ 
-Cov(X_i,Y_i) &= \frac{1}{4}(1-2r_{xy})z_{ixy}\\ 
+ &= \frac{1}{4}z_{ixy} - \frac{r_{xy}}{2}z_{ixy} \qquad\text{with: } z_{ixy} = x_{iM}y_{iM} - x_{iM}y_{iP} - x_{iP}y_{iM} + x_{iP}y_{iP}\\
+Cov(X_i,Y_i) &= \frac{1}{4}(1-2r_{xy})z_{ixy}\\
 \end{align}
 $$
 
-##### Variance 
+##### Variance
 
 We can now calculate the variance $Var(X_i)$
 
@@ -957,7 +997,7 @@ Var(G) &= \sum_{jk} e_je_k  \frac{1}{4}(1-2r_{jk})(z_{1jk} + z_{2jk})\\
 \end{align}
 $$
 
-in Matrix notation: with $X$ a random vector and $a$ a vector: 
+in Matrix notation: with $X$ a random vector and $a$ a vector:
 
 $$
 \begin{align}
