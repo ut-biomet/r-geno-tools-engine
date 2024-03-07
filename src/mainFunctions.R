@@ -224,8 +224,7 @@ draw_manhattanPlot <- function(gwasFile = NULL,
   if (!is.null(outFile)) {
     logger$log("Save results ...")
     if (interactive) {
-      htmlwidgets::saveWidget(plotly::partial_bundle(p),
-                              outFile, selfcontained = TRUE)
+      save_plotly(p, outFile)
     } else {
       dev.off()
     }
@@ -703,8 +702,7 @@ draw_relHeatmap <- function(relMatFile = NULL,
   if (!is.null(outFile)) {
     logger$log("Save results ...")
     if (interactive) {
-      htmlwidgets::saveWidget(plotly::partial_bundle(p),
-                              outFile, selfcontained = TRUE)
+      save_plotly(p, outFile)
     } else {
       dev.off()
     }
@@ -763,8 +761,7 @@ draw_pedNetwork <- function(pedFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    htmlwidgets::saveWidget(p,
-                            outFile, selfcontained = TRUE)
+      save_plotly(p, outFile)
     logger$log("Save results DONE")
   }
   p
@@ -1139,8 +1136,7 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    htmlwidgets::saveWidget(p,
-                            outFile, selfcontained = TRUE)
+      save_plotly(p, outFile)
     logger$log("Save results DONE")
   }
   p
@@ -1223,8 +1219,7 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-    htmlwidgets::saveWidget(p,
-                            outFile, selfcontained = TRUE)
+      save_plotly(p, outFile)
     logger$log("Save results DONE")
   }
   p

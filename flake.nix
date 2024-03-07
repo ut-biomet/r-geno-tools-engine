@@ -13,21 +13,8 @@
   flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = import nixpkgs {inherit system;};
-      Rpkgs = pkgs;
-      # # for specific R version:
-      # Rpkgs =
-      #   (import (pkgs.fetchFromGitHub {
-      #       # Update to get other R version
-      #       name = "nixpkgs-R-4.3.1";
-      #       url = "https://github.com/NixOS/nixpkgs/";
-      #       ref = "refs/heads/nixpkgs-unstable";
-      #       rev = "976fa3369d722e76f37c77493d99829540d43845";
-      #     })
-      #     {inherit system;})
-      #   .pkgs;
-      R-with-my-packages = Rpkgs.rWrapper.override {
-        packages = with Rpkgs.rPackages; [
-          # list necessary R packages here
+      R-with-my-packages = pkgs.rWrapper.override {
+        packages = with pkgs.rPackages; [
           argparse
           R6
           digest
@@ -39,6 +26,7 @@
           plotly
           qqman
           vcfR
+          pandoc
 
           (pkgs.rPackages.buildRPackage {
             name = "breedSimulatR";
@@ -48,8 +36,8 @@
               rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
               sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
             };
-            propagatedBuildInputs =  with Rpkgs.rPackages; [data_table R6 vcfR];
-            nativeBuildInputs = with Rpkgs.rPackages; [data_table R6 vcfR];
+            propagatedBuildInputs =  with pkgs.rPackages; [data_table R6 vcfR];
+            nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR];
           })
 
           /*
@@ -59,17 +47,21 @@
           AGHmatrix
         ];
       };
-    in {
-      packages = {
-      };
+    in rec {
 
-      devShells.default =
-      pkgs.mkShell {
+      packages.r-geno-tools-engine = pkgs.callPackage ./nix_pkgs/default.nix {
+        inherit pkgs;
+      };
+      packages.default = packages.r-geno-tools-engine;
+
+      devShells.default = pkgs.mkShell {
         LOCALE_ARCHIVE = if "${system}" == "x86_64-linux" then "${pkgs.glibcLocalesUtf8}/lib/locale/locale-archive" else "";
         R_LIBS_USER = "''"; # to no use users' installed R packages
         nativeBuildInputs = [pkgs.bashInteractive];
         buildInputs = [
           R-with-my-packages
+          pkgs.pandoc
+          pkgs.python3
         ];
       };
 

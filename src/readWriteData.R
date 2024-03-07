@@ -1523,3 +1523,14 @@ save_blupVarExp_as_json <- function(blupVarExp, file){
                        digits = NA,
                        na = 'string')
 }
+
+#' Save a plotly graph
+#'
+#' @param plot graph generated with plotly
+#' @param file file path where to save the html graph. If the file already exists, it
+#' will be overwritten.
+#'
+#' @return path of the created file
+save_plotly <- function(plot, file){
+  htmlwidgets::saveWidget(widget = plot, file = file, selfcontained = TRUE)
+}

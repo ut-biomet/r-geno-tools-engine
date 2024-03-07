@@ -75,13 +75,13 @@ withCallingHandlers(
     library(argparse)
     formatter_class <- "lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=42, width=100)"
     main_parser = ArgumentParser(
-      prog = './r-geno-tools-engine.R',
+      prog = 'r-geno-tools-engine',
       description = "Toolbox for some genomic analysis written in R.",
       formatter_class = formatter_class,
       # argument_default = "True",
       usage = "%(prog)s"
     )
-    main_subparsers = main_parser$add_subparsers(prog = './r-geno-tools-engine.R',
+    main_subparsers = main_parser$add_subparsers(prog = 'r-geno-tools-engine',
                                                  title = "Available commands",
                                                  dest = "command")
 

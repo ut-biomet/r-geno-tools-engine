@@ -16,7 +16,7 @@ capture_output({
       imgFile <- LDplot(gDta, 42, 72, file = tempfile())
     })
     expect_no_error({
-      imgFile <- LDplot(gDta, 1024, 1074, file = "testOutput/plot.png")
+      imgFile <- LDplot(gDta, 1024, 1074, file = tempfile(fileext = ".png"))
     })
     file.remove(imgFile)
   })

@@ -1,4 +1,5 @@
 .direnv/
+result
 
 readmeTemp/
 tests/testthat/testOutput/

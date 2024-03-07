@@ -761,4 +761,28 @@ capture_output({
     expect_equal(resfile, outfile)
   })
 
+
+
+  # save_save_plotly ----
+  test_that('save_plotly', {
+
+    resfile <- tempfile(fileext = ".html")
+    plot <- plotly::plot_ly(type = "scatter",
+                            mode = "markers",
+                            data = iris,
+                            x = ~Sepal.Length,
+                            y = ~Sepal.Width,
+                            color = ~Species ,
+                            hoverinfo = "text",
+                            text = apply(iris, 1, function(l) {
+                              paste(names(l), ":", l, collapse = "\n")
+                            })
+    )
+    expect_no_error({
+      outfile <- save_plotly(plot, resfile)
+    })
+    expect_true(file.exists(resfile))
+    expect_true(file.info(resfile)$size > 0)
+    expect_equal(readLines(resfile, n = 1), "<!DOCTYPE html>")
+  })
 })

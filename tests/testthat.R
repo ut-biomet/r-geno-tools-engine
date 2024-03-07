@@ -65,8 +65,3 @@ if (length(UNTESTED_ERROR_CODES) != 0) {
     "` have not been tested"))
 }
 
-# clean testOutput dir
-f <- list.files("tests/testthat/testOutput",
-                full.names = TRUE,
-                include.dirs = TRUE)
-invisible(lapply(f, unlink, recursive = TRUE))

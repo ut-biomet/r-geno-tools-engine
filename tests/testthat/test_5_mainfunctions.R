@@ -455,7 +455,7 @@ capture.output({
 
       test_that(paste("draw_relHeatmap inter:", inter, basename(file)), {
         ext <- ".html"
-        if (inter) {
+        if (!inter) {
           ext <- ".png"
         }
         tmpF <- tempfile(fileext = ext)
