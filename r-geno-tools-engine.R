@@ -10,6 +10,16 @@
 options(keep.source = TRUE) # to get the error locations
 ERROR_AS_JSON <- FALSE
 
+if (nzchar(Sys.getenv("RGENOROOT"))) {
+  projectRoot <- Sys.getenv("RGENOROOT")
+} else {
+  projectRoot <- getwd()
+}
+
+if ("renv" %in% rownames(installed.packages()) && !isTRUE(as.logical(Sys.getenv("NO_RENV")))) {
+  renv::load(projectRoot)
+}
+
 withCallingHandlers(
   engineError = function(err) {
     if (ERROR_AS_JSON) {
@@ -60,13 +70,6 @@ withCallingHandlers(
   },
 
   {
-
-    if (nzchar(Sys.getenv("RGENOROOT"))) {
-      projectRoot <- Sys.getenv("RGENOROOT")
-    } else {
-      projectRoot <- getwd()
-    }
-
 
     # Create parser ----
     library(argparse)
