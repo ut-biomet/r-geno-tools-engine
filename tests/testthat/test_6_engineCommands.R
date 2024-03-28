@@ -244,7 +244,7 @@ test_that('crossing-simulation', {
   cmd <- paste(
     rGenoCommand, 'crossing-simulation',
     '--genoFile "$ROOT_DATA_FILES/data/geno/breedGame_phasedGeno.vcf.gz"',
-    '--crossTableFile "$ROOT_DATA_FILES/data/crossingTable/breedGame_crossTable.csv"',
+    '--crossTableFile "$ROOT_DATA_FILES/data/crossingTable/breedGame_small_crossTable.csv"',
     '--SNPcoordFile "$ROOT_DATA_FILES/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
     '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/crossSim.vcf.gz"'
   )
