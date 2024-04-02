@@ -28,7 +28,9 @@ expect_engineError <- function(code) {
     "BAD_ARG_TAU_OMEGA" = c("expected", "provided"),
     "BAD_ARG_TEST" = c("expected", "provided"),
     "BAD_ARG_THRESH_CALLRATE" = c("expected", "provided"),
+    "BAD_ARG_THRESH_CALLRATE_FILTER_OUT_ALL_MARKERS" = c("provided", "max_geno_callrate"),
     "BAD_ARG_THRESH_MAF" = c("expected", "provided"),
+    "BAD_ARG_THRESH_MAF_FILTER_OUT_ALL_MARKERS" = c("provided", "max_geno_maf"),
     "BAD_ARG_THRESH_P" = c("expected", "provided"),
     "BAD_ARG_TRAIT" = c("expected", "provided"),
 
@@ -38,6 +40,9 @@ expect_engineError <- function(code) {
     "BAD_CROSSTABLE_UNAVAILABLE_INDS" = c("n_unavailable_ind", "unavailable_inds"),
 
     "BAD_GENOTYPE_UNPHASED" = c(),
+    "BAD_GENO_ALL_MONOMORPHIC_SNP" = c(),
+
+    "BAD_GENO_PHENO_NO_COMMON_INDS" = c(),
 
     "BAD_GWAS_FILE" = c(),
     "BAD_PROGENY_BLUP_FILE" = c("expected", "provided"),

@@ -1375,18 +1375,26 @@ prepareData <- function(gDta, pDta) {
   logger <- Logger$new("r-prepareData()")
   # Remove from geno data individuals that are not in phenotypic data-set
   logger$log("Remove from geno data individuals that are not in phenotypic data-set ...")
+  if (!any(rownames(pDta) %in% gDta@ped$id )) {
+    engineError("No common individuals found between genotypes and phenotypes data.",
+                extra = list(code = errorCode("BAD_GENO_PHENO_NO_COMMON_INDS")))
+  }
   gDta <- gaston::select.inds(gDta, id %in% rownames(pDta))
   logger$log("Remove from geno data individuals that are not in phenotypic data-set DONE")
 
 
   # reorder phenotypic data with id in bed matrix
   logger$log("reorder matrix ...")
-  pDta <- pDta[gDta@ped$id,,drop=F]
+  pDta <- pDta[gDta@ped$id,,drop = F]
   logger$log("reorder matrix DONE")
 
 
   # remove monomorphic markers
   logger$log("remove monomorphic markers ...")
+  if (!any(gDta@snps$maf > 0)) {
+    engineError("All SNP are monomorphic.",
+                extra = list(code = errorCode("BAD_GENO_ALL_MONOMORPHIC_SNP")))
+  }
   gDta <- gaston::select.snps(gDta, maf > 0)
   logger$log("remove monomorphic markers DONE")
 

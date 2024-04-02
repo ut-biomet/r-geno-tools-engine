@@ -226,7 +226,7 @@ check_response <- function(response) {
   invisible(TRUE)
 }
 
-check_thresh_maf <- function(thresh_maf) {
+check_thresh_maf <- function(thresh_maf, geno = NULL) {
   code <- "BAD_ARG_THRESH_MAF"
 
   if (!is.numeric(thresh_maf)) {
@@ -251,10 +251,19 @@ check_thresh_maf <- function(thresh_maf) {
                  n_skip_caller = 3,
                  extra = list(code = errorCode(code)))
   }
+  if (!is.null(geno)) {
+    if (!any(geno@snps$maf > thresh_maf)) {
+      engineError("The provided `thresh_maf` is too high and filter out all SNPs.",
+                  n_skip_caller = 3,
+                  extra = list(code = errorCode("BAD_ARG_THRESH_MAF_FILTER_OUT_ALL_MARKERS"),
+                               provided = thresh_maf,
+                               max_geno_maf = max(geno@snps$maf)))
+    }
+  }
   invisible(TRUE)
 }
 
-check_thresh_callrate <- function(thresh_callrate) {
+check_thresh_callrate <- function(thresh_callrate, geno = NULL) {
   code <- "BAD_ARG_THRESH_CALLRATE"
 
   if (!is.numeric(thresh_callrate)) {
@@ -278,6 +287,16 @@ check_thresh_callrate <- function(thresh_callrate) {
                  not = thresh_callrate,
                  n_skip_caller = 3,
                  extra = list(code = errorCode(code)))
+  }
+
+  if (!is.null(geno)) {
+    if (!any(geno@snps$callrate > thresh_callrate)) {
+      engineError("The provided `thresh_callrate` is too high and filter out all SNPs.",
+                  n_skip_caller = 3,
+                  extra = list(code = errorCode("BAD_ARG_THRESH_CALLRATE_FILTER_OUT_ALL_MARKERS"),
+                               provided = thresh_callrate,
+                               max_geno_collrate = max(geno@snps$callrate)))
+    }
   }
   invisible(TRUE)
 }

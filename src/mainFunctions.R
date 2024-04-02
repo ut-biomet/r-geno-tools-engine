@@ -51,8 +51,6 @@ run_gwas <- function(genoFile = NULL,
     fixed <- 0
   }
   check_response(response)
-  check_thresh_maf(thresh_maf)
-  check_thresh_callrate(thresh_callrate)
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
@@ -72,6 +70,9 @@ run_gwas <- function(genoFile = NULL,
   logger$log("Get data DONE")
 
   check_trait(trait, colnames(data$phenoData))
+  check_thresh_maf(thresh_maf, geno = data$genoData)
+  check_thresh_callrate(thresh_callrate, geno = data$genoData)
+
 
 
   logger$log("GWAS analysis ...")

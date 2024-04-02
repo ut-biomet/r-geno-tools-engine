@@ -73,7 +73,9 @@ capture.output({
                      outFile = NULL)
 
   wrongParamsL <- list(genoFile = c("/geno-do-not-exist", NA),
-                       phenoFile = c("/pheno-do-not-exist", NA, "../data/pheno_duplicated.csv"),
+                       phenoFile = c("/pheno-do-not-exist", NA,
+                                     "../data/pheno_duplicated.csv",
+                                     "../data/pheno_no_common_ind_with_geno.csv"),
                        trait = list("Trait.that.do.not.exist", c("a", "b"), NA),
                        test = list("not.a.test", c("c", "d"), NA),
                        fixed = list(-1, 1.5, "1", c(0,1)),
