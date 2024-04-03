@@ -3,8 +3,7 @@
   pkgs,
   runCommand,
   ...
-}:
-let
+}: let
   engines_R_deps = with pkgs.rPackages; [
     argparse
     R6
@@ -25,7 +24,7 @@ let
         rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
         sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
       };
-      propagatedBuildInputs =  with pkgs.rPackages; [data_table R6 vcfR];
+      propagatedBuildInputs = with pkgs.rPackages; [data_table R6 vcfR];
       nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR];
     })
   ];
@@ -36,15 +35,15 @@ let
   ];
 
   R_with_packages = pkgs.rWrapper.override {
-        packages = engines_R_deps;
-      };
+    packages = engines_R_deps;
+  };
   R_with_packages_test = pkgs.rWrapper.override {
-        packages = engines_R_deps ++ tests_R_deps ;
-      };
+    packages = engines_R_deps ++ tests_R_deps;
+  };
 in
   pkgs.stdenv.mkDerivation (finalAttrs: rec {
     pname = "r-geno-tools-engine";
-    version = "v1.0.1";
+    version = "v1.0.2";
 
     src = pkgs.lib.sources.cleanSource ../.;
 
