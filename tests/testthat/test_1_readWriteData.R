@@ -48,7 +48,8 @@ capture_output({
   # readPhenoData ----
   test_that("readPhenoData", {
     files <- c("../../data/pheno/testPhenoData01.csv",
-               "../data/resistance_initColl.csv")
+               "../data/resistance_initColl.csv",
+               "../data/pheno_OK_numeric_as_character.csv")
 
     for (file in files) {
       expect_no_error({
@@ -65,6 +66,11 @@ capture_output({
     err <- expect_engineError({
       dta <- readPhenoData("../data/pheno_duplicated.csv")
     })
+
+    err <- expect_engineError({
+      dta <- readPhenoData("../data/pheno_inconsistent_both_numeric_and_character_values.csv")
+    })
+
   })
 
 

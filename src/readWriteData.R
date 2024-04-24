@@ -451,6 +451,30 @@ readPhenoData <- function(file, ind.names = 1, ...) {
   dta <- dta[, -ind.names, drop = FALSE]
   logger$log("Set pheno data's row names DONE")
 
+
+  logger$log("Check data consistency ...")
+
+  accetpedColumnType <- c("numeric", "integer", "logical")
+  columnTypes <- sapply(dta, class)
+  if (!all(columnTypes %in% accetpedColumnType)) {
+    columnWithWrongTypes <- names(columnTypes)[!columnTypes %in% accetpedColumnType]
+    engineError(
+      paste0('Some phenotype data are not detected as any of the accepted types: "',
+             paste0(accetpedColumnType, collapse = '", "'),
+             '". Affected columns are: "',
+             paste0(columnWithWrongTypes, collapse = '", "'),
+             '". Please check your data.'
+             ),
+      extra = list(
+        code = errorCode("BAD_PHENO_DATA_CLASS"),
+        columnWithWrongTypes = columnWithWrongTypes,
+        detectedClass = columnTypes[columnWithWrongTypes]
+      )
+    )
+  }
+  logger$log("Check data consistency DONE")
+
+
   logger$log("DONE, return output.")
   dta
 }

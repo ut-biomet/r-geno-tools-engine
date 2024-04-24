@@ -126,6 +126,7 @@ errorCode <- function(code) {
     "BAD_GENO_ALL_MONOMORPHIC_SNP",
 
     "BAD_PHENOTYPE_DUPLICATES",
+    "BAD_PHENO_DATA_CLASS",
 
     "BAD_GENO_PHENO_NO_COMMON_INDS",
 
@@ -171,7 +172,7 @@ errorCode <- function(code) {
   if (is.null(codes[[code]])) {
     err <- structure(
       list(
-        message = paste0("Error code `", code, "` does not exist."),
+        message = paste0("Error code `", code, "` does not exist.")
       ),
       class = c("missingErrorCode", "error", "condition")
     )
