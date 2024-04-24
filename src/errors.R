@@ -25,6 +25,11 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
                     })), collapse = "\n")
   )
 
+  if ("code" %in% names(extra)) {
+    # make sure the error code exists
+    extra$code <- errorCode(extra$code)
+  }
+
   err <- structure(
     list(
       message = message,
