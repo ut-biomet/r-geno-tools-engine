@@ -513,7 +513,8 @@ capture_output({
   # readSNPcoord ----
   SNPcoordFiles <- c('../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
                      '../data/breedingGame_SNPcoord_missingIds.csv',
-                     '../data/breedingGame_SNPcoord_missingPhysPos.csv')
+                     '../data/breedingGame_SNPcoord_missingPhysPos.csv',
+                     '../data/breedingGame_SNPcoord_missingPhysPos_columns.csv')
   for (file in SNPcoordFiles) {
     test_that(paste('readSNPcoord', basename(file)), {
       expect_no_error({
@@ -616,7 +617,12 @@ capture_output({
       })
   })
 
-
+  file <- '../data/SNPcoord_linkmappos_not_number.csv'
+  test_that(paste('readSNPcoord', basename(file)), {
+      err <- expect_engineError({
+        SNPcoord <- readSNPcoord(file)
+      })
+  })
 
 
   # readMarkerEffects ----

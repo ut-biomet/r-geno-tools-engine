@@ -498,6 +498,13 @@ capture.output({
       crossTableFile = '../../data/crossingTable/breedGame_crossTable.csv',
       nCross = 3,
       outFile = tempfile(fileext = ".vcf.gz")
+    ),
+    missingPhysPosColumns = list(
+      phasedGenoFile = '../data/breedGame_phasedGeno_missingPos.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingPhysPos_columns.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_crossTable.csv',
+      nCross = 3,
+      outFile = tempfile(fileext = ".vcf.gz")
     )
   )
 
@@ -510,13 +517,23 @@ capture.output({
     outFile <- data$outFile
 
     test_that(paste('crossingSimulation -', names(crossigSimDataList)[i]), {
-      expect_no_error({
-        createdFile <- crossingSimulation(genoFile = phasedGenoFile,
-                                          crossTableFile = crossTableFile,
-                                          SNPcoordFile = SNPcoordFile,
-                                          nCross = nCross,
-                                          outFile = outFile)
-      })
+      if (grepl(pattern = "missingPhysPos", names(crossigSimDataList)[i])) {
+        expect_warning({
+          createdFile <- crossingSimulation(genoFile = phasedGenoFile,
+                                            crossTableFile = crossTableFile,
+                                            SNPcoordFile = SNPcoordFile,
+                                            nCross = nCross,
+                                            outFile = outFile)
+        })
+      } else {
+        expect_no_error({
+          createdFile <- crossingSimulation(genoFile = phasedGenoFile,
+                                            crossTableFile = crossTableFile,
+                                            SNPcoordFile = SNPcoordFile,
+                                            nCross = nCross,
+                                            outFile = outFile)
+        })
+      }
       expect_equal(createdFile, outFile)
       expect_no_error({
         createdGeno <- readGenoData(createdFile)
@@ -598,6 +615,13 @@ capture.output({
       markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
       outFile = tempfile(fileext = ".json")
     ),
+    missingPhysPosColumns = list(
+      genoFile = '../data/breedGame_phasedGeno_missingPos.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingPhysPos_columns.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
+      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
+      outFile = tempfile(fileext = ".json")
+    ),
     completeDta_severalTraits = list(
       genoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
       crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
@@ -616,16 +640,27 @@ capture.output({
     outFile <-  progBlupDataList[[i]]$outFile
 
     test_that(paste('calc_progenyBlupEstimation -', names(progBlupDataList)[i]), {
-      expect_no_error({
-        projBlups_list <- calc_progenyBlupEstimation(
-          genoFile = genoFile,
-          crossTableFile = crossTableFile,
-          SNPcoordFile = SNPcoordFile,
-          markerEffectsFile = markerEffectsFile,
-          outFile = outFile
-        )
-      })
-
+      if (grepl(pattern = "missingPhysPos", names(crossigSimDataList)[i])) {
+        expect_warning({
+          projBlups_list <- calc_progenyBlupEstimation(
+            genoFile = genoFile,
+            crossTableFile = crossTableFile,
+            SNPcoordFile = SNPcoordFile,
+            markerEffectsFile = markerEffectsFile,
+            outFile = outFile
+          )
+        })
+      } else {
+        expect_no_error({
+          projBlups_list <- calc_progenyBlupEstimation(
+            genoFile = genoFile,
+            crossTableFile = crossTableFile,
+            SNPcoordFile = SNPcoordFile,
+            markerEffectsFile = markerEffectsFile,
+            outFile = outFile
+          )
+        })
+      }
       expect_is(projBlups_list, "list")
       lapply(projBlups_list, function(projBlups){
         expect_is(projBlups, "list")
