@@ -137,7 +137,7 @@ genoRelMat <- function(geno) {
 
   ### Check input ----
   logger$log('Check inputs ...')
-  if (!all.equal(class(geno)[1], c('bed.matrix'))) {
+  if (!isTRUE(all.equal(class(geno)[1], c('bed.matrix')))) {
     bad_argument("geno", must_be = "a bed.matrix", not = geno, "type")
   }
   # remove monomorphic markers
