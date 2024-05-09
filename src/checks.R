@@ -77,6 +77,43 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
     user_SNPcoord <- user_SNPcoord[-additionalSNP,]
   }
 
+  if (all(is.na(user_SNPcoord$physPos))) {
+    # add vcf_file snp physical position to SNPcoord data frame
+    msg <- paste("SNP physical position was not provided in SNPcoord file.",
+                 "Those values are replaced with VCF's SNP physical positions.")
+    warning(msg)
+    user_SNPcoord[order(user_SNPcoord$SNPid), 'physPos'] <- vcf_SNPcoord[order(user_SNPcoord$SNPid), 'physPos']
+  }
+
+  if (!isTRUE(all.equal(user_SNPcoord[order(user_SNPcoord$SNPid), 'physPos'],
+                         vcf_SNPcoord[order(user_SNPcoord$SNPid), 'physPos']))) {
+    # if this is too strict, it could be changed to a warning and we replace
+    # the physical positions provided by the user with those from the VCF file.
+
+    snp_ids <- user_SNPcoord$SNPid[order(user_SNPcoord$SNPid)]
+    user_physPos <- user_SNPcoord[order(user_SNPcoord$SNPid), 'physPos']
+    vcf_physPos <- vcf_SNPcoord[order(user_SNPcoord$SNPid), 'physPos']
+    physPos_missmatch_ids <- snp_ids[which(user_physPos != vcf_physPos)]
+
+    engineError(paste0(
+      'SNPs coordinates file must have identical physical position when compared',
+      ' against the VCF file. There are ',
+      length(physPos_missmatch_ids),
+      ' missmatch between the provided SNPcoord file and VCF file on a total of',
+      length(snp_ids),
+      'SNPs. The ids of those SNPs are: `',
+      paste(physPos_missmatch_ids, collapse = "`, `"),
+      '`'
+    ),
+    extra = list(
+      "code" = errorCode("BAD_SNPCOORD_PHYSICAL_POS_VCF_MISSMATCH"),
+      "n_physPos_missmatch" = length(physPos_missmatch_ids),
+      "n_snp" = length(snp_ids),
+      "physPos_missmatch_ids" = physPos_missmatch_ids
+    ))
+  }
+
+
   inconsistent_order_chr <- unlist(lapply(unique(user_SNPcoord$chr), function(chr) {
     snpcoord <- user_SNPcoord[user_SNPcoord$chr == chr,]
     snpcoord <- snpcoord[order(snpcoord$physPos),]
@@ -93,10 +130,6 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
                   "affected_chr" = inconsistent_order_chr
                 ))
   }
-
-
-  # add vcf_file snp physical position to SNPcoord data frame
-  user_SNPcoord[order(user_SNPcoord$SNPid), 'physPos'] <- vcf_SNPcoord[order(vcf_SNPcoord$SNPid), 'physPos']
 
   return(user_SNPcoord)
 }

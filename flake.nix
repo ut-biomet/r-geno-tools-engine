@@ -27,6 +27,7 @@
             qqman
             vcfR
             pandoc
+            Rd2md
 
             (pkgs.rPackages.buildRPackage {
               name = "breedSimulatR";

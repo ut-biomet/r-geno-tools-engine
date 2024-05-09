@@ -805,12 +805,15 @@ readCrossTable <- function(file, header = TRUE) {
 #' @param file path of the SNPs coordinates file (`csv` file). This `.csv` file can have 4 named columns:
 #' - `chr`: Chromosome holding the SNP
 #' - `physPos`: SNP physical position on the chromosome
-#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
+#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan (mandatory)
 #' - `SNPid`: SNP's IDs
+#'
+#' Column `physPos` is optional except in some particular case (see below)
 #'
 #' If `SNPid` columns is missing or have missing values, the SNPid will be
 #' automatically imputed using the convention `chr@physPos` therefore columns
 #' `chr` and `physPos` should not have any missing values
+#'
 #'
 #' @return data.frame of 4 columns: 'chr', 'linkMapPos', 'SNPid'
 readSNPcoord <- function(file) {
@@ -850,6 +853,30 @@ readSNPcoord <- function(file) {
       )
     )
   }
+  # check linkMapPos are numeric
+  if (!is.numeric(SNPcoord$linkMapPos)) {
+    numeric_linkMapPos <- suppressWarnings({as.numeric(SNPcoord$linkMapPos)})
+    not_numeric_linkMapPos <- which(is.na(numeric_linkMapPos))
+    not_numeric_linkMapPos_ids <- SNPcoord$SNPid[not_numeric_linkMapPos]
+    engineError(paste0(
+      'SNPs coordinates file must have numeric linkage map positions. ',
+      'Positions of ',
+      length(not_numeric_linkMapPos_ids),
+      ' SNPs have NOT been detected as numeric on a total of ',
+      nrow(SNPcoord),
+      '. The ids of those SNPs are: `',
+      paste(not_numeric_linkMapPos_ids, collapse = "`, `"),
+      '`'
+      ),
+      extra = list(
+        code = errorCode("BAD_SNPCOORD_SNP_LINKMAP_POSITION_NOT_NUMERIC"),
+        n_snp = nrow(SNPcoord),
+        n_not_numeric_linkMapPos = length(not_numeric_linkMapPos),
+        not_numeric_linkMapPos_ids = not_numeric_linkMapPos_ids
+      )
+    )
+  }
+
   if (missingVar['SNPid'] & (missingVar['chr'] | missingVar['physPos'])) {
     # we need either SNPid or (chr and physPos)
     engineError(paste(
@@ -889,7 +916,6 @@ readSNPcoord <- function(file) {
       )
     )
   }
-
 
   # impute missing SNPid
   missingIDlines <- is.na(SNPcoord$SNPid)

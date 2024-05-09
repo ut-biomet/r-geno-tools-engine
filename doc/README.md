@@ -92,6 +92,101 @@ Argument      |Description
 `breedSimulatR`'s population object
 
 
+# `engineError`
+
+Title
+
+
+## Description
+
+Title
+
+
+## Usage
+
+```r
+engineError(message, extra = list(), n_skip_caller = 1)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`message`     |     error message
+`extra`     |     list of extra information
+`n_skip_caller`     |     (int, default 1) This is to catch the function where the error happens. 0 will show this function, 1 will show the function calling this one and so on.
+
+
+# `bad_argument`
+
+Raise error
+
+
+## Description
+
+To be used inside functions to check their arguments.
+ the error message will be:
+ "`arg` must be `must_be` not `not`"
+ (adapted from https://adv-r.hadley.nz/conditions.html#signalling)
+
+
+## Usage
+
+```r
+bad_argument(
+  arg,
+  must_be,
+  not = NULL,
+  errType = "value",
+  class = "engineError",
+  extra = NULL,
+  n_skip_caller = 2
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`arg`     |     (character) tested argument name
+`must_be`     |     (character) expected value or type
+`not`     |     (any) provided value
+`errType`     |     "type" is the only recognised value. Use it to report an error about the type of the argument
+`class`     |     use "engineError" (default) to raise an expected "engineError"
+`extra`     |     (list, default NULL) extra information to pass to engineError
+`n_skip_caller`     |     (int, default 2) see `engineError`
+
+
+## Examples
+
+```r
+x = "a"
+bad_argument("x", must_be = 42, not = x)
+# will stop with the error msg: "`x` must be 42 not `a`"
+bad_argument("x", must_be = "numeric", not = x, "type")
+# will stop with the error msg: "`x` must be numeric not `character`"
+```
+
+
+# `errorCode`
+
+list of error codes as function so that unexpected error code raise and error
+
+
+## Description
+
+list of error codes as function so that unexpected error code raise and error
+
+
+## Usage
+
+```r
+errorCode(code)
+```
+
+
 # `filterGWAS`
 
 Filter gwas results
@@ -223,7 +318,7 @@ run_gwas(
   phenoUrl = NULL,
   trait,
   test,
-  fixed = 0,
+  fixed = NULL,
   response = "quantitative",
   thresh_maf,
   thresh_callrate,
@@ -373,6 +468,7 @@ draw_ldPlot(
   genoUrl = NULL,
   from,
   to,
+  n_max = 50,
   outFile = tempfile(fileext = ".png")
 )
 ```
@@ -385,7 +481,8 @@ Argument      |Description
 `genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
 `from`     |     lower bound of the range of SNPs for which the LD is computed
 `to`     |     upper bound of the range of SNPs for which the LD is computed
-`outFile`     |     path of the png file to save the plot. If `NULL`, the image file will not be created. By default write in an tempoary `.png` file.
+`n_max`     |     maximum number of marker to show (to avoid unreadable plot) created. By default write in an tempoary `.png` file.
+`outFile`     |     path of the png file to save the plot. If `NULL`, the image file will not be
 
 
 ## Value
@@ -393,7 +490,7 @@ Argument      |Description
 path of the created file (or NULL if `file` is NULL)
 
 
-# `calc_pedRelMAt`
+# `calc_pedRelMat`
 
 Calculate pedigree relationship matrix
 
@@ -406,7 +503,7 @@ Calculate pedigree relationship matrix
 ## Usage
 
 ```r
-calc_pedRelMAt(
+calc_pedRelMat(
   pedFile = NULL,
   pedUrl = NULL,
   unknown_string = "",
@@ -443,7 +540,7 @@ list with 3 elements `relMat` the relationship matrix, `metadata` a
  of the file containing the results.
 
 
-# `calc_genoRelMAt`
+# `calc_genoRelMat`
 
 Calculate genomic relationship matrix
 
@@ -456,7 +553,7 @@ Calculate genomic relationship matrix
 ## Usage
 
 ```r
-calc_genoRelMAt(
+calc_genoRelMat(
   genoFile = NULL,
   genoUrl = NULL,
   outFile = tempfile(fileext = ".csv"),
@@ -670,10 +767,10 @@ Argument      |Description
 `genoUrl`     |     url of a phased VCF file path (ext `.vcf` or `.vcf.gz`)
 `crossTableFile`     |     path of the crossing table data file (`csv` file of 2 or 3 columns). It must contain the names of the variables as its first line. The column 1 and 2 will be interpreted as the parents ids. The optional third column will be interpreted as the offspring base name.
 `crossTableUrl`     |     URL of a crossing table file
-`SNPcoordFile`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs
+`SNPcoordFile`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file should have 4 named columns: - `chr`: Chromosome holding the SNP (mandatory) - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan (mandatory) - `SNPid`: SNP's IDs
 `SNPcoordUrl`     |     URL of a SNP coordinate file
 `nCross`     |     number of cross to simulate for each parent pair defined in the crossing table.
-`outFile`     |     path of the `.vcf.gz` file containing the simulated genotypes of the offspring. It must end by `.vcf.gz`. By default write in an temporary file.
+`outFile`     |     path of the `.vcf.gz` file containing the simulated genotypes of the offspring. It must end by `.vcf.gz`. By default write in an temporary file.  For SNPcoordFile/Url, column `physPos` is optional except in some particular case (see below). If this column is provided (or contain only missing values), it should exactly match the physical positions of the SNP specified in the VCF file. If `SNPid` columns is missing or have missing values, the SNPid will be automatically imputed using the convention `chr@physPos` therefore columns `chr` and `physPos` should not have any missing values in this case.
 
 
 ## Value
@@ -723,7 +820,7 @@ Argument      |Description
 `SNPcoordUrl`     |     URL of a SNP coordinate file
 `markerEffectsFile`     |     path of the marker effects file (`csv` or `json` file).
 `markerEffectsUrl`     |     URL of a marker effect file
-`outFile`     |     `.json` file path where to save the data. If the file already exists, it will be overwritten.
+`outFile`     |     `.json` file path where to save the data. If the file already exists, it will be overwritten.  For SNPcoordFile/Url, column `physPos` is optional except in some particular case (see below). If this column is provided (or contain only missing values), it should exactly match the physical positions of the SNP specified in the VCF file. If `SNPid` columns is missing or have missing values, the SNPid will be automatically imputed using the convention `chr@physPos` therefore columns `chr` and `physPos` should not have any missing values in this case.
 
 
 ## Value
@@ -751,6 +848,7 @@ draw_progBlupsPlot(
   errorBarInterval = 0.95,
   y_axisName = "Genetic values",
   sorting = "alpha",
+  trait = NULL,
   outFile = tempfile(fileext = ".html")
 )
 ```
@@ -765,6 +863,54 @@ Argument      |Description
 `errorBarInterval`     |     length of XX% interval of interest represented by the error bars (default=0.95)
 `y_axisName`     |     The Y axis name (default = "genetic values")
 `sorting`     |     method to sort the individuals (X axis) can be: - "asc": sort the BLUP expected value in ascending order (from left to right) - "dec": sort the BLUP expected value in decreasing order (from left to right) - any other value will sort the individuals in alphabetical order (from left to right)
+`outFile`     |     outFile path of the file containing the plot. If `NULL`, the output will not be written in any file. By default write in an temporary file.
+
+
+## Value
+
+plotly graph
+
+
+# `draw_progBlupsPlot_2traits`
+
+Draw a plotly graph of blups data for 2 traits
+
+
+## Description
+
+The points are located at the expected value and the ellipses
+ size represent the `confidenceLevel` prediction interval.
+
+
+## Usage
+
+```r
+draw_progBlupsPlot_2traits(
+  progEstimFile = NULL,
+  progEstimUrl = NULL,
+  x_trait,
+  y_trait,
+  confidenceLevel = 0.95,
+  x_suffix = "",
+  y_suffix = "",
+  ellipses_npoints = 100,
+  outFile = tempfile(fileext = ".html")
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`progEstimFile`     |     path of the progeny BLUP estimation file generated by r-geno-tools-engine containing the blup estimations of the progenies of some crosses (`json` file).
+`progEstimUrl`     |     URL of a progeny BLUP estimation file
+`x_trait`     |     name of the trait to show on the x axis
+`y_trait`     |     name of the trait to show on the y axis
+`confidenceLevel`     |     level of the prediction ellipses (default 0.95, ie 95 %  ellypses)
+`x_suffix`     |     suffix to add to the x axis's name
+`y_suffix`     |     suffix to add to the y axis's name
+`ellipses_npoints`     |     number of points used to draw the ellipses (default 100)
 `outFile`     |     outFile path of the file containing the plot. If `NULL`, the output will not be written in any file. By default write in an temporary file.
 
 
@@ -926,9 +1072,9 @@ Argument      |Description
 a `forceNetwork` object (`htmlwidget`)
 
 
-# `plotBlup`
+# `plotBlup_1trait`
 
-Draw a plotly graph of blups data
+Draw a plotly graph of blups data for 1 trait
 
 
 ## Description
@@ -940,11 +1086,12 @@ X axis is the crosses, and Y axis the blups. The points are located at the
 ## Usage
 
 ```r
-plotBlup(
+plotBlup_1trait(
   blupDta,
   sorting = "alpha",
-  y_axisName = "Genetic values",
-  errorBarInterval = 0.95
+  y_axisName = NULL,
+  errorBarInterval = 0.95,
+  trait
 )
 ```
 
@@ -953,10 +1100,55 @@ plotBlup(
 
 Argument      |Description
 ------------- |----------------
-`blupDta`     |     data.frame of 4 columns: "ind1", "ind2", "blup_exp", "blup_var"
+`blupDta`     |     list of data.frame of 4 columns: "ind1", "ind2", "blup_exp", "blup_var"
 `sorting`     |     method to sort the individuals (X axis) can be: - "asc": sort the BLUP expected value in ascending order (from left to right) - "dec": sort the BLUP expected value in decreasing order (from left to right) - any other value will sort the individuals in alphabetical order (from left to right)
-`y_axisName`     |     Name of the Y axis (default = "genetic values")
+`y_axisName`     |     Name of the Y axis (default = `trait`)
 `errorBarInterval`     |     length of XX% interval of interest represented by the error bars (default=0.95)
+`trait`     |     name of the trait to plot. This should be a name of the blupDta list. (optional if only one trait in `blupDta`, it will be set to the name of this trait)
+
+
+## Value
+
+plotly graph
+
+
+# `plotBlup_2traits`
+
+Draw a plotly graph of blups data for 2 traits
+
+
+## Description
+
+The points are located at the expected value and the ellipses
+ size represent the `confidenceLevel` prediction interval.
+
+
+## Usage
+
+```r
+plotBlup_2traits(
+  blupDta,
+  x_trait,
+  y_trait,
+  confidenceLevel = 0.95,
+  x_suffix = "",
+  y_suffix = "",
+  ellipses_npoints = 100
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`blupDta`     |     list returned by calc_progenyBlupEstimation
+`x_trait`     |     name of the trait to show on the x axis
+`y_trait`     |     name of the trait to show on the y axis
+`confidenceLevel`     |     level of the prediction ellipses (default 0.95, ie 95 %  ellypses)
+`x_suffix`     |     suffix to add to the x axis's name
+`y_suffix`     |     suffix to add to the y axis's name
+`ellipses_npoints`     |     number of points used to draw the ellipses (default 100)
 
 
 ## Value
@@ -998,13 +1190,13 @@ named list of matrices. List names are the chromosomes' names.
 
 # `calcProgenyGenetCovar`
 
-Calculate the genetic variance-covariance of matrix the progenies of 2 given
+Calculate the genetic variance-covariance matrix of the progenies of 2 given
  parents
 
 
 ## Description
 
-Calculate the genetic variance-covariance of matrix the progenies of 2 given
+Calculate the genetic variance-covariance matrix of the progenies of 2 given
  parents
 
 
@@ -1095,7 +1287,54 @@ Argument      |Description
 
 ## Value
 
-numeric
+list for each trait with a list with
+ - `sum` the global expected value for the trait (taking in account the intercept)
+ - `by_chr` list of the expected value for each chromosome (NOT taking in account the intercept)
+
+
+# `calcProgenyBlupCovariance`
+
+Calculate the variance covariance matrix of the progeny's blups for several
+ traits
+
+
+## Description
+
+Calculate the variance covariance matrix of the progeny's blups for several
+ traits
+
+
+## Usage
+
+```r
+calcProgenyBlupCovariance(
+  SNPcoord,
+  r,
+  haplo,
+  p1.id,
+  p2.id,
+  markerEffects,
+  blupExpectedValues
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`SNPcoord`     |     SNP coordinate data.frame return by `readSNPcoord`
+`r`     |     recombination rate matrices return by `calcRecombRate`
+`haplo`     |     haplotypes of individuals ("haplotypes" element of the list return by `readPhasedGeno` function)
+`p1.id`     |     id of the first parent
+`p2.id`     |     id of the second parent
+`blupExpectedValues`     |     output of `calcProgenyBlupExpected`
+`makrerEffects`     |     output of `readMarkerEffects`
+
+
+## Value
+
+matrix
 
 
 # `downloadGenoData`
@@ -1685,7 +1924,7 @@ readSNPcoord(file)
 
 Argument      |Description
 ------------- |----------------
-`file`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file can have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan - `SNPid`: SNP's IDs  If `SNPid` columns is missing or have missing values, the SNPid will be automatically imputed using the convention `chr@physPos` therefore columns `chr` and `physPos` should not have any missing values
+`file`     |     path of the SNPs coordinates file (`csv` file). This `.csv` file can have 4 named columns: - `chr`: Chromosome holding the SNP - `physPos`: SNP physical position on the chromosome - `linkMapPos`: SNP linkage map position on the chromosome in Morgan (mandatory) - `SNPid`: SNP's IDs  Column `physPos` is optional except in some particular case (see below)  If `SNPid` columns is missing or have missing values, the SNPid will be automatically imputed using the convention `chr@physPos` therefore columns `chr` and `physPos` should not have any missing values
 
 
 ## Value
@@ -2019,6 +2258,66 @@ Argument      |Description
 ------------- |----------------
 `df`     |     data.frame
 `file`     |     file path where to save the data. If the file already exists, it will be overwritten.
+
+
+## Value
+
+path of the created file
+
+
+# `save_blupVarExp_as_json`
+
+Save a R blupVarExp as json file
+
+
+## Description
+
+Save a R blupVarExp as json file
+
+
+## Usage
+
+```r
+save_blupVarExp_as_json(blupVarExp, file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`blupVarExp`     |     list (cf. `calc_progenyBlupEstimation()`)
+`file`     |     file path where to save the data. If the file already exists, it will be overwritten.
+
+
+## Value
+
+path of the created file
+
+
+# `save_plotly`
+
+Save a plotly graph
+
+
+## Description
+
+Save a plotly graph
+
+
+## Usage
+
+```r
+save_plotly(plot, file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`plot`     |     graph generated with plotly
+`file`     |     file path where to save the html graph. If the file already exists, it will be overwritten.
 
 
 ## Value

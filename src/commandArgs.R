@@ -224,17 +224,18 @@ arg$SNPcoordFile$flag = '--SNPcoordFile'
 arg$SNPcoordFile$help = paste("path of the SNPs coordinates",
                               "file (`csv` file). This `.csv` file can have",
                               "4 named columns:\\n",
-                              "- `chr`: chromosome name holding the SNP\\n",
+                              "- `chr`: chromosome name holding the SNP (mandatory)\\n",
                               "- `physPos`: physical position of the SNP on",
                               "the chromosome\\n",
                               "- `linkMapPos`: linkage map position of the SNP",
-                              "on the chromosome in Morgan\\n",
+                              "on the chromosome in Morgan (mandatory)\\n",
                               "- `SNPid`: ID of the SNP\\n",
-                              "If `SNPid` columns is missing or have missing",
-                              "values, the SNPid will be automatically imputed",
-                              "using the convention `chr@physPos` therefore",
-                              "columns `chr` and `physPos` should not have",
-                              "any missing values")
+                              "Column `physPos` is optional except in some particular case (see below).\\n",
+                              "If this column is provided (or contain only missing values), it should",
+                              "exactly match the physical positions of the SNP specified in the VCF file.\\n",
+                              "If `SNPid` columns is missing or have missing values, the SNPid will be",
+                              "automatically imputed using the convention `chr@physPos` therefore columns",
+                              "`chr` and `physPos` should not have any missing values in this case.")
 arg$SNPcoordFile$type = 'character'
 
 

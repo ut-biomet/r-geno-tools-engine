@@ -784,9 +784,9 @@ draw_pedNetwork <- function(pedFile = NULL,
 #' @param crossTableUrl URL of a crossing table file
 #' @param SNPcoordFile path of the SNPs coordinates file
 #' (`csv` file). This `.csv` file should have 4 named columns:
-#' - `chr`: Chromosome holding the SNP
+#' - `chr`: Chromosome holding the SNP (mandatory)
 #' - `physPos`: SNP physical position on the chromosome
-#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan
+#' - `linkMapPos`: SNP linkage map position on the chromosome in Morgan (mandatory)
 #' - `SNPid`: SNP's IDs
 #' @param SNPcoordUrl URL of a SNP coordinate file
 #' @param nCross number of cross to simulate for each parent pair defined
@@ -794,6 +794,13 @@ draw_pedNetwork <- function(pedFile = NULL,
 #' @param outFile path of the `.vcf.gz` file containing the simulated genotypes
 #' of the offspring. It must end by `.vcf.gz`. By default write in an temporary
 #' file.
+#'
+#' For SNPcoordFile/Url, column `physPos` is optional except in some particular case (see below).
+#' If this column is provided (or contain only missing values), it should
+#' exactly match the physical positions of the SNP specified in the VCF file.
+#' If `SNPid` columns is missing or have missing values, the SNPid will be
+#' automatically imputed using the convention `chr@physPos` therefore columns
+#' `chr` and `physPos` should not have any missing values in this case.
 #'
 #' @return path of the `.vcf.gz` file containing the simulated genotypes
 #' of the offspring.
@@ -915,6 +922,13 @@ crossingSimulation <- function(genoFile = NULL,
 #' @param markerEffectsUrl URL of a marker effect file
 #' @param outFile `.json` file path where to save the data. If the file already exists,
 #' it will be overwritten.
+#'
+#' For SNPcoordFile/Url, column `physPos` is optional except in some particular case (see below).
+#' If this column is provided (or contain only missing values), it should
+#' exactly match the physical positions of the SNP specified in the VCF file.
+#' If `SNPid` columns is missing or have missing values, the SNPid will be
+#' automatically imputed using the convention `chr@physPos` therefore columns
+#' `chr` and `physPos` should not have any missing values in this case.
 #'
 #' @return data.frame containing the calculations results
 calc_progenyBlupEstimation <- function(genoFile = NULL,
