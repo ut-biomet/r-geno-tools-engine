@@ -1,9 +1,14 @@
-#' Title
+#' Main function to raise an `engineError` (ie. expected error)
+#'
+#' This function is similar to the R's `stop` function and should be used
+#' instead to ensure we raise expected errors.
 #'
 #' @param message error message
-#' @param extra list of extra information
+#' @param extra list of extra information that will be included in the error
 #' @param n_skip_caller (int, default 1) This is to catch the function where the
 #' error happens. 0 will show this function, 1 will show the function calling this one and so on.
+#'
+#'
 #'
 engineError <- function(message, extra = list(), n_skip_caller = 1) {
   error_locations <- c()
@@ -46,7 +51,7 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
 }
 
 
-#' Raise error
+#' Helper function to raise an `engineError` for a "bad argument"
 #'
 #' To be used inside functions to check their arguments.
 #' the error message will be:
