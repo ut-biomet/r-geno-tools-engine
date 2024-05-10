@@ -94,12 +94,13 @@ Argument      |Description
 
 # `engineError`
 
-Title
+Main function to raise an `engineError` (ie. expected error)
 
 
 ## Description
 
-Title
+This function is similar to the R's `stop` function and should be used
+ instead to ensure we raise expected errors.
 
 
 ## Usage
@@ -114,13 +115,13 @@ engineError(message, extra = list(), n_skip_caller = 1)
 Argument      |Description
 ------------- |----------------
 `message`     |     error message
-`extra`     |     list of extra information
+`extra`     |     list of extra information that will be included in the error
 `n_skip_caller`     |     (int, default 1) This is to catch the function where the error happens. 0 will show this function, 1 will show the function calling this one and so on.
 
 
 # `bad_argument`
 
-Raise error
+Helper function to raise an `engineError` for a "bad argument"
 
 
 ## Description
@@ -296,6 +297,29 @@ The method "hommel" is not implemented because it is too long to calculate.
 ## Value
 
 list of two elements: "p_adj" vector of adjusted p values, "thresh_adj" the adjusted threshold (if thresh_p is preovided, NULL if not)
+
+
+# `Logger`
+
+R6 class use to log messages in this engine's function
+
+
+## Description
+
+R6 class use to log messages in this engine's function
+ 
+ R6 class use to log messages in this engine's function
+
+
+## Examples
+
+```r
+## ------------------------------------------------
+## Method `Logger$new`
+## ------------------------------------------------
+
+mylogger <- Logger$new(context = NULL)
+```
 
 
 # `run_gwas`
@@ -2431,29 +2455,6 @@ matrix
 Hiroyoshi Iwata, Julien Diot
 
 
-# `Logger`
-
-R6 class use to log messages in this engine's function
-
-
-## Description
-
-R6 class use to log messages in this engine's function
- 
- R6 class use to log messages in this engine's function
-
-
-## Examples
-
-```r
-## ------------------------------------------------
-## Method `Logger$new`
-## ------------------------------------------------
-
-mylogger <- Logger$new(context = NULL)
-```
-
-
 # `supThisWarning`
 
 Do not show a specific warning message
@@ -2482,57 +2483,5 @@ Argument      |Description
 ## Details
 
 This is based on the `base::suppressWarnings` function.
-
-
-# `writeDoc`
-
-Write engine documentation
-
-
-## Description
-
-Write engine documentation
-
-
-## Usage
-
-```r
-writeDoc(srcDir = "./src", docDir = "./doc")
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`srcDir`     |     path of R sources folder (default "./src")
-`docDir`     |     path of documentation folder (default "./doc")
-
-
-## Details
-
-Write engine's functions documentation in a README.md file located in `docDir`.
-
-
-# `createResultExample`
-
-Create results example files
-
-
-## Description
-
-Create results example files
-
-
-## Usage
-
-```r
-createResultExample()
-```
-
-
-## Details
-
-Use predefined input/output files
 
 

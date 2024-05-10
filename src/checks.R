@@ -223,7 +223,7 @@ check_fixed <- function(fixed, test) {
                    extra = list(code = errorCode(code),
                                 test = test))
     }
-  } else if (!(is.null(fixed) | fixed == 0)) {
+  } else if (!(is.null(fixed) || fixed == 0)) {
     warning('`fixed` seems to have been set but it will not be taken in account when `test` is "',
             test, '"')
   }

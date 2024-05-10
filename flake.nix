@@ -28,6 +28,7 @@
             vcfR
             pandoc
             Rd2md
+            roxygen2
 
             (pkgs.rPackages.buildRPackage {
               name = "breedSimulatR";
@@ -73,7 +74,6 @@
         };
 
         apps = {
-          # example of "apps" that could be run with `nix run .\#<name> -- --args`
           testsRepo = let
             testsRepo = pkgs.writeShellApplication {
               name = "testsRepo";
@@ -85,6 +85,30 @@
           in {
             type = "app";
             program = "${testsRepo}/bin/testsRepo";
+          };
+
+          writeDoc = let
+            writeDoc = pkgs.writeShellApplication {
+              name = "writeDoc";
+              text = ''
+                Rscript --vanilla -e "source('tools/tools.R'); writeDoc()"
+              '';
+            };
+          in {
+            type = "app";
+            program = "${writeDoc}/bin/writeDoc";
+          };
+
+          createResultExample = let
+            createResultExample = pkgs.writeShellApplication {
+              name = "createResultExample";
+              text = ''
+                Rscript --vanilla -e "source('tools/tools.R'); createResultExample()"
+              '';
+            };
+          in {
+            type = "app";
+            program = "${createResultExample}/bin/createResultExample";
           };
         };
       }

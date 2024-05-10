@@ -877,7 +877,7 @@ readSNPcoord <- function(file) {
     )
   }
 
-  if (missingVar['SNPid'] & (missingVar['chr'] | missingVar['physPos'])) {
+  if (missingVar['SNPid'] & (missingVar['chr'] || missingVar['physPos'])) {
     # we need either SNPid or (chr and physPos)
     engineError(paste(
       'snps coordinates file should have a header specifying either ',
