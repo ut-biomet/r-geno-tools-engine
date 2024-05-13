@@ -79,7 +79,8 @@ in
       cp ./r-geno-tools-engine.R build/bin/r-geno-tools-engine.R
       wrapProgram $(pwd)/build/bin/r-geno-tools-engine.R \
         --set PATH ${lib.makeBinPath (propagatedBuildInputs ++ [pkgs.coreutils])} \
-        --set RGENOROOT $(pwd)/build
+        --set RGENOROOT $(pwd)/build \
+        --set R_LIBS_USER "\"\""
 
       mkdir build/test_data
       cp ./data/geno/testMarkerData01.vcf.gz build/test_data/.
