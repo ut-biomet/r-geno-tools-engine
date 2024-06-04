@@ -13,6 +13,26 @@
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {inherit system;};
+
+        vegan_withoutX = pkgs.rPackages.vegan.override {
+          requireX = false;
+        };
+        vcfR_deps = with pkgs.rPackages; [
+          ape
+          dplyr
+          magrittr
+          memuse
+          pinfsc50
+          Rcpp
+          stringr
+          tibble
+          viridisLite
+          vegan_withoutX
+        ];
+        vcfR_withoutX = pkgs.rPackages.vcfR.overrideAttrs (oldAttrs: {
+          propagatedBuildInputs = vcfR_deps;
+          nativeBuildInputs = vcfR_deps;
+        });
         R-with-my-packages = pkgs.rWrapper.override {
           packages = with pkgs.rPackages; [
             argparse
@@ -25,22 +45,24 @@
             networkD3
             plotly
             qqman
-            vcfR
+            vcfR_withoutX
             pandoc
             Rd2md
             roxygen2
 
-            (pkgs.rPackages.buildRPackage {
-              name = "breedSimulatR";
-              src = pkgs.fetchFromGitHub {
-                owner = "ut-biomet";
-                repo = "breedSimulatR";
-                rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
-                sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
-              };
-              propagatedBuildInputs = with pkgs.rPackages; [data_table R6 vcfR];
-              nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR];
-            })
+            (
+              pkgs.rPackages.buildRPackage {
+                name = "breedSimulatR";
+                src = pkgs.fetchFromGitHub {
+                  owner = "ut-biomet";
+                  repo = "breedSimulatR";
+                  rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
+                  sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
+                };
+                propagatedBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
+                nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
+              }
+            )
 
             /*
             developement packages
