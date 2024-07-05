@@ -890,7 +890,7 @@ readSNPcoord <- function(file) {
   }
   # add missing values for missing variables
   if (any(missingVar)) {
-    SNPcoord[[names(which(missingVar))]] <- NA
+    SNPcoord[, names(which(missingVar))] <- NA
   }
   SNPcoord <- SNPcoord[, c("chr", "physPos", "SNPid", "linkMapPos")]
   # check missing values
