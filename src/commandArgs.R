@@ -224,7 +224,7 @@ arg$SNPcoordFile$flag = '--SNPcoordFile'
 arg$SNPcoordFile$help = paste("path of the SNPs coordinates",
                               "file (`csv` file). This `.csv` file can have",
                               "4 named columns:\\n",
-                              "- `chr`: chromosome name holding the SNP (mandatory)\\n",
+                              "- `chr`: chromosome name holding the SNP\\n",
                               "- `physPos`: physical position of the SNP on",
                               "the chromosome\\n",
                               "- `linkMapPos`: linkage map position of the SNP",

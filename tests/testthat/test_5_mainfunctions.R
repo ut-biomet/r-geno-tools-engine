@@ -485,6 +485,13 @@ capture.output({
       nCross = 3,
       outFile = tempfile(fileext = ".vcf.gz")
     ),
+    missingChr = list(
+      phasedGenoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingChr.csv',
+      crossTableFile = '../../data/crossingTable/breedGame_crossTable.csv',
+      nCross = 3,
+      outFile = tempfile(fileext = ".vcf.gz")
+    ),
     missingSNPid = list(
       phasedGenoFile = '../data/breedGame_phasedGeno_missingIds.vcf.gz',
       SNPcoordFile = '../data/breedingGame_SNPcoord_missingIds.csv',
@@ -517,7 +524,7 @@ capture.output({
     outFile <- data$outFile
 
     test_that(paste('crossingSimulation -', names(crossigSimDataList)[i]), {
-      if (grepl(pattern = "missingPhysPos", names(crossigSimDataList)[i])) {
+      if (grepl(pattern = "missingPhysPos|missingChr", names(crossigSimDataList)[i])) {
         expect_warning({
           createdFile <- crossingSimulation(genoFile = phasedGenoFile,
                                             crossTableFile = crossTableFile,
@@ -601,6 +608,13 @@ capture.output({
       markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
       outFile = tempfile(fileext = ".json")
     ),
+    missingChr = list(
+      genoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
+      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
+      SNPcoordFile = '../data/breedingGame_SNPcoord_missingChr.csv',
+      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.csv',
+      outFile = tempfile(fileext = ".json")
+    ),
     missingSNPid = list(
       genoFile = '../data/breedGame_phasedGeno_missingIds.vcf.gz',
       SNPcoordFile = '../data/breedingGame_SNPcoord_missingIds.csv',
@@ -640,7 +654,7 @@ capture.output({
     outFile <-  progBlupDataList[[i]]$outFile
 
     test_that(paste('calc_progenyBlupEstimation -', names(progBlupDataList)[i]), {
-      if (grepl(pattern = "missingPhysPos", names(crossigSimDataList)[i])) {
+      if (grepl(pattern = "missingPhysPos|missingChr", names(crossigSimDataList)[i])) {
         expect_warning({
           projBlups_list <- calc_progenyBlupEstimation(
             genoFile = genoFile,
