@@ -92,6 +92,14 @@
             R-with-my-packages
             pkgs.pandoc
             pkgs.python3
+            (
+              (pkgs.callPackage ./nix_pkgs/default.nix {
+                inherit pkgs;
+              })
+              .overrideAttrs (oldAttrs: {
+                doCheck = false;
+              })
+            )
           ];
         };
 
