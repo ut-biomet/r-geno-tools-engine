@@ -126,60 +126,116 @@ pedRelMat <- function(ped) {
 
 
 
-#' Genomic Relationship Matrix calculation
+
+#' Additive Genomic Matrix
 #'
 #' @param geno `gaston::bed.matrix` return by `readGenoData` function
+#' @param standardized `boolean` (default TRUE) control if the returned genetic
+#' matrix should be standardized.
+#'
+#' @details The standardization is made with: (x - 2*p) / sqrt(2*p*(1 - p)) with x the
+#' genetic values in alleles dose and p the allelic frequency.
 #'
 #' @return matrix
-#' @author Hiroyoshi Iwata, Julien Diot
-genoRelMat <- function(geno) {
-  logger <- Logger$new("r-genodRelMat()")
-
-  ### Check input ----
-  logger$log('Check inputs ...')
-  if (!isTRUE(all.equal(class(geno)[1], c('bed.matrix')))) {
-    bad_argument("geno", must_be = "a bed.matrix", not = geno, "type")
+calc_additive_geno <- function(geno, standardized = TRUE){
+  if (standardized) {
+    gaston::standardize(geno) <- "p"
+    # this is equivalent of `(x - 2*p) / sqrt(2*p*(1 - p))`
+    # with x in allele dose
+  } else {
+    gaston::standardize(geno) <- "none"
   }
-  # remove monomorphic markers
-  geno <- gaston::select.snps(geno, maf != 0)
-  logger$log('Check inputs DONE')
-
-
-  # calculate genetic relationship matrix
-  logger$log('Calculate genomic relationship matrix ...')
-
-  # # the following is an alternative to `gaston`
-  # X <- gaston::as.matrix(geno)
-  # logger$log('Scale genomic matrix ...')
-  # X_scaled <- scale(X)
-  # logger$log('Scale genomic matrix DONE')
-  # if (any(is.na(X_scaled))) {
-  # logger$log('Impute missing values ...')
-  #   X_scaled[is.na(X_scaled)] <- 0
-  # logger$log('Impute missing values DONE')
-  # }
-  # logger$log('Calculate crossproduct (this might take a while) ...')
-  # grm <- matrix(0, nrow = nrow(X_scaled), ncol = nrow(X_scaled))
-  # nSplit <- 100 # this value might probably be optimized
-  # for (i in 1:nSplit ) {
-  #   logger$log(paste0('\t', i, ' / ', nSplit, ' ...'), context = FALSE)
-  #   sel <- (1:ncol(X_scaled)) %% nSplit == i - 1
-  #   grm <- grm + tcrossprod(X_scaled[, sel])
-  # }
-  # grm / ncol(X_scaled)
-  # logger$log('Calculate crossproduct DONE')
-
-
-  grm <- gaston::GRM(geno, autosome.only = FALSE)
-  logger$log('Calculate genomic relationship matrix DONE')
-
-
-  ### output ----
-  logger$log("DONE, return output.")
-  return(grm)
-
+  return(gaston::as.matrix(geno))
 }
 
+#' Additive Genomic Relationship Matrix calculation
+#'
+#' @param geno `gaston::bed.matrix` return by `readGenoData` function
+#' @param standardized `boolean` (default TRUE) control if the calculation
+#' should be done on the standardized additive genetic matrix.
+#'
+#' @return list of 2 elements:
+#' - `geno_mat`: the genetic matrix used for calculating the relationship matrix
+#' - `rel_mat`: the relationship matrix
+calc_additive_rel_mat <- function(geno, standardized = TRUE) {
+  if (standardized) {
+    return(
+      list(
+        geno_mat = calc_additive_geno(geno, standardized = TRUE),
+        rel_mat = gaston::GRM(geno, autosome.only = FALSE)
+      )
+    )
+  }
+
+  X <- calc_additive_geno(geno, standardized = FALSE)
+  list(
+    geno_mat = X,
+    rel_mat = tcrossprod(X) / ncol(X)
+  )
+}
+
+#' Dominance Genomic Matrix
+#'
+#' @param geno `gaston::bed.matrix` return by `readGenoData` function
+#' @param standardized `boolean` (default TRUE) control if the returned genetic
+#' matrix should be standardized.
+#'
+#' @details The standardization is made with the matrix with entries
+#' `p/(1 - p)`, `-1`, `(1-p)/p` according to the values `0`, `1`, `2` in the
+#' genetic matrix, with p the allele frequency (cf. `?gaston::DM`)
+#'
+#' @return matrix
+calc_dominance_geno <- function(geno, standardized = TRUE){
+  gaston::standardize(geno) <- "none"
+
+  if (standardized) {
+    D <- apply(gaston::as.matrix(geno), MARGIN = 2, function(x) {
+      af <- sum(x) / (2*length(x))
+      i <- af/(1 - af)
+      j <- -1
+      k <- (1 - af)/af
+
+      (
+        i * as.numeric(x == 0)
+        + j * as.numeric(x == 1)
+        + k * as.numeric(x == 2)
+      )
+    })
+    colnames(D) <- geno@snps$id
+    row.names(D) <- geno@ped$id
+    return(D)
+  }
+
+  return(-abs(gaston::as.matrix(geno) - 1) + 1)
+}
+
+#' Dominance Genomic Relationship Matrix calculation
+#'
+#' @param geno `gaston::bed.matrix` return by `readGenoData` function
+#' @param standardized `boolean` (default TRUE) control if the calculation
+#' should be done on the standardized dominance genetic matrix.
+#'
+#' @return list of 2 elements:
+#' - `geno_mat`: the genetic matrix used for calculating the relationship matrix
+#' - `rel_mat`: the relationship matrix
+calc_dominance_rel_mat <- function(geno, standardized = TRUE) {
+  if (standardized) {
+    return(
+      list(
+        geno_mat = calc_dominance_geno(geno, standardized = TRUE),
+        rel_mat = gaston::DM(geno, autosome.only = FALSE)
+      )
+    )
+  }
+
+  D <- calc_dominance_geno(geno, standardized = FALSE)
+  return(
+    list(
+      geno_mat = D,
+      rel_mat = tcrossprod(D) / ncol(D)
+    )
+  )
+}
 
 
 #' Combined (pedigree + genomic) Relationship Matrix

@@ -489,7 +489,7 @@ calc_genoRelMat <- function(genoFile = NULL,
   }
 
   logger$log("Calcualte genomic relationship matrix ...")
-  relMat <- genoRelMat(geno = geno)
+  relMat <- calc_additive_rel_mat(geno = geno, standardized = TRUE)$rel_mat
   logger$log("Calcualte genomic relationship matrix DONE")
   logger$log("Get metadata ...")
   metadata <- list(info = "R-geno-engine, genomic relationship matrix",

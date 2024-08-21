@@ -33,47 +33,51 @@
           propagatedBuildInputs = vcfR_deps;
           nativeBuildInputs = vcfR_deps;
         });
-        R-with-my-packages = pkgs.rWrapper.override {
-          packages = with pkgs.rPackages; [
-            argparse
-            R6
-            digest
-            ellipse
-            gaston
-            jsonlite
-            manhattanly
-            networkD3
-            plotly
-            qqman
-            vcfR_withoutX
-            pandoc
-            Rd2md
-            roxygen2
 
-            (
-              pkgs.rPackages.buildRPackage {
-                name = "breedSimulatR";
-                src = pkgs.fetchFromGitHub {
-                  owner = "ut-biomet";
-                  repo = "breedSimulatR";
-                  rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
-                  sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
-                };
-                propagatedBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
-                nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
-              }
-            )
+        R-packages = with pkgs.rPackages; [
+          argparse
+          R6
+          digest
+          ellipse
+          gaston
+          jsonlite
+          manhattanly
+          networkD3
+          qqman
+          plotly
+          vcfR_withoutX
+          pandoc
+          Rd2md
+          roxygen2
 
-            /*
-            developement packages
-            */
-            testthat
-            AGHmatrix
+          sommer
 
-            languageserver
-            styler
-          ];
-        };
+          caret
+          RAINBOWR
+
+          (
+            pkgs.rPackages.buildRPackage {
+              name = "breedSimulatR";
+              src = pkgs.fetchFromGitHub {
+                owner = "ut-biomet";
+                repo = "breedSimulatR";
+                rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
+                sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
+              };
+              propagatedBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
+              nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
+            }
+          )
+
+          /*
+          developement packages
+          */
+          testthat
+          AGHmatrix
+
+          languageserver
+          styler
+        ];
       in rec {
         packages.r-geno-tools-engine = pkgs.callPackage ./nix_pkgs/default.nix {
           inherit pkgs;
@@ -89,7 +93,8 @@
           R_PROFILE_USER = "''"; # to disable`.Rprofile` files (eg. when the project already use `renv`)
           nativeBuildInputs = [pkgs.bashInteractive];
           buildInputs = [
-            R-with-my-packages
+            (pkgs.rWrapper.override {packages = R-packages;})
+            (pkgs.rstudioWrapper.override {packages = R-packages;})
             pkgs.pandoc
             pkgs.python3
             (

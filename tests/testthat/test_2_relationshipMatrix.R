@@ -46,24 +46,30 @@ capture_output({
   # genoRelMat ----
   genoFiles <- c('../../data/geno/breedGame_geno.vcf.gz')
   for (file in genoFiles) {
-    test_that(paste("genoRelMat", basename(file)), {
+    test_that(paste("calc_additive_rel_mat", basename(file)), {
       geno <- readGenoData(file)
       # reduce `geno` size to be faster
       geno <- gaston::select.inds(geno, id %in% sample(geno@ped$id, 100))
 
       expect_no_error({
-        relMat <- genoRelMat(geno)
+        relMat <- calc_additive_rel_mat(geno = geno, standardized = TRUE)
       })
-      expect_true(is.matrix(relMat))
-      expect_true(is.numeric(relMat))
-      expect_true(isSymmetric(relMat))
-      expect_true(!any(is.na(relMat)))
-      expect_true(!is.null(colnames(relMat)))
-      expect_true(!is.null(row.names(relMat)))
-      expect_identical(colnames(relMat), row.names(relMat))
-      expect_identical(geno@ped$id, colnames(relMat))
+      expect_true(is.matrix(relMat$rel_mat))
+      expect_true(is.numeric(relMat$rel_mat))
+      expect_true(isSymmetric(relMat$rel_mat))
+      expect_true(!any(is.na(relMat$rel_mat)))
+      expect_true(!is.null(colnames(relMat$rel_mat)))
+      expect_true(!is.null(row.names(relMat$rel_mat)))
+      expect_identical(colnames(relMat$rel_mat), row.names(relMat$rel_mat))
+      expect_identical(geno@ped$id, colnames(relMat$rel_mat))
+
+      stop("TODO add new checks because of the updated function")
     })
   }
+
+  stop("TODO add tests for dominance")
+  stop("TODO add tests for additive genetic matrix")
+  stop("TODO add tests for dominance genetic matrix")
 
 
   # combinedRelMat ----
@@ -72,7 +78,7 @@ capture_output({
   A <- A[sampledInds, sampledInds]
   geno <- readGenoData('../../data/geno/breedGame_geno.vcf.gz')
   geno <- gaston::select.inds(geno, id %in% sampledInds)
-  G <- genoRelMat(geno)
+  G <- calc_additive_rel_mat(geno = geno, standardized = TRUE)$rel_mat
 
   paramList <- list(
     default = list(ped_rm = A, geno_rm = G),

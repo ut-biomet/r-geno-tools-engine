@@ -215,6 +215,290 @@ Argument      |Description
 `filter_quant`     |     [numeric] threshold to keep only the filter_quant*100 %  of the points with the lowest p-values for the plot (default no filtering)
 
 
+# `fit_with_gaston`
+
+Fit a GS model using `gaston` package
+
+
+## Description
+
+Fit a GS model using `gaston` package
+
+
+## Usage
+
+```r
+fit_with_gaston(pheno, K)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`pheno`     |     **1 dimensional** vector of phenotypic values
+`K`     |     list of 1 or 2 variance covariance matrices to consider for the random effect.
+
+
+## Details
+
+This is a wrapper around `gaston::lmm.aireml()` see
+ `?gaston::lmm.aireml()` for more information
+
+
+## Value
+
+list of 3 elements
+ - `logL`: Value of log-likelihood of the model (cf. `?gaston::lmm.aireml()`)
+ - `blups`: `length(pheno)` by `length(K)` matrix of the blups of the
+ individuals (one random effects per column).
+ - `intercept`: value of the intercept of the model
+
+
+# `fit_with_rainbowr`
+
+Fit a GS model using `RAINBOWR` package
+
+
+## Description
+
+Fit a GS model using `RAINBOWR` package
+
+
+## Usage
+
+```r
+fit_with_rainbowr(pheno, K)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`pheno`     |     **1 dimensional** vector of phenotypic values
+`K`     |     list of 1 or 2 variance covariance matrices used for the random effect.
+
+
+## Details
+
+This is a wrapper around `RAINBOWR::EM3.general()` see
+ `?RAINBOWR::EM3.general()` for more information
+
+
+## Value
+
+list of 3 elements
+ - `logL`: Value of log-likelihood of the model (cf. `?RAINBOWR::EM3.general()`)
+ - `blups`: `length(pheno)` by `length(K)` matrix of the blups of the
+ individuals (one random effects per column).
+ - `intercept`: value of the intercept of the model
+
+
+# `calc_mark_eff`
+
+Calculate markers effects from the BLUPS, the genetic matrix and the
+ variance covariance matrix of the blups (ie. genetic relationship matrices)
+
+
+## Description
+
+Calculate markers effects from the BLUPS, the genetic matrix and the
+ variance covariance matrix of the blups (ie. genetic relationship matrices)
+
+
+## Usage
+
+```r
+calc_mark_eff(geno_mat, rel_mat, blups)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`geno_mat`     |     `n_inds` by `n_marker` genomic matrix
+`rel_mat`     |     `n_inds` by `n_inds` relationship matrix associated to `geno_mat`
+`blups`     |     `n_inds` vector of the individuals blups effect.
+
+
+## Details
+
+Calculation is made by
+ 
+$$(\frac{X}{n_{mark}})(\frac{X}{n_{mark}})'Z^{-1}B$$
+ 
+ 
+ with:
+ - $X$ the genetic matrix
+ - $n_ mark $ the number of markers (ie. number of columns of $X$)
+ - $Z$ the relationship matrix of $X$
+ - $B$ the blups of the individuals
+
+
+## Value
+
+vector of the estimated markers effects
+
+
+# `train_gs_model`
+
+Train GS model optionally with dominance
+
+
+## Description
+
+Train GS model optionally with dominance
+
+
+## Usage
+
+```r
+train_gs_model(pheno, geno, with_dominance = FALSE)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`pheno`     |     1 column data.frame of the phenotype
+`geno`     |     bed.matrix returned by `readGenoData()`
+`with_dominance`     |     (default = FALSE) control if the model should include dominance effects
+
+
+## Details
+
+IMPORTANT ! It will return the markers effects for the genotypes encoded:
+ - **in allele dose (0, 1, 2) for the additive effects**
+ - **as (0, 1, 0) for the dominance effects**
+
+
+## Value
+
+list of 2 elements:
+ - `intercept`: the intercept of the model
+ - `eff`: data.frame of 2 columns `additive` and `dominance` with
+ their corresponding markers effects
+
+
+# `predict_gs_model`
+
+Make GS predictions
+
+
+## Description
+
+Make GS predictions
+
+
+## Usage
+
+```r
+predict_gs_model(geno, estim_mark_eff)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`geno`     |     bed.matrix returned by `readGenoData()` on wich we want to make prediction
+`estim_mark_eff`     |     (list, output of `train_gs_model()`) estimated markers effects and intercept.
+
+
+## Value
+
+data.frame of one column containing the prediction
+
+
+# `cross_validation_evaluation`
+
+Repeated K-Folds cross-validation of a GS model
+
+
+## Description
+
+Repeated K-Folds cross-validation of a GS model
+
+
+## Usage
+
+```r
+cross_validation_evaluation(
+  pheno,
+  geno,
+  with_dominance = TRUE,
+  n_folds = 10,
+  n_repetitions = 5
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`pheno`     |     1 column data.frame of the phenotype
+`geno`     |     bed.matrix returned by `readGenoData()`
+`with_dominance`     |     (default = FALSE) control if the model should include dominance effects
+`n_folds`     |     (default `10`) number of folds for each repetition
+`n_repetitions`     |     (default `5`) number of repetition
+
+
+## Value
+
+list of 2 elements:
+ - `predictions`: data.frame of the predicted values during the
+ cross-validation. Available columns:
+ - `ind` individual id
+ - `actual` phenotype value in the training data
+ - `predicted` predicted values
+ - `fold` cross-validation fold id
+ - `repetition` cross-validation repetition id
+ - `metrics`: data.frame of the calculated model metrics during the
+ cross-validation. Available columns are:
+ - `fold` cross-validation fold id
+ - `repetition` cross-validation repetition id
+ - `...` values of the metrics returned by `get_model_metrics()` (one column
+ per returned list's elements with the same name)
+
+
+# `get_model_metrics`
+
+Calculate model metrics
+
+
+## Description
+
+Calculate model metrics
+
+
+## Usage
+
+```r
+get_model_metrics(actual, predictions)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`actual`     |     vector of actual values
+`predictions`     |     vector of model's predicted values
+
+
+## Value
+
+list of metrics values:
+ - `rmse` root mean square error
+ - `corel_pearson` Pearson's corelation coefficient
+ - `corel_spearman` Spearman's corelation coefficient
+ - `r2` R squared
+
+
 # `gwas`
 
 perform GWAS analysis
@@ -1173,6 +1457,38 @@ Argument      |Description
 `x_suffix`     |     suffix to add to the x axis's name
 `y_suffix`     |     suffix to add to the y axis's name
 `ellipses_npoints`     |     number of points used to draw the ellipses (default 100)
+
+
+## Value
+
+plotly graph
+
+
+# `evaluation_plot`
+
+Draw a plotly graph of a GS model cross-validation evaluation
+
+
+## Description
+
+This plots is composed of several subplots:
+ - Observed vs Predicted scatter plot for all the cross-validation folds
+ - Horizontal box plots of models metrics calculated during the
+ cross-validation
+
+
+## Usage
+
+```r
+evaluation_plot(evaluation_results)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`evaluation_results`     |     list returned by `cross_validation_evaluation()`
 
 
 ## Value
@@ -2383,20 +2699,20 @@ matrix
 Hiroyoshi Iwata, Julien Diot
 
 
-# `genoRelMat`
+# `calc_additive_geno`
 
-Genomic Relationship Matrix calculation
+Additive Genomic Matrix
 
 
 ## Description
 
-Genomic Relationship Matrix calculation
+Additive Genomic Matrix
 
 
 ## Usage
 
 ```r
-genoRelMat(geno)
+calc_additive_geno(geno, standardized = TRUE)
 ```
 
 
@@ -2405,6 +2721,13 @@ genoRelMat(geno)
 Argument      |Description
 ------------- |----------------
 `geno`     |     `gaston::bed.matrix` return by `readGenoData` function
+`standardized`     |     `boolean` (default TRUE) control if the returned genetic matrix should be standardized.
+
+
+## Details
+
+The standardization is made with: (x - 2*p) / sqrt(2*p*(1 - p)) with x the
+ genetic values in alleles dose and p the allelic frequency.
 
 
 ## Value
@@ -2412,9 +2735,105 @@ Argument      |Description
 matrix
 
 
-## Author
+# `calc_additive_rel_mat`
 
-Hiroyoshi Iwata, Julien Diot
+Additive Genomic Relationship Matrix calculation
+
+
+## Description
+
+Additive Genomic Relationship Matrix calculation
+
+
+## Usage
+
+```r
+calc_additive_rel_mat(geno, standardized = TRUE)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`geno`     |     `gaston::bed.matrix` return by `readGenoData` function
+`standardized`     |     `boolean` (default TRUE) control if the calculation should be done on the standardized additive genetic matrix.
+
+
+## Value
+
+list of 2 elements:
+ - `geno_mat`: the genetic matrix used for calculating the relationship matrix
+ - `rel_mat`: the relationship matrix
+
+
+# `calc_dominance_geno`
+
+Dominance Genomic Matrix
+
+
+## Description
+
+Dominance Genomic Matrix
+
+
+## Usage
+
+```r
+calc_dominance_geno(geno, standardized = TRUE)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`geno`     |     `gaston::bed.matrix` return by `readGenoData` function
+`standardized`     |     `boolean` (default TRUE) control if the returned genetic matrix should be standardized.
+
+
+## Details
+
+The standardization is made with the matrix with entries
+ `p/(1 - p)`, `-1`, `(1-p)/p` according to the values `0`, `1`, `2` in the
+ genetic matrix, with p the allele frequency (cf. `?gaston::DM`)
+
+
+## Value
+
+matrix
+
+
+# `calc_dominance_rel_mat`
+
+Dominance Genomic Relationship Matrix calculation
+
+
+## Description
+
+Dominance Genomic Relationship Matrix calculation
+
+
+## Usage
+
+```r
+calc_dominance_rel_mat(geno, standardized = TRUE)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`geno`     |     `gaston::bed.matrix` return by `readGenoData` function
+`standardized`     |     `boolean` (default TRUE) control if the calculation should be done on the standardized dominance genetic matrix.
+
+
+## Value
+
+list of 2 elements:
+ - `geno_mat`: the genetic matrix used for calculating the relationship matrix
+ - `rel_mat`: the relationship matrix
 
 
 # `combinedRelMat`

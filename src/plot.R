@@ -583,3 +583,123 @@ plotBlup_2traits <- function(blupDta,
   logger$log('draw plot DONE')
   p
 }
+
+
+
+
+#' Draw a plotly graph of a GS model cross-validation evaluation
+#'
+#' This plots is composed of several subplots:
+#' - Observed vs Predicted scatter plot for all the cross-validation folds
+#' - Horizontal box plots of models metrics calculated during the
+#' cross-validation
+#'
+#' @param evaluation_results list returned by `cross_validation_evaluation()`
+#'
+#' @return plotly graph
+evaluation_plot <- function(evaluation_results) {
+
+  pred_dta <- evaluation_results$predictions
+
+  n_reps <- length(unique(pred_dta$repetition))
+  n_folds <- length(unique(pred_dta$fold)) / n_reps
+
+  scatter_plot <- plotly::plot_ly(type = "scatter", mode = "markers")
+
+  min_x <- min(pred_dta$actual)
+  max_x <- max(pred_dta$actual)
+  scatter_plot <- plotly::add_lines(scatter_plot,
+                                    inherit = FALSE,
+                                    x = c(min_x, max_x),
+                                    y = c(min_x, max_x),
+                                    line = list(color = 'red', dash = 'dash'),
+                                    name = "identity line"
+  )
+
+  scatter_plot <- plotly::add_markers(
+    scatter_plot,
+    data = pred_dta,
+    x = ~actual,
+    y = ~predicted,
+    color = ~repetition,
+    hoverinfo = "text",
+    text = apply(pred_dta, 1, function(l) {
+      paste(names(l), ":", l, collapse = "\n")
+    })
+  )
+
+  scatter_plot <- plotly::layout(
+    scatter_plot,
+    yaxis = list(title = "Predicted values"),
+    xaxis = list(title = "Observed values")
+  )
+
+  all_metrics <- evaluation_results$metrics
+
+  metrics_long_names <- list(
+    "rmse" = "Root Mean Square Error",
+    "corel_pearson" = "Correlation (Pearson)",
+    "corel_spearman" = "Correlation (Spearman)",
+    "r2" = "R squared"
+  )
+
+  metrics <- colnames(all_metrics)[colnames(all_metrics) %in% names(metrics_long_names)]
+
+  box_plots <- lapply(metrics, function(metric) {
+    mean_val <- signif(mean(all_metrics[, metric], na.rm = TRUE), 3)
+    box_plot <- plotly::plot_ly(
+      type = "box",
+      x = all_metrics[, metric],
+      boxpoints = "all",
+      jitter = 0.3,
+      pointpos = 0,
+      hoverinfo = "text",
+      name = metrics_long_names[[metric]],
+      text = apply(all_metrics, 1, function(l) {
+        paste(names(l), ":", l, collapse = "\n")
+      })
+    )
+    box_plot <- plotly::layout(
+      box_plot,
+      yaxis = list(title = "", showticklabels = FALSE),
+      xaxis = list(
+        title = list(
+          standoff = 0,
+          text = paste0(metrics_long_names[[metric]], "\nMean value: ", mean_val)
+        )
+      )
+    )
+    box_plot %>% plotly::layout(title = paste0("Cross-Validation Results (",
+                                               n_reps, " repetitions, ", n_folds, " folds)"),
+                                plot_bgcolor = '#e5ecf6'
+                                )
+  })
+
+
+  margin <- c(0.0, 0.0, 0.12, 0.0)
+  heights = rep(1/length(box_plots), length(box_plots))
+  # plotly::subplot is a bit "buggy" and because the margins are not applied on
+  # the 1st and last plot, those one appears bigger than the others
+  # we need to manually tweak the heights of the plots to get equal sizes
+  heights[1] <- heights[1] - margin[3]
+  heights <- heights + margin[3]/length(heights)
+
+  box_plots <- plotly::subplot(box_plots,
+                               nrows = length(box_plots),
+                               titleY = TRUE,
+                               titleX = TRUE,
+                               heights = heights,
+                               margin = margin)
+
+  fig <- plotly::subplot(scatter_plot,
+                         box_plots,
+                         widths = c(0.7, 0.3),
+                         titleY = TRUE,
+                         titleX = TRUE)
+  fig <- plotly::layout(fig,
+                 title = paste0("Cross-Validation Results (",
+                                n_reps, " repetitions, ", n_folds, " folds)"),
+                 plot_bgcolor = '#e5ecf6')
+
+  return(fig)
+}
