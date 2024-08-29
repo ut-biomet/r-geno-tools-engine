@@ -137,7 +137,7 @@ pedRelMat <- function(ped) {
 #' genetic values in alleles dose and p the allelic frequency.
 #'
 #' @return matrix
-calc_additive_geno <- function(geno, standardized = TRUE){
+calc_additive_geno <- function(geno, standardized = TRUE) {
   if (standardized) {
     gaston::standardize(geno) <- "p"
     # this is equivalent of `(x - 2*p) / sqrt(2*p*(1 - p))`
@@ -190,7 +190,7 @@ calc_dominance_geno <- function(geno, standardized = TRUE){
 
   if (standardized) {
     D <- apply(gaston::as.matrix(geno), MARGIN = 2, function(x) {
-      af <- sum(x) / (2*length(x))
+      af <- sum(x, na.rm = TRUE) / (2*length(x))
       i <- af/(1 - af)
       j <- -1
       k <- (1 - af)/af

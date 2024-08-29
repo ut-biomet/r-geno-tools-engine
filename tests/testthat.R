@@ -33,6 +33,10 @@ UNTESTED_ERROR_CODES <- NULL
 #           reporter = StopReporter$new(),
 #           stop_on_failure = TRUE,
 #           stop_on_warning = FALSE)
+# test_file("tests/testthat/test_2_gs_models.R",
+#           reporter = StopReporter$new(),
+#           stop_on_failure = TRUE,
+#           stop_on_warning = FALSE)
 # test_file("tests/testthat/test_3_crossingSimulation.R",
 #           reporter = StopReporter$new(),
 #           stop_on_failure = TRUE,

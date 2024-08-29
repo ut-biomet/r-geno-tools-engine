@@ -3,6 +3,21 @@
 #
 # Description:
 # relationship matrix tests.
+library(testthat)
+
+expect_correct_relmat <- function(relationship_matrix, individuals_names) {
+  expect_true(is.matrix(relationship_matrix))
+  expect_true(is.numeric(relationship_matrix))
+  expect_true(isSymmetric(relationship_matrix))
+  expect_true(!any(is.na(relationship_matrix)))
+  expect_true(!is.null(colnames(relationship_matrix)))
+  expect_true(!is.null(row.names(relationship_matrix)))
+  expect_identical(
+    colnames(relationship_matrix),
+    row.names(relationship_matrix)
+  )
+  expect_identical(colnames(relationship_matrix), individuals_names)
+}
 
 capture_output({
 
@@ -18,17 +33,9 @@ capture_output({
       expect_no_error({
         relMat <- pedRelMat(ped)
       })
-      expect_true(is.matrix(relMat))
-      expect_true(is.numeric(relMat))
-      expect_true(isSymmetric(relMat))
-      expect_true(!any(is.na(relMat)))
-      expect_true(all(relMat >= 0))
-      expect_true(all(relMat <= 2))
-      expect_true(!is.null(colnames(relMat)))
-      expect_true(!is.null(row.names(relMat)))
-      expect_identical(colnames(relMat), row.names(relMat))
-      expect_identical(ped$data$ind, colnames(relMat))
+      expect_correct_relmat(relMat, ped$data$ind)
     })
+
     test_that(paste("pedRelMat vs AGHmatrix", basename(file)),{
       skip_if_not_installed("AGHmatrix")
       suppressWarnings({
@@ -54,22 +61,97 @@ capture_output({
       expect_no_error({
         relMat <- calc_additive_rel_mat(geno = geno, standardized = TRUE)
       })
-      expect_true(is.matrix(relMat$rel_mat))
-      expect_true(is.numeric(relMat$rel_mat))
-      expect_true(isSymmetric(relMat$rel_mat))
-      expect_true(!any(is.na(relMat$rel_mat)))
-      expect_true(!is.null(colnames(relMat$rel_mat)))
-      expect_true(!is.null(row.names(relMat$rel_mat)))
-      expect_identical(colnames(relMat$rel_mat), row.names(relMat$rel_mat))
-      expect_identical(geno@ped$id, colnames(relMat$rel_mat))
 
-      stop("TODO add new checks because of the updated function")
+      expect_true(is.list(relMat))
+      expect_identical(names(relMat), c("geno_mat", "rel_mat"))
+
+      expect_correct_relmat(relMat$rel_mat, geno@ped$id)
+
+      expect_true(is.matrix(relMat$geno_mat))
+      expect_true(is.numeric(relMat$geno_mat))
+      expect_failure(expect_identical(relMat$geno_mat, gaston::as.matrix(geno)))
+      expect_identical(
+        calc_additive_rel_mat(geno = geno, standardized = FALSE)$geno_mat,
+        gaston::as.matrix(geno)
+      )
+    })
+
+
+    test_that(paste("calc_dominance_rel_mat", basename(file)), {
+      geno <- readGenoData(file)
+      # reduce `geno` size to be faster
+      geno <- gaston::select.inds(geno, id %in% sample(geno@ped$id, 100))
+
+      expect_no_error({
+        relMat <- calc_dominance_rel_mat(geno = geno, standardized = TRUE)
+      })
+
+      expect_true(is.list(relMat))
+      expect_identical(names(relMat), c("geno_mat", "rel_mat"))
+
+      expect_correct_relmat(relMat$rel_mat, geno@ped$id)
+
+      expect_true(is.matrix(relMat$geno_mat))
+      expect_true(is.numeric(relMat$geno_mat))
+      expect_failure(expect_identical(relMat$geno_mat, gaston::as.matrix(geno)))
+      expect_identical(
+        calc_additive_rel_mat(geno = geno, standardized = FALSE)$geno_mat,
+        gaston::as.matrix(geno)
+      )
+    })
+
+
+    test_that(paste("calc_additive_geno", basename(file)), {
+      geno <- readGenoData(file)
+      # reduce `geno` size to be faster
+      geno <- gaston::select.inds(geno, id %in% sample(geno@ped$id, 100))
+
+      expect_no_error({
+        add_geno_std <- calc_additive_geno(geno = geno, standardized = TRUE)
+        add_geno_not_std <- calc_additive_geno(geno = geno, standardized = FALSE)
+      })
+
+      for (add_geno in list(add_geno_std, add_geno_not_std)) {
+        expect_true(is.matrix(add_geno))
+        expect_true(is.numeric(add_geno))
+      }
+
+      expect_identical(add_geno_not_std, gaston::as.matrix(geno))
+      expect_failure(expect_identical(add_geno_std, gaston::as.matrix(geno)))
+    })
+
+
+    test_that(paste("calc_dominance_geno", basename(file)), {
+      geno <- readGenoData(file)
+      # reduce `geno` size to be faster
+      geno <- gaston::select.inds(geno, id %in% sample(geno@ped$id, 100))
+
+      expect_no_error({
+        dom_geno_std <- calc_dominance_geno(geno = geno, standardized = TRUE)
+        dom_geno_not_std <- calc_dominance_geno(geno = geno, standardized = FALSE)
+      })
+
+      for (dom_geno in list(dom_geno_std, dom_geno_not_std)) {
+        expect_true(is.matrix(dom_geno))
+        expect_true(is.numeric(dom_geno))
+      }
+      expect_failure(expect_identical(dom_geno_std, dom_geno_not_std))
+
     })
   }
 
-  stop("TODO add tests for dominance")
-  stop("TODO add tests for additive genetic matrix")
-  stop("TODO add tests for dominance genetic matrix")
+
+  test_that(paste("calc_dominance_geno missing values", basename(file)), {
+      n = 1000
+      p = 3
+      geno <- matrix(sample(c(0, 1, 2), size = n*p, replace = TRUE),
+                     ncol = p)
+      geno[1, 1] <- NA
+      geno <- gaston::as.bed.matrix(geno)
+      dom_geno_std <- calc_dominance_geno(geno = geno, standardized = TRUE)
+      expect_true(is.na(dom_geno_std[1, 1]))
+      expect_true(!all(is.na(dom_geno_std[, 1])))
+  })
 
 
   # combinedRelMat ----
@@ -103,19 +185,9 @@ capture_output({
           relMat <- do.call(combinedRelMat, params)
         })
       }
-      expect_true(is.matrix(relMat))
-      expect_true(is.numeric(relMat))
-      expect_identical(dim(relMat), dim(params$ped_rm))
-      expect_true(!any(is.na(relMat)))
-      expect_true(isSymmetric(relMat)) # exact symmetry
-      # check approximate symmetry (diff< ~1.5e-8.) instead
-      # expect_true(all.equal.numeric(relMat, t(relMat)))
-
-      expect_true(!is.null(colnames(relMat)))
-      expect_true(!is.null(row.names(relMat)))
-      expect_identical(colnames(relMat), row.names(relMat))
-      expect_identical(colnames(params$ped_rm), colnames(relMat))
+      expect_correct_relmat(relMat, colnames(params$ped_rm))
     })
+
     if (!grepl('warn_', paramName)) {
       test_that(paste("combineRelMat vs AGHmatrix:", paramName),{
         skip_if_not_installed("AGHmatrix")

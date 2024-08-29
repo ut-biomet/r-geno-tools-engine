@@ -636,14 +636,14 @@ evaluation_plot <- function(evaluation_results) {
 
   all_metrics <- evaluation_results$metrics
 
-  metrics_long_names <- list(
-    "rmse" = "Root Mean Square Error",
-    "corel_pearson" = "Correlation (Pearson)",
-    "corel_spearman" = "Correlation (Spearman)",
-    "r2" = "R squared"
+  metrics_info <- list(
+    "rmse" = c("Root Mean Square Error", "#E41A1C"),
+    "corel_pearson" = c("Correlation (Pearson)", "#377EB8"),
+    "corel_spearman" = c("Correlation (Spearman)", "#4DAF4A"),
+    "r2" = c("R squared", "#984EA3")
   )
 
-  metrics <- colnames(all_metrics)[colnames(all_metrics) %in% names(metrics_long_names)]
+  metrics <- colnames(all_metrics)[colnames(all_metrics) %in% names(metrics_info)]
 
   box_plots <- lapply(metrics, function(metric) {
     mean_val <- signif(mean(all_metrics[, metric], na.rm = TRUE), 3)
@@ -654,7 +654,8 @@ evaluation_plot <- function(evaluation_results) {
       jitter = 0.3,
       pointpos = 0,
       hoverinfo = "text",
-      name = metrics_long_names[[metric]],
+      name = metrics_info[[metric]][1],
+      color = I(metrics_info[[metric]][2]),
       text = apply(all_metrics, 1, function(l) {
         paste(names(l), ":", l, collapse = "\n")
       })
@@ -665,7 +666,7 @@ evaluation_plot <- function(evaluation_results) {
       xaxis = list(
         title = list(
           standoff = 0,
-          text = paste0(metrics_long_names[[metric]], "\nMean value: ", mean_val)
+          text = paste0(metrics_info[[metric]][1], "\nMean value: ", mean_val)
         )
       )
     )
@@ -691,15 +692,21 @@ evaluation_plot <- function(evaluation_results) {
                                heights = heights,
                                margin = margin)
 
-  fig <- plotly::subplot(scatter_plot,
-                         box_plots,
-                         widths = c(0.7, 0.3),
-                         titleY = TRUE,
-                         titleX = TRUE)
+  withCallingHandlers({
+    fig <- plotly::subplot(scatter_plot,
+                           box_plots,
+                           widths = c(0.7, 0.3),
+                           titleY = TRUE,
+                           titleX = TRUE)
+  }, warning = function(warn) {
+    expected_warning <- "minimal value for n is 3, returning requested palette with 3 different levels\n"
+    if (identical(warn$message, expected_warning)) {
+      tryInvokeRestart("muffleWarning")
+    }
+  })
   fig <- plotly::layout(fig,
                  title = paste0("Cross-Validation Results (",
                                 n_reps, " repetitions, ", n_folds, " folds)"),
                  plot_bgcolor = '#e5ecf6')
-
   return(fig)
 }

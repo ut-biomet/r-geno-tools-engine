@@ -79,7 +79,7 @@ fit_with_rainbowr <- function(pheno, K) {
     list(
       logL = mod_rainbowr$LL,
       blups = blups,
-      intercept = mod_rainbowr$beta,
+      intercept = mod_rainbowr$beta
     )
   )
 }
@@ -245,7 +245,7 @@ cross_validation_evaluation <- function(pheno,
                                         with_dominance = TRUE,
                                         n_folds = 10,
                                         n_repetitions = 5) {
-
+  stopifnot(n_folds != 1)
 
   pheno <- pheno[geno@ped$id, 1, drop = FALSE]
 

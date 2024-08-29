@@ -208,4 +208,25 @@ capture_output({
       expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
     })
   }
+
+
+
+
+  # evaluation_plot ----
+  pheno_train <- readPhenoData("../../data/genomic_selection/pheno_train.csv")
+  geno_train <- readGenoData("../../data/genomic_selection/geno_G1.vcf.gz")
+  evaluation_results <- cross_validation_evaluation(
+    pheno_train,
+    geno_train,
+    with_dominance = FALSE,
+    n_folds = 3,
+    n_repetitions = 2
+  )
+  test_that("evaluation_plot", {
+    expect_no_error({
+      p <- evaluation_plot(evaluation_results)
+    })
+    expect_true(all.equal(class(p), c("plotly", "htmlwidget")))
+  })
+
 })
