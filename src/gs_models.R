@@ -107,7 +107,7 @@ fit_with_rainbowr <- function(pheno, K) {
 #' @return vector of the estimated markers effects
 calc_mark_eff <- function(geno_mat, rel_mat, blups) {
   mark_eff <- crossprod(geno_mat/ncol(geno_mat), solve(rel_mat)) %*% blups
-  mark_eff[is.na(mark_eff)] <- 0
+  # mark_eff[is.na(mark_eff)] <- 0
   return(t(mark_eff)[1,])
 }
 
@@ -133,6 +133,8 @@ calc_mark_eff <- function(geno_mat, rel_mat, blups) {
 train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
 
   stopifnot(identical(row.names(pheno), geno@ped$id))
+  stopifnot(all(!is.na(pheno[,1])))
+  stopifnot(all(geno@snps$callrate == 1))
 
   relationship_matrices <- list()
 
@@ -141,6 +143,9 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
 
   if (with_dominance) {
     dominance_std <- calc_dominance_rel_mat(geno, standardized = TRUE)
+    dominance_not_std <- calc_dominance_rel_mat(geno, standardized = FALSE)
+    check_dominance_model_is_applicable(dominance_not_std)
+
     relationship_matrices[[2]] <- dominance_std$rel_mat
   }
 
@@ -152,7 +157,6 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
     model <- fit_with_rainbowr(pheno[[1]], relationship_matrices)
   }
 
-
   estim_mark_eff_add_std <- calc_mark_eff(additive_std$geno_mat,
                                           additive_std$rel_mat,
                                           model$blups[, 1])
@@ -161,16 +165,13 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
   estim_mark_eff_add <- estim_mark_eff_add_std / sqrt( 2 * geno@p * (1 - geno@p))
   intercept_adjustment_add = sum(estim_mark_eff_add * 2 * geno@p)
 
-
   estim_mark_eff_dom <- rep(NA, length(estim_mark_eff_add))
   names(estim_mark_eff_dom) <- names(estim_mark_eff_add)
   if (with_dominance) {
-    dominance_not_std <- calc_dominance_rel_mat(geno, standardized = FALSE)
     estim_mark_eff_dom <- calc_mark_eff(dominance_not_std$geno_mat,
                                         dominance_not_std$rel_mat,
                                         model$blups[, 2])
   }
-
 
   eff <- data.frame(
     row.names = geno@snps$id
@@ -200,7 +201,6 @@ predict_gs_model <- function(geno, estim_mark_eff) {
 
   estimated_markers <- row.names(estim_mark_eff$eff)
   geno <- gaston::select.snps(geno, id %in% estimated_markers)
-
   estim_mark_eff$eff <- estim_mark_eff$eff[geno@snps$id,]
 
   additive_gv <- calc_additive_geno(geno, standardized = FALSE) %*% estim_mark_eff$eff$additive
@@ -311,4 +311,62 @@ get_model_metrics <- function(actual, predictions) {
     corel_spearman = cor(actual, predictions, method = "spearman"),
     r2 = 1 - sum(error^2) / sum((actual - mean(actual))^2)
   )
+}
+
+
+
+#' Check if a dominance model is applicable with the provided genetic data
+#'
+#' @param dominance list returned by
+#' @param homozygous_threshold A threshold used to identify individuals or SNPs
+#' with a homozygosity proportion exceeding this value. These will be counted
+#' and reported in the error message if applicable.
+#' This parameter does not influence the function's behavior, only the error
+#' message it can raise.
+#'
+#' @details
+#' The dominance model need the dominance relationship matrix to be invertible
+#' in order to be able to calculate the dominance effects. This function will
+#' return an error if it is not the case.
+#' The error will contain information about the homozygousity of the markers and
+#' individuals as if the data have too many homozygous individuals/markers it
+#' will probably not be suited for a dominance model. The ``
+#'
+#'
+#' @return `TRUE` or raise an `engineError`
+check_dominance_model_is_applicable <- function(dominance, homozygous_threshold = 0.95) {
+
+  if (det(dominance$rel_mat) == 0) {
+    # dominance$rel_mat is not invertible
+
+    snp_homozygous_proportion <- 1 - colSums(dominance$geno_mat) / nrow(dominance$geno_mat)
+    homozygous_snp <- snp_homozygous_proportion > homozygous_threshold
+    n_homozygous_snp <- sum(homozygous_snp)
+    homozygous_snp_proportion <- n_homozygous_snp / ncol(dominance$geno_mat)
+
+    ind_homozygous_proportion <- 1 - rowSums(dominance$geno_mat) / ncol(dominance$geno_mat)
+    homozygous_ind <- ind_homozygous_proportion > homozygous_threshold
+    n_homozygous_ind <- sum(homozygous_ind)
+
+    engineError(
+      message = paste(
+        "Dominace model is not applicable with the provided data as",
+        "the dominance relationship matrix is not invertible.",
+        "FYI,", n_homozygous_ind, "individuals have a",
+        "homozygousity higher than", homozygous_threshold * 100,
+        "%, and", signif(homozygous_snp_proportion * 100, 2), "% of",
+        "the markers have a homozygousity proportion higher than",
+        homozygous_threshold * 100, "%."
+        ),
+      extra = list(
+        code = errorCode("DOMINANCE_MODEL_NOT_APPLICABLE"),
+        n_homozygous_ind = n_homozygous_ind,
+        n_homozygous_snp = n_homozygous_snp,
+        n_ind = nrow(dominance$geno_mat),
+        n_snp = ncol(dominance$geno_mat),
+        homozygous_threshold = homozygous_threshold
+      )
+    )
+  }
+  return(TRUE)
 }
