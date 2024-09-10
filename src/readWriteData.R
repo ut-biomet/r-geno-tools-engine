@@ -1433,7 +1433,8 @@ prepareData <- function(gDta, pDta) {
   logger$log("Remove from geno data individuals that are not in phenotypic data-set DONE")
 
 
-  # reorder phenotypic data with id in bed matrix
+  # filter out ind without genotypes from the pheno data
+  # and reorder phenotypic data with id in bed matrix
   logger$log("reorder matrix ...")
   pDta <- pDta[gDta@ped$id,,drop = F]
   logger$log("reorder matrix DONE")
@@ -1591,4 +1592,46 @@ save_blupVarExp_as_json <- function(blupVarExp, file){
 #' @return path of the created file
 save_plotly <- function(plot, file){
   htmlwidgets::saveWidget(widget = plot, file = file, selfcontained = TRUE)
+}
+
+
+#' Save a GS model
+#'
+#' @param model GS model generated with
+#' @param trait_name name of the phenotypic trait predicted by this model
+#' @param file file path where to save the model. If the file already exists, it
+#' will be overwritten.
+#'
+#' @return path of the created file
+save_GS_model <- function(model, trait_name, file) {
+
+  logger <- Logger$new("r-save_GS_model()")
+
+  logger$log('Check file ...')
+  if (length(file) != 1) {
+    logger$log('Error: only one file name should be provided')
+    bad_argument('length(file)', must_be = "1", not = length(file))
+  }
+
+  logger$log("Check output file extention ...")
+  ext <- tools::file_ext(file)
+  if (ext != "json") {
+    engineError('The output file must end by `.json`', extra = list())
+  }
+  logger$log("Check output file extention DONE")
+
+  model_as_list <- list()
+  model_as_list$intercept <- model$intercept
+  model_as_list$additive_effects <- as.list(model$eff$additive)
+  model_as_list$dominance_effects <- as.list(model$eff$dominance)
+  names(model_as_list$additive_effects) <- row.names(model$eff)
+  names(model_as_list$dominance_effects) <- row.names(model$eff)
+  model_as_list <- list(model_as_list)
+  names(model_as_list) <- trait_name
+
+  jsonlite::write_json(model_as_list,
+                       path = file,
+                       pretty = T,
+                       digits = NA,
+                       na = 'string')
 }

@@ -775,7 +775,7 @@ capture_output({
 
 
 
-  # save_save_plotly ----
+  # save_plotly ----
   test_that('save_plotly', {
 
     resfile <- tempfile(fileext = ".html")
@@ -796,5 +796,25 @@ capture_output({
     expect_true(file.exists(resfile))
     expect_true(file.info(resfile)$size > 0)
     expect_equal(readLines(resfile, n = 1), "<!DOCTYPE html>")
+  })
+
+
+
+  # save_GS_model ----
+  test_that('save_GS_model', {
+
+    data <- readData(genoFile = "../../data/genomic_selection/geno_G1.vcf.gz",
+                     phenoFile = "../../data/genomic_selection/pheno_train.csv")
+    model_add <- train_gs_model(data$pheno, data$geno, with_dominance = FALSE)
+    model_dom <- train_gs_model(data$pheno, data$geno, with_dominance = TRUE)
+
+    for (model in list(model_add, model_dom)) {
+    resfile <- tempfile(fileext = ".json")
+    expect_no_error({
+      outfile <- save_GS_model(model_add, "pheno", resfile)
+    })
+    expect_true(file.exists(resfile))
+    expect_true(file.info(resfile)$size > 0)
+    }
   })
 })
