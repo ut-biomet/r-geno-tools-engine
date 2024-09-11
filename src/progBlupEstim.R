@@ -80,7 +80,11 @@ calcProgenyGenetCovar <- function(SNPcoord, r, haplo, p1.id, p2.id) {
 #' Calculate the BULP variance of the progeny
 #'
 #' @param SNPcoord SNP coordinate data.frame return by `readSNPcoord`
-#' @param markerEffects the markers effects return by `readMarkerEffects`
+#' @param makrerEffects (output of `extract_additive_effects` function) list of
+#' 2 elements:
+#' `intercept`: named vector of the intercepts
+#' `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with
+#' the marker ids as row names.
 #' @param geneticCovar list of the genetic variance covariance matrices return by
 #' `calcProgenyGenetCovar`
 #'
@@ -103,7 +107,11 @@ calcProgenyBlupVariance <- function(SNPcoord, markerEffects, geneticCovar) {
 #' return by `readPhasedGeno` function)
 #' @param p1.id id of the first parent
 #' @param p2.id id of the second parent
-#' @param markerEffects the markers effects return by `readMarkerEffects`
+#' @param makrerEffects (output of `extract_additive_effects` function) list of
+#' 2 elements:
+#' `intercept`: named vector of the intercepts
+#' `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with
+#' the marker ids as row names.
 #'
 #' @return list for each trait with a list with
 #' - `sum` the global expected value for the trait (taking in account the intercept)
@@ -139,7 +147,11 @@ calcProgenyBlupExpected <- function(SNPcoord, haplo, p1.id, p2.id, markerEffects
 #' return by `readPhasedGeno` function)
 #' @param p1.id id of the first parent
 #' @param p2.id id of the second parent
-#' @param makrerEffects output of `readMarkerEffects`
+#' @param makrerEffects (output of `extract_additive_effects` function) list of
+#' 2 elements:
+#' `intercept`: named vector of the intercepts
+#' `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with
+#' the marker ids as row names.
 #' @param blupExpectedValues output of `calcProgenyBlupExpected`
 #'
 #' @return matrix

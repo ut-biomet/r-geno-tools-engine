@@ -1019,9 +1019,9 @@ readMarkerEffects <- function(file) {
     markerEffects <- readMarkerEffects_json(file)
   }
 
-  if (nrow(markerEffects$SNPeffects) == 0) {
+  if (nrow(markerEffects$SNPeffects_add) == 0) {
     engineError(
-      "Bad marker effects format, no row detected",
+      "Bad marker effects format, no row detected for additive effects",
       extra = list(
         code = errorCode("BAD_MARKER_EFFECTS_FORMAT_EMPTY")
       )
@@ -1029,7 +1029,7 @@ readMarkerEffects <- function(file) {
   }
 
   # missing values
-  if (any(is.na(markerEffects$SNPeffects))) {
+  if (any(is.na(markerEffects$SNPeffects_add))) {
     engineError(
       'Marker effects should not have any missing values',
       extra = list(
@@ -1039,19 +1039,24 @@ readMarkerEffects <- function(file) {
   }
 
   # check unicity of SNPids
-  duplicatedIds <- which(duplicated(markerEffects$SNPeffects$SNPid))
-  if (length(duplicatedIds) != 0) {
-    engineError(
-      "Marker effects must not have duplicated SNP ids.",
-      extra = list(
-        code = errorCode("BAD_MARKER_EFFECTS_DUPLICATED_ID"),
-        n_duplicated_ids = length(duplicatedIds),
-        duplicated_ids = markerEffects$SNPid[duplicatedIds]
+  for (markEff in markerEffects[c("SNPeffects_add", "SNPeffects_dom")]) {
+    duplicatedIds <- which(duplicated(markEff$SNPid))
+    if (length(duplicatedIds) != 0) {
+      engineError(
+        "Marker effects must not have duplicated SNP ids.",
+        extra = list(
+          code = errorCode("BAD_MARKER_EFFECTS_DUPLICATED_ID"),
+          n_duplicated_ids = length(duplicatedIds),
+          duplicated_ids = markerEffects$SNPid[duplicatedIds]
+        )
       )
-    )
+    }
   }
-  row.names(markerEffects$SNPeffects) <- markerEffects$SNPeffects$SNPid
-  markerEffects$SNPeffects <- markerEffects$SNPeffects[, -1, drop = FALSE]
+
+  row.names(markerEffects$SNPeffects_add) <- markerEffects$SNPeffects_add$SNPid
+  row.names(markerEffects$SNPeffects_dom) <- markerEffects$SNPeffects_dom$SNPid
+  markerEffects$SNPeffects_add <- markerEffects$SNPeffects_add[, -1, drop = FALSE]
+  markerEffects$SNPeffects_dom <- markerEffects$SNPeffects_dom[, -1, drop = FALSE]
 
   return(markerEffects)
 }
@@ -1112,11 +1117,10 @@ readMarkerEffects_csv <- function(file) {
     markerEffects <- markerEffects[-interceptId,]
   }
 
-
-
   return(list(
     intercept = intercept,
-    SNPeffects = markerEffects
+    SNPeffects_add = markerEffects,
+    SNPeffects_dom = markerEffects[FALSE,]
   ))
 }
 
@@ -1145,51 +1149,82 @@ readMarkerEffects_csv <- function(file) {
 readMarkerEffects_json <- function(file) {
   logger <- Logger$new("r-readMarkerEffects_json()")
 
+
   logger$log('Read marker effects file ...')
   rawMarkerEffects_list <- jsonlite::fromJSON(file,
                                               simplifyVector = FALSE)
   logger$log('Read marker effects file DONE')
-  if (length(rawMarkerEffects_list[[1]]) != 2) {
+
+  expectedFields_old_version <- c('intercept', 'coefficients')
+  expectedFields_new_version <- c('intercept', 'additive_effects', 'dominance_effects')
+
+  if (all(names(rawMarkerEffects_list) %in% expectedFields_old_version)) {
+    # old format with 1 unnamed trait
     rawMarkerEffects_list <- list(unknownTrait = rawMarkerEffects_list)
   }
 
+  # new file named trait(s)
+
   markerEffects <- list(
     intercept = c(),
-    SNPeffects = data.frame(SNPid = character())
+    SNPeffects_add = data.frame(SNPid = character()),
+    SNPeffects_dom = data.frame(SNPid = character())
   )
-  expectedFields <- c('intercept', 'coefficients')
 
   for (trait in names(rawMarkerEffects_list)) {
     mark_eff <- rawMarkerEffects_list[[trait]]
 
-    if (!all(names(mark_eff) %in% expectedFields)) {
+    if ((!all(names(mark_eff) %in% expectedFields_old_version))
+        && (!all(names(mark_eff) %in% expectedFields_new_version))) {
       engineError(
         "Marker effects: bad json's keys",
         extra = list(
           code = errorCode("BAD_MARKER_EFFECTS_JSON_KEYS"),
-          expected = expectedFields,
+          expected = expectedFields_new_version,
           provided = names(mark_eff)
         )
       )
     }
 
     markerEffects$intercept <- c(markerEffects$intercept,
-                                 mark_eff$intercept)
+                                 unlist(mark_eff$intercept))
     names(markerEffects$intercept)[length(markerEffects$intercept)] <- trait
 
+    if (all(names(mark_eff) %in% expectedFields_old_version)) {
+      # old format with named trait(s)
+      mark_eff$additive_effects <- mark_eff$coefficients
+      mark_eff$dominance_effects <- NULL
+    }
 
-    current_trait_effects <- data.frame(
-      coef = as.numeric(unlist(mark_eff$coefficients)),
-      SNPid = names(mark_eff$coefficients)
+    current_trait_add_effects <- data.frame(
+      additive_effects = as.numeric(unlist(mark_eff$additive_effects)),
+      SNPid = names(mark_eff$additive_effects)
     )
-    colnames(current_trait_effects)[1] <- trait
-    markerEffects$SNPeffects <- merge(
-      markerEffects$SNPeffects,
-      current_trait_effects,
+
+    dominance_effects <- unlist(mark_eff$dominance_effects)
+    dominance_effects[dominance_effects == "NA"] <- NA
+    current_trait_dom_effects <- data.frame(
+      dominance_effects = as.numeric(dominance_effects),
+      SNPid = as.character(names(mark_eff$dominance_effects))
+    )
+
+    colnames(current_trait_add_effects)[1] <- trait
+    markerEffects$SNPeffects_add <- merge(
+      markerEffects$SNPeffects_add,
+      current_trait_add_effects,
+      by = "SNPid",
+      all = TRUE
+    )
+
+    colnames(current_trait_dom_effects)[1] <- trait
+    markerEffects$SNPeffects_dom <- merge(
+      markerEffects$SNPeffects_dom,
+      current_trait_dom_effects,
       by = "SNPid",
       all = TRUE
     )
   }
+
   return(markerEffects)
 }
 
@@ -1631,7 +1666,27 @@ save_GS_model <- function(model, trait_name, file) {
 
   jsonlite::write_json(model_as_list,
                        path = file,
+                       simplifyVector = T,
                        pretty = T,
                        digits = NA,
                        na = 'string')
+}
+
+#' Format `markerEffects` to be used by `calcProgenyBlupCovariance` function.
+#'
+#' @param markerEffects list
+#'
+#' @return list of 2 elements:
+#' `intercept`: named vector of the intercepts
+#' `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with
+#' the marker ids as row names.
+extract_additive_effects <- function(markerEffects) {
+  if (nrow(markerEffects$SNPeffects_dom) != 0
+      && !all(is.na(markerEffects$SNPeffects_dom[,1]))) {
+    engineError("Model with dominance can not be used, only purely additive model.",
+                extra = list(code = errorCode("DOMINANCE_MODEL_FOR_BLUP_ESTIMATION")))
+  }
+  markerEffects <- markerEffects[c("intercept", "SNPeffects_add")]
+  names(markerEffects)[2] <- "SNPeffects"
+  return(markerEffects)
 }

@@ -633,7 +633,10 @@ capture_output({
                           '../data/markerEffects_scientificNotation.json',
                           '../../data/markerEffects/breedGame_markerEffects_1namedTrait.json',
                           '../../data/markerEffects/breedGame_markerEffects_2traits.json',
-                          '../../data/markerEffects/breedGame_markerEffects_2traits.csv')
+                          '../../data/markerEffects/breedGame_markerEffects_2traits.csv',
+                          '../../data/results/GS_model_additive.json',
+                          '../../data/results/GS_model_dominance.json')
+
   for (file in markerEffectsFiles) {
     test_that(paste('readMarkerEffects', basename(file)), {
       expect_no_error({
@@ -641,16 +644,17 @@ capture_output({
       })
       expect_is(markerEff, 'list')
       expect_equal(names(markerEff),
-                   c('intercept', 'SNPeffects'))
+                   c('intercept', 'SNPeffects_add', 'SNPeffects_dom'))
       if (identical(tools::file_ext(file), 'csv')) {
         csv_snpid <- read.csv(file)$SNPid
         csv_snpid <- csv_snpid[csv_snpid != "--INTERCEPT--"]
-        expect_equal(row.names(markerEff$SNPeffects),
+        expect_equal(row.names(markerEff$SNPeffects_add),
                      csv_snpid)
       }
       expect_true(is.numeric(markerEff$intercept))
-      expect_true(!any(is.na(markerEff$SNPeffects)))
-      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects))
+      expect_true(!any(is.na(markerEff$SNPeffects_add)))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects_add))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects_dom))
     })
 
     # downloadMarkerEffects ----
@@ -662,16 +666,17 @@ capture_output({
       })
       expect_is(markerEff, 'list')
       expect_equal(names(markerEff),
-                   c('intercept', 'SNPeffects'))
+                   c('intercept', 'SNPeffects_add', 'SNPeffects_dom'))
       if (identical(tools::file_ext(file), 'csv')) {
         csv_snpid <- read.csv(file)$SNPid
         csv_snpid <- csv_snpid[csv_snpid != "--INTERCEPT--"]
-        expect_equal(row.names(markerEff$SNPeffects),
+        expect_equal(row.names(markerEff$SNPeffects_add),
                      csv_snpid)
       }
       expect_true(is.numeric(markerEff$intercept))
-      expect_true(!any(is.na(markerEff$SNPeffects)))
-      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects))
+      expect_true(!any(is.na(markerEff$SNPeffects_add)))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects_add))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects_dom))
     })
   }
 
@@ -817,4 +822,44 @@ capture_output({
     expect_true(file.info(resfile)$size > 0)
     }
   })
+
+
+
+  # extract_additive_effects ----
+
+  markerEffectsFiles <- c('../../data/markerEffects/breedGame_markerEffects.csv',
+                          '../../data/markerEffects/breedGame_markerEffects.json',
+                          '../data/markerEffects_ok.csv',
+                          '../data/markerEffects_ok.json',
+                          '../data/markerEffects_scientificNotation.json',
+                          '../../data/markerEffects/breedGame_markerEffects_1namedTrait.json',
+                          '../../data/markerEffects/breedGame_markerEffects_2traits.json',
+                          '../../data/markerEffects/breedGame_markerEffects_2traits.csv',
+                          '../../data/results/GS_model_additive.json')
+  for (file in markerEffectsFiles) {
+    test_that(paste('readMarkerEffects', basename(file)), {
+      markerEff <- readMarkerEffects(file)
+      expect_no_error({
+        markerEff <- extract_additive_effects(markerEff)
+      })
+      expect_is(markerEff, 'list')
+      expect_equal(names(markerEff),
+                   c('intercept', 'SNPeffects'))
+      expect_true(is.numeric(markerEff$intercept))
+      expect_true(!any(is.na(markerEff$SNPeffects)))
+      expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects))
+    })
+  }
+
+  markerEffectsFiles_dominance <- c('../../data/results/GS_model_dominance.json')
+  for (file in markerEffectsFiles_dominance) {
+    test_that(paste('readMarkerEffects', basename(file)), {
+      markerEff <- readMarkerEffects(file)
+      expect_no_error({
+        expect_engineError({
+          markerEff <- extract_additive_effects(markerEff)
+        })
+      })
+    })
+  }
 })

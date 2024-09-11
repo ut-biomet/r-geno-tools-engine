@@ -69,6 +69,7 @@ expect_engineError <- function(code) {
     "BAD_SNPCOORD_SNP_LINKMAP_POSITION_NOT_NUMERIC" = c("n_snp", "n_not_numeric_linkMapPos", "not_numeric_linkMapPos_ids"),
     "BAD_SNPCOORD_PHYSICAL_POS_VCF_MISSMATCH" = c("n_physPos_missmatch", "n_snp", "physPos_missmatch_ids"),
     "INCONSISTENT_RELATIONSHIP_MATRICES" = c(),
+    "DOMINANCE_MODEL_FOR_BLUP_ESTIMATION" = c(),
     "FILE_EXIST" = c("file"),
     "FILE_NOT_FOUND" = c("file"),
     "INPUT_FILE_NOT_PROVIDED" = c("input_file"),

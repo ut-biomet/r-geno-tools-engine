@@ -986,6 +986,11 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
                 extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
                              input_file = "markers effects"))
   }
+
+  markerEffects <- extract_additive_effects(markerEffects)
+
+
+
   logger$log("Get data DONE")
 
   # check input data

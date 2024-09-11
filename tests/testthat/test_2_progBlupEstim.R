@@ -29,6 +29,7 @@ capture_output({
     SNPcoord <- readSNPcoord(files$SNPcoordFile)
     crossTable <- readCrossTable(files$crossTableFile)
     markerEffects <- readMarkerEffects(files$markerEffectsFile)
+    markerEffects <- extract_additive_effects(markerEffects)
 
     r <- calcRecombRate(SNPcoord)
     nCrosses <- nrow(crossTable)
