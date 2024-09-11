@@ -1244,3 +1244,73 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
   }
   p
 }
+
+
+
+train_gs_model_main <- function(genoFile = NULL,
+                                phenoFile = NULL,
+                                genoUrl = NULL,
+                                phenoUrl = NULL,
+                                trait,
+                                with_dominance,
+                                thresh_maf,
+                                outFile = tempfile(fileext = ".json")
+) {
+
+  # browser()
+
+  logger <- Logger$new("r-train_gs_model_main()")
+  check_outFile(outFile, accept_null = TRUE)
+
+  logger$log("Get data ...")
+  if (!is.null(genoFile) && !is.null(phenoFile)
+      && is.null(genoUrl) && is.null(phenoUrl)) {
+    data <- readData(genoFile = genoFile,
+                     phenoFile = phenoFile)
+  } else if (!is.null(genoUrl) && !is.null(phenoUrl)
+            && is.null(genoFile) && is.null(phenoFile)) {
+    data <- downloadData(genoUrl = genoUrl,
+                         phenoUrl = phenoUrl)
+  } else {
+    engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
+                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+                             input_file = "genotype"))
+  }
+  logger$log("Get data DONE")
+
+  check_trait(trait, colnames(data$phenoData))
+  check_thresh_maf(thresh_maf, geno = data$genoData)
+
+  logger$log("Filter SNP and missing values...")
+  data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
+  # remove markers with missing values
+  data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
+
+  data$phenoData <- data$phenoData[, trait, drop = FALSE]
+  data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]),, drop = FALSE]
+  data$genoData <- gaston::select.inds(data$genoData, id %in% rownames(data$phenoData))
+  data$phenoData <- data$phenoData[data$genoData@ped$id,,drop = F]
+  logger$log("Filter SNP and missing values DONE")
+
+
+  logger$log("Model training...")
+  model <- train_gs_model(data$phenoData[, trait, drop = FALSE],
+                          data$genoData,
+                          with_dominance = with_dominance)
+  logger$log("Model training DONE")
+
+
+  if (!is.null(outFile)) {
+    logger$log("Save results ...")
+    file <- save_GS_model(model = model, trait_name = trait, file = outFile)
+    logger$log("Save results DONE")
+  } else {
+    file <- NULL
+  }
+
+  return(list(
+    "model" = model,
+    "file" = file
+  ))
+
+}

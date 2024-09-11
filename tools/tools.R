@@ -208,5 +208,25 @@ createResultExample <- function() {
   unlink(list.dirs('data/results', recursive = FALSE),
          recursive = TRUE)
 
+
+
+
+  outFile <- 'data/results/GS_model_additive.json'
+  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+                      phenoFile = "data/genomic_selection/pheno_train.csv",
+                      trait = "pheno",
+                      with_dominance = FALSE,
+                      thresh_maf = 0,
+                      outFile = outFile)
+
+  outFile <- 'data/results/GS_model_dominance.json'
+  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+                      phenoFile = "data/genomic_selection/pheno_train.csv",
+                      trait = "pheno",
+                      with_dominance = TRUE,
+                      thresh_maf = 0,
+                      outFile = outFile)
+
+
   NULL
 }

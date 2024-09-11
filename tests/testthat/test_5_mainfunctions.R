@@ -6,6 +6,61 @@
 
 capture.output({
 
+
+  # GS model ----
+  tests_cases <- list(
+    test_01 = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                   pheno = "../../data/genomic_selection/pheno_train.csv",
+                   trait = "pheno"),
+    missing_genotype = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                            pheno = "../data/GS_pheno_train_missing_genotype.csv",
+                            trait = "pheno"),
+    missing_phenotype = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                             pheno = "../data/GS_pheno_train_missing_phenotype.csv",
+                             trait = "pheno")
+  )
+
+  for (test in names(tests_cases)) {
+
+    test_that(paste0("train_gs_model_main ", test), {
+      for (with_dominance in c(T,F)) {
+        expect_no_error({
+          model <- train_gs_model_main(genoFile = tests_cases[[test]]$geno,
+                                       phenoFile = tests_cases[[test]]$pheno,
+                                       genoUrl = NULL,
+                                       phenoUrl = NULL,
+                                       trait = tests_cases[[test]]$trait,
+                                       with_dominance = with_dominance,
+                                       thresh_maf = 0,
+                                       outFile = tempfile(fileext = ".json")
+          )
+        })
+      }
+    })
+  }
+
+  tests_bad_cases <- list(
+    no_heterozygot = list(geno = "../../data/geno/testMarkerData01.vcf.gz",
+                          pheno = "../../data/pheno/testPhenoData01.csv",
+                          trait = "Flowering.time.at.Arkansas")
+  )
+  for (test in names(tests_bad_cases)) {
+
+    test_that(paste0("train_gs_model_main Bad case ", test), {
+      expect_engineError({
+        model <- train_gs_model_main(genoFile = tests_bad_cases[[test]]$geno,
+                                     phenoFile = tests_bad_cases[[test]]$pheno,
+                                     genoUrl = NULL,
+                                     phenoUrl = NULL,
+                                     trait = tests_bad_cases[[test]]$trait,
+                                     with_dominance = TRUE,
+                                     thresh_maf = 0,
+                                     outFile = tempfile(fileext = ".json"))
+      })
+    })
+  }
+
+
   # run GWAS ----
   files <- list(
     test_01 = list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
