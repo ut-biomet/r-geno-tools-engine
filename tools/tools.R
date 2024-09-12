@@ -202,15 +202,7 @@ createResultExample <- function() {
                              ellipses_npoints = 100,
                              outFile = outFile_plot)
 
-
-
-  # clear folder
-  unlink(list.dirs('data/results', recursive = FALSE),
-         recursive = TRUE)
-
-
-
-
+  # train_gs_model_main ----
   outFile <- 'data/results/GS_model_additive.json'
   train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
                       phenoFile = "data/genomic_selection/pheno_train.csv",
@@ -226,6 +218,42 @@ createResultExample <- function() {
                       with_dominance = TRUE,
                       thresh_maf = 0,
                       outFile = outFile)
+
+  # train_gs_model_main ----
+  outFile <- 'data/results/GS_model_additive.json'
+  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+                      phenoFile = "data/genomic_selection/pheno_train.csv",
+                      trait = "pheno",
+                      with_dominance = FALSE,
+                      thresh_maf = 0,
+                      outFile = outFile)
+
+  outFile <- 'data/results/GS_model_dominance.json'
+  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+                      phenoFile = "data/genomic_selection/pheno_train.csv",
+                      trait = "pheno",
+                      with_dominance = TRUE,
+                      thresh_maf = 0,
+                      outFile = outFile)
+
+
+  # predict_gs_model_main ----
+  outFile <- 'data/results/GS_model_prediction_1trait.csv'
+  predictions <- predict_gs_model_main(genoFile = "data/genomic_selection/geno_G2.vcf.gz",
+                                       genoUrl = NULL,
+                                       markerEffectsFile = "data/results/GS_model_dominance.json",
+                                       markerEffectsUrl = NULL,
+                                       outFile = outFile)
+  outFile <- 'data/results/GS_model_prediction_2traits.csv'
+  predictions <- predict_gs_model_main(genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
+                                       genoUrl = NULL,
+                                       markerEffectsFile = "data/markerEffects/breedGame_markerEffects_2traits.json",
+                                       markerEffectsUrl = NULL,
+                                       outFile = outFile)
+
+  # clear folder
+  unlink(list.dirs('data/results', recursive = FALSE),
+         recursive = TRUE)
 
 
   NULL

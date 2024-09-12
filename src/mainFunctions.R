@@ -1257,8 +1257,6 @@ train_gs_model_main <- function(genoFile = NULL,
                                 outFile = tempfile(fileext = ".json")
 ) {
 
-  # browser()
-
   logger <- Logger$new("r-train_gs_model_main()")
   check_outFile(outFile, accept_null = TRUE)
 
@@ -1314,3 +1312,93 @@ train_gs_model_main <- function(genoFile = NULL,
   ))
 
 }
+
+
+
+predict_gs_model_main <- function(genoFile = NULL,
+                                  genoUrl = NULL,
+                                  markerEffectsFile = NULL,
+                                  markerEffectsUrl = NULL,
+                                  outFile = tempfile(fileext = ".csv")) {
+
+  logger <- Logger$new("r-predict_gs_model_main()")
+
+  check_outFile(outFile, expected_ext = ".csv", accept_null = TRUE)
+
+  # load input data
+  logger$log("Get data ...")
+  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+    g <- readGenoData(genoFile)
+  } else if (is.null(genoFile) && !is.null(genoUrl)) {
+    g <- downloadGenoData(genoUrl)
+  } else {
+    engineError("Either `genoFile` or `genoUrl` should be provided",
+                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+                             input_file = "genotype"))
+  }
+
+  if (!is.null(markerEffectsFile) &&  is.null(markerEffectsUrl)) {
+    markerEffects <- readMarkerEffects(markerEffectsFile)
+  } else if (is.null(markerEffectsFile) && !is.null(markerEffectsUrl)) {
+    markerEffects <- downloadMarkerEffects(markerEffectsUrl)
+  } else {
+    engineError("Either `markerEffectsFile` or `markerEffectsUrl` should be provided",
+                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+                             input_file = "markers effects"))
+  }
+
+  predictions_list <- lapply(names(markerEffects$intercept), function(trait){
+    eff <- merge(markerEffects$SNPeffects_add[, trait, drop = FALSE],
+                 markerEffects$SNPeffects_dom[, trait, drop = FALSE],
+                 by = "row.names", all = T)
+    row.names(eff) <- eff$Row.names
+    colnames(eff)[c(2,3)] <- c("additive", "dominance")
+    eff <- eff[, c("additive", "dominance")]
+
+    if (!all(row.names(eff) %in% g@snps$id)) {
+      missing_snp <- row.names(eff)[!row.names(eff) %in% g@snps$id]
+      engineError("Genotype file is missing some model's markers.",
+                  extra = list(
+                    code = errorCode("BAD_GENO_MISSING_SNP"),
+                    n_missing_snp = length(missing_snp),
+                    missing_snp = missing_snp))
+    }
+
+    estim_mark_eff <- list(
+      intercept = markerEffects$intercept[trait],
+      eff = eff
+    )
+
+    predictions <- predict_gs_model(g, estim_mark_eff)
+    colnames(predictions) <- paste0("predicted.", trait)
+    predictions$ind <- row.names(predictions)
+    predictions <- predictions[, c("ind", paste0("predicted.", trait))]
+    predictions
+  })
+
+  predictions <- purrr::reduce(predictions_list, dplyr::full_join, by = "ind")
+
+
+  if (!is.null(outFile)) {
+    logger$log("Save results ...")
+    write.csv(predictions,
+              file = outFile,
+              row.names = FALSE)
+    file <- outFile
+    logger$log("Save results DONE")
+  } else {
+    file <- NULL
+  }
+
+  return(list(
+    "predictions" = predictions,
+    "file" = file
+  ))
+}
+
+
+
+
+
+
+

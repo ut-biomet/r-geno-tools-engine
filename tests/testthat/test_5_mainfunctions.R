@@ -61,6 +61,35 @@ capture.output({
   }
 
 
+
+  # GS predictions ----
+
+  tests_cases <- list(
+    additive = list(geno = "../../data/genomic_selection/geno_G2.vcf.gz",
+                   markerEffects = "../../data/results/GS_model_additive.json"),
+    dominance = list(geno = "../../data/genomic_selection/geno_G2.vcf.gz",
+                     markerEffects = "../../data/results/GS_model_dominance.json"),
+    several_traits = list(geno = "../../data/geno/breedGame_phasedGeno.vcf.gz",
+                          markerEffects = "../../data/markerEffects/breedGame_markerEffects_2traits.json")
+  )
+
+  for (test in names(tests_cases)) {
+    test_that(paste0("train_gs_model_main ", test), {
+      expect_no_error({
+        predictions <- predict_gs_model_main(genoFile = tests_cases[[test]]$geno,
+                                             genoUrl = NULL,
+                                             markerEffectsFile = tests_cases[[test]]$markerEffects,
+                                             markerEffectsUrl = NULL,
+                                             outFile = tempfile(fileext = ".csv")
+        )
+      })
+    })
+  }
+
+
+
+
+
   # run GWAS ----
   files <- list(
     test_01 = list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
