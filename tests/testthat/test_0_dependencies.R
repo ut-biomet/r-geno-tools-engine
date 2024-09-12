@@ -21,5 +21,7 @@ capture_output({
     expect_true(compareVersion("0.3.2", as.character(packageVersion("breedSimulatR"))) != 1)
     expect_true(compareVersion("0.1.8", as.character(packageVersion("qqman"))) != 1)
     expect_true(compareVersion("2.2.2", as.character(packageVersion("argparse"))) != 1)
+    expect_true(compareVersion("0.1.33", as.character(packageVersion("RAINBOWR"))) != 1)
+    expect_true(compareVersion("6.0", as.character(packageVersion("caret"))) != 1)
   })
 })

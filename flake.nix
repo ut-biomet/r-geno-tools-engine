@@ -50,9 +50,7 @@
           pandoc
           Rd2md
           roxygen2
-
           sommer
-
           caret
           RAINBOWR
 

@@ -37,6 +37,10 @@
     plotly
     qqman
     vcfR_withoutX
+    sommer
+    caret
+    RAINBOWR
+
     (
       pkgs.rPackages.buildRPackage {
         name = "breedSimulatR";
@@ -66,7 +70,7 @@
 in
   pkgs.stdenv.mkDerivation (finalAttrs: rec {
     pname = "r-geno-tools-engine";
-    version = "v1.0.5";
+    version = "v1.1.0";
 
     src = pkgs.lib.sources.cleanSource ../.;
 
@@ -116,6 +120,10 @@ in
       cp ./data/SNPcoordinates/breedingGame_SNPcoord.csv build/test_data/.
       cp ./data/markerEffects/breedGame_markerEffects.csv build/test_data/.
       cp ./data/markerEffects/breedGame_markerEffects_2traits.json build/test_data/.
+      cp ./data/genomic_selection/geno_G1.vcf.gz build/test_data/.
+      cp ./data/genomic_selection/geno_G2.vcf.gz build/test_data/.
+      cp ./data/genomic_selection/pheno_test.csv build/test_data/.
+      cp ./data/genomic_selection/pheno_train.csv build/test_data/.
     '';
 
     checkPhase = ''
