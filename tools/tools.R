@@ -219,6 +219,23 @@ createResultExample <- function() {
                       thresh_maf = 0,
                       outFile = outFile)
 
+
+  # gs evaluation ----
+  outFile <- 'data/results/GS_model_evaluation.json'
+  cross_validation_evaluation_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+                                   phenoFile = "data/genomic_selection/pheno_train.csv",
+                                   trait = "pheno",
+                                   n_folds = 10,
+                                   n_repetitions = 5,
+                                   with_dominance = FALSE,
+                                   thresh_maf = 0,
+                                   outFile = outFile)
+
+  # gs evaluation plot ----
+  outFile <- 'data/results/GS_model_evaluation_plot.html'
+  draw_evaluation_plot(evaluationFile = 'data/results/GS_model_evaluation.json',
+                       outFile = outFile)
+
   # train_gs_model_main ----
   outFile <- 'data/results/GS_model_additive.json'
   train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
