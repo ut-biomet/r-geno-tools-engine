@@ -1110,15 +1110,57 @@ plot <- draw_progBlupsPlot_2traits(
 ```
 
 ![progBlupPlot-2-traits](README_files/progBlupPlot-2-traits.png)
+</details>
+
+
+## Genomic selection
+
+<details><summary>Click to expand</summary>
+
+### Model evaluation
+
+Before training a model is is good practive to evaluate the performance a the model.
+
+This can be done with the following command:
+
+```sh
+./r-geno-tools-engine.R evaluate-gs-model --genoFile data/genomic_selection/geno_G1.vcf.gz --phenoFile data/genomic_selection/pheno_train.csv --trait pheno --with-dominance true --outFile ./model_evaluation.json
+```
+
+Once the evaluation is done, you can visualize it with:
+
+```sh
+./r-geno-tools-engine.R plot-gs-model-evaluation --evaluation-file ./model_evaluation.json --outFile evaluation_plot.html
+```
+
+![gs_evaluation_plot](README_files/gs_evaluation_plot.png)
+
+### Model training
+
+A GS model can be build with the command:
+
+```sh
+./r-geno-tools-engine.R train-gs-model --genoFile data/genomic_selection/geno_G1.vcf.gz --phenoFile data/genomic_selection/pheno_train.csv --trait pheno --with-dominance true --outFile ./estimated_markers_effects.json
+```
+
+This command will create a "marker effects" file that contains the estimated markers effects that can be used to make predicitons.
+
+2 models can be build, one with only additive effects estimation
+(with `--with-dominance false`) or one with both additive and dominance effects
+estimations with (with `--with-dominance true`).
+
+### Model predictions
+
+GS prediction can be made from a "marker effects" file and a genotype file with 
+the command:
+
+```sh
+ ./r-geno-tools-engine.R gs-predictions --genoFile data/genomic_selection/geno_G2.vcf.gz --markerEffectsFile ./estimated_markers_effects.json --outFile predictions.csv
+```
 
 
 
 </details>
-
-
-
-
-
 
 # Data references
 
