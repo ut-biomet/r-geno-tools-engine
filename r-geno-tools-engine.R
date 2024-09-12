@@ -554,6 +554,138 @@ withCallingHandlers(
                                          action = 'store_true',
                                          required = FALSE)
 
+    ## GS model evaluation ----
+    gs_model_evaluation_parser = main_subparsers$add_parser(
+      "evaluate-gs-model",
+      help = "Evaluate a genomic selection model.",
+      description = paste(
+        "Evaluate a genomic selection model.",
+        "This evaluation is done with a repeated cross-validation."
+      ),
+      formatter_class = formatter_class)
+
+    gs_model_evaluation_parser$add_argument(arg$genoFile$flag,
+                                            help = arg$genoFile$help,
+                                            type = arg$genoFile$type,
+                                            required = TRUE)
+    gs_model_evaluation_parser$add_argument(arg$phenoFile$flag,
+                                            help = arg$phenoFile$help,
+                                            type = arg$phenoFile$type,
+                                            required = TRUE)
+    gs_model_evaluation_parser$add_argument(arg$trait$flag,
+                                            help = arg$trait$help,
+                                            type = arg$trait$type,
+                                            required = TRUE)
+    gs_model_evaluation_parser$add_argument(arg$with_dominance$flag,
+                                            help = arg$with_dominance$help,
+                                            type = arg$with_dominance$type,
+                                            required = TRUE)
+    gs_model_evaluation_parser$add_argument(arg$n_folds$flag,
+                                            help = arg$n_folds$help,
+                                            type = arg$n_folds$type,
+                                            default = arg$n_folds$default)
+    gs_model_evaluation_parser$add_argument(arg$n_repetitions$flag,
+                                            help = arg$n_repetitions$help,
+                                            type = arg$n_repetitions$type,
+                                            default = arg$n_repetitions$default)
+    gs_model_evaluation_parser$add_argument(arg$outFile$flag,
+                                            help = arg$outFile$help,
+                                            type = arg$outFile$type,
+                                            required = TRUE)
+    gs_model_evaluation_parser$add_argument(arg$json_error$flag,
+                                            help = arg$json_error$help,
+                                            default = arg$json_error$default,
+                                            action = 'store_true',
+                                            required = FALSE)
+
+    ## plot-gs-model-evaluation ----
+    plot_gs_model_evaluation_parser = main_subparsers$add_parser(
+      "plot-gs-model-evaluation",
+      help = "Create an interactive plot of the evaluation resutls",
+      description = paste(
+        "Create an interactive plot of the evaluation resutls"
+      ),
+      formatter_class = formatter_class)
+
+
+    plot_gs_model_evaluation_parser$add_argument(arg$evaluation_file$flag,
+                                                 help = arg$evaluation_file$help,
+                                                 type = arg$evaluation_file$type,
+                                                 required = TRUE)
+    plot_gs_model_evaluation_parser$add_argument(arg$outFile$flag,
+                                                 help = arg$outFile$help,
+                                                 type = arg$outFile$type,
+                                                 required = TRUE)
+    plot_gs_model_evaluation_parser$add_argument(arg$json_error$flag,
+                                                 help = arg$json_error$help,
+                                                 default = arg$json_error$default,
+                                                 action = 'store_true',
+                                                 required = FALSE)
+
+    ## Train GS model ----
+    train_gs_model_parser = main_subparsers$add_parser(
+      "train-gs-model",
+      help = "Train a genomic selection model.",
+      description = paste(
+        "Train a genomic selection model.",
+        "This model allow to include optionnaly dominance effects.",
+        "The result file will contain the estimated markers effects that can",
+        "be used to make predictions."
+      ),
+      formatter_class = formatter_class)
+
+    train_gs_model_parser$add_argument(arg$genoFile$flag,
+                                       help = arg$genoFile$help,
+                                       type = arg$genoFile$type,
+                                       required = TRUE)
+    train_gs_model_parser$add_argument(arg$phenoFile$flag,
+                                       help = arg$phenoFile$help,
+                                       type = arg$phenoFile$type,
+                                       required = TRUE)
+    train_gs_model_parser$add_argument(arg$trait$flag,
+                                       help = arg$trait$help,
+                                       type = arg$trait$type,
+                                       required = TRUE)
+    train_gs_model_parser$add_argument(arg$with_dominance$flag,
+                                       help = arg$with_dominance$help,
+                                       type = arg$with_dominance$type,
+                                       required = TRUE)
+    train_gs_model_parser$add_argument(arg$outFile$flag,
+                                       help = arg$outFile$help,
+                                       type = arg$outFile$type,
+                                       required = TRUE)
+    train_gs_model_parser$add_argument(arg$json_error$flag,
+                                       help = arg$json_error$help,
+                                       default = arg$json_error$default,
+                                       action = 'store_true',
+                                       required = FALSE)
+
+    ## gs-predictions ----
+    gs_prediction_parser = main_subparsers$add_parser(
+      "gs-predictions",
+      help = "Make phenotypic prediction using a markers effects",
+      description = paste(
+        "Make phenotypic prediction using markers effects"
+      ),
+      formatter_class = formatter_class)
+
+    gs_prediction_parser$add_argument(arg$genoFile$flag,
+                                       help = arg$genoFile$help,
+                                       type = arg$genoFile$type,
+                                       required = TRUE)
+    gs_prediction_parser$add_argument(arg$markersEffectsFile$flag,
+                                       help = arg$markersEffectsFile$help,
+                                       type = arg$markersEffectsFile$type,
+                                       required = TRUE)
+    gs_prediction_parser$add_argument(arg$outFile$flag,
+                                       help = arg$outFile$help,
+                                       type = arg$outFile$type,
+                                       required = TRUE)
+    gs_prediction_parser$add_argument(arg$json_error$flag,
+                                       help = arg$json_error$help,
+                                       default = arg$json_error$default,
+                                       action = 'store_true',
+                                       required = FALSE)
 
     # Parse the command line arguments
     args = main_parser$parse_args()
@@ -716,6 +848,37 @@ withCallingHandlers(
         ellipses_npoints = args$ellipses_npoints,
         outFile = args$outFile
       )
+      quit(save = "no", status = 0)
+    } else if (args$command == 'evaluate-gs-model') {
+      # evaluate-gs-model ----
+      evaluation <- cross_validation_evaluation_main(genoFile = args$geno,
+                                                     phenoFile = args$pheno,
+                                                     trait = args$trait,
+                                                     with_dominance = args$with_dominance,
+                                                     n_folds = args$n_folds,
+                                                     n_repetitions = args$n_repetitions,
+                                                     thresh_maf = 0,
+                                                     outFile = args$outFile)
+      quit(save = "no", status = 0)
+    } else if (args$command == 'plot-gs-model-evaluation') {
+      # plot-gs-model-evaluation ----
+      plot <- draw_evaluation_plot(evaluationFile = args$evaluation_file,
+                                   outFile = args$outFile)
+      quit(save = "no", status = 0)
+    } else if (args$command == 'train-gs-model') {
+      # train-gs-model ----
+      model <- train_gs_model_main(genoFile = args$geno,
+                                   phenoFile = args$pheno,
+                                   trait = args$trait,
+                                   with_dominance = args$with_dominance,
+                                   thresh_maf = 0,
+                                   outFile = args$outFile)
+      quit(save = "no", status = 0)
+    } else if (args$command == 'gs-predictions') {
+      # gs-predictions ----
+      predictions <- predict_gs_model_main(genoFile =  args$geno,
+                                           markerEffectsFile = args$markerEffectsFile,
+                                           outFile = args$outFile)
       quit(save = "no", status = 0)
     }
 

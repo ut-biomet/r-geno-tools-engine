@@ -338,6 +338,70 @@ test_that('progeny-blup-plot-2-traits', {
 })
 
 
+# evaluate-gs-model ----
+test_that('evaluate-gs-model', {
+  cmd <- paste(
+    rGenoCommand, 'evaluate-gs-model',
+    '--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz',
+    '--phenoFile $ROOT_DATA_FILES/data/genomic_selection/pheno_train.csv',
+    '--trait pheno',
+    '--with-dominance true',
+    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_evaluation.json'
+  )
+
+  expect_no_warning({
+    x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+  })
+  expect_equal(x, 0)
+})
+
+# plot-gs-model-evaluation ----
+test_that('plot-gs-model-evaluation', {
+  cmd <- paste(
+    rGenoCommand, 'plot-gs-model-evaluation',
+    '--evaluation-file $ROOT_DATA_FILES/tests/testthat/testOutput/gs_evaluation.json',
+    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/eval_plot.html'
+  )
+
+  expect_no_warning({
+    x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+  })
+  expect_equal(x, 0)
+})
+
+# train-gs-model ----
+test_that('train-gs-model', {
+  cmd <- paste(
+    rGenoCommand, 'train-gs-model',
+    '--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz',
+    '--phenoFile $ROOT_DATA_FILES/data/genomic_selection/pheno_train.csv',
+    '--trait pheno',
+    '--with-dominance true',
+    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_model.json'
+  )
+
+  expect_no_warning({
+    x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+  })
+  expect_equal(x, 0)
+})
+
+# gs-predictions ----
+test_that('gs-predictions', {
+  cmd <- paste(
+    rGenoCommand, 'gs-predictions',
+    '--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz',
+    '--markerEffectsFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_model.json',
+    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_prediction.csv'
+  )
+
+  expect_no_warning({
+    x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
+  })
+  expect_equal(x, 0)
+})
+
+# expected Errors ----
 test_that('Expected error RAW', {
 
   cmd <- paste(rGenoCommand, 'pedNetwork',

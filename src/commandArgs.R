@@ -134,7 +134,7 @@ arg$response$type = 'character'
 
 # trait ----
 arg$trait$flag = '--trait'
-arg$trait$help = 'Name of the trait to analyze. (Must be a column name of the phenotypic file for GWAS)'
+arg$trait$help = 'Name of the trait to analyze. (Must be a column name of the phenotypic file)'
 arg$trait$type = 'character'
 
 
@@ -378,3 +378,29 @@ arg$ellipses_npoints$type = 'integer'
 arg$json_error$flag = '--json-errors'
 arg$json_error$default = FALSE
 arg$json_error$help = 'Write errors as json in stderr (default FALSE)'
+
+# with-dominance ----
+arg$with_dominance$flag = '--with-dominance'
+arg$with_dominance$help = 'Should the model include dominance effects'
+arg$with_dominance$type = 'logical'
+
+# n-folds ----
+arg$n_folds$flag = '--n-folds'
+arg$n_folds$default = 10
+arg$n_folds$help = paste0('Number of folds for each cross-validation (default ',
+                          arg$n_folds$default,
+                          ')')
+arg$n_folds$type = 'integer'
+
+# n-folds ----
+arg$n_repetitions$flag = '--n-repetitions'
+arg$n_repetitions$default = 5
+arg$n_repetitions$help = paste0('Number of cross-validation repetition (default ',
+                          arg$n_repetitions$default,
+                          ')')
+arg$n_repetitions$type = 'integer'
+
+# evaluation-file ----
+arg$evaluation_file$flag <- '--evaluation-file'
+arg$evaluation_file$help <- 'Path of the model evaluation results'
+arg$evaluation_file$type <- 'character'
