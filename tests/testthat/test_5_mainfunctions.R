@@ -61,6 +61,73 @@ capture.output({
   }
 
 
+  # GS cross-validation ----
+  tests_cases <- list(
+    test_01 = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                   pheno = "../../data/genomic_selection/pheno_train.csv",
+                   trait = "pheno"),
+    missing_genotype = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                            pheno = "../data/GS_pheno_train_missing_genotype.csv",
+                            trait = "pheno"),
+    missing_phenotype = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                             pheno = "../data/GS_pheno_train_missing_phenotype.csv",
+                             trait = "pheno")
+  )
+
+  for (test in names(tests_cases)) {
+
+    test_that(paste0("cross_validation_evaluation_main ", test), {
+      for (with_dominance in c(T,F)) {
+        expect_no_error({
+          evaluation <- cross_validation_evaluation_main(genoFile = tests_cases[[test]]$geno,
+                                                         phenoFile = tests_cases[[test]]$pheno,
+                                                         genoUrl = NULL,
+                                                         phenoUrl = NULL,
+                                                         trait = tests_cases[[test]]$trait,
+                                                         with_dominance = with_dominance,
+                                                         n_folds = 10,
+                                                         n_repetitions = 5,
+                                                         thresh_maf = 0,
+                                                         outFile = tempfile(fileext = ".json")
+          )
+        })
+      }
+    })
+  }
+
+
+  # GS evaluation plot ----
+  tests_cases <- list(
+    test_01 = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                   pheno = "../../data/genomic_selection/pheno_train.csv",
+                   trait = "pheno"),
+    missing_genotype = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                            pheno = "../data/GS_pheno_train_missing_genotype.csv",
+                            trait = "pheno"),
+    missing_phenotype = list(geno = "../../data/genomic_selection/geno_G1.vcf.gz",
+                             pheno = "../data/GS_pheno_train_missing_phenotype.csv",
+                             trait = "pheno")
+  )
+
+  for (test in names(tests_cases)) {
+    test_that(paste0("cross_validation_evaluation_main ", test), {
+      for (with_dominance in c(T,F)) {
+        evaluation <- cross_validation_evaluation_main(genoFile = tests_cases[[test]]$geno,
+                                                       phenoFile = tests_cases[[test]]$pheno,
+                                                       trait = tests_cases[[test]]$trait,
+                                                       with_dominance = with_dominance,
+                                                       n_folds = 10,
+                                                       n_repetitions = 5,
+                                                       thresh_maf = 0,
+                                                       outFile = tempfile(fileext = ".json"))
+        expect_no_error({
+          draw_evaluation_plot(evaluation$file,
+                               tempfile(fileext = ".html"))
+        })
+      }
+
+    })
+  }
 
   # GS predictions ----
 
