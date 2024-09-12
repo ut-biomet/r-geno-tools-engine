@@ -113,16 +113,17 @@ manPlot <- function(gwas,
     if (remainPoints == 0) {
       # manhattanly::manhattanly can't handle empty data
       p <- plotly::plot_ly(type = "scatter",
-                           mode = "lines+markers") %>%
-        plotly::layout(title = title,
-                       xaxis = list(title = 'Chromosome',
-                                    zerolinecolor = '#ffff',
-                                    gridcolor = 'ffff',
-                                    showticklabels=FALSE),
-                       yaxis = list(title = '-log10(p)',
-                                    # zerolinecolor = '#ffff',
-                                    # gridcolor = 'ffff',
-                                    showticklabels=FALSE))
+                           mode = "lines+markers")
+      p <- plotly::layout(p,
+                          title = title,
+                          xaxis = list(title = 'Chromosome',
+                                       zerolinecolor = '#ffff',
+                                       gridcolor = 'ffff',
+                                       showticklabels=FALSE),
+                          yaxis = list(title = '-log10(p)',
+                                       # zerolinecolor = '#ffff',
+                                       # gridcolor = 'ffff',
+                                       showticklabels=FALSE))
     } else {
       p <- manhattanly::manhattanly(
         data.frame(CHR = gwas$chr,
@@ -670,10 +671,10 @@ evaluation_plot <- function(evaluation_results) {
         )
       )
     )
-    box_plot %>% plotly::layout(title = paste0("Cross-Validation Results (",
-                                               n_reps, " repetitions, ", n_folds, " folds)"),
-                                plot_bgcolor = '#e5ecf6'
-                                )
+    plotly::layout(box_plot, title = paste0("Cross-Validation Results (",
+                                            n_reps, " repetitions, ", n_folds, " folds)"),
+                   plot_bgcolor = '#e5ecf6'
+    )
   })
 
 
