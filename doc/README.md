@@ -499,6 +499,46 @@ list of metrics values:
  - `r2` R squared
 
 
+# `check_dominance_model_is_applicable`
+
+Check if a dominance model is applicable with the provided genetic data
+
+
+## Description
+
+Check if a dominance model is applicable with the provided genetic data
+
+
+## Usage
+
+```r
+check_dominance_model_is_applicable(dominance, homozygous_threshold = 0.95)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`dominance`     |     list returned by
+`homozygous_threshold`     |     A threshold used to identify individuals or SNPs with a homozygosity proportion exceeding this value. These will be counted and reported in the error message if applicable. This parameter does not influence the function's behavior, only the error message it can raise.
+
+
+## Details
+
+The dominance model need the dominance relationship matrix to be invertible
+ in order to be able to calculate the dominance effects. This function will
+ return an error if it is not the case.
+ The error will contain information about the homozygousity of the markers and
+ individuals as if the data have too many homozygous individuals/markers it
+ will probably not be suited for a dominance model. The ``
+
+
+## Value
+
+`TRUE` or raise an `engineError`
+
+
 # `gwas`
 
 perform GWAS analysis
@@ -1227,6 +1267,152 @@ Argument      |Description
 plotly graph
 
 
+# `train_gs_model_main`
+
+Train GS model
+
+
+## Description
+
+Train GS model
+
+
+## Usage
+
+```r
+train_gs_model_main(
+  genoFile = NULL,
+  phenoFile = NULL,
+  genoUrl = NULL,
+  phenoUrl = NULL,
+  trait,
+  with_dominance,
+  thresh_maf,
+  outFile = tempfile(fileext = ".json")
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
+`phenoFile`     |     path of the phenotypic data file (`csv` file). Individuals' name should be the first column of the file and no duplication is allowed.
+`genoUrl`     |     url of the geno data file (`.vcf` or `.vcf.gz` file)
+`phenoUrl`     |     url of the phenotypic data file (`csv` file) Individuals' name should be the first column of the file and no duplication is allowed.
+`trait`     |     Chraracter of length 1, name of the trait to analyze. Must be a column name of the phenotypic file.
+`with_dominance`     |     should the model include dominance effects
+`thresh_maf`     |     threshold to keep only markers with minor allele frequency greater than `thresh_maf`.
+`outFile`     |     paht of the `.json` file where to save the model's estimated markers effects.
+
+
+# `predict_gs_model_main`
+
+Make phenotypic prediction using a markers effects
+
+
+## Description
+
+Make phenotypic prediction using a markers effects
+
+
+## Usage
+
+```r
+predict_gs_model_main(
+  genoFile = NULL,
+  genoUrl = NULL,
+  markerEffectsFile = NULL,
+  markerEffectsUrl = NULL,
+  outFile = tempfile(fileext = ".csv")
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
+`genoUrl`     |     url of the geno data file (`.vcf` or `.vcf.gz` file)
+`markerEffectsFile`     |     path of the marker effects file (`csv` or `json` file).
+`markerEffectsUrl`     |     URL of a marker effect file
+`outFile`     |     `.csv` file path where to save the predictions. If the file already exists, it will be overwritten.
+
+
+# `cross_validation_evaluation_main`
+
+Evaluate a model with repeated cross validation
+
+
+## Description
+
+Evaluate a model with repeated cross validation
+
+
+## Usage
+
+```r
+cross_validation_evaluation_main(
+  genoFile = NULL,
+  phenoFile = NULL,
+  genoUrl = NULL,
+  phenoUrl = NULL,
+  trait,
+  n_folds = 10,
+  n_repetitions = 5,
+  with_dominance,
+  thresh_maf,
+  outFile = tempfile(fileext = ".json")
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`genoFile`     |     path of the geno data file (`.vcf` or `.vcf.gz` file)
+`phenoFile`     |     path of the phenotypic data file (`csv` file). Individuals' name should be the first column of the file and no duplication is allowed.
+`genoUrl`     |     url of the geno data file (`.vcf` or `.vcf.gz` file)
+`phenoUrl`     |     url of the phenotypic data file (`csv` file) Individuals' name should be the first column of the file and no duplication is allowed.
+`trait`     |     Chraracter of length 1, name of the trait to analyze. Must be a column name of the phenotypic file.
+`n_folds`     |     number of fold for each cross-validation
+`n_repetitions`     |     number of cross-validation repetitions
+`with_dominance`     |     should the model include dominance effects
+`thresh_maf`     |     threshold to keep only markers with minor allele frequency greater than `thresh_maf`.
+`outFile`     |     paht of the `.json` file where to save the evaluation results
+
+
+# `draw_evaluation_plot`
+
+Draw the evaluation result plot
+
+
+## Description
+
+Draw the evaluation result plot
+
+
+## Usage
+
+```r
+draw_evaluation_plot(
+  evaluationFile = NULL,
+  outFile = tempfile(fileext = ".html")
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`evaluationFile`     |     path of the evaluation result file generated by `save_GS_evaluation` function
+`outFile`     |     path of the file containing the plot. If `NULL`, the output will not be written in any file. By default write in an temporary file.
+
+
 # `manPlot`
 
 create manhatan plot
@@ -1588,8 +1774,8 @@ calcProgenyBlupVariance(SNPcoord, markerEffects, geneticCovar)
 Argument      |Description
 ------------- |----------------
 `SNPcoord`     |     SNP coordinate data.frame return by `readSNPcoord`
-`markerEffects`     |     the markers effects return by `readMarkerEffects`
 `geneticCovar`     |     list of the genetic variance covariance matrices return by `calcProgenyGenetCovar`
+`makrerEffects`     |     (output of `extract_additive_effects` function) list of 2 elements: `intercept`: named vector of the intercepts `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with the marker ids as row names.
 
 
 ## Value
@@ -1622,7 +1808,7 @@ Argument      |Description
 `haplo`     |     haplotypes of individuals ("haplotypes" element of the list return by `readPhasedGeno` function)
 `p1.id`     |     id of the first parent
 `p2.id`     |     id of the second parent
-`markerEffects`     |     the markers effects return by `readMarkerEffects`
+`makrerEffects`     |     (output of `extract_additive_effects` function) list of 2 elements: `intercept`: named vector of the intercepts `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with the marker ids as row names.
 
 
 ## Value
@@ -1669,7 +1855,7 @@ Argument      |Description
 `p1.id`     |     id of the first parent
 `p2.id`     |     id of the second parent
 `blupExpectedValues`     |     output of `calcProgenyBlupExpected`
-`makrerEffects`     |     output of `readMarkerEffects`
+`makrerEffects`     |     (output of `extract_additive_effects` function) list of 2 elements: `intercept`: named vector of the intercepts `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with the marker ids as row names.
 
 
 ## Value
@@ -2663,6 +2849,119 @@ Argument      |Description
 ## Value
 
 path of the created file
+
+
+# `save_GS_model`
+
+Save a GS model
+
+
+## Description
+
+Save a GS model
+
+
+## Usage
+
+```r
+save_GS_model(model, trait_name, file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`model`     |     GS model generated with
+`trait_name`     |     name of the phenotypic trait predicted by this model
+`file`     |     file path where to save the model. If the file already exists, it will be overwritten.
+
+
+## Value
+
+path of the created file
+
+
+# `extract_additive_effects`
+
+Format `markerEffects` to be used by `calcProgenyBlupCovariance` function.
+
+
+## Description
+
+Format `markerEffects` to be used by `calcProgenyBlupCovariance` function.
+
+
+## Usage
+
+```r
+extract_additive_effects(markerEffects)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`markerEffects`     |     list
+
+
+## Value
+
+list of 2 elements:
+ `intercept`: named vector of the intercepts
+ `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with
+ the marker ids as row names.
+
+
+# `save_GS_evaluation`
+
+Save evaluation result in .json file
+
+
+## Description
+
+Save evaluation result in .json file
+
+
+## Usage
+
+```r
+save_GS_evaluation(evaluation, trait_name, file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`evaluation`     |     output of `cross_validation_evaluation` function
+`trait_name`     |     trait name
+`file`     |     file path where to save the evaluations resutls. If the file already exists, it will be overwritten.
+
+
+# `read_GS_evaluation`
+
+read evaluation results file
+
+
+## Description
+
+read evaluation results file
+
+
+## Usage
+
+```r
+read_GS_evaluation(file)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`file`     |     path of the evaluation result file generated by `save_GS_evaluation` function
 
 
 # `pedRelMat`

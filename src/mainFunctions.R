@@ -1247,6 +1247,21 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
 
 
 
+#' Train GS model
+#'
+#' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param phenoFile path of the phenotypic data file (`csv` file). Individuals'
+#' name should be the first column of the file and no duplication is allowed.
+#' @param genoUrl url of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param phenoUrl url of the phenotypic data file (`csv` file) Individuals'
+#' name should be the first column of the file and no duplication is allowed.
+#' @param trait Chraracter of length 1, name of the trait to analyze. Must be a
+#'   column name of the phenotypic file.
+#' @param with_dominance should the model include dominance effects
+#' @param thresh_maf threshold to keep only markers with minor allele frequency
+#' greater than `thresh_maf`.
+#' @param outFile paht of the `.json` file where to save the model's estimated
+#' markers effects.
 train_gs_model_main <- function(genoFile = NULL,
                                 phenoFile = NULL,
                                 genoUrl = NULL,
@@ -1315,6 +1330,14 @@ train_gs_model_main <- function(genoFile = NULL,
 
 
 
+#' Make phenotypic prediction using a markers effects
+#'
+#' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param genoUrl url of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param markerEffectsFile path of the marker effects file (`csv` or `json` file).
+#' @param markerEffectsUrl URL of a marker effect file
+#' @param outFile `.csv` file path where to save the predictions. If the file already exists,
+#' it will be overwritten.
 predict_gs_model_main <- function(genoFile = NULL,
                                   genoUrl = NULL,
                                   markerEffectsFile = NULL,
