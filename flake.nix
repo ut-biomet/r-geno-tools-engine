@@ -92,16 +92,19 @@
           R_LIBS_USER = "''"; # to no use users' installed R packages
           R_PROFILE_USER = "''"; # to disable`.Rprofile` files (eg. when the project already use `renv`)
           nativeBuildInputs = [ pkgs.bashInteractive ];
-          buildInputs = [
-            (pkgs.rWrapper.override { packages = R-packages; })
-            (pkgs.rstudioWrapper.override { packages = R-packages; })
+          buildInputs =
+            [
+              (pkgs.rWrapper.override { packages = R-packages; })
 
-            pkgs.pandoc
-            pkgs.python3
-            ((pkgs.callPackage ./nix_pkgs/default.nix { inherit pkgs; }).overrideAttrs (oldAttrs: {
-              doCheck = false;
-            }))
-          ];
+              pkgs.pandoc
+              pkgs.python3
+              ((pkgs.callPackage ./nix_pkgs/default.nix { inherit pkgs; }).overrideAttrs (oldAttrs: {
+                doCheck = false;
+              }))
+            ]
+            ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
+              (pkgs.rstudioWrapper.override { packages = R-packages; })
+            ];
         };
 
         apps = {
