@@ -83,6 +83,7 @@ pkgs.stdenv.mkDerivation (finalAttrs: rec {
     R_with_packages
     pkgs.python3
     pkgs.pandoc
+    pkgs.fontconfig
   ];
 
   nativeBuildInputs = [
@@ -107,6 +108,8 @@ pkgs.stdenv.mkDerivation (finalAttrs: rec {
     cp ./r-geno-tools-engine.R build/bin/r-geno-tools-engine.R
     wrapProgram $(pwd)/build/bin/r-geno-tools-engine.R \
       --set PATH ${lib.makeBinPath (propagatedBuildInputs ++ [ pkgs.coreutils ])} \
+      --set FONTCONFIG_FILE ${pkgs.fontconfig.out}/etc/fonts/fonts.conf \
+      --set FONTCONFIG_PATH ${pkgs.fontconfig.out}/etc/fonts/ \
       --set RGENOROOT $(pwd)/build \
       --set R_LIBS_USER "\"\""
 
@@ -129,6 +132,8 @@ pkgs.stdenv.mkDerivation (finalAttrs: rec {
 
   checkPhase = ''
     export XDG_CACHE_HOME="$(mktemp -d)"
+    export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
+    export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts/
 
     RGENOROOT="build"
     ROOT_DATA_FILES="."
