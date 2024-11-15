@@ -3,11 +3,10 @@
   pkgs,
   runCommand,
   ...
-}: let
+}:
+let
   # To undo the effect of `requireX = true`
-  vegan_withoutX = pkgs.rPackages.vegan.override {
-    requireX = false;
-  };
+  vegan_withoutX = pkgs.rPackages.vegan.override { requireX = false; };
   vcfR_deps = with pkgs.rPackages; [
     ape
     dplyr
@@ -41,19 +40,25 @@
     caret
     RAINBOWR
 
-    (
-      pkgs.rPackages.buildRPackage {
-        name = "breedSimulatR";
-        src = pkgs.fetchFromGitHub {
-          owner = "ut-biomet";
-          repo = "breedSimulatR";
-          rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
-          sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
-        };
-        propagatedBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
-        nativeBuildInputs = with pkgs.rPackages; [data_table R6 vcfR_withoutX];
-      }
-    )
+    (pkgs.rPackages.buildRPackage {
+      name = "breedSimulatR";
+      src = pkgs.fetchFromGitHub {
+        owner = "ut-biomet";
+        repo = "breedSimulatR";
+        rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
+        sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
+      };
+      propagatedBuildInputs = with pkgs.rPackages; [
+        data_table
+        R6
+        vcfR_withoutX
+      ];
+      nativeBuildInputs = with pkgs.rPackages; [
+        data_table
+        R6
+        vcfR_withoutX
+      ];
+    })
   ];
 
   tests_R_deps = with pkgs.rPackages; [
@@ -61,93 +66,88 @@
     AGHmatrix
   ];
 
-  R_with_packages = pkgs.rWrapper.override {
-    packages = engines_R_deps;
-  };
-  R_with_packages_test = pkgs.rWrapper.override {
-    packages = engines_R_deps ++ tests_R_deps;
-  };
+  R_with_packages = pkgs.rWrapper.override { packages = engines_R_deps; };
+  R_with_packages_test = pkgs.rWrapper.override { packages = engines_R_deps ++ tests_R_deps; };
 in
-  pkgs.stdenv.mkDerivation (finalAttrs: rec {
-    pname = "r-geno-tools-engine";
-    version = "v1.1.0";
+pkgs.stdenv.mkDerivation (finalAttrs: rec {
+  pname = "r-geno-tools-engine";
+  version = "v1.1.0";
 
-    src = pkgs.lib.sources.cleanSource ../.;
+  src = pkgs.lib.sources.cleanSource ../.;
 
-    # To skip the Makefile `make deps`
-    # dontBuild = true;
-    doCheck = true;
+  # To skip the Makefile `make deps`
+  # dontBuild = true;
+  doCheck = true;
 
-    propagatedBuildInputs = [
-      R_with_packages
-      pkgs.python3
-      pkgs.pandoc
-    ];
+  propagatedBuildInputs = [
+    R_with_packages
+    pkgs.python3
+    pkgs.pandoc
+  ];
 
-    nativeBuildInputs = [
-      R_with_packages_test
-      pkgs.makeWrapper
-    ];
+  nativeBuildInputs = [
+    R_with_packages_test
+    pkgs.makeWrapper
+  ];
 
-    patchPhase = ''
-      runHook prePatch
+  patchPhase = ''
+    runHook prePatch
 
-      substituteInPlace ./r-geno-tools-engine.R --replace-fail '#!/usr/bin/env Rscript' '#!${R_with_packages}/bin/Rscript --vanilla'
+    substituteInPlace ./r-geno-tools-engine.R --replace-fail '#!/usr/bin/env Rscript' '#!${R_with_packages}/bin/Rscript --vanilla'
 
-      runHook postPatch
-    '';
+    runHook postPatch
+  '';
 
-    buildPhase = ''
+  buildPhase = ''
 
-      mkdir -p build/src
-      cp -r ./src/* build/src/.
+    mkdir -p build/src
+    cp -r ./src/* build/src/.
 
-      mkdir -p build/bin
-      cp ./r-geno-tools-engine.R build/bin/r-geno-tools-engine.R
-      wrapProgram $(pwd)/build/bin/r-geno-tools-engine.R \
-        --set PATH ${lib.makeBinPath (propagatedBuildInputs ++ [pkgs.coreutils])} \
-        --set RGENOROOT $(pwd)/build \
-        --set R_LIBS_USER "\"\""
+    mkdir -p build/bin
+    cp ./r-geno-tools-engine.R build/bin/r-geno-tools-engine.R
+    wrapProgram $(pwd)/build/bin/r-geno-tools-engine.R \
+      --set PATH ${lib.makeBinPath (propagatedBuildInputs ++ [ pkgs.coreutils ])} \
+      --set RGENOROOT $(pwd)/build \
+      --set R_LIBS_USER "\"\""
 
-      mkdir build/test_data
-      cp ./data/geno/testMarkerData01.vcf.gz build/test_data/.
-      cp ./data/pheno/testPhenoData01.csv build/test_data/.
-      cp ./data/pedigree/testPedData_char.csv build/test_data/.
-      cp ./data/geno/breedGame_geno.vcf.gz build/test_data/.
-      cp ./data/geno/breedGame_phasedGeno.vcf.gz build/test_data/.
-      cp ./data/pedigree/breedGame_pedigree.csv build/test_data/.
-      cp ./data/crossingTable/breedGame_small_crossTable.csv build/test_data/.
-      cp ./data/SNPcoordinates/breedingGame_SNPcoord.csv build/test_data/.
-      cp ./data/markerEffects/breedGame_markerEffects.csv build/test_data/.
-      cp ./data/markerEffects/breedGame_markerEffects_2traits.json build/test_data/.
-      cp ./data/genomic_selection/geno_G1.vcf.gz build/test_data/.
-      cp ./data/genomic_selection/geno_G2.vcf.gz build/test_data/.
-      cp ./data/genomic_selection/pheno_test.csv build/test_data/.
-      cp ./data/genomic_selection/pheno_train.csv build/test_data/.
-    '';
+    mkdir build/test_data
+    cp ./data/geno/testMarkerData01.vcf.gz build/test_data/.
+    cp ./data/pheno/testPhenoData01.csv build/test_data/.
+    cp ./data/pedigree/testPedData_char.csv build/test_data/.
+    cp ./data/geno/breedGame_geno.vcf.gz build/test_data/.
+    cp ./data/geno/breedGame_phasedGeno.vcf.gz build/test_data/.
+    cp ./data/pedigree/breedGame_pedigree.csv build/test_data/.
+    cp ./data/crossingTable/breedGame_small_crossTable.csv build/test_data/.
+    cp ./data/SNPcoordinates/breedingGame_SNPcoord.csv build/test_data/.
+    cp ./data/markerEffects/breedGame_markerEffects.csv build/test_data/.
+    cp ./data/markerEffects/breedGame_markerEffects_2traits.json build/test_data/.
+    cp ./data/genomic_selection/geno_G1.vcf.gz build/test_data/.
+    cp ./data/genomic_selection/geno_G2.vcf.gz build/test_data/.
+    cp ./data/genomic_selection/pheno_test.csv build/test_data/.
+    cp ./data/genomic_selection/pheno_train.csv build/test_data/.
+  '';
 
-    checkPhase = ''
-      export XDG_CACHE_HOME="$(mktemp -d)"
+  checkPhase = ''
+    export XDG_CACHE_HOME="$(mktemp -d)"
 
-      RGENOROOT="build"
-      ROOT_DATA_FILES="."
-      Rscript --vanilla ./tests/testthat.R
-    '';
+    RGENOROOT="build"
+    ROOT_DATA_FILES="."
+    Rscript --vanilla ./tests/testthat.R
+  '';
 
-    installPhase = ''
-      runHook preInstall
+  installPhase = ''
+    runHook preInstall
 
-      substituteInPlace ./build/bin/r-geno-tools-engine.R --replace-fail $(pwd)/build $out
-      cp -r ./build $out
-      mv $out/bin/r-geno-tools-engine.R $out/bin/r-geno-tools-engine
+    substituteInPlace ./build/bin/r-geno-tools-engine.R --replace-fail $(pwd)/build $out
+    cp -r ./build $out
+    mv $out/bin/r-geno-tools-engine.R $out/bin/r-geno-tools-engine
 
-      runHook postInstall
-    '';
+    runHook postInstall
+  '';
 
-    passthru.tests =
-      runCommand "r-geno-tools-engine-test" {
-        nativeBuildInputs = [finalAttrs.finalPackage];
-      } ''
+  passthru.tests =
+    runCommand "r-geno-tools-engine-test" { nativeBuildInputs = [ finalAttrs.finalPackage ]; }
+      ''
         # Necessary for the derivation to be successful
         mkdir $out
         mkdir $out/logs
@@ -275,4 +275,4 @@ in
 
         echo "Test: DONE"
       '';
-  })
+})
