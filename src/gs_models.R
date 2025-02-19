@@ -338,6 +338,22 @@ check_dominance_model_is_applicable <- function(dominance, homozygous_threshold 
 
   if (det(dominance$rel_mat) == 0) {
     # dominance$rel_mat is not invertible
+    # Sometime for computing precision reason, `det(dominance$rel_mat)` can be
+    # 0 but the matrix can yet be invertible (`solve` function is more
+    # robust than `det` function)
+    inversible <- tryCatch(
+      {
+        solve(dominance$rel_mat)
+        TRUE
+      },
+      error = function(err) {
+        return(FALSE)
+      }
+    )
+
+    if (inversible) {
+      return(TRUE)
+    }
 
     snp_homozygous_proportion <- 1 - colSums(dominance$geno_mat) / nrow(dominance$geno_mat)
     homozygous_snp <- snp_homozygous_proportion > homozygous_threshold
