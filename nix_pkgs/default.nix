@@ -71,7 +71,7 @@ let
 in
 pkgs.stdenv.mkDerivation (finalAttrs: rec {
   pname = "r-geno-tools-engine";
-  version = "v1.1.1";
+  version = "v1.2.0";
 
   src = pkgs.lib.sources.cleanSource ../.;
 
