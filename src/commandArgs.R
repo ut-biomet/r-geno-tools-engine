@@ -404,3 +404,75 @@ arg$n_repetitions$type = 'integer'
 arg$evaluation_file$flag <- '--evaluation-file'
 arg$evaluation_file$help <- 'Path of the model evaluation results'
 arg$evaluation_file$type <- 'character'
+
+# rate_add ----
+arg$rate_add$flag <- '--rate-add'
+arg$rate_add$default <- 1/0.3
+arg$rate_add$help <- paste0('Rate parameter for the exponential distribution of additive effects. This can be tune to get desired genetic values distribution. (default: ', arg$rate_add$default, ')')
+arg$rate_add$type <- 'double'
+
+# rate_dom ----
+arg$rate_dom$flag <- '--rate-dom'
+arg$rate_dom$default <- 1/0.30
+arg$rate_dom$help <- paste0('Rate parameter for the exponential distribution of dominance effects. This can be tune to get desired genetic values distribution. (default: ', arg$rate_dom$default, ')')
+arg$rate_dom$type <- 'double'
+
+# generate_dominance_effects ----
+arg$generate_dominance_effects$flag <- '--dominance'
+arg$generate_dominance_effects$help <- 'If passed, will generate both additive and dominance effects'
+
+# prop_add ----
+arg$prop_add$flag <- '--prop-add'
+arg$prop_add$default <- 1
+arg$prop_add$help <- paste0('Proportion of SNPs with additive effects, (default: ', arg$prop_add$default, ')')
+arg$prop_add$type <- 'double'
+
+# prop_dom ----
+arg$prop_dom$flag <- '--prop-dom'
+arg$prop_dom$default <- 1
+arg$prop_dom$help <- paste0('Proportion of SNPs with additive effects, (default: ', arg$prop_dom$default, ')')
+arg$prop_dom$type <- 'double'
+
+# allow_dual_effects ----
+arg$no_dual_effects$flag <- '--no-dual-effects'
+arg$no_dual_effects$help <- 'If passed, markers will have either an additive effect or a dominance effect but not both. Be sure `--prop-add` and `--prop-dom` are compatible.'
+
+
+# rnd_seed ----
+arg$rng_seed$flag <- '--rng-seed'
+arg$rng_seed$default <- NULL
+arg$rng_seed$help <- paste('Random seed for reproducibility. (default: no seed). IMPORTANT: Reproducibility accross different version of this software are not garanteed.')
+arg$rng_seed$type <- 'integer'
+
+
+# markersEffects (bis) ----
+arg$markersEffectsFile_2$flag <- '--markerEffectsFile'
+arg$markersEffectsFile_2$help <- "path of the marker effects json file generated with `generate-rnd-marker-effects` command."
+arg$markersEffectsFile_2$type <- 'character'
+
+
+# mean ----
+arg$mean$flag <- '--mean'
+arg$mean$default <- 0
+arg$mean$help <- paste0("Mean of the simulated phenotype distribution. (default: ", arg$mean$default, ")")
+arg$mean$type <- 'double'
+
+# heritability ----
+arg$heritability$flag <- '--heritability'
+arg$heritability$default <- NULL
+arg$heritability$help <- "Desired broad-sense heritability of the trait (used to compute noise variance). Either `--heritability` or `--sd-noise` must be specified."
+arg$heritability$type <- 'double'
+
+
+# sd_noise ----
+arg$sd_noise$flag <- '--sd-noise'
+arg$sd_noise$default <- NULL
+arg$sd_noise$help <- "Standard deviation of environmental noise. Either `--heritability` or `--sd-noise` must be specified."
+arg$sd_noise$type <- 'double'
+
+# trait_name ----
+arg$trait_name$flag <- '--trait-name'
+arg$trait_name$default <- "phenotype"
+arg$trait_name$help <- paste0("Name of the trait (default: ", arg$trait_name$default, ")")
+arg$trait_name$type <- 'character'
+

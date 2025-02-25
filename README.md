@@ -28,6 +28,12 @@
   - [Progenies BLUP variance and expected values](#progenies-blup-variance-and-expected-values)
     - [Introduction](#introduction-2)
     - [Command](#command-1)
+  - [Genomic selection](#genomic-selection)
+    - [Model evaluation](#model-evaluation)
+    - [Model training](#model-training)
+    - [Model predictions](#model-predictions)
+    - [Generate random marker effects](#generate-random-marker-effects)
+    - [Generate phenotypes](#generate-phenotypes)
 - [Data references](#data-references)
 - [Utils](#utils)
 
@@ -209,8 +215,10 @@ All the R functions of this engine are documented in [`./doc/README.md`](doc/REA
 You can generate this markdown documentation using the function `writeDoc` (defined in [`./src/utils.R`](src/utils.R)):
 
 ``` r
-writeDoc(srcDir = "src",
-         docDir = "doc")
+writeDoc(
+    srcDir = "src",
+    docDir = "doc"
+)
 ```
 
 # Tests
@@ -326,57 +334,58 @@ docker run --rm -v "$PWD"/readmeTemp:/files rgenotoolsengine \
 For a usage as R library one can use those functions.
 
 ``` r
-gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
-                         phenoFile = "data/pheno/testPhenoData01.csv",
-                         genoUrl = NULL,
-                         phenoUrl = NULL,
-                         trait = "Flowering.time.at.Arkansas",
-                         test = "score",
-                         fixed = 0,
-                         response = "quantitative",
-                         thresh_maf = 0.05,
-                         thresh_callrate = 0.95,
-                         outFile = tempfile(fileext = ".json"))
-#> 2024-03-04 11:07:30.837106 - r-run_gwas(): Get data ...
-#> 2024-03-04 11:07:30.904313 - r-readData(): get geno data ...
-#> 2024-03-04 11:07:30.913054 - r-readGenoData(): Check file extention ... 
-#> 2024-03-04 11:07:30.921748 - r-readGenoData(): Read geno file ... 
-#> ped stats and snps stats have been set. 
-#> 'p' has been set. 
-#> 'mu' and 'sigma' have been set.
-#> 2024-03-04 11:07:31.734199 - r-readGenoData(): Read geno file DONE 
-#> 2024-03-04 11:07:31.734325 - r-readGenoData(): DONE, return output.
-#> 2024-03-04 11:07:31.73439 - r-readData(): get geno data DONE
-#> 2024-03-04 11:07:31.734454 - r-readData(): get pheno data ...
-#> 2024-03-04 11:07:31.750441 - r-readPhenoData(): Read phenotypic file ... 
-#> 2024-03-04 11:07:31.755147 - r-readPhenoData(): Read phenotypic file DONE 
-#> 2024-03-04 11:07:31.755227 - r-readPhenoData(): Check individuals unicity ...
-#> 2024-03-04 11:07:31.75532 - r-readPhenoData(): Check individuals unicity DONE
-#> 2024-03-04 11:07:31.755381 - r-readPhenoData(): Set pheno data's row names ...
-#> 2024-03-04 11:07:31.755487 - r-readPhenoData(): Set pheno data's row names DONE
-#> 2024-03-04 11:07:31.755553 - r-readPhenoData(): DONE, return output.
-#> 2024-03-04 11:07:31.755611 - r-readData(): get pheno data DONE
-#> 2024-03-04 11:07:31.75567 - r-readData(): prepare data ...
-#> 2024-03-04 11:07:31.755785 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
-#> 2024-03-04 11:07:32.11601 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
-#> 2024-03-04 11:07:32.116139 - r-prepareData(): reorder matrix ...
-#> 2024-03-04 11:07:32.116494 - r-prepareData(): reorder matrix DONE
-#> 2024-03-04 11:07:32.116562 - r-prepareData(): remove monomorphic markers ...
-#> 2024-03-04 11:07:32.134077 - r-prepareData(): remove monomorphic markers DONE
-#> 2024-03-04 11:07:32.134224 - r-prepareData(): DONE, return output.
-#> 2024-03-04 11:07:32.134292 - r-readData(): prepare data DONE
-#> 2024-03-04 11:07:32.134358 - r-readData(): DONE, return output.
-#> 2024-03-04 11:07:32.134419 - r-run_gwas(): Get data DONE
-#> 2024-03-04 11:07:32.1345 - r-run_gwas(): GWAS analysis ...
-#> 2024-03-04 11:07:32.150414 - r-gwas(): aggregate data in bed matrix ...
-#> 2024-03-04 11:07:32.150642 - r-gwas(): aggregate data in bed matrix DONE
-#> 2024-03-04 11:07:32.150742 - r-gwas(): remove individuals with missing phenotypic values ...
-#> 2024-03-04 11:07:32.302235 - r-gwas(): remove samples with missing phenotypic values DONE
-#> 2024-03-04 11:07:32.302379 - r-gwas(): filter SNPs ...
-#> 2024-03-04 11:07:32.341511 - r-gwas(): filter SNPs DONE
-#> 2024-03-04 11:07:32.341655 - r-gwas(): calculate genetic relatinoal matrix ...
-#> 2024-03-04 11:07:32.49034 - r-gwas(): calculate genetic relatinoal matrix DONE
-#> 2024-03-04 11:07:32.490526 - r-gwas(): fit model ...
+gwas_results <- run_gwas(
+    genoFile = "data/geno/testMarkerData01.vcf.gz",
+    phenoFile = "data/pheno/testPhenoData01.csv",
+    genoUrl = NULL,
+    phenoUrl = NULL,
+    trait = "Flowering.time.at.Arkansas",
+    test = "score",
+    fixed = 0,
+    response = "quantitative",
+    thresh_maf = 0.05,
+    thresh_callrate = 0.95,
+    outFile = tempfile(fileext = ".json")
+)
+#> 2025-02-25 12:10:59.917659 - r-run_gwas(): Get data ...
+#> 2025-02-25 12:10:59.984128 - r-readData(): get geno data ...
+#> 2025-02-25 12:10:59.993988 - r-readGenoData(): Check file extention ... 
+#> 2025-02-25 12:11:00.002975 - r-readGenoData(): Read geno file ... 
+#> 2025-02-25 12:11:00.791363 - r-readGenoData(): Read geno file DONE 
+#> 2025-02-25 12:11:00.791526 - r-readGenoData(): DONE, return output.
+#> 2025-02-25 12:11:00.791604 - r-readData(): get geno data DONE
+#> 2025-02-25 12:11:00.791675 - r-readData(): get pheno data ...
+#> 2025-02-25 12:11:00.812017 - r-readPhenoData(): Read phenotypic file ... 
+#> 2025-02-25 12:11:00.816633 - r-readPhenoData(): Read phenotypic file DONE 
+#> 2025-02-25 12:11:00.816725 - r-readPhenoData(): Check individuals unicity ...
+#> 2025-02-25 12:11:00.816829 - r-readPhenoData(): Check individuals unicity DONE
+#> 2025-02-25 12:11:00.8169 - r-readPhenoData(): Set pheno data's row names ...
+#> 2025-02-25 12:11:00.817016 - r-readPhenoData(): Set pheno data's row names DONE
+#> 2025-02-25 12:11:00.817087 - r-readPhenoData(): Check data consistency ...
+#> 2025-02-25 12:11:00.817209 - r-readPhenoData(): Check data consistency DONE
+#> 2025-02-25 12:11:00.817286 - r-readPhenoData(): DONE, return output.
+#> 2025-02-25 12:11:00.817355 - r-readData(): get pheno data DONE
+#> 2025-02-25 12:11:00.817424 - r-readData(): prepare data ...
+#> 2025-02-25 12:11:00.825326 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set ...
+#> 2025-02-25 12:11:01.264424 - r-prepareData(): Remove from geno data individuals that are not in phenotypic data-set DONE
+#> 2025-02-25 12:11:01.264585 - r-prepareData(): reorder matrix ...
+#> 2025-02-25 12:11:01.264941 - r-prepareData(): reorder matrix DONE
+#> 2025-02-25 12:11:01.265015 - r-prepareData(): remove monomorphic markers ...
+#> 2025-02-25 12:11:01.286864 - r-prepareData(): remove monomorphic markers DONE
+#> 2025-02-25 12:11:01.287014 - r-prepareData(): DONE, return output.
+#> 2025-02-25 12:11:01.287091 - r-readData(): prepare data DONE
+#> 2025-02-25 12:11:01.287167 - r-readData(): DONE, return output.
+#> 2025-02-25 12:11:01.28726 - r-run_gwas(): Get data DONE
+#> 2025-02-25 12:11:01.302619 - r-run_gwas(): GWAS analysis ...
+#> 2025-02-25 12:11:01.322339 - r-gwas(): aggregate data in bed matrix ...
+#> 2025-02-25 12:11:01.322537 - r-gwas(): aggregate data in bed matrix DONE
+#> 2025-02-25 12:11:01.322614 - r-gwas(): remove individuals with missing phenotypic values ...
+#> 2025-02-25 12:11:01.485571 - r-gwas(): remove samples with missing phenotypic values DONE
+#> 2025-02-25 12:11:01.485723 - r-gwas(): filter SNPs ...
+#> 2025-02-25 12:11:01.525694 - r-gwas(): filter SNPs DONE
+#> 2025-02-25 12:11:01.525852 - r-gwas(): calculate genetic relatinoal matrix ...
+#> 2025-02-25 12:11:01.677742 - r-gwas(): calculate genetic relatinoal matrix DONE
+#> 2025-02-25 12:11:01.677949 - r-gwas(): fit model ...
 #> [Iteration 1] theta = 78.0648 78.2819
 #> [Iteration 1] log L = -1002.17
 #> [Iteration 1] AI-REML update
@@ -390,33 +399,33 @@ gwas_results <- run_gwas(genoFile = "data/geno/testMarkerData01.vcf.gz",
 #> [Iteration 3] AI-REML update
 #> [Iteration 3] ||gradient|| = 0.113945
 #> [Iteration 4] theta = 29.2502 195.436
-#> [Iteration 4] log L = -986.514
+#> [Iteration 4] log L = -986.513
 #> [Iteration 4] AI-REML update
-#> [Iteration 4] ||gradient|| = 0.00580945
+#> [Iteration 4] ||gradient|| = 0.00580943
 #> [Iteration 5] theta = 29.4021 195.213
 #> [Iteration 5] log L = -986.513
 #> [Iteration 5] AI-REML update
-#> [Iteration 5] ||gradient|| = 0.000323296
+#> [Iteration 5] ||gradient|| = 0.000323295
 #> [Iteration 6] theta = 29.4178 195.143
 #> [Iteration 6] log L = -986.513
 #> [Iteration 6] AI-REML update
-#> [Iteration 6] ||gradient|| = 4.32634e-05
+#> [Iteration 6] ||gradient|| = 4.32636e-05
 #> [Iteration 7] theta = 29.4199 195.133
 #> [Iteration 7] log L = -986.513
 #> [Iteration 7] AI-REML update
-#> [Iteration 7] ||gradient|| = 5.95134e-06
-#> 2024-03-04 11:07:32.919143 - r-gwas(): fit model DONE
-#> 2024-03-04 11:07:32.919276 - r-gwas(): DONE, return output.
-#> 2024-03-04 11:07:32.919352 - r-run_gwas(): GWAS analysis DONE
-#> 2024-03-04 11:07:32.919418 - r-run_gwas(): Save metadata ...
-#> 2024-03-04 11:07:32.944153 - r-run_gwas(): Save metadata DONE
-#> 2024-03-04 11:07:32.944306 - r-run_gwas(): Save results ...
-#> 2024-03-04 11:07:32.944441 - r-saveGWAS(): Check file ...
-#> 2024-03-04 11:07:32.944581 - r-saveGWAS(): Check file DONE
-#> 2024-03-04 11:07:33.157765 - r-run_gwas(): Save results DONE
+#> [Iteration 7] ||gradient|| = 5.9514e-06
+#> 2025-02-25 12:11:02.056854 - r-gwas(): fit model DONE
+#> 2025-02-25 12:11:02.057029 - r-gwas(): DONE, return output.
+#> 2025-02-25 12:11:02.057127 - r-run_gwas(): GWAS analysis DONE
+#> 2025-02-25 12:11:02.057229 - r-run_gwas(): Save metadata ...
+#> 2025-02-25 12:11:02.08889 - r-run_gwas(): Save metadata DONE
+#> 2025-02-25 12:11:02.08909 - r-run_gwas(): Save results ...
+#> 2025-02-25 12:11:02.089277 - r-saveGWAS(): Check file ...
+#> 2025-02-25 12:11:02.089445 - r-saveGWAS(): Check file DONE
+#> 2025-02-25 12:11:02.298719 - r-run_gwas(): Save results DONE
 gwas_results$file
-#> [1] "/tmp/Rtmpf5vQTG/file112964dc003a.json"
-substr(gwas_results$gwasRes, start=1, stop=500)
+#> [1] "/tmp/Rtmp2T4b8k/file40c1570c48973.json"
+substr(gwas_results$gwasRes, start = 1, stop = 500)
 #> [
 #>   {
 #>     "chr": "1",
@@ -435,7 +444,7 @@ substr(gwas_results$gwasRes, start=1, stop=500)
 #>     "A1": "C",
 #>     "A2": "T",
 #>     "freqA2": 0.1254,
-#>     "score": 1.6744,
+#>     "score": 1.6745,
 #>     "p": 0.1957
 #>   },
 #>   {
@@ -454,82 +463,86 @@ substr(gwas_results$gwasRes, start=1, stop=500)
 ```
 
 ``` r
-p <- draw_manhattanPlot(gwasFile = gwas_results$file,
-                        gwasUrl = NULL,
-                        adj_method = "bonferroni",
-                        thresh_p = 0.05,
-                        chr = NA,
-                        interactive = TRUE,
-                        # filter_pAdj = 1,
-                        # filter_nPoints = Inf,
-                        filter_quant = 0.1,
-                        outFile = tempfile(fileext = ".html"))
-#> 2024-03-04 11:07:33.299759 - r-draw_manhattanPlot(): Get data ...
-#> 2024-03-04 11:07:33.299936 - r-readGWAS(): Read result file ... 
-#> 2024-03-04 11:07:33.408482 - r-readGWAS(): Read result file DONE 
-#> 2024-03-04 11:07:33.408673 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2024-03-04 11:07:33.790282 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2024-03-04 11:07:33.790442 - r-readGWAS(): DONE, return output.
-#> 2024-03-04 11:07:33.790514 - r-draw_manhattanPlot(): Get data DONE
-#> 2024-03-04 11:07:33.79058 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
-#> 2024-03-04 11:07:33.820982 - r-manPlot(): Remove NAs ...
-#> 2024-03-04 11:07:33.989858 - r-manPlot(): Remove NAs DONE
-#> 2024-03-04 11:07:33.990012 - r-manPlot(): Adjust p-values ...
-#> 2024-03-04 11:07:34.001414 - r-adjustPval(): Check adj_method ...
-#> 2024-03-04 11:07:34.001529 - r-adjustPval(): Check adj_method DONE
-#> 2024-03-04 11:07:34.001594 - r-adjustPval(): Check p values ...
-#> 2024-03-04 11:07:34.001813 - r-adjustPval(): Check p values DONE
-#> 2024-03-04 11:07:34.001875 - r-adjustPval(): Adjust p-values ...
-#> 2024-03-04 11:07:34.002284 - r-adjustPval(): Adjust p-values DONE
-#> 2024-03-04 11:07:34.002349 - r-adjustPval(): Adjust threshold ...
-#> 2024-03-04 11:07:34.036902 - r-adjustPval(): Adjust threshold DONE
-#> 2024-03-04 11:07:34.03707 - r-adjustPval(): DONE, return output
-#> 2024-03-04 11:07:34.037152 - r-manPlot(): Adjust p-values DONE
-#> 2024-03-04 11:07:34.076836 - r-manPlot(): Check duplicated SNP ID ...
-#> 2024-03-04 11:07:34.077478 - r-manPlot(): Check duplicated SNP ID DONE
-#> 2024-03-04 11:07:34.077561 - r-manPlot(): Extract significant SNP ...
-#> 2024-03-04 11:07:34.077716 - r-manPlot(): Extract significant SNP DONE
-#> 2024-03-04 11:07:34.095363 - r-filterGWAS(): Filter points ...
-#> 2024-03-04 11:07:34.095496 - r-filterGWAS(): skip filter_pAdj
-#> 2024-03-04 11:07:34.100442 - r-filterGWAS(): skip filter_nPoints
-#> 2024-03-04 11:07:34.100562 - r-manPlot(): Draw plot ...
-#> 2024-03-04 11:07:34.436416 - r-manPlot(): Draw plot DONE
-#> 2024-03-04 11:07:34.436538 - r-manPlot(): DONE, return output
-#> 2024-03-04 11:07:34.43661 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
-#> 2024-03-04 11:07:34.436673 - r-draw_manhattanPlot(): Save results ...
-#> 2024-03-04 11:07:35.136112 - r-draw_manhattanPlot(): Save results DONE
+p <- draw_manhattanPlot(
+    gwasFile = gwas_results$file,
+    gwasUrl = NULL,
+    adj_method = "bonferroni",
+    thresh_p = 0.05,
+    chr = NA,
+    interactive = TRUE,
+    # filter_pAdj = 1,
+    # filter_nPoints = Inf,
+    filter_quant = 0.1,
+    outFile = tempfile(fileext = ".html")
+)
+#> 2025-02-25 12:11:02.453799 - r-draw_manhattanPlot(): Get data ...
+#> 2025-02-25 12:11:02.454032 - r-readGWAS(): Read result file ... 
+#> 2025-02-25 12:11:02.565188 - r-readGWAS(): Read result file DONE 
+#> 2025-02-25 12:11:02.5654 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2025-02-25 12:11:02.981913 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2025-02-25 12:11:02.982099 - r-readGWAS(): DONE, return output.
+#> 2025-02-25 12:11:02.982177 - r-draw_manhattanPlot(): Get data DONE
+#> 2025-02-25 12:11:02.982266 - r-draw_manhattanPlot(): Draw Manhattan Plot ...
+#> 2025-02-25 12:11:03.012834 - r-manPlot(): Remove NAs ...
+#> 2025-02-25 12:11:03.19411 - r-manPlot(): Remove NAs DONE
+#> 2025-02-25 12:11:03.194288 - r-manPlot(): Adjust p-values ...
+#> 2025-02-25 12:11:03.205364 - r-adjustPval(): Check adj_method ...
+#> 2025-02-25 12:11:03.20548 - r-adjustPval(): Check adj_method DONE
+#> 2025-02-25 12:11:03.205556 - r-adjustPval(): Check p values ...
+#> 2025-02-25 12:11:03.205769 - r-adjustPval(): Check p values DONE
+#> 2025-02-25 12:11:03.20584 - r-adjustPval(): Adjust p-values ...
+#> 2025-02-25 12:11:03.206265 - r-adjustPval(): Adjust p-values DONE
+#> 2025-02-25 12:11:03.206355 - r-adjustPval(): Adjust threshold ...
+#> 2025-02-25 12:11:03.22744 - r-adjustPval(): Adjust threshold DONE
+#> 2025-02-25 12:11:03.227601 - r-adjustPval(): DONE, return output
+#> 2025-02-25 12:11:03.227695 - r-manPlot(): Adjust p-values DONE
+#> 2025-02-25 12:11:03.266278 - r-manPlot(): Check duplicated SNP ID ...
+#> 2025-02-25 12:11:03.266929 - r-manPlot(): Check duplicated SNP ID DONE
+#> 2025-02-25 12:11:03.267005 - r-manPlot(): Extract significant SNP ...
+#> 2025-02-25 12:11:03.267163 - r-manPlot(): Extract significant SNP DONE
+#> 2025-02-25 12:11:03.284273 - r-filterGWAS(): Filter points ...
+#> 2025-02-25 12:11:03.284428 - r-filterGWAS(): skip filter_pAdj
+#> 2025-02-25 12:11:03.289435 - r-filterGWAS(): skip filter_nPoints
+#> 2025-02-25 12:11:03.289563 - r-manPlot(): Draw plot ...
+#> 2025-02-25 12:11:03.60387 - r-manPlot(): Draw plot DONE
+#> 2025-02-25 12:11:03.604011 - r-manPlot(): DONE, return output
+#> 2025-02-25 12:11:03.604105 - r-draw_manhattanPlot(): Draw Manhattan Plot DONE
+#> 2025-02-25 12:11:03.604182 - r-draw_manhattanPlot(): Save results ...
+#> 2025-02-25 12:11:04.355769 - r-draw_manhattanPlot(): Save results DONE
 ```
 
 ``` r
-gwas_adj <- run_resAdjustment(gwasFile = gwas_results$file,
-                              gwasUrl = NULL,
-                              adj_method = "bonferroni",
-                              outFile = tempfile(fileext = ".json"))
-#> 2024-03-04 11:07:35.189365 - r-run_resAdjustment(): Get data ...
-#> 2024-03-04 11:07:35.197226 - r-readGWAS(): Read result file ... 
-#> 2024-03-04 11:07:35.288746 - r-readGWAS(): Read result file DONE 
-#> 2024-03-04 11:07:35.288938 - r-readGWAS(): Convert Json to data.frame ... 
-#> 2024-03-04 11:07:35.710556 - r-readGWAS(): Convert Json to data.frame DONE 
-#> 2024-03-04 11:07:35.710829 - r-readGWAS(): DONE, return output.
-#> 2024-03-04 11:07:35.710904 - r-run_resAdjustment(): Get data DONE
-#> 2024-03-04 11:07:35.710971 - r-run_resAdjustment(): Adjust p-values ...
-#> 2024-03-04 11:07:35.711103 - r-adjustPval(): Check adj_method ...
-#> 2024-03-04 11:07:35.711168 - r-adjustPval(): Check adj_method DONE
-#> 2024-03-04 11:07:35.71123 - r-adjustPval(): Check p values ...
-#> 2024-03-04 11:07:35.711434 - r-adjustPval(): Check p values DONE
-#> 2024-03-04 11:07:35.7115 - r-adjustPval(): Adjust p-values ...
-#> 2024-03-04 11:07:35.711909 - r-adjustPval(): Adjust p-values DONE
-#> 2024-03-04 11:07:35.711974 - r-adjustPval(): DONE, return output
-#> 2024-03-04 11:07:35.712047 - r-run_resAdjustment(): Adjust p-values DONE
-#> 2024-03-04 11:07:35.71215 - r-filterGWAS(): Filter points ...
-#> 2024-03-04 11:07:35.712225 - r-filterGWAS(): skip filter_pAdj
-#> 2024-03-04 11:07:35.712289 - r-filterGWAS(): skip filter_quant
-#> 2024-03-04 11:07:35.712356 - r-filterGWAS(): skip filter_nPoints
-#> 2024-03-04 11:07:35.712417 - r-run_resAdjustment(): Save results ...
-#> 2024-03-04 11:07:35.719417 - r-saveGWAS(): Check file ...
-#> 2024-03-04 11:07:35.719559 - r-saveGWAS(): Check file DONE
-#> 2024-03-04 11:07:35.895174 - r-run_resAdjustment(): Save results DONE
-substr(gwas_adj$gwasAdjusted, start=1, stop=500)
+gwas_adj <- run_resAdjustment(
+    gwasFile = gwas_results$file,
+    gwasUrl = NULL,
+    adj_method = "bonferroni",
+    outFile = tempfile(fileext = ".json")
+)
+#> 2025-02-25 12:11:04.455993 - r-run_resAdjustment(): Get data ...
+#> 2025-02-25 12:11:04.462313 - r-readGWAS(): Read result file ... 
+#> 2025-02-25 12:11:04.556082 - r-readGWAS(): Read result file DONE 
+#> 2025-02-25 12:11:04.556299 - r-readGWAS(): Convert Json to data.frame ... 
+#> 2025-02-25 12:11:04.855314 - r-readGWAS(): Convert Json to data.frame DONE 
+#> 2025-02-25 12:11:04.855505 - r-readGWAS(): DONE, return output.
+#> 2025-02-25 12:11:04.855709 - r-run_resAdjustment(): Get data DONE
+#> 2025-02-25 12:11:04.855789 - r-run_resAdjustment(): Adjust p-values ...
+#> 2025-02-25 12:11:04.855931 - r-adjustPval(): Check adj_method ...
+#> 2025-02-25 12:11:04.85601 - r-adjustPval(): Check adj_method DONE
+#> 2025-02-25 12:11:04.856083 - r-adjustPval(): Check p values ...
+#> 2025-02-25 12:11:04.856314 - r-adjustPval(): Check p values DONE
+#> 2025-02-25 12:11:04.856396 - r-adjustPval(): Adjust p-values ...
+#> 2025-02-25 12:11:04.873812 - r-adjustPval(): Adjust p-values DONE
+#> 2025-02-25 12:11:04.873997 - r-adjustPval(): DONE, return output
+#> 2025-02-25 12:11:04.874091 - r-run_resAdjustment(): Adjust p-values DONE
+#> 2025-02-25 12:11:04.874235 - r-filterGWAS(): Filter points ...
+#> 2025-02-25 12:11:04.874323 - r-filterGWAS(): skip filter_pAdj
+#> 2025-02-25 12:11:04.874396 - r-filterGWAS(): skip filter_quant
+#> 2025-02-25 12:11:04.874469 - r-filterGWAS(): skip filter_nPoints
+#> 2025-02-25 12:11:04.874539 - r-run_resAdjustment(): Save results ...
+#> 2025-02-25 12:11:04.881631 - r-saveGWAS(): Check file ...
+#> 2025-02-25 12:11:04.881785 - r-saveGWAS(): Check file DONE
+#> 2025-02-25 12:11:05.268111 - r-run_resAdjustment(): Save results DONE
+substr(gwas_adj$gwasAdjusted, start = 1, stop = 500)
 #> [
 #>   {
 #>     "chr": "1",
@@ -549,7 +562,7 @@ substr(gwas_adj$gwasAdjusted, start=1, stop=500)
 #>     "A1": "C",
 #>     "A2": "T",
 #>     "freqA2": 0.1254,
-#>     "score": 1.6744,
+#>     "score": 1.6745,
 #>     "p": 0.1957,
 #>     "p_adj": 1
 #>   },
@@ -589,28 +602,27 @@ docker run --rm -v "$PWD"/data/geno/:/geno \
 **Main function**
 
 ``` r
-imgFile <- draw_ldPlot(genoFile = "data/geno/testMarkerData01.vcf.gz",
-                       genoUrl = NULL,
-                       from = 42,
-                       to = 62,
-                       outFile = tempfile(fileext = ".png"))
-#> 2024-03-04 11:07:36.105452 - r-draw_ldPlot(): Get data ...
-#> 2024-03-04 11:07:36.10563 - r-readGenoData(): Check file extention ... 
-#> 2024-03-04 11:07:36.105862 - r-readGenoData(): Read geno file ... 
-#> ped stats and snps stats have been set. 
-#> 'p' has been set. 
-#> 'mu' and 'sigma' have been set.
-#> 2024-03-04 11:07:36.822769 - r-readGenoData(): Read geno file DONE 
-#> 2024-03-04 11:07:36.822898 - r-readGenoData(): DONE, return output.
-#> 2024-03-04 11:07:36.822989 - r-draw_ldPlot(): Get data DONE
-#> 2024-03-04 11:07:36.823057 - r-draw_ldPlot(): Draw LD Plot ...
-#> 2024-03-04 11:07:36.823187 - r-LDplot(): Compute LD ...
-#> 2024-03-04 11:07:36.824136 - r-LDplot(): Compute LD DONE
-#> 2024-03-04 11:07:36.824211 - r-LDplot(): Create LD plot ...
-#> 2024-03-04 11:07:36.82554 - r-LDplot(): Create create file: /tmp/Rtmpf5vQTG/file1129621202e0e.png
-#> 2024-03-04 11:07:37.004627 - r-LDplot(): Create LD plot DONE
-#> 2024-03-04 11:07:37.004787 - r-LDplot(): DONE, return output
-#> 2024-03-04 11:07:37.004855 - r-draw_ldPlot(): Draw LD Plot DONE
+imgFile <- draw_ldPlot(
+    genoFile = "data/geno/testMarkerData01.vcf.gz",
+    genoUrl = NULL,
+    from = 42,
+    to = 62,
+    outFile = tempfile(fileext = ".png")
+)
+#> 2025-02-25 12:11:05.361663 - r-draw_ldPlot(): Get data ...
+#> 2025-02-25 12:11:05.361882 - r-readGenoData(): Check file extention ... 
+#> 2025-02-25 12:11:05.362118 - r-readGenoData(): Read geno file ... 
+#> 2025-02-25 12:11:06.038993 - r-readGenoData(): Read geno file DONE 
+#> 2025-02-25 12:11:06.039148 - r-readGenoData(): DONE, return output.
+#> 2025-02-25 12:11:06.039239 - r-draw_ldPlot(): Get data DONE
+#> 2025-02-25 12:11:06.039313 - r-draw_ldPlot(): Draw LD Plot ...
+#> 2025-02-25 12:11:06.039447 - r-LDplot(): Compute LD ...
+#> 2025-02-25 12:11:06.040125 - r-LDplot(): Compute LD DONE
+#> 2025-02-25 12:11:06.040233 - r-LDplot(): Create LD plot ...
+#> 2025-02-25 12:11:06.040537 - r-LDplot(): Create create file: /tmp/Rtmp2T4b8k/file40c153b8d57d1.png
+#> 2025-02-25 12:11:06.237489 - r-LDplot(): Create LD plot DONE
+#> 2025-02-25 12:11:06.237666 - r-LDplot(): DONE, return output
+#> 2025-02-25 12:11:06.237743 - r-draw_ldPlot(): Draw LD Plot DONE
 ```
 
 </details>
@@ -637,39 +649,41 @@ docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
 ```
 
 ``` r
-calc_pedRelMat(pedFile = 'data/pedigree/testPedData_char.csv',
-               pedUrl = NULL,
-               header = TRUE,
-               unknown_string = '',
-               outFile = tempfile(fileext = ".json"))
-#> 2024-03-04 11:07:37.018051 - r-calc_pedRelMAt(): Get data ...
-#> 2024-03-04 11:07:37.053553 - r-readPedData: Read pedigree file ...
-#> 2024-03-04 11:07:37.058639 - r-readPedData: Read pedigree file DONE
-#> 2024-03-04 11:07:37.058746 - r-readPedData: Check pedigree file ...
-#> 2024-03-04 11:07:37.093595 - r-readPedData: Check pedigree file DONE
-#> 2024-03-04 11:07:37.093723 - r-readPedData: DONE, return output.
-#> 2024-03-04 11:07:37.093827 - r-calc_pedRelMAt(): Get data DONE
-#> 2024-03-04 11:07:37.093904 - r-calc_pedRelMAt(): Calcualte pedigree relationship matrix ...
-#> 2024-03-04 11:07:37.144964 - r-pedRelMat(): Check inputs ...
-#> 2024-03-04 11:07:37.145123 - r-pedRelMat(): Check inputs DONE
-#> 2024-03-04 11:07:37.145195 - r-pedRelMat(): Create look-up table ...
-#> 2024-03-04 11:07:37.146203 - r-pedRelMat(): Create look-up table DONE
-#> 2024-03-04 11:07:37.146286 - r-pedRelMat(): Calculate relationship matrix ...
-#> 2024-03-04 11:07:37.146694 - r-pedRelMat(): Calculate relationship matrix DONE
-#> 2024-03-04 11:07:37.146775 - r-pedRelMat(): DONE, return output.
-#> 2024-03-04 11:07:37.146846 - r-calc_pedRelMAt(): Calcualte pedigree relationship matrix DONE
-#> 2024-03-04 11:07:37.146923 - r-calc_pedRelMAt(): Get metadata ...
-#> 2024-03-04 11:07:37.147051 - r-calc_pedRelMAt(): Get metadata DONE
-#> 2024-03-04 11:07:37.147121 - r-calc_pedRelMAt(): Save results ...
-#> 2024-03-04 11:07:37.167838 - r-saveRelMat(): Check relationship matrix ...
-#> 2024-03-04 11:07:37.168875 - r-saveRelMat(): Check relationship matrix DONE
-#> 2024-03-04 11:07:37.168965 - r-saveRelMat(): Check file ...
-#> 2024-03-04 11:07:37.169084 - r-saveRelMat(): Check file DONE
-#> 2024-03-04 11:07:37.169152 - r-saveRelMat(): Check file format ...
-#> 2024-03-04 11:07:37.169267 - r-saveRelMat(): Check file format DONE
-#> 2024-03-04 11:07:37.169333 - r-saveRelMat(): Write relationship matrix in `.json` file ...
-#> 2024-03-04 11:07:37.172395 - r-saveRelMat(): Write relationship matrix in `.json` file DONE
-#> 2024-03-04 11:07:37.172481 - r-calc_pedRelMAt(): Save results DONE
+calc_pedRelMat(
+    pedFile = "data/pedigree/testPedData_char.csv",
+    pedUrl = NULL,
+    header = TRUE,
+    unknown_string = "",
+    outFile = tempfile(fileext = ".json")
+)
+#> 2025-02-25 12:11:06.251855 - r-calc_pedRelMAt(): Get data ...
+#> 2025-02-25 12:11:06.28612 - r-readPedData: Read pedigree file ...
+#> 2025-02-25 12:11:06.286837 - r-readPedData: Read pedigree file DONE
+#> 2025-02-25 12:11:06.286924 - r-readPedData: Check pedigree file ...
+#> 2025-02-25 12:11:06.325603 - r-readPedData: Check pedigree file DONE
+#> 2025-02-25 12:11:06.325748 - r-readPedData: DONE, return output.
+#> 2025-02-25 12:11:06.325837 - r-calc_pedRelMAt(): Get data DONE
+#> 2025-02-25 12:11:06.32591 - r-calc_pedRelMAt(): Calcualte pedigree relationship matrix ...
+#> 2025-02-25 12:11:06.398543 - r-pedRelMat(): Check inputs ...
+#> 2025-02-25 12:11:06.398711 - r-pedRelMat(): Check inputs DONE
+#> 2025-02-25 12:11:06.398786 - r-pedRelMat(): Create look-up table ...
+#> 2025-02-25 12:11:06.399714 - r-pedRelMat(): Create look-up table DONE
+#> 2025-02-25 12:11:06.399802 - r-pedRelMat(): Calculate relationship matrix ...
+#> 2025-02-25 12:11:06.400123 - r-pedRelMat(): Calculate relationship matrix DONE
+#> 2025-02-25 12:11:06.400213 - r-pedRelMat(): DONE, return output.
+#> 2025-02-25 12:11:06.400287 - r-calc_pedRelMAt(): Calcualte pedigree relationship matrix DONE
+#> 2025-02-25 12:11:06.400357 - r-calc_pedRelMAt(): Get metadata ...
+#> 2025-02-25 12:11:06.400484 - r-calc_pedRelMAt(): Get metadata DONE
+#> 2025-02-25 12:11:06.400554 - r-calc_pedRelMAt(): Save results ...
+#> 2025-02-25 12:11:06.419765 - r-saveRelMat(): Check relationship matrix ...
+#> 2025-02-25 12:11:06.420588 - r-saveRelMat(): Check relationship matrix DONE
+#> 2025-02-25 12:11:06.420676 - r-saveRelMat(): Check file ...
+#> 2025-02-25 12:11:06.420796 - r-saveRelMat(): Check file DONE
+#> 2025-02-25 12:11:06.420868 - r-saveRelMat(): Check file format ...
+#> 2025-02-25 12:11:06.420979 - r-saveRelMat(): Check file format DONE
+#> 2025-02-25 12:11:06.42105 - r-saveRelMat(): Write relationship matrix in `.json` file ...
+#> 2025-02-25 12:11:06.423798 - r-saveRelMat(): Write relationship matrix in `.json` file DONE
+#> 2025-02-25 12:11:06.423889 - r-calc_pedRelMAt(): Save results DONE
 #> $relMat
 #>               Pluto     Zeus     Leda Dione   Tantale   Europe     Pelos  Minos
 #> Pluto        1.0000 0.000000 0.000000 0.000 0.5000000 0.000000 0.2500000 0.0000
@@ -687,7 +701,7 @@ calc_pedRelMat(pedFile = 'data/pedigree/testPedData_char.csv',
 #> [1] "R-geno-engine, Pedigree relationship matrix"
 #> 
 #> $metadata$date
-#> [1] "2024-03-04 11:07:37 JST"
+#> [1] "2025-02-25 12:11:06 JST"
 #> 
 #> $metadata$nInds
 #> [1] 20
@@ -697,7 +711,7 @@ calc_pedRelMat(pedFile = 'data/pedigree/testPedData_char.csv',
 #> 
 #> 
 #> $file
-#> [1] "/tmp/Rtmpf5vQTG/file1129652d9d9a3.json"
+#> [1] "/tmp/Rtmp2T4b8k/file40c155d7978e0.json"
 ```
 
 ### Genomic relationship matrix
@@ -713,36 +727,30 @@ docker run --rm -v "$PWD"/data/geno/:/geno \
 ```
 
 ``` r
-calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
-                genoUrl = NULL,
-                outFile = tempfile(fileext = ".json"))
-#> 2024-03-04 11:07:37.200845 - r-calc_genoRelMAt(): Get data ...
-#> 2024-03-04 11:07:37.200994 - r-readGenoData(): Check file extention ... 
-#> 2024-03-04 11:07:37.20124 - r-readGenoData(): Read geno file ... 
-#> ped stats and snps stats have been set. 
-#> 'p' has been set. 
-#> 'mu' and 'sigma' have been set.
-#> 2024-03-04 11:07:37.312313 - r-readGenoData(): Read geno file DONE 
-#> 2024-03-04 11:07:37.312448 - r-readGenoData(): DONE, return output.
-#> 2024-03-04 11:07:37.312524 - r-calc_genoRelMAt(): Calcualte genomic relationship matrix ...
-#> 2024-03-04 11:07:37.312657 - r-genodRelMat(): Check inputs ...
-#> 2024-03-04 11:07:37.318083 - r-genodRelMat(): Check inputs DONE
-#> 2024-03-04 11:07:37.318184 - r-genodRelMat(): Calculate genomic relationship matrix ...
-#> 2024-03-04 11:07:37.507568 - r-genodRelMat(): Calculate genomic relationship matrix DONE
-#> 2024-03-04 11:07:37.507742 - r-genodRelMat(): DONE, return output.
-#> 2024-03-04 11:07:37.507812 - r-calc_genoRelMAt(): Calcualte genomic relationship matrix DONE
-#> 2024-03-04 11:07:37.507879 - r-calc_genoRelMAt(): Get metadata ...
-#> 2024-03-04 11:07:37.514085 - r-calc_genoRelMAt(): Get metadata DONE
-#> 2024-03-04 11:07:37.514194 - r-calc_genoRelMAt(): Save results ...
-#> 2024-03-04 11:07:37.514335 - r-saveRelMat(): Check relationship matrix ...
-#> 2024-03-04 11:07:37.665752 - r-saveRelMat(): Check relationship matrix DONE
-#> 2024-03-04 11:07:37.665925 - r-saveRelMat(): Check file ...
-#> 2024-03-04 11:07:37.666038 - r-saveRelMat(): Check file DONE
-#> 2024-03-04 11:07:37.666101 - r-saveRelMat(): Check file format ...
-#> 2024-03-04 11:07:37.666216 - r-saveRelMat(): Check file format DONE
-#> 2024-03-04 11:07:37.666656 - r-saveRelMat(): Write relationship matrix in `.json` file ...
-#> 2024-03-04 11:07:38.748591 - r-saveRelMat(): Write relationship matrix in `.json` file DONE
-#> 2024-03-04 11:07:38.749569 - r-calc_genoRelMAt(): Save results DONE
+calc_genoRelMat(
+    genoFile = "data/geno/breedGame_geno.vcf.gz",
+    genoUrl = NULL,
+    outFile = tempfile(fileext = ".json")
+)
+#> 2025-02-25 12:11:06.4379 - r-calc_genoRelMAt(): Get data ...
+#> 2025-02-25 12:11:06.438079 - r-readGenoData(): Check file extention ... 
+#> 2025-02-25 12:11:06.438347 - r-readGenoData(): Read geno file ... 
+#> 2025-02-25 12:11:06.547873 - r-readGenoData(): Read geno file DONE 
+#> 2025-02-25 12:11:06.548023 - r-readGenoData(): DONE, return output.
+#> 2025-02-25 12:11:06.5481 - r-calc_genoRelMAt(): Calcualte genomic relationship matrix ...
+#> 2025-02-25 12:11:06.898106 - r-calc_genoRelMAt(): Calcualte genomic relationship matrix DONE
+#> 2025-02-25 12:11:06.898304 - r-calc_genoRelMAt(): Get metadata ...
+#> 2025-02-25 12:11:06.90463 - r-calc_genoRelMAt(): Get metadata DONE
+#> 2025-02-25 12:11:06.904785 - r-calc_genoRelMAt(): Save results ...
+#> 2025-02-25 12:11:06.904932 - r-saveRelMat(): Check relationship matrix ...
+#> 2025-02-25 12:11:06.944667 - r-saveRelMat(): Check relationship matrix DONE
+#> 2025-02-25 12:11:06.94486 - r-saveRelMat(): Check file ...
+#> 2025-02-25 12:11:06.944983 - r-saveRelMat(): Check file DONE
+#> 2025-02-25 12:11:06.945053 - r-saveRelMat(): Check file format ...
+#> 2025-02-25 12:11:06.945184 - r-saveRelMat(): Check file format DONE
+#> 2025-02-25 12:11:06.94527 - r-saveRelMat(): Write relationship matrix in `.json` file ...
+#> 2025-02-25 12:11:08.058091 - r-saveRelMat(): Write relationship matrix in `.json` file DONE
+#> 2025-02-25 12:11:08.058581 - r-calc_genoRelMAt(): Save results DONE
 #> $relMat
 #>               F2_0001.0001  F2_0001.0002  F2_0001.0003  F2_0001.0004
 #>               F2_0001.0005  F2_0001.0006  F2_0001.0007  F2_0001.0008
@@ -757,12 +765,12 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #>               F2_0001.0041  F2_0001.0042  F2_0001.0043  F2_0001.0044
 #>               F2_0001.0045  F2_0001.0046  F2_0001.0047  F2_0001.0048
 #>               F2_0001.0049  F2_0001.0050  F2_0001.0051  F2_0001.0052
-#>               F2_0001.0053  F2_0001.0054 F2_0001.0055  F2_0001.0056
+#>               F2_0001.0053  F2_0001.0054  F2_0001.0055  F2_0001.0056
 #>               F2_0001.0057  F2_0001.0058  F2_0001.0059  F2_0001.0060
 #>               F2_0001.0061  F2_0001.0062  F2_0001.0063  F2_0001.0064
 #>               F2_0001.0065  F2_0001.0066  F2_0001.0067  F2_0001.0068
 #>               F2_0001.0069  F2_0001.0070  F2_0001.0071  F2_0001.0072
-#>               F2_0001.0073 F2_0001.0074  F2_0001.0075  F2_0001.0076
+#>               F2_0001.0073  F2_0001.0074  F2_0001.0075  F2_0001.0076
 #>               F2_0001.0077  F2_0001.0078  F2_0001.0079  F2_0001.0080
 #>               F2_0001.0081  F2_0001.0082  F2_0001.0083  F2_0001.0084
 #>               F2_0001.0085  F2_0001.0086  F2_0001.0087  F2_0001.0088
@@ -770,44 +778,45 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #>               F2_0001.0093  F2_0001.0094  F2_0001.0095  F2_0001.0096
 #>               F2_0001.0097  F2_0001.0098  F2_0001.0099  F2_0001.0100
 #>              F2_0002.0001  F2_0002.0002  F2_0002.0003 F2_0002.0004 F2_0002.0005
-#>               F2_0002.0006  F2_0002.0007 F2_0002.0008 F2_0002.0009
+#>               F2_0002.0006  F2_0002.0007 F2_0002.0008  F2_0002.0009
 #>               F2_0002.0010  F2_0002.0011  F2_0002.0012 F2_0002.0013
 #>               F2_0002.0014 F2_0002.0015  F2_0002.0016 F2_0002.0017 F2_0002.0018
-#>              F2_0002.0019  F2_0002.0020 F2_0002.0021 F2_0002.0022 F2_0002.0023
+#>              F2_0002.0019  F2_0002.0020 F2_0002.0021  F2_0002.0022 F2_0002.0023
 #>              F2_0002.0024 F2_0002.0025 F2_0002.0026 F2_0002.0027  F2_0002.0028
-#>              F2_0002.0029 F2_0002.0030 F2_0002.0031  F2_0002.0032  F2_0002.0033
-#>              F2_0002.0034 F2_0002.0035  F2_0002.0036 F2_0002.0037 F2_0002.0038
-#>               F2_0002.0039  F2_0002.0040  F2_0002.0041  F2_0002.0042
-#>              F2_0002.0043 F2_0002.0044  F2_0002.0045 F2_0002.0046 F2_0002.0047
-#>              F2_0002.0048 F2_0002.0049 F2_0002.0050 F2_0002.0051 F2_0002.0052
-#>              F2_0002.0053  F2_0002.0054  F2_0002.0055 F2_0002.0056 F2_0002.0057
-#>               F2_0002.0058  F2_0002.0059  F2_0002.0060  F2_0002.0061
-#>              F2_0002.0062  F2_0002.0063  F2_0002.0064 F2_0002.0065 F2_0002.0066
-#>              F2_0002.0067 F2_0002.0068 F2_0002.0069  F2_0002.0070  F2_0002.0071
-#>               F2_0002.0072 F2_0002.0073  F2_0002.0074 F2_0002.0075 F2_0002.0076
-#>               F2_0002.0077 F2_0002.0078 F2_0002.0079 F2_0002.0080  F2_0002.0081
-#>              F2_0002.0082  F2_0002.0083 F2_0002.0084  F2_0002.0085
-#>               F2_0002.0086  F2_0002.0087 F2_0002.0088 F2_0002.0089
-#>               F2_0002.0090 F2_0002.0091 F2_0002.0092 F2_0002.0093 F2_0002.0094
-#>              F2_0002.0095  F2_0002.0096 F2_0002.0097  F2_0002.0098
-#>               F2_0002.0099 F2_0002.0100  F2_0003.0001 F2_0003.0002 F2_0003.0003
-#>               F2_0003.0004  F2_0003.0005  F2_0003.0006 F2_0003.0007
-#>               F2_0003.0008 F2_0003.0009 F2_0003.0010  F2_0003.0011 F2_0003.0012
-#>               F2_0003.0013 F2_0003.0014 F2_0003.0015 F2_0003.0016 F2_0003.0017
-#>               F2_0003.0018 F2_0003.0019 F2_0003.0020 F2_0003.0021  F2_0003.0022
-#>               F2_0003.0023  F2_0003.0024 F2_0003.0025 F2_0003.0026
-#>               F2_0003.0027 F2_0003.0028 F2_0003.0029  F2_0003.0030
-#>               F2_0003.0031  F2_0003.0032 F2_0003.0033 F2_0003.0034
-#>               F2_0003.0035 F2_0003.0036  F2_0003.0037  F2_0003.0038
-#>               F2_0003.0039 F2_0003.0040 F2_0003.0041 F2_0003.0042 F2_0003.0043
-#>              F2_0003.0044  F2_0003.0045  F2_0003.0046 F2_0003.0047
-#>               F2_0003.0048  F2_0003.0049 F2_0003.0050 F2_0003.0051 F2_0003.0052
-#>              F2_0003.0053  F2_0003.0054  F2_0003.0055  F2_0003.0056
-#>              F2_0003.0057  F2_0003.0058  F2_0003.0059  F2_0003.0060
-#>              F2_0003.0061 F2_0003.0062 F2_0003.0063  F2_0003.0064 F2_0003.0065
-#>              F2_0003.0066 F2_0003.0067 F2_0003.0068  F2_0003.0069  F2_0003.0070
-#>               F2_0003.0071 F2_0003.0072 F2_0003.0073  F2_0003.0074
-#>               F2_0003.0075 F2_0003.0076 F2_0003.0077 F2_0003.0078 F2_0003.0079
+#>              F2_0002.0029  F2_0002.0030 F2_0002.0031  F2_0002.0032
+#>               F2_0002.0033 F2_0002.0034 F2_0002.0035  F2_0002.0036 F2_0002.0037
+#>              F2_0002.0038  F2_0002.0039  F2_0002.0040  F2_0002.0041
+#>               F2_0002.0042 F2_0002.0043 F2_0002.0044  F2_0002.0045 F2_0002.0046
+#>              F2_0002.0047 F2_0002.0048 F2_0002.0049 F2_0002.0050 F2_0002.0051
+#>              F2_0002.0052  F2_0002.0053  F2_0002.0054  F2_0002.0055
+#>              F2_0002.0056 F2_0002.0057  F2_0002.0058  F2_0002.0059
+#>               F2_0002.0060  F2_0002.0061 F2_0002.0062  F2_0002.0063
+#>               F2_0002.0064  F2_0002.0065 F2_0002.0066 F2_0002.0067 F2_0002.0068
+#>              F2_0002.0069  F2_0002.0070  F2_0002.0071  F2_0002.0072
+#>              F2_0002.0073  F2_0002.0074 F2_0002.0075 F2_0002.0076  F2_0002.0077
+#>              F2_0002.0078 F2_0002.0079 F2_0002.0080  F2_0002.0081 F2_0002.0082
+#>               F2_0002.0083 F2_0002.0084  F2_0002.0085  F2_0002.0086
+#>               F2_0002.0087 F2_0002.0088 F2_0002.0089  F2_0002.0090 F2_0002.0091
+#>              F2_0002.0092 F2_0002.0093 F2_0002.0094 F2_0002.0095  F2_0002.0096
+#>              F2_0002.0097  F2_0002.0098  F2_0002.0099  F2_0002.0100
+#>               F2_0003.0001 F2_0003.0002 F2_0003.0003  F2_0003.0004
+#>               F2_0003.0005  F2_0003.0006 F2_0003.0007  F2_0003.0008
+#>              F2_0003.0009 F2_0003.0010  F2_0003.0011 F2_0003.0012  F2_0003.0013
+#>              F2_0003.0014 F2_0003.0015 F2_0003.0016 F2_0003.0017  F2_0003.0018
+#>              F2_0003.0019  F2_0003.0020 F2_0003.0021  F2_0003.0022
+#>               F2_0003.0023 F2_0003.0024 F2_0003.0025 F2_0003.0026  F2_0003.0027
+#>               F2_0003.0028 F2_0003.0029  F2_0003.0030  F2_0003.0031
+#>               F2_0003.0032  F2_0003.0033 F2_0003.0034  F2_0003.0035
+#>               F2_0003.0036  F2_0003.0037  F2_0003.0038  F2_0003.0039
+#>              F2_0003.0040 F2_0003.0041 F2_0003.0042 F2_0003.0043 F2_0003.0044
+#>               F2_0003.0045  F2_0003.0046 F2_0003.0047  F2_0003.0048
+#>               F2_0003.0049 F2_0003.0050 F2_0003.0051  F2_0003.0052 F2_0003.0053
+#>               F2_0003.0054  F2_0003.0055  F2_0003.0056  F2_0003.0057
+#>               F2_0003.0058  F2_0003.0059  F2_0003.0060 F2_0003.0061
+#>              F2_0003.0062 F2_0003.0063  F2_0003.0064 F2_0003.0065  F2_0003.0066
+#>              F2_0003.0067 F2_0003.0068  F2_0003.0069  F2_0003.0070
+#>               F2_0003.0071  F2_0003.0072  F2_0003.0073  F2_0003.0074
+#>               F2_0003.0075 F2_0003.0076  F2_0003.0077 F2_0003.0078 F2_0003.0079
 #>              F2_0003.0080 F2_0003.0081 F2_0003.0082 F2_0003.0083  F2_0003.0084
 #>               F2_0003.0085 F2_0003.0086  F2_0003.0087 F2_0003.0088
 #>               F2_0003.0089  F2_0003.0090 F2_0003.0091  F2_0003.0092
@@ -816,7 +825,7 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #>               F3_0001.0001  F3_0001.0002  F3_0001.0003  F3_0001.0004
 #>               F3_0001.0005  F3_0001.0006  F3_0001.0007  F3_0001.0008
 #>               F3_0001.0009  F3_0001.0010  F3_0001.0011  F3_0001.0012
-#>               F3_0001.0013  F3_0001.0014 F3_0001.0015  F3_0001.0016
+#>               F3_0001.0013  F3_0001.0014  F3_0001.0015  F3_0001.0016
 #>               F3_0001.0017  F3_0001.0018  F3_0001.0019  F3_0001.0020
 #>               F3_0001.0021  F3_0001.0022  F3_0001.0023  F3_0001.0024
 #>               F3_0001.0025  F3_0001.0026  F3_0001.0027  F3_0001.0028
@@ -826,7 +835,7 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #>               F3_0001.0041  F3_0001.0042  F3_0001.0043  F3_0001.0044
 #>               F3_0001.0045  F3_0001.0046  F3_0001.0047  F3_0001.0048
 #>               F3_0001.0049  F3_0001.0050  F3_0001.0051  F3_0001.0052
-#>               F3_0001.0053  F3_0001.0054  F3_0001.0055 F3_0001.0056
+#>               F3_0001.0053  F3_0001.0054  F3_0001.0055  F3_0001.0056
 #>               F3_0001.0057  F3_0001.0058  F3_0001.0059  F3_0001.0060
 #>               F3_0001.0061  F3_0001.0062  F3_0001.0063  F3_0001.0064
 #>               F3_0001.0065  F3_0001.0066  F3_0001.0067  F3_0001.0068
@@ -846,7 +855,7 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #>               F3_0002.0021  F3_0002.0022  F3_0002.0023  F3_0002.0024
 #>               F3_0002.0025  F3_0002.0026  F3_0002.0027  F3_0002.0028
 #>               F3_0002.0029  F3_0002.0030  F3_0002.0031  F3_0002.0032
-#>               F3_0002.0033  F3_0002.0034  F3_0002.0035 F3_0002.0036
+#>               F3_0002.0033  F3_0002.0034  F3_0002.0035  F3_0002.0036
 #>              F3_0002.0037  F3_0002.0038  F3_0002.0039  F3_0002.0040
 #>               F3_0002.0041  F3_0002.0042  F3_0002.0043  F3_0002.0044
 #>               F3_0002.0045  F3_0002.0046  F3_0002.0047  F3_0002.0048
@@ -892,78 +901,79 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #>               F4_0001.0005  F4_0001.0006  F4_0001.0007  F4_0001.0008
 #>               F4_0001.0009  F4_0001.0010  F4_0001.0011  F4_0001.0012
 #>               F4_0001.0013  F4_0001.0014  F4_0001.0015  F4_0001.0016
-#>               F4_0001.0017  F4_0001.0018  F4_0001.0019 F4_0001.0020
+#>               F4_0001.0017  F4_0001.0018  F4_0001.0019  F4_0001.0020
 #>               F4_0001.0021  F4_0001.0022  F4_0001.0023  F4_0001.0024
 #>               F4_0001.0025  F4_0001.0026  F4_0001.0027  F4_0001.0028
 #>               F4_0001.0029  F4_0001.0030  F4_0001.0031  F4_0001.0032
-#>               F4_0001.0033 F4_0001.0034 F4_0001.0035  F4_0001.0036
+#>               F4_0001.0033 F4_0001.0034  F4_0001.0035  F4_0001.0036
 #>               F4_0001.0037  F4_0001.0038  F4_0001.0039  F4_0001.0040
 #>              F4_0001.0041  F4_0001.0042  F4_0001.0043  F4_0001.0044
-#>              F4_0001.0045  F4_0001.0046 F4_0001.0047  F4_0001.0048
+#>               F4_0001.0045  F4_0001.0046 F4_0001.0047  F4_0001.0048
 #>               F4_0001.0049  F4_0001.0050  F4_0001.0051  F4_0001.0052
 #>               F4_0001.0053  F4_0001.0054  F4_0001.0055  F4_0001.0056
 #>               F4_0001.0057  F4_0001.0058  F4_0001.0059  F4_0001.0060
-#>              F4_0001.0061  F4_0001.0062  F4_0001.0063  F4_0001.0064
+#>               F4_0001.0061  F4_0001.0062  F4_0001.0063  F4_0001.0064
 #>               F4_0001.0065  F4_0001.0066  F4_0001.0067 F4_0001.0068
 #>               F4_0001.0069  F4_0001.0070  F4_0001.0071  F4_0001.0072
 #>               F4_0001.0073  F4_0001.0074  F4_0001.0075  F4_0001.0076
 #>               F4_0001.0077  F4_0001.0078  F4_0001.0079  F4_0001.0080
 #>               F4_0001.0081  F4_0001.0082  F4_0001.0083  F4_0001.0084
-#>               F4_0001.0085  F4_0001.0086 F4_0001.0087 F4_0001.0088
+#>               F4_0001.0085  F4_0001.0086  F4_0001.0087  F4_0001.0088
 #>               F4_0001.0089  F4_0001.0090  F4_0001.0091  F4_0001.0092
 #>               F4_0001.0093  F4_0001.0094  F4_0001.0095  F4_0001.0096
-#>              F4_0001.0097  F4_0001.0098  F4_0001.0099  F4_0001.0100
-#>               F4_0001.0101  F4_0001.0102  F4_0001.0103 F4_0001.0104
+#>               F4_0001.0097 F4_0001.0098  F4_0001.0099  F4_0001.0100
+#>               F4_0001.0101  F4_0001.0102  F4_0001.0103  F4_0001.0104
 #>               F4_0001.0105  F4_0001.0106  F4_0001.0107  F4_0001.0108
-#>              F4_0001.0109  F4_0001.0110  F4_0001.0111  F4_0001.0112
+#>               F4_0001.0109  F4_0001.0110  F4_0001.0111  F4_0001.0112
 #>               F4_0001.0113  F4_0001.0114  F4_0001.0115  F4_0001.0116
 #>              F4_0001.0117  F4_0001.0118  F4_0001.0119  F4_0001.0120
-#>              F4_0001.0121  F4_0001.0122  F4_0001.0123  F4_0001.0124
+#>               F4_0001.0121  F4_0001.0122  F4_0001.0123  F4_0001.0124
 #>               F4_0001.0125  F4_0001.0126  F4_0001.0127  F4_0001.0128
 #>               F4_0001.0129 F4_0001.0130  F4_0001.0131  F4_0001.0132
 #>               F4_0001.0133  F4_0001.0134  F4_0001.0135  F4_0001.0136
 #>              F4_0001.0137  F4_0001.0138  F4_0001.0139  F4_0001.0140
 #>               F4_0001.0141  F4_0001.0142  F4_0001.0143  F4_0001.0144
-#>              F4_0001.0145 F4_0001.0146  F4_0001.0147  F4_0001.0148 F4_0001.0149
-#>               F4_0001.0150  F4_0001.0151  F4_0001.0152  F4_0001.0153
-#>               F4_0001.0154  F4_0001.0155 F4_0001.0156  F4_0001.0157
-#>               F4_0001.0158 F4_0001.0159  F4_0001.0160  F4_0001.0161
-#>               F4_0001.0162  F4_0001.0163  F4_0001.0164  F4_0001.0165
-#>               F4_0001.0166  F4_0001.0167 F4_0001.0168  F4_0001.0169
-#>               F4_0001.0170 F4_0001.0171  F4_0001.0172  F4_0001.0173
-#>               F4_0001.0174  F4_0001.0175 F4_0001.0176  F4_0001.0177
-#>              F4_0001.0178  F4_0001.0179 F4_0001.0180  F4_0001.0181 F4_0001.0182
-#>               F4_0001.0183 F4_0001.0184  F4_0001.0185  F4_0001.0186
-#>               F4_0001.0187 F4_0001.0188  F4_0001.0189  F4_0001.0190
-#>               F4_0001.0191  F4_0001.0192  F4_0001.0193  F4_0001.0194
-#>               F4_0001.0195  F4_0001.0196  F4_0001.0197  F4_0001.0198
-#>              F4_0001.0199 F4_0001.0200  F4_0001.0201  F4_0001.0202
-#>               F4_0001.0203  F4_0001.0204  F4_0001.0205  F4_0001.0206
-#>               F4_0001.0207  F4_0001.0208  F4_0001.0209  F4_0001.0210
-#>               F4_0001.0211  F4_0001.0212  F4_0001.0213  F4_0001.0214
-#>               F4_0001.0215  F4_0001.0216  F4_0001.0217  F4_0001.0218
-#>               F4_0001.0219 F4_0001.0220  F4_0001.0221  F4_0001.0222
-#>               F4_0001.0223  F4_0001.0224  F4_0001.0225  F4_0001.0226
-#>               F4_0001.0227 F4_0001.0228  F4_0001.0229  F4_0001.0230
-#>               F4_0001.0231  F4_0001.0232  F4_0001.0233  F4_0001.0234
-#>              F4_0001.0235  F4_0001.0236  F4_0001.0237  F4_0001.0238
-#>               F4_0001.0239  F4_0001.0240  F4_0001.0241  F4_0001.0242
-#>               F4_0001.0243  F4_0001.0244  F4_0001.0245  F4_0001.0246
-#>               F4_0001.0247 F4_0001.0248  F4_0001.0249  F4_0001.0250
-#>               F4_0001.0251 F4_0001.0252  F4_0001.0253  F4_0001.0254
-#>               F4_0001.0255  F4_0001.0256  F4_0001.0257  F4_0001.0258
-#>               F4_0001.0259  F4_0001.0260  F4_0001.0261  F4_0001.0262
-#>               F4_0001.0263 F4_0001.0264  F4_0001.0265  F4_0001.0266
-#>               F4_0001.0267  F4_0001.0268  F4_0001.0269  F4_0001.0270
-#>               F4_0001.0271  F4_0001.0272  F4_0001.0273  F4_0001.0274
-#>               F4_0001.0275  F4_0001.0276  F4_0001.0277  F4_0001.0278
-#>               F4_0001.0279  F4_0001.0280  F4_0001.0281  F4_0001.0282
-#>               F4_0001.0283  F4_0001.0284  F4_0001.0285  F4_0001.0286
-#>               F4_0001.0287  F4_0001.0288  F4_0001.0289  F4_0001.0290
-#>               F4_0001.0291 F4_0001.0292  F4_0001.0293  F4_0001.0294
-#>              F4_0001.0295  F4_0001.0296  F4_0001.0297  F4_0001.0298
-#>              F4_0001.0299  F4_0001.0300  F1_0001.0001 F1_0002.0001 F1_0003.0001
-#>              F1_0004.0001     Coll0402    Coll0425      Coll0486      Coll0659
+#>               F4_0001.0145 F4_0001.0146  F4_0001.0147  F4_0001.0148
+#>              F4_0001.0149  F4_0001.0150  F4_0001.0151  F4_0001.0152
+#>               F4_0001.0153  F4_0001.0154  F4_0001.0155 F4_0001.0156
+#>               F4_0001.0157  F4_0001.0158 F4_0001.0159  F4_0001.0160
+#>               F4_0001.0161  F4_0001.0162  F4_0001.0163 F4_0001.0164
+#>               F4_0001.0165  F4_0001.0166  F4_0001.0167 F4_0001.0168
+#>               F4_0001.0169  F4_0001.0170 F4_0001.0171  F4_0001.0172
+#>               F4_0001.0173  F4_0001.0174  F4_0001.0175 F4_0001.0176
+#>               F4_0001.0177  F4_0001.0178  F4_0001.0179 F4_0001.0180
+#>               F4_0001.0181 F4_0001.0182  F4_0001.0183 F4_0001.0184
+#>               F4_0001.0185  F4_0001.0186  F4_0001.0187  F4_0001.0188
+#>               F4_0001.0189  F4_0001.0190  F4_0001.0191  F4_0001.0192
+#>               F4_0001.0193  F4_0001.0194  F4_0001.0195  F4_0001.0196
+#>               F4_0001.0197  F4_0001.0198  F4_0001.0199 F4_0001.0200
+#>               F4_0001.0201  F4_0001.0202  F4_0001.0203  F4_0001.0204
+#>               F4_0001.0205  F4_0001.0206  F4_0001.0207  F4_0001.0208
+#>               F4_0001.0209  F4_0001.0210  F4_0001.0211  F4_0001.0212
+#>               F4_0001.0213  F4_0001.0214  F4_0001.0215  F4_0001.0216
+#>               F4_0001.0217  F4_0001.0218  F4_0001.0219 F4_0001.0220
+#>               F4_0001.0221  F4_0001.0222  F4_0001.0223  F4_0001.0224
+#>               F4_0001.0225  F4_0001.0226  F4_0001.0227 F4_0001.0228
+#>               F4_0001.0229  F4_0001.0230  F4_0001.0231  F4_0001.0232
+#>               F4_0001.0233  F4_0001.0234  F4_0001.0235  F4_0001.0236
+#>               F4_0001.0237  F4_0001.0238  F4_0001.0239  F4_0001.0240
+#>               F4_0001.0241 F4_0001.0242  F4_0001.0243  F4_0001.0244
+#>               F4_0001.0245  F4_0001.0246  F4_0001.0247  F4_0001.0248
+#>               F4_0001.0249  F4_0001.0250  F4_0001.0251 F4_0001.0252
+#>               F4_0001.0253  F4_0001.0254  F4_0001.0255  F4_0001.0256
+#>               F4_0001.0257  F4_0001.0258  F4_0001.0259  F4_0001.0260
+#>               F4_0001.0261  F4_0001.0262  F4_0001.0263  F4_0001.0264
+#>               F4_0001.0265  F4_0001.0266  F4_0001.0267  F4_0001.0268
+#>               F4_0001.0269  F4_0001.0270  F4_0001.0271  F4_0001.0272
+#>               F4_0001.0273  F4_0001.0274  F4_0001.0275  F4_0001.0276
+#>               F4_0001.0277  F4_0001.0278  F4_0001.0279  F4_0001.0280
+#>               F4_0001.0281  F4_0001.0282  F4_0001.0283  F4_0001.0284
+#>               F4_0001.0285  F4_0001.0286  F4_0001.0287  F4_0001.0288
+#>               F4_0001.0289  F4_0001.0290  F4_0001.0291 F4_0001.0292
+#>               F4_0001.0293  F4_0001.0294  F4_0001.0295  F4_0001.0296
+#>               F4_0001.0297  F4_0001.0298 F4_0001.0299  F4_0001.0300
+#>               F1_0001.0001 F1_0002.0001 F1_0003.0001 F1_0004.0001     Coll0402
+#>                 Coll0425      Coll0486      Coll0659
 #>  [ reached getOption("max.print") -- omitted 908 rows ]
 #> 
 #> $metadata
@@ -971,7 +981,7 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #> [1] "R-geno-engine, genomic relationship matrix"
 #> 
 #> $metadata$date
-#> [1] "2024-03-04 11:07:37 JST"
+#> [1] "2025-02-25 12:11:06 JST"
 #> 
 #> $metadata$nInds
 #> [1] 908
@@ -981,7 +991,7 @@ calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
 #> 
 #> 
 #> $file
-#> [1] "/tmp/Rtmpf5vQTG/file11296676adb09.json"
+#> [1] "/tmp/Rtmp2T4b8k/file40c1550eebf36.json"
 ```
 
 ### Combined relationship matrix
@@ -1006,43 +1016,45 @@ docker run --rm -v "$PWD"/data/results/:/results \
 ```
 
 ``` r
-calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
-                    genoRelMatFile = 'data/results/breedGame_genoRelMat.csv',
-                    method = "Martini",
-                    tau = 1,
-                    omega = 0.5,
-                    outFile = tempfile(fileext = ".json"))
-#> 2024-03-04 11:07:38.854305 - r-calc_combinedRelMat(): Get data ...
-#> 2024-03-04 11:07:38.860328 - r-readRelMat(): Read relationship matrix `csv` file ... 
-#> 2024-03-04 11:07:39.538838 - r-readRelMat(): Read relationship matrix `csv` file DONE
-#> 2024-03-04 11:07:39.539022 - r-readRelMat(): Check loaded relationship matrix ...
-#> 2024-03-04 11:07:39.717473 - r-readRelMat(): Check loaded relationship matrix DONE
-#> 2024-03-04 11:07:39.71773 - r-readRelMat(): DONE, return output.
-#> 2024-03-04 11:07:39.718341 - r-readRelMat(): Read relationship matrix `csv` file ... 
-#> 2024-03-04 11:07:40.262082 - r-readRelMat(): Read relationship matrix `csv` file DONE
-#> 2024-03-04 11:07:40.262249 - r-readRelMat(): Check loaded relationship matrix ...
-#> 2024-03-04 11:07:40.291506 - r-readRelMat(): Check loaded relationship matrix DONE
-#> 2024-03-04 11:07:40.291683 - r-readRelMat(): DONE, return output.
-#> 2024-03-04 11:07:40.291751 - r-calc_combinedRelMat(): Get data DONE
-#> 2024-03-04 11:07:40.291855 - r-calc_combinedRelMat(): Calcualte combined relationship matrix ...
-#> 2024-03-04 11:07:40.313483 - r-combineRelMat(): Check inputs ...
-#> 2024-03-04 11:07:40.633274 - r-combineRelMat(): Check inputs DONE
-#> 2024-03-04 11:07:40.633453 - r-combineRelMat(): Calculate combined relationship matrix ...
-#> 2024-03-04 11:07:40.9375 - r-combineRelMat(): Calculate combined relationship matrix DONE
-#> 2024-03-04 11:07:40.937689 - r-combineRelMat(): DONE, return output.
-#> 2024-03-04 11:07:40.937763 - r-calc_combinedRelMat(): Calcualte combined relationship matrix DONE
-#> 2024-03-04 11:07:40.937824 - r-calc_combinedRelMat(): Get metadata ...
-#> 2024-03-04 11:07:41.040536 - r-calc_combinedRelMat(): Get metadata DONE
-#> 2024-03-04 11:07:41.040697 - r-calc_combinedRelMat(): Save results ...
-#> 2024-03-04 11:07:41.040837 - r-saveRelMat(): Check relationship matrix ...
-#> 2024-03-04 11:07:41.161059 - r-saveRelMat(): Check relationship matrix DONE
-#> 2024-03-04 11:07:41.161235 - r-saveRelMat(): Check file ...
-#> 2024-03-04 11:07:41.161346 - r-saveRelMat(): Check file DONE
-#> 2024-03-04 11:07:41.161409 - r-saveRelMat(): Check file format ...
-#> 2024-03-04 11:07:41.161535 - r-saveRelMat(): Check file format DONE
-#> 2024-03-04 11:07:41.161602 - r-saveRelMat(): Write relationship matrix in `.json` file ...
-#> 2024-03-04 11:07:43.608388 - r-saveRelMat(): Write relationship matrix in `.json` file DONE
-#> 2024-03-04 11:07:43.609027 - r-calc_combinedRelMat(): Save results DONE
+calc_combinedRelMat(
+    pedRelMatFile = "data/results/breedGame_pedRelMat.csv",
+    genoRelMatFile = "data/results/breedGame_genoRelMat.csv",
+    method = "Martini",
+    tau = 1,
+    omega = 0.5,
+    outFile = tempfile(fileext = ".json")
+)
+#> 2025-02-25 12:11:08.164587 - r-calc_combinedRelMat(): Get data ...
+#> 2025-02-25 12:11:08.170661 - r-readRelMat(): Read relationship matrix `csv` file ... 
+#> 2025-02-25 12:11:08.815869 - r-readRelMat(): Read relationship matrix `csv` file DONE
+#> 2025-02-25 12:11:08.816071 - r-readRelMat(): Check loaded relationship matrix ...
+#> 2025-02-25 12:11:08.987183 - r-readRelMat(): Check loaded relationship matrix DONE
+#> 2025-02-25 12:11:08.987382 - r-readRelMat(): DONE, return output.
+#> 2025-02-25 12:11:08.987704 - r-readRelMat(): Read relationship matrix `csv` file ... 
+#> 2025-02-25 12:11:09.535077 - r-readRelMat(): Read relationship matrix `csv` file DONE
+#> 2025-02-25 12:11:09.535301 - r-readRelMat(): Check loaded relationship matrix ...
+#> 2025-02-25 12:11:09.644125 - r-readRelMat(): Check loaded relationship matrix DONE
+#> 2025-02-25 12:11:09.644473 - r-readRelMat(): DONE, return output.
+#> 2025-02-25 12:11:09.644554 - r-calc_combinedRelMat(): Get data DONE
+#> 2025-02-25 12:11:09.644732 - r-calc_combinedRelMat(): Calcualte combined relationship matrix ...
+#> 2025-02-25 12:11:09.665046 - r-combineRelMat(): Check inputs ...
+#> 2025-02-25 12:11:09.965519 - r-combineRelMat(): Check inputs DONE
+#> 2025-02-25 12:11:09.965712 - r-combineRelMat(): Calculate combined relationship matrix ...
+#> 2025-02-25 12:11:10.269329 - r-combineRelMat(): Calculate combined relationship matrix DONE
+#> 2025-02-25 12:11:10.269571 - r-combineRelMat(): DONE, return output.
+#> 2025-02-25 12:11:10.269651 - r-calc_combinedRelMat(): Calcualte combined relationship matrix DONE
+#> 2025-02-25 12:11:10.269724 - r-calc_combinedRelMat(): Get metadata ...
+#> 2025-02-25 12:11:10.379719 - r-calc_combinedRelMat(): Get metadata DONE
+#> 2025-02-25 12:11:10.379906 - r-calc_combinedRelMat(): Save results ...
+#> 2025-02-25 12:11:10.380056 - r-saveRelMat(): Check relationship matrix ...
+#> 2025-02-25 12:11:10.497687 - r-saveRelMat(): Check relationship matrix DONE
+#> 2025-02-25 12:11:10.497882 - r-saveRelMat(): Check file ...
+#> 2025-02-25 12:11:10.498006 - r-saveRelMat(): Check file DONE
+#> 2025-02-25 12:11:10.498077 - r-saveRelMat(): Check file format ...
+#> 2025-02-25 12:11:10.498216 - r-saveRelMat(): Check file format DONE
+#> 2025-02-25 12:11:10.498292 - r-saveRelMat(): Write relationship matrix in `.json` file ...
+#> 2025-02-25 12:11:13.145905 - r-saveRelMat(): Write relationship matrix in `.json` file DONE
+#> 2025-02-25 12:11:13.146252 - r-calc_combinedRelMat(): Save results DONE
 #> $relMat
 #>               F2_0001.0001  F2_0001.0002  F2_0001.0003  F2_0001.0004
 #>               F2_0001.0005  F2_0001.0006  F2_0001.0007  F2_0001.0008
@@ -1069,301 +1081,301 @@ calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
 #>               F2_0001.0089  F2_0001.0090  F2_0001.0091  F2_0001.0092
 #>               F2_0001.0093  F2_0001.0094  F2_0001.0095  F2_0001.0096
 #>               F2_0001.0097  F2_0001.0098  F2_0001.0099  F2_0001.0100
-#>               F2_0002.0001  F2_0002.0002  F2_0002.0003  F2_0002.0004
+#>              F2_0002.0001  F2_0002.0002  F2_0002.0003  F2_0002.0004
 #>               F2_0002.0005  F2_0002.0006  F2_0002.0007  F2_0002.0008
 #>               F2_0002.0009  F2_0002.0010  F2_0002.0011  F2_0002.0012
 #>               F2_0002.0013  F2_0002.0014  F2_0002.0015  F2_0002.0016
-#>               F2_0002.0017  F2_0002.0018  F2_0002.0019  F2_0002.0020
-#>               F2_0002.0021  F2_0002.0022  F2_0002.0023  F2_0002.0024
-#>               F2_0002.0025  F2_0002.0026  F2_0002.0027  F2_0002.0028
-#>              F2_0002.0029  F2_0002.0030  F2_0002.0031  F2_0002.0032
-#>              F2_0002.0033  F2_0002.0034  F2_0002.0035  F2_0002.0036
-#>               F2_0002.0037  F2_0002.0038  F2_0002.0039  F2_0002.0040
-#>               F2_0002.0041  F2_0002.0042  F2_0002.0043  F2_0002.0044
-#>               F2_0002.0045  F2_0002.0046  F2_0002.0047  F2_0002.0048
-#>               F2_0002.0049  F2_0002.0050  F2_0002.0051  F2_0002.0052
-#>               F2_0002.0053 F2_0002.0054  F2_0002.0055  F2_0002.0056
-#>               F2_0002.0057  F2_0002.0058  F2_0002.0059  F2_0002.0060
-#>              F2_0002.0061  F2_0002.0062  F2_0002.0063  F2_0002.0064
-#>               F2_0002.0065  F2_0002.0066  F2_0002.0067  F2_0002.0068
-#>               F2_0002.0069  F2_0002.0070  F2_0002.0071  F2_0002.0072
-#>               F2_0002.0073  F2_0002.0074  F2_0002.0075  F2_0002.0076
-#>               F2_0002.0077  F2_0002.0078  F2_0002.0079  F2_0002.0080
-#>               F2_0002.0081  F2_0002.0082  F2_0002.0083  F2_0002.0084
-#>               F2_0002.0085  F2_0002.0086  F2_0002.0087  F2_0002.0088
-#>               F2_0002.0089  F2_0002.0090  F2_0002.0091  F2_0002.0092
-#>              F2_0002.0093  F2_0002.0094  F2_0002.0095  F2_0002.0096
-#>               F2_0002.0097  F2_0002.0098  F2_0002.0099  F2_0002.0100
-#>               F2_0003.0001  F2_0003.0002  F2_0003.0003  F2_0003.0004
-#>               F2_0003.0005  F2_0003.0006  F2_0003.0007  F2_0003.0008
-#>               F2_0003.0009 F2_0003.0010  F2_0003.0011  F2_0003.0012
-#>               F2_0003.0013  F2_0003.0014 F2_0003.0015  F2_0003.0016
-#>               F2_0003.0017  F2_0003.0018  F2_0003.0019  F2_0003.0020
-#>               F2_0003.0021  F2_0003.0022  F2_0003.0023  F2_0003.0024
-#>               F2_0003.0025 F2_0003.0026  F2_0003.0027  F2_0003.0028
-#>               F2_0003.0029  F2_0003.0030 F2_0003.0031  F2_0003.0032
-#>               F2_0003.0033  F2_0003.0034  F2_0003.0035  F2_0003.0036
-#>               F2_0003.0037  F2_0003.0038  F2_0003.0039  F2_0003.0040
-#>               F2_0003.0041  F2_0003.0042  F2_0003.0043 F2_0003.0044
-#>               F2_0003.0045  F2_0003.0046  F2_0003.0047  F2_0003.0048
-#>               F2_0003.0049  F2_0003.0050  F2_0003.0051  F2_0003.0052
-#>               F2_0003.0053  F2_0003.0054  F2_0003.0055  F2_0003.0056
-#>               F2_0003.0057  F2_0003.0058  F2_0003.0059  F2_0003.0060
-#>               F2_0003.0061  F2_0003.0062  F2_0003.0063  F2_0003.0064
-#>               F2_0003.0065  F2_0003.0066  F2_0003.0067  F2_0003.0068
-#>               F2_0003.0069  F2_0003.0070  F2_0003.0071  F2_0003.0072
-#>               F2_0003.0073 F2_0003.0074  F2_0003.0075  F2_0003.0076
-#>               F2_0003.0077  F2_0003.0078  F2_0003.0079  F2_0003.0080
-#>               F2_0003.0081  F2_0003.0082  F2_0003.0083  F2_0003.0084
-#>               F2_0003.0085 F2_0003.0086  F2_0003.0087  F2_0003.0088
-#>               F2_0003.0089  F2_0003.0090  F2_0003.0091  F2_0003.0092
-#>               F2_0003.0093  F2_0003.0094  F2_0003.0095  F2_0003.0096
-#>               F2_0003.0097  F2_0003.0098  F2_0003.0099  F2_0003.0100
-#>               F3_0001.0001  F3_0001.0002  F3_0001.0003  F3_0001.0004
-#>               F3_0001.0005  F3_0001.0006  F3_0001.0007  F3_0001.0008
-#>               F3_0001.0009  F3_0001.0010  F3_0001.0011  F3_0001.0012
-#>               F3_0001.0013  F3_0001.0014  F3_0001.0015  F3_0001.0016
-#>               F3_0001.0017  F3_0001.0018  F3_0001.0019  F3_0001.0020
-#>               F3_0001.0021  F3_0001.0022  F3_0001.0023  F3_0001.0024
-#>               F3_0001.0025  F3_0001.0026  F3_0001.0027  F3_0001.0028
-#>               F3_0001.0029  F3_0001.0030  F3_0001.0031  F3_0001.0032
-#>               F3_0001.0033  F3_0001.0034  F3_0001.0035  F3_0001.0036
-#>               F3_0001.0037  F3_0001.0038  F3_0001.0039  F3_0001.0040
-#>               F3_0001.0041  F3_0001.0042  F3_0001.0043  F3_0001.0044
-#>               F3_0001.0045  F3_0001.0046  F3_0001.0047  F3_0001.0048
-#>               F3_0001.0049  F3_0001.0050  F3_0001.0051  F3_0001.0052
-#>               F3_0001.0053  F3_0001.0054  F3_0001.0055  F3_0001.0056
-#>               F3_0001.0057  F3_0001.0058  F3_0001.0059  F3_0001.0060
-#>               F3_0001.0061  F3_0001.0062  F3_0001.0063  F3_0001.0064
-#>               F3_0001.0065  F3_0001.0066  F3_0001.0067  F3_0001.0068
-#>               F3_0001.0069  F3_0001.0070  F3_0001.0071  F3_0001.0072
-#>               F3_0001.0073  F3_0001.0074  F3_0001.0075  F3_0001.0076
-#>               F3_0001.0077  F3_0001.0078  F3_0001.0079  F3_0001.0080
-#>               F3_0001.0081  F3_0001.0082  F3_0001.0083  F3_0001.0084
-#>               F3_0001.0085  F3_0001.0086  F3_0001.0087  F3_0001.0088
-#>               F3_0001.0089  F3_0001.0090  F3_0001.0091  F3_0001.0092
-#>               F3_0001.0093  F3_0001.0094  F3_0001.0095  F3_0001.0096
-#>               F3_0001.0097  F3_0001.0098  F3_0001.0099  F3_0001.0100
-#>               F3_0002.0001  F3_0002.0002  F3_0002.0003  F3_0002.0004
-#>               F3_0002.0005  F3_0002.0006  F3_0002.0007  F3_0002.0008
-#>               F3_0002.0009  F3_0002.0010  F3_0002.0011  F3_0002.0012
-#>               F3_0002.0013  F3_0002.0014  F3_0002.0015  F3_0002.0016
-#>               F3_0002.0017  F3_0002.0018  F3_0002.0019  F3_0002.0020
-#>               F3_0002.0021  F3_0002.0022  F3_0002.0023  F3_0002.0024
-#>               F3_0002.0025  F3_0002.0026  F3_0002.0027  F3_0002.0028
-#>               F3_0002.0029  F3_0002.0030  F3_0002.0031  F3_0002.0032
-#>               F3_0002.0033  F3_0002.0034  F3_0002.0035  F3_0002.0036
-#>               F3_0002.0037  F3_0002.0038  F3_0002.0039  F3_0002.0040
-#>               F3_0002.0041  F3_0002.0042  F3_0002.0043  F3_0002.0044
-#>               F3_0002.0045  F3_0002.0046  F3_0002.0047  F3_0002.0048
-#>               F3_0002.0049  F3_0002.0050  F3_0002.0051  F3_0002.0052
-#>               F3_0002.0053  F3_0002.0054  F3_0002.0055  F3_0002.0056
-#>               F3_0002.0057  F3_0002.0058  F3_0002.0059  F3_0002.0060
-#>               F3_0002.0061  F3_0002.0062  F3_0002.0063  F3_0002.0064
-#>               F3_0002.0065  F3_0002.0066  F3_0002.0067  F3_0002.0068
-#>               F3_0002.0069  F3_0002.0070  F3_0002.0071  F3_0002.0072
-#>               F3_0002.0073  F3_0002.0074  F3_0002.0075  F3_0002.0076
-#>               F3_0002.0077  F3_0002.0078  F3_0002.0079  F3_0002.0080
-#>               F3_0002.0081  F3_0002.0082  F3_0002.0083  F3_0002.0084
-#>               F3_0002.0085  F3_0002.0086  F3_0002.0087  F3_0002.0088
-#>               F3_0002.0089  F3_0002.0090  F3_0002.0091  F3_0002.0092
-#>               F3_0002.0093  F3_0002.0094  F3_0002.0095  F3_0002.0096
-#>               F3_0002.0097  F3_0002.0098  F3_0002.0099  F3_0002.0100
-#>               F3_0003.0001  F3_0003.0002  F3_0003.0003  F3_0003.0004
-#>               F3_0003.0005  F3_0003.0006  F3_0003.0007  F3_0003.0008
-#>               F3_0003.0009  F3_0003.0010  F3_0003.0011  F3_0003.0012
-#>               F3_0003.0013  F3_0003.0014  F3_0003.0015  F3_0003.0016
-#>               F3_0003.0017  F3_0003.0018  F3_0003.0019  F3_0003.0020
-#>               F3_0003.0021  F3_0003.0022  F3_0003.0023  F3_0003.0024
-#>               F3_0003.0025  F3_0003.0026  F3_0003.0027  F3_0003.0028
-#>               F3_0003.0029  F3_0003.0030  F3_0003.0031  F3_0003.0032
-#>               F3_0003.0033  F3_0003.0034  F3_0003.0035  F3_0003.0036
-#>               F3_0003.0037  F3_0003.0038  F3_0003.0039  F3_0003.0040
-#>               F3_0003.0041  F3_0003.0042  F3_0003.0043  F3_0003.0044
-#>               F3_0003.0045  F3_0003.0046  F3_0003.0047  F3_0003.0048
-#>               F3_0003.0049  F3_0003.0050  F3_0003.0051  F3_0003.0052
-#>               F3_0003.0053  F3_0003.0054  F3_0003.0055  F3_0003.0056
-#>               F3_0003.0057  F3_0003.0058  F3_0003.0059  F3_0003.0060
-#>               F3_0003.0061  F3_0003.0062  F3_0003.0063  F3_0003.0064
-#>               F3_0003.0065  F3_0003.0066  F3_0003.0067  F3_0003.0068
-#>               F3_0003.0069  F3_0003.0070  F3_0003.0071  F3_0003.0072
-#>               F3_0003.0073  F3_0003.0074  F3_0003.0075  F3_0003.0076
-#>               F3_0003.0077  F3_0003.0078  F3_0003.0079  F3_0003.0080
-#>               F3_0003.0081  F3_0003.0082  F3_0003.0083  F3_0003.0084
-#>               F3_0003.0085  F3_0003.0086  F3_0003.0087  F3_0003.0088
-#>               F3_0003.0089  F3_0003.0090  F3_0003.0091  F3_0003.0092
-#>               F3_0003.0093  F3_0003.0094  F3_0003.0095  F3_0003.0096
-#>               F3_0003.0097  F3_0003.0098  F3_0003.0099  F3_0003.0100
-#>               F4_0001.0001  F4_0001.0002  F4_0001.0003  F4_0001.0004
-#>               F4_0001.0005  F4_0001.0006  F4_0001.0007  F4_0001.0008
-#>               F4_0001.0009  F4_0001.0010  F4_0001.0011  F4_0001.0012
-#>               F4_0001.0013  F4_0001.0014  F4_0001.0015  F4_0001.0016
-#>               F4_0001.0017  F4_0001.0018  F4_0001.0019  F4_0001.0020
-#>               F4_0001.0021  F4_0001.0022  F4_0001.0023  F4_0001.0024
-#>               F4_0001.0025  F4_0001.0026  F4_0001.0027  F4_0001.0028
-#>               F4_0001.0029  F4_0001.0030  F4_0001.0031  F4_0001.0032
-#>               F4_0001.0033  F4_0001.0034  F4_0001.0035  F4_0001.0036
-#>               F4_0001.0037  F4_0001.0038  F4_0001.0039  F4_0001.0040
-#>               F4_0001.0041  F4_0001.0042  F4_0001.0043  F4_0001.0044
-#>               F4_0001.0045  F4_0001.0046  F4_0001.0047  F4_0001.0048
-#>               F4_0001.0049  F4_0001.0050  F4_0001.0051  F4_0001.0052
-#>               F4_0001.0053  F4_0001.0054  F4_0001.0055  F4_0001.0056
-#>               F4_0001.0057  F4_0001.0058  F4_0001.0059  F4_0001.0060
-#>               F4_0001.0061  F4_0001.0062  F4_0001.0063  F4_0001.0064
-#>               F4_0001.0065  F4_0001.0066  F4_0001.0067  F4_0001.0068
-#>               F4_0001.0069  F4_0001.0070  F4_0001.0071  F4_0001.0072
-#>               F4_0001.0073  F4_0001.0074  F4_0001.0075  F4_0001.0076
-#>               F4_0001.0077  F4_0001.0078  F4_0001.0079  F4_0001.0080
-#>               F4_0001.0081  F4_0001.0082  F4_0001.0083  F4_0001.0084
-#>               F4_0001.0085  F4_0001.0086  F4_0001.0087  F4_0001.0088
-#>               F4_0001.0089  F4_0001.0090  F4_0001.0091  F4_0001.0092
-#>               F4_0001.0093  F4_0001.0094  F4_0001.0095  F4_0001.0096
-#>               F4_0001.0097  F4_0001.0098  F4_0001.0099  F4_0001.0100
-#>               F4_0001.0101  F4_0001.0102  F4_0001.0103  F4_0001.0104
-#>               F4_0001.0105  F4_0001.0106  F4_0001.0107  F4_0001.0108
-#>               F4_0001.0109  F4_0001.0110  F4_0001.0111  F4_0001.0112
-#>               F4_0001.0113  F4_0001.0114  F4_0001.0115  F4_0001.0116
-#>               F4_0001.0117  F4_0001.0118  F4_0001.0119  F4_0001.0120
-#>               F4_0001.0121  F4_0001.0122  F4_0001.0123  F4_0001.0124
-#>               F4_0001.0125  F4_0001.0126  F4_0001.0127  F4_0001.0128
-#>               F4_0001.0129  F4_0001.0130  F4_0001.0131  F4_0001.0132
-#>               F4_0001.0133  F4_0001.0134  F4_0001.0135  F4_0001.0136
-#>               F4_0001.0137  F4_0001.0138  F4_0001.0139  F4_0001.0140
-#>               F4_0001.0141  F4_0001.0142  F4_0001.0143  F4_0001.0144
-#>               F4_0001.0145  F4_0001.0146  F4_0001.0147  F4_0001.0148
-#>               F4_0001.0149  F4_0001.0150  F4_0001.0151  F4_0001.0152
-#>               F4_0001.0153  F4_0001.0154  F4_0001.0155  F4_0001.0156
-#>               F4_0001.0157  F4_0001.0158  F4_0001.0159  F4_0001.0160
-#>               F4_0001.0161  F4_0001.0162  F4_0001.0163  F4_0001.0164
-#>               F4_0001.0165  F4_0001.0166  F4_0001.0167  F4_0001.0168
-#>               F4_0001.0169  F4_0001.0170  F4_0001.0171  F4_0001.0172
-#>               F4_0001.0173  F4_0001.0174  F4_0001.0175  F4_0001.0176
-#>               F4_0001.0177  F4_0001.0178  F4_0001.0179  F4_0001.0180
-#>               F4_0001.0181  F4_0001.0182  F4_0001.0183  F4_0001.0184
-#>               F4_0001.0185  F4_0001.0186  F4_0001.0187  F4_0001.0188
-#>               F4_0001.0189  F4_0001.0190  F4_0001.0191  F4_0001.0192
-#>               F4_0001.0193  F4_0001.0194  F4_0001.0195  F4_0001.0196
-#>               F4_0001.0197  F4_0001.0198  F4_0001.0199  F4_0001.0200
-#>               F4_0001.0201  F4_0001.0202  F4_0001.0203  F4_0001.0204
-#>               F4_0001.0205  F4_0001.0206  F4_0001.0207  F4_0001.0208
-#>               F4_0001.0209  F4_0001.0210  F4_0001.0211  F4_0001.0212
-#>               F4_0001.0213  F4_0001.0214  F4_0001.0215  F4_0001.0216
-#>               F4_0001.0217  F4_0001.0218  F4_0001.0219  F4_0001.0220
-#>               F4_0001.0221  F4_0001.0222  F4_0001.0223  F4_0001.0224
-#>               F4_0001.0225  F4_0001.0226  F4_0001.0227  F4_0001.0228
-#>               F4_0001.0229  F4_0001.0230  F4_0001.0231 F4_0001.0232
-#>               F4_0001.0233  F4_0001.0234  F4_0001.0235  F4_0001.0236
-#>               F4_0001.0237  F4_0001.0238  F4_0001.0239  F4_0001.0240
-#>               F4_0001.0241  F4_0001.0242  F4_0001.0243  F4_0001.0244
-#>               F4_0001.0245  F4_0001.0246  F4_0001.0247  F4_0001.0248
-#>               F4_0001.0249  F4_0001.0250  F4_0001.0251  F4_0001.0252
-#>               F4_0001.0253  F4_0001.0254  F4_0001.0255  F4_0001.0256
-#>               F4_0001.0257  F4_0001.0258  F4_0001.0259  F4_0001.0260
-#>               F4_0001.0261  F4_0001.0262  F4_0001.0263  F4_0001.0264
-#>               F4_0001.0265  F4_0001.0266  F4_0001.0267  F4_0001.0268
-#>               F4_0001.0269  F4_0001.0270  F4_0001.0271  F4_0001.0272
-#>               F4_0001.0273  F4_0001.0274  F4_0001.0275  F4_0001.0276
-#>               F4_0001.0277  F4_0001.0278  F4_0001.0279  F4_0001.0280
-#>               F4_0001.0281  F4_0001.0282  F4_0001.0283  F4_0001.0284
-#>               F4_0001.0285  F4_0001.0286  F4_0001.0287  F4_0001.0288
-#>               F4_0001.0289  F4_0001.0290  F4_0001.0291  F4_0001.0292
-#>               F4_0001.0293  F4_0001.0294  F4_0001.0295  F4_0001.0296
-#>               F4_0001.0297  F4_0001.0298  F4_0001.0299  F4_0001.0300
-#>               F1_0001.0001 F1_0002.0001  F1_0003.0001  F1_0004.0001 Coll0001
-#>              Coll0002 Coll0003 Coll0004 Coll0005 Coll0006 Coll0007 Coll0008
-#>              Coll0009 Coll0010 Coll0011 Coll0012 Coll0013 Coll0014 Coll0015
-#>              Coll0016 Coll0017 Coll0018 Coll0019 Coll0020 Coll0021 Coll0022
-#>              Coll0023 Coll0024 Coll0025 Coll0026 Coll0027 Coll0028 Coll0029
-#>              Coll0030 Coll0031 Coll0032 Coll0033 Coll0034 Coll0035 Coll0036
-#>              Coll0037 Coll0038 Coll0039 Coll0040 Coll0041 Coll0042 Coll0043
-#>              Coll0044 Coll0045 Coll0046 Coll0047 Coll0048 Coll0049 Coll0050
-#>              Coll0051 Coll0052 Coll0053 Coll0054 Coll0055 Coll0056 Coll0057
-#>              Coll0058 Coll0059 Coll0060 Coll0061 Coll0062 Coll0063 Coll0064
-#>              Coll0065 Coll0066 Coll0067 Coll0068 Coll0069 Coll0070 Coll0071
-#>              Coll0072 Coll0073 Coll0074 Coll0075 Coll0076 Coll0077 Coll0078
-#>              Coll0079 Coll0080 Coll0081 Coll0082 Coll0083 Coll0084 Coll0085
-#>              Coll0086 Coll0087 Coll0088 Coll0089 Coll0090 Coll0091 Coll0092
-#>              Coll0093 Coll0094 Coll0095 Coll0096 Coll0097 Coll0098 Coll0099
-#>              Coll0100 Coll0101 Coll0102 Coll0103 Coll0104 Coll0105 Coll0106
-#>              Coll0107 Coll0108 Coll0109 Coll0110 Coll0111 Coll0112 Coll0113
-#>              Coll0114 Coll0115 Coll0116 Coll0117 Coll0118 Coll0119 Coll0120
-#>              Coll0121 Coll0122 Coll0123 Coll0124 Coll0125 Coll0126 Coll0127
-#>              Coll0128 Coll0129 Coll0130 Coll0131 Coll0132 Coll0133 Coll0134
-#>              Coll0135 Coll0136 Coll0137 Coll0138 Coll0139 Coll0140 Coll0141
-#>              Coll0142 Coll0143 Coll0144 Coll0145 Coll0146 Coll0147 Coll0148
-#>              Coll0149 Coll0150 Coll0151 Coll0152 Coll0153 Coll0154 Coll0155
-#>              Coll0156 Coll0157 Coll0158 Coll0159 Coll0160 Coll0161 Coll0162
-#>              Coll0163 Coll0164 Coll0165 Coll0166 Coll0167 Coll0168 Coll0169
-#>              Coll0170 Coll0171 Coll0172 Coll0173 Coll0174 Coll0175 Coll0176
-#>              Coll0177 Coll0178 Coll0179 Coll0180 Coll0181 Coll0182 Coll0183
-#>              Coll0184 Coll0185 Coll0186 Coll0187 Coll0188 Coll0189 Coll0190
-#>              Coll0191 Coll0192 Coll0193 Coll0194 Coll0195 Coll0196 Coll0197
-#>              Coll0198 Coll0199 Coll0200 Coll0201 Coll0202 Coll0203 Coll0204
-#>              Coll0205 Coll0206 Coll0207 Coll0208 Coll0209 Coll0210 Coll0211
-#>              Coll0212 Coll0213 Coll0214 Coll0215 Coll0216 Coll0217 Coll0218
-#>              Coll0219 Coll0220 Coll0221 Coll0222 Coll0223 Coll0224 Coll0225
-#>              Coll0226 Coll0227 Coll0228 Coll0229 Coll0230 Coll0231 Coll0232
-#>              Coll0233 Coll0234 Coll0235 Coll0236 Coll0237 Coll0238 Coll0239
-#>              Coll0240 Coll0241 Coll0242 Coll0243 Coll0244 Coll0245 Coll0246
-#>              Coll0247 Coll0248 Coll0249 Coll0250 Coll0251 Coll0252 Coll0253
-#>              Coll0254 Coll0255 Coll0256 Coll0257 Coll0258 Coll0259 Coll0260
-#>              Coll0261 Coll0262 Coll0263 Coll0264 Coll0265 Coll0266 Coll0267
-#>              Coll0268 Coll0269 Coll0270 Coll0271 Coll0272 Coll0273 Coll0274
-#>              Coll0275 Coll0276 Coll0277 Coll0278 Coll0279 Coll0280 Coll0281
-#>              Coll0282 Coll0283 Coll0284 Coll0285 Coll0286 Coll0287 Coll0288
-#>              Coll0289 Coll0290 Coll0291 Coll0292 Coll0293 Coll0294 Coll0295
-#>              Coll0296 Coll0297 Coll0298 Coll0299 Coll0300 Coll0301 Coll0302
-#>              Coll0303 Coll0304 Coll0305 Coll0306 Coll0307 Coll0308 Coll0309
-#>              Coll0310 Coll0311 Coll0312 Coll0313 Coll0314 Coll0315 Coll0316
-#>              Coll0317 Coll0318 Coll0319 Coll0320 Coll0321 Coll0322 Coll0323
-#>              Coll0324 Coll0325 Coll0326 Coll0327 Coll0328 Coll0329 Coll0330
-#>              Coll0331 Coll0332 Coll0333 Coll0334 Coll0335 Coll0336 Coll0337
-#>              Coll0338 Coll0339 Coll0340 Coll0341 Coll0342 Coll0343 Coll0344
-#>              Coll0345 Coll0346 Coll0347 Coll0348 Coll0349 Coll0350 Coll0351
-#>              Coll0352 Coll0353 Coll0354 Coll0355 Coll0356 Coll0357 Coll0358
-#>              Coll0359 Coll0360 Coll0361 Coll0362 Coll0363 Coll0364 Coll0365
-#>              Coll0366 Coll0367 Coll0368 Coll0369 Coll0370 Coll0371 Coll0372
-#>              Coll0373 Coll0374 Coll0375 Coll0376 Coll0377 Coll0378 Coll0379
-#>              Coll0380 Coll0381 Coll0382 Coll0383 Coll0384 Coll0385 Coll0386
-#>              Coll0387 Coll0388 Coll0389 Coll0390 Coll0391 Coll0392 Coll0393
-#>              Coll0394 Coll0395 Coll0396 Coll0397 Coll0398 Coll0399 Coll0400
-#>              Coll0401     Coll0402 Coll0403 Coll0404 Coll0405 Coll0406 Coll0407
-#>              Coll0408 Coll0409 Coll0410 Coll0411 Coll0412 Coll0413 Coll0414
-#>              Coll0415 Coll0416 Coll0417 Coll0418 Coll0419 Coll0420 Coll0421
-#>              Coll0422 Coll0423 Coll0424     Coll0425 Coll0426 Coll0427 Coll0428
-#>              Coll0429 Coll0430 Coll0431 Coll0432 Coll0433 Coll0434 Coll0435
-#>              Coll0436 Coll0437 Coll0438 Coll0439 Coll0440 Coll0441 Coll0442
-#>              Coll0443 Coll0444 Coll0445 Coll0446 Coll0447 Coll0448 Coll0449
-#>              Coll0450 Coll0451 Coll0452 Coll0453 Coll0454 Coll0455 Coll0456
-#>              Coll0457 Coll0458 Coll0459 Coll0460 Coll0461 Coll0462 Coll0463
-#>              Coll0464 Coll0465 Coll0466 Coll0467 Coll0468 Coll0469 Coll0470
-#>              Coll0471 Coll0472 Coll0473 Coll0474 Coll0475 Coll0476 Coll0477
-#>              Coll0478 Coll0479 Coll0480 Coll0481 Coll0482 Coll0483 Coll0484
-#>              Coll0485      Coll0486 Coll0487 Coll0488 Coll0489 Coll0490
-#>              Coll0491 Coll0492 Coll0493 Coll0494 Coll0495 Coll0496 Coll0497
-#>              Coll0498 Coll0499 Coll0500 Coll0501 Coll0502 Coll0503 Coll0504
-#>              Coll0505 Coll0506 Coll0507 Coll0508 Coll0509 Coll0510 Coll0511
-#>              Coll0512 Coll0513 Coll0514 Coll0515 Coll0516 Coll0517 Coll0518
-#>              Coll0519 Coll0520 Coll0521 Coll0522 Coll0523 Coll0524 Coll0525
-#>              Coll0526 Coll0527 Coll0528 Coll0529 Coll0530 Coll0531 Coll0532
-#>              Coll0533 Coll0534 Coll0535 Coll0536 Coll0537 Coll0538 Coll0539
-#>              Coll0540 Coll0541 Coll0542 Coll0543 Coll0544 Coll0545 Coll0546
-#>              Coll0547 Coll0548 Coll0549 Coll0550 Coll0551 Coll0552 Coll0553
-#>              Coll0554 Coll0555 Coll0556 Coll0557 Coll0558 Coll0559 Coll0560
-#>              Coll0561 Coll0562 Coll0563 Coll0564 Coll0565 Coll0566 Coll0567
-#>              Coll0568 Coll0569 Coll0570 Coll0571 Coll0572 Coll0573 Coll0574
-#>              Coll0575 Coll0576 Coll0577 Coll0578 Coll0579 Coll0580 Coll0581
-#>              Coll0582 Coll0583 Coll0584 Coll0585 Coll0586 Coll0587 Coll0588
-#>              Coll0589 Coll0590 Coll0591 Coll0592 Coll0593 Coll0594 Coll0595
-#>              Coll0596 Coll0597 Coll0598 Coll0599 Coll0600 Coll0601 Coll0602
-#>              Coll0603 Coll0604 Coll0605 Coll0606 Coll0607 Coll0608 Coll0609
-#>              Coll0610 Coll0611 Coll0612 Coll0613 Coll0614 Coll0615 Coll0616
-#>              Coll0617 Coll0618 Coll0619 Coll0620 Coll0621 Coll0622 Coll0623
-#>              Coll0624 Coll0625 Coll0626 Coll0627 Coll0628 Coll0629 Coll0630
-#>              Coll0631 Coll0632 Coll0633 Coll0634 Coll0635 Coll0636 Coll0637
-#>              Coll0638 Coll0639 Coll0640 Coll0641 Coll0642 Coll0643 Coll0644
-#>              Coll0645 Coll0646 Coll0647 Coll0648 Coll0649 Coll0650 Coll0651
-#>              Coll0652 Coll0653 Coll0654 Coll0655 Coll0656 Coll0657 Coll0658
+#>              F2_0002.0017  F2_0002.0018 F2_0002.0019  F2_0002.0020 F2_0002.0021
+#>               F2_0002.0022  F2_0002.0023  F2_0002.0024  F2_0002.0025
+#>               F2_0002.0026  F2_0002.0027  F2_0002.0028 F2_0002.0029
+#>               F2_0002.0030  F2_0002.0031  F2_0002.0032  F2_0002.0033
+#>               F2_0002.0034  F2_0002.0035  F2_0002.0036  F2_0002.0037
+#>               F2_0002.0038  F2_0002.0039  F2_0002.0040  F2_0002.0041
+#>               F2_0002.0042  F2_0002.0043 F2_0002.0044  F2_0002.0045
+#>               F2_0002.0046  F2_0002.0047  F2_0002.0048  F2_0002.0049
+#>               F2_0002.0050  F2_0002.0051  F2_0002.0052  F2_0002.0053
+#>              F2_0002.0054  F2_0002.0055  F2_0002.0056  F2_0002.0057
+#>               F2_0002.0058  F2_0002.0059  F2_0002.0060 F2_0002.0061
+#>               F2_0002.0062  F2_0002.0063  F2_0002.0064 F2_0002.0065
+#>               F2_0002.0066  F2_0002.0067  F2_0002.0068  F2_0002.0069
+#>              F2_0002.0070  F2_0002.0071  F2_0002.0072  F2_0002.0073
+#>               F2_0002.0074  F2_0002.0075  F2_0002.0076  F2_0002.0077
+#>               F2_0002.0078  F2_0002.0079  F2_0002.0080  F2_0002.0081
+#>               F2_0002.0082  F2_0002.0083  F2_0002.0084  F2_0002.0085
+#>               F2_0002.0086  F2_0002.0087  F2_0002.0088  F2_0002.0089
+#>               F2_0002.0090  F2_0002.0091 F2_0002.0092  F2_0002.0093
+#>               F2_0002.0094  F2_0002.0095  F2_0002.0096  F2_0002.0097
+#>               F2_0002.0098  F2_0002.0099  F2_0002.0100  F2_0003.0001
+#>               F2_0003.0002  F2_0003.0003  F2_0003.0004  F2_0003.0005
+#>               F2_0003.0006  F2_0003.0007  F2_0003.0008  F2_0003.0009
+#>               F2_0003.0010  F2_0003.0011  F2_0003.0012  F2_0003.0013
+#>               F2_0003.0014 F2_0003.0015  F2_0003.0016  F2_0003.0017
+#>               F2_0003.0018  F2_0003.0019  F2_0003.0020  F2_0003.0021
+#>               F2_0003.0022  F2_0003.0023  F2_0003.0024  F2_0003.0025
+#>               F2_0003.0026  F2_0003.0027  F2_0003.0028  F2_0003.0029
+#>               F2_0003.0030  F2_0003.0031  F2_0003.0032  F2_0003.0033
+#>               F2_0003.0034  F2_0003.0035  F2_0003.0036  F2_0003.0037
+#>               F2_0003.0038  F2_0003.0039  F2_0003.0040  F2_0003.0041
+#>               F2_0003.0042  F2_0003.0043  F2_0003.0044  F2_0003.0045
+#>               F2_0003.0046  F2_0003.0047  F2_0003.0048  F2_0003.0049
+#>               F2_0003.0050  F2_0003.0051  F2_0003.0052  F2_0003.0053
+#>               F2_0003.0054  F2_0003.0055  F2_0003.0056  F2_0003.0057
+#>               F2_0003.0058  F2_0003.0059  F2_0003.0060  F2_0003.0061
+#>               F2_0003.0062  F2_0003.0063  F2_0003.0064  F2_0003.0065
+#>               F2_0003.0066  F2_0003.0067  F2_0003.0068 F2_0003.0069
+#>               F2_0003.0070  F2_0003.0071  F2_0003.0072  F2_0003.0073
+#>              F2_0003.0074  F2_0003.0075  F2_0003.0076  F2_0003.0077
+#>               F2_0003.0078  F2_0003.0079  F2_0003.0080  F2_0003.0081
+#>               F2_0003.0082  F2_0003.0083 F2_0003.0084  F2_0003.0085
+#>              F2_0003.0086  F2_0003.0087  F2_0003.0088  F2_0003.0089
+#>               F2_0003.0090  F2_0003.0091  F2_0003.0092  F2_0003.0093
+#>              F2_0003.0094  F2_0003.0095  F2_0003.0096  F2_0003.0097
+#>               F2_0003.0098  F2_0003.0099  F2_0003.0100  F3_0001.0001
+#>               F3_0001.0002  F3_0001.0003  F3_0001.0004  F3_0001.0005
+#>               F3_0001.0006  F3_0001.0007  F3_0001.0008  F3_0001.0009
+#>               F3_0001.0010  F3_0001.0011  F3_0001.0012  F3_0001.0013
+#>               F3_0001.0014  F3_0001.0015  F3_0001.0016  F3_0001.0017
+#>               F3_0001.0018  F3_0001.0019  F3_0001.0020  F3_0001.0021
+#>               F3_0001.0022  F3_0001.0023  F3_0001.0024  F3_0001.0025
+#>               F3_0001.0026  F3_0001.0027  F3_0001.0028  F3_0001.0029
+#>               F3_0001.0030  F3_0001.0031  F3_0001.0032  F3_0001.0033
+#>               F3_0001.0034  F3_0001.0035  F3_0001.0036  F3_0001.0037
+#>               F3_0001.0038  F3_0001.0039  F3_0001.0040  F3_0001.0041
+#>               F3_0001.0042  F3_0001.0043  F3_0001.0044  F3_0001.0045
+#>               F3_0001.0046  F3_0001.0047  F3_0001.0048  F3_0001.0049
+#>               F3_0001.0050  F3_0001.0051  F3_0001.0052  F3_0001.0053
+#>               F3_0001.0054  F3_0001.0055  F3_0001.0056  F3_0001.0057
+#>               F3_0001.0058  F3_0001.0059  F3_0001.0060  F3_0001.0061
+#>               F3_0001.0062  F3_0001.0063  F3_0001.0064  F3_0001.0065
+#>               F3_0001.0066  F3_0001.0067  F3_0001.0068  F3_0001.0069
+#>               F3_0001.0070  F3_0001.0071  F3_0001.0072  F3_0001.0073
+#>               F3_0001.0074  F3_0001.0075  F3_0001.0076  F3_0001.0077
+#>               F3_0001.0078  F3_0001.0079  F3_0001.0080  F3_0001.0081
+#>               F3_0001.0082  F3_0001.0083  F3_0001.0084  F3_0001.0085
+#>               F3_0001.0086  F3_0001.0087  F3_0001.0088  F3_0001.0089
+#>               F3_0001.0090  F3_0001.0091  F3_0001.0092  F3_0001.0093
+#>               F3_0001.0094  F3_0001.0095  F3_0001.0096  F3_0001.0097
+#>               F3_0001.0098  F3_0001.0099  F3_0001.0100  F3_0002.0001
+#>               F3_0002.0002  F3_0002.0003  F3_0002.0004  F3_0002.0005
+#>               F3_0002.0006  F3_0002.0007  F3_0002.0008  F3_0002.0009
+#>               F3_0002.0010  F3_0002.0011  F3_0002.0012  F3_0002.0013
+#>               F3_0002.0014  F3_0002.0015  F3_0002.0016  F3_0002.0017
+#>               F3_0002.0018  F3_0002.0019  F3_0002.0020  F3_0002.0021
+#>               F3_0002.0022  F3_0002.0023  F3_0002.0024  F3_0002.0025
+#>               F3_0002.0026  F3_0002.0027  F3_0002.0028  F3_0002.0029
+#>               F3_0002.0030  F3_0002.0031  F3_0002.0032  F3_0002.0033
+#>               F3_0002.0034  F3_0002.0035  F3_0002.0036  F3_0002.0037
+#>               F3_0002.0038  F3_0002.0039  F3_0002.0040  F3_0002.0041
+#>               F3_0002.0042  F3_0002.0043  F3_0002.0044  F3_0002.0045
+#>               F3_0002.0046  F3_0002.0047  F3_0002.0048  F3_0002.0049
+#>               F3_0002.0050  F3_0002.0051  F3_0002.0052  F3_0002.0053
+#>               F3_0002.0054  F3_0002.0055  F3_0002.0056  F3_0002.0057
+#>               F3_0002.0058  F3_0002.0059  F3_0002.0060  F3_0002.0061
+#>               F3_0002.0062  F3_0002.0063  F3_0002.0064  F3_0002.0065
+#>               F3_0002.0066  F3_0002.0067  F3_0002.0068  F3_0002.0069
+#>               F3_0002.0070  F3_0002.0071  F3_0002.0072  F3_0002.0073
+#>               F3_0002.0074  F3_0002.0075  F3_0002.0076  F3_0002.0077
+#>               F3_0002.0078  F3_0002.0079  F3_0002.0080  F3_0002.0081
+#>               F3_0002.0082  F3_0002.0083  F3_0002.0084  F3_0002.0085
+#>               F3_0002.0086  F3_0002.0087  F3_0002.0088  F3_0002.0089
+#>               F3_0002.0090  F3_0002.0091  F3_0002.0092  F3_0002.0093
+#>               F3_0002.0094  F3_0002.0095  F3_0002.0096  F3_0002.0097
+#>               F3_0002.0098  F3_0002.0099  F3_0002.0100  F3_0003.0001
+#>               F3_0003.0002  F3_0003.0003  F3_0003.0004  F3_0003.0005
+#>               F3_0003.0006  F3_0003.0007  F3_0003.0008  F3_0003.0009
+#>               F3_0003.0010  F3_0003.0011  F3_0003.0012  F3_0003.0013
+#>               F3_0003.0014  F3_0003.0015  F3_0003.0016  F3_0003.0017
+#>               F3_0003.0018  F3_0003.0019  F3_0003.0020  F3_0003.0021
+#>               F3_0003.0022  F3_0003.0023  F3_0003.0024  F3_0003.0025
+#>               F3_0003.0026  F3_0003.0027  F3_0003.0028  F3_0003.0029
+#>               F3_0003.0030  F3_0003.0031  F3_0003.0032  F3_0003.0033
+#>               F3_0003.0034  F3_0003.0035  F3_0003.0036  F3_0003.0037
+#>               F3_0003.0038  F3_0003.0039  F3_0003.0040  F3_0003.0041
+#>               F3_0003.0042  F3_0003.0043  F3_0003.0044  F3_0003.0045
+#>               F3_0003.0046  F3_0003.0047  F3_0003.0048  F3_0003.0049
+#>               F3_0003.0050  F3_0003.0051  F3_0003.0052  F3_0003.0053
+#>               F3_0003.0054  F3_0003.0055  F3_0003.0056  F3_0003.0057
+#>               F3_0003.0058  F3_0003.0059  F3_0003.0060  F3_0003.0061
+#>               F3_0003.0062  F3_0003.0063  F3_0003.0064  F3_0003.0065
+#>               F3_0003.0066  F3_0003.0067  F3_0003.0068  F3_0003.0069
+#>               F3_0003.0070  F3_0003.0071  F3_0003.0072  F3_0003.0073
+#>               F3_0003.0074  F3_0003.0075  F3_0003.0076  F3_0003.0077
+#>               F3_0003.0078  F3_0003.0079  F3_0003.0080  F3_0003.0081
+#>               F3_0003.0082  F3_0003.0083  F3_0003.0084  F3_0003.0085
+#>               F3_0003.0086  F3_0003.0087  F3_0003.0088  F3_0003.0089
+#>               F3_0003.0090  F3_0003.0091  F3_0003.0092  F3_0003.0093
+#>               F3_0003.0094  F3_0003.0095  F3_0003.0096  F3_0003.0097
+#>               F3_0003.0098  F3_0003.0099  F3_0003.0100  F4_0001.0001
+#>               F4_0001.0002  F4_0001.0003  F4_0001.0004  F4_0001.0005
+#>               F4_0001.0006  F4_0001.0007  F4_0001.0008  F4_0001.0009
+#>               F4_0001.0010  F4_0001.0011  F4_0001.0012  F4_0001.0013
+#>               F4_0001.0014  F4_0001.0015  F4_0001.0016  F4_0001.0017
+#>               F4_0001.0018  F4_0001.0019  F4_0001.0020  F4_0001.0021
+#>               F4_0001.0022  F4_0001.0023  F4_0001.0024  F4_0001.0025
+#>               F4_0001.0026  F4_0001.0027  F4_0001.0028  F4_0001.0029
+#>               F4_0001.0030  F4_0001.0031  F4_0001.0032  F4_0001.0033
+#>               F4_0001.0034  F4_0001.0035  F4_0001.0036  F4_0001.0037
+#>               F4_0001.0038  F4_0001.0039  F4_0001.0040  F4_0001.0041
+#>               F4_0001.0042  F4_0001.0043  F4_0001.0044  F4_0001.0045
+#>               F4_0001.0046  F4_0001.0047  F4_0001.0048  F4_0001.0049
+#>               F4_0001.0050  F4_0001.0051  F4_0001.0052  F4_0001.0053
+#>               F4_0001.0054  F4_0001.0055  F4_0001.0056  F4_0001.0057
+#>               F4_0001.0058  F4_0001.0059  F4_0001.0060  F4_0001.0061
+#>               F4_0001.0062  F4_0001.0063  F4_0001.0064  F4_0001.0065
+#>               F4_0001.0066  F4_0001.0067  F4_0001.0068  F4_0001.0069
+#>               F4_0001.0070  F4_0001.0071  F4_0001.0072  F4_0001.0073
+#>               F4_0001.0074  F4_0001.0075  F4_0001.0076  F4_0001.0077
+#>               F4_0001.0078  F4_0001.0079  F4_0001.0080  F4_0001.0081
+#>               F4_0001.0082  F4_0001.0083  F4_0001.0084  F4_0001.0085
+#>               F4_0001.0086  F4_0001.0087  F4_0001.0088  F4_0001.0089
+#>               F4_0001.0090  F4_0001.0091  F4_0001.0092  F4_0001.0093
+#>               F4_0001.0094  F4_0001.0095  F4_0001.0096  F4_0001.0097
+#>               F4_0001.0098  F4_0001.0099  F4_0001.0100  F4_0001.0101
+#>               F4_0001.0102  F4_0001.0103  F4_0001.0104  F4_0001.0105
+#>               F4_0001.0106  F4_0001.0107  F4_0001.0108  F4_0001.0109
+#>               F4_0001.0110  F4_0001.0111  F4_0001.0112  F4_0001.0113
+#>               F4_0001.0114  F4_0001.0115  F4_0001.0116  F4_0001.0117
+#>               F4_0001.0118  F4_0001.0119  F4_0001.0120  F4_0001.0121
+#>               F4_0001.0122  F4_0001.0123  F4_0001.0124  F4_0001.0125
+#>               F4_0001.0126  F4_0001.0127  F4_0001.0128  F4_0001.0129
+#>               F4_0001.0130  F4_0001.0131  F4_0001.0132  F4_0001.0133
+#>               F4_0001.0134  F4_0001.0135  F4_0001.0136  F4_0001.0137
+#>               F4_0001.0138  F4_0001.0139  F4_0001.0140  F4_0001.0141
+#>               F4_0001.0142  F4_0001.0143  F4_0001.0144  F4_0001.0145
+#>               F4_0001.0146  F4_0001.0147  F4_0001.0148  F4_0001.0149
+#>               F4_0001.0150  F4_0001.0151  F4_0001.0152  F4_0001.0153
+#>               F4_0001.0154  F4_0001.0155  F4_0001.0156  F4_0001.0157
+#>               F4_0001.0158  F4_0001.0159  F4_0001.0160  F4_0001.0161
+#>               F4_0001.0162  F4_0001.0163  F4_0001.0164  F4_0001.0165
+#>               F4_0001.0166  F4_0001.0167  F4_0001.0168  F4_0001.0169
+#>               F4_0001.0170  F4_0001.0171  F4_0001.0172  F4_0001.0173
+#>               F4_0001.0174  F4_0001.0175  F4_0001.0176  F4_0001.0177
+#>               F4_0001.0178  F4_0001.0179  F4_0001.0180  F4_0001.0181
+#>               F4_0001.0182  F4_0001.0183  F4_0001.0184  F4_0001.0185
+#>               F4_0001.0186  F4_0001.0187  F4_0001.0188  F4_0001.0189
+#>               F4_0001.0190  F4_0001.0191  F4_0001.0192  F4_0001.0193
+#>               F4_0001.0194  F4_0001.0195  F4_0001.0196  F4_0001.0197
+#>               F4_0001.0198  F4_0001.0199  F4_0001.0200  F4_0001.0201
+#>               F4_0001.0202  F4_0001.0203  F4_0001.0204  F4_0001.0205
+#>               F4_0001.0206  F4_0001.0207  F4_0001.0208  F4_0001.0209
+#>               F4_0001.0210  F4_0001.0211  F4_0001.0212  F4_0001.0213
+#>               F4_0001.0214  F4_0001.0215  F4_0001.0216  F4_0001.0217
+#>               F4_0001.0218  F4_0001.0219  F4_0001.0220  F4_0001.0221
+#>               F4_0001.0222  F4_0001.0223  F4_0001.0224  F4_0001.0225
+#>               F4_0001.0226  F4_0001.0227  F4_0001.0228  F4_0001.0229
+#>               F4_0001.0230  F4_0001.0231 F4_0001.0232  F4_0001.0233
+#>               F4_0001.0234  F4_0001.0235  F4_0001.0236  F4_0001.0237
+#>               F4_0001.0238  F4_0001.0239  F4_0001.0240  F4_0001.0241
+#>               F4_0001.0242  F4_0001.0243  F4_0001.0244  F4_0001.0245
+#>               F4_0001.0246  F4_0001.0247  F4_0001.0248  F4_0001.0249
+#>               F4_0001.0250  F4_0001.0251  F4_0001.0252  F4_0001.0253
+#>               F4_0001.0254  F4_0001.0255  F4_0001.0256  F4_0001.0257
+#>               F4_0001.0258  F4_0001.0259  F4_0001.0260  F4_0001.0261
+#>               F4_0001.0262  F4_0001.0263  F4_0001.0264  F4_0001.0265
+#>               F4_0001.0266  F4_0001.0267  F4_0001.0268  F4_0001.0269
+#>               F4_0001.0270  F4_0001.0271  F4_0001.0272  F4_0001.0273
+#>               F4_0001.0274  F4_0001.0275  F4_0001.0276  F4_0001.0277
+#>               F4_0001.0278  F4_0001.0279  F4_0001.0280  F4_0001.0281
+#>               F4_0001.0282  F4_0001.0283  F4_0001.0284  F4_0001.0285
+#>               F4_0001.0286  F4_0001.0287  F4_0001.0288  F4_0001.0289
+#>               F4_0001.0290  F4_0001.0291  F4_0001.0292  F4_0001.0293
+#>               F4_0001.0294  F4_0001.0295  F4_0001.0296  F4_0001.0297
+#>               F4_0001.0298  F4_0001.0299  F4_0001.0300  F1_0001.0001
+#>              F1_0002.0001 F1_0003.0001  F1_0004.0001 Coll0001 Coll0002 Coll0003
+#>              Coll0004 Coll0005 Coll0006 Coll0007 Coll0008 Coll0009 Coll0010
+#>              Coll0011 Coll0012 Coll0013 Coll0014 Coll0015 Coll0016 Coll0017
+#>              Coll0018 Coll0019 Coll0020 Coll0021 Coll0022 Coll0023 Coll0024
+#>              Coll0025 Coll0026 Coll0027 Coll0028 Coll0029 Coll0030 Coll0031
+#>              Coll0032 Coll0033 Coll0034 Coll0035 Coll0036 Coll0037 Coll0038
+#>              Coll0039 Coll0040 Coll0041 Coll0042 Coll0043 Coll0044 Coll0045
+#>              Coll0046 Coll0047 Coll0048 Coll0049 Coll0050 Coll0051 Coll0052
+#>              Coll0053 Coll0054 Coll0055 Coll0056 Coll0057 Coll0058 Coll0059
+#>              Coll0060 Coll0061 Coll0062 Coll0063 Coll0064 Coll0065 Coll0066
+#>              Coll0067 Coll0068 Coll0069 Coll0070 Coll0071 Coll0072 Coll0073
+#>              Coll0074 Coll0075 Coll0076 Coll0077 Coll0078 Coll0079 Coll0080
+#>              Coll0081 Coll0082 Coll0083 Coll0084 Coll0085 Coll0086 Coll0087
+#>              Coll0088 Coll0089 Coll0090 Coll0091 Coll0092 Coll0093 Coll0094
+#>              Coll0095 Coll0096 Coll0097 Coll0098 Coll0099 Coll0100 Coll0101
+#>              Coll0102 Coll0103 Coll0104 Coll0105 Coll0106 Coll0107 Coll0108
+#>              Coll0109 Coll0110 Coll0111 Coll0112 Coll0113 Coll0114 Coll0115
+#>              Coll0116 Coll0117 Coll0118 Coll0119 Coll0120 Coll0121 Coll0122
+#>              Coll0123 Coll0124 Coll0125 Coll0126 Coll0127 Coll0128 Coll0129
+#>              Coll0130 Coll0131 Coll0132 Coll0133 Coll0134 Coll0135 Coll0136
+#>              Coll0137 Coll0138 Coll0139 Coll0140 Coll0141 Coll0142 Coll0143
+#>              Coll0144 Coll0145 Coll0146 Coll0147 Coll0148 Coll0149 Coll0150
+#>              Coll0151 Coll0152 Coll0153 Coll0154 Coll0155 Coll0156 Coll0157
+#>              Coll0158 Coll0159 Coll0160 Coll0161 Coll0162 Coll0163 Coll0164
+#>              Coll0165 Coll0166 Coll0167 Coll0168 Coll0169 Coll0170 Coll0171
+#>              Coll0172 Coll0173 Coll0174 Coll0175 Coll0176 Coll0177 Coll0178
+#>              Coll0179 Coll0180 Coll0181 Coll0182 Coll0183 Coll0184 Coll0185
+#>              Coll0186 Coll0187 Coll0188 Coll0189 Coll0190 Coll0191 Coll0192
+#>              Coll0193 Coll0194 Coll0195 Coll0196 Coll0197 Coll0198 Coll0199
+#>              Coll0200 Coll0201 Coll0202 Coll0203 Coll0204 Coll0205 Coll0206
+#>              Coll0207 Coll0208 Coll0209 Coll0210 Coll0211 Coll0212 Coll0213
+#>              Coll0214 Coll0215 Coll0216 Coll0217 Coll0218 Coll0219 Coll0220
+#>              Coll0221 Coll0222 Coll0223 Coll0224 Coll0225 Coll0226 Coll0227
+#>              Coll0228 Coll0229 Coll0230 Coll0231 Coll0232 Coll0233 Coll0234
+#>              Coll0235 Coll0236 Coll0237 Coll0238 Coll0239 Coll0240 Coll0241
+#>              Coll0242 Coll0243 Coll0244 Coll0245 Coll0246 Coll0247 Coll0248
+#>              Coll0249 Coll0250 Coll0251 Coll0252 Coll0253 Coll0254 Coll0255
+#>              Coll0256 Coll0257 Coll0258 Coll0259 Coll0260 Coll0261 Coll0262
+#>              Coll0263 Coll0264 Coll0265 Coll0266 Coll0267 Coll0268 Coll0269
+#>              Coll0270 Coll0271 Coll0272 Coll0273 Coll0274 Coll0275 Coll0276
+#>              Coll0277 Coll0278 Coll0279 Coll0280 Coll0281 Coll0282 Coll0283
+#>              Coll0284 Coll0285 Coll0286 Coll0287 Coll0288 Coll0289 Coll0290
+#>              Coll0291 Coll0292 Coll0293 Coll0294 Coll0295 Coll0296 Coll0297
+#>              Coll0298 Coll0299 Coll0300 Coll0301 Coll0302 Coll0303 Coll0304
+#>              Coll0305 Coll0306 Coll0307 Coll0308 Coll0309 Coll0310 Coll0311
+#>              Coll0312 Coll0313 Coll0314 Coll0315 Coll0316 Coll0317 Coll0318
+#>              Coll0319 Coll0320 Coll0321 Coll0322 Coll0323 Coll0324 Coll0325
+#>              Coll0326 Coll0327 Coll0328 Coll0329 Coll0330 Coll0331 Coll0332
+#>              Coll0333 Coll0334 Coll0335 Coll0336 Coll0337 Coll0338 Coll0339
+#>              Coll0340 Coll0341 Coll0342 Coll0343 Coll0344 Coll0345 Coll0346
+#>              Coll0347 Coll0348 Coll0349 Coll0350 Coll0351 Coll0352 Coll0353
+#>              Coll0354 Coll0355 Coll0356 Coll0357 Coll0358 Coll0359 Coll0360
+#>              Coll0361 Coll0362 Coll0363 Coll0364 Coll0365 Coll0366 Coll0367
+#>              Coll0368 Coll0369 Coll0370 Coll0371 Coll0372 Coll0373 Coll0374
+#>              Coll0375 Coll0376 Coll0377 Coll0378 Coll0379 Coll0380 Coll0381
+#>              Coll0382 Coll0383 Coll0384 Coll0385 Coll0386 Coll0387 Coll0388
+#>              Coll0389 Coll0390 Coll0391 Coll0392 Coll0393 Coll0394 Coll0395
+#>              Coll0396 Coll0397 Coll0398 Coll0399 Coll0400 Coll0401    Coll0402
+#>              Coll0403 Coll0404 Coll0405 Coll0406 Coll0407 Coll0408 Coll0409
+#>              Coll0410 Coll0411 Coll0412 Coll0413 Coll0414 Coll0415 Coll0416
+#>              Coll0417 Coll0418 Coll0419 Coll0420 Coll0421 Coll0422 Coll0423
+#>              Coll0424    Coll0425 Coll0426 Coll0427 Coll0428 Coll0429 Coll0430
+#>              Coll0431 Coll0432 Coll0433 Coll0434 Coll0435 Coll0436 Coll0437
+#>              Coll0438 Coll0439 Coll0440 Coll0441 Coll0442 Coll0443 Coll0444
+#>              Coll0445 Coll0446 Coll0447 Coll0448 Coll0449 Coll0450 Coll0451
+#>              Coll0452 Coll0453 Coll0454 Coll0455 Coll0456 Coll0457 Coll0458
+#>              Coll0459 Coll0460 Coll0461 Coll0462 Coll0463 Coll0464 Coll0465
+#>              Coll0466 Coll0467 Coll0468 Coll0469 Coll0470 Coll0471 Coll0472
+#>              Coll0473 Coll0474 Coll0475 Coll0476 Coll0477 Coll0478 Coll0479
+#>              Coll0480 Coll0481 Coll0482 Coll0483 Coll0484 Coll0485
+#>                   Coll0486 Coll0487 Coll0488 Coll0489 Coll0490 Coll0491
+#>              Coll0492 Coll0493 Coll0494 Coll0495 Coll0496 Coll0497 Coll0498
+#>              Coll0499 Coll0500 Coll0501 Coll0502 Coll0503 Coll0504 Coll0505
+#>              Coll0506 Coll0507 Coll0508 Coll0509 Coll0510 Coll0511 Coll0512
+#>              Coll0513 Coll0514 Coll0515 Coll0516 Coll0517 Coll0518 Coll0519
+#>              Coll0520 Coll0521 Coll0522 Coll0523 Coll0524 Coll0525 Coll0526
+#>              Coll0527 Coll0528 Coll0529 Coll0530 Coll0531 Coll0532 Coll0533
+#>              Coll0534 Coll0535 Coll0536 Coll0537 Coll0538 Coll0539 Coll0540
+#>              Coll0541 Coll0542 Coll0543 Coll0544 Coll0545 Coll0546 Coll0547
+#>              Coll0548 Coll0549 Coll0550 Coll0551 Coll0552 Coll0553 Coll0554
+#>              Coll0555 Coll0556 Coll0557 Coll0558 Coll0559 Coll0560 Coll0561
+#>              Coll0562 Coll0563 Coll0564 Coll0565 Coll0566 Coll0567 Coll0568
+#>              Coll0569 Coll0570 Coll0571 Coll0572 Coll0573 Coll0574 Coll0575
+#>              Coll0576 Coll0577 Coll0578 Coll0579 Coll0580 Coll0581 Coll0582
+#>              Coll0583 Coll0584 Coll0585 Coll0586 Coll0587 Coll0588 Coll0589
+#>              Coll0590 Coll0591 Coll0592 Coll0593 Coll0594 Coll0595 Coll0596
+#>              Coll0597 Coll0598 Coll0599 Coll0600 Coll0601 Coll0602 Coll0603
+#>              Coll0604 Coll0605 Coll0606 Coll0607 Coll0608 Coll0609 Coll0610
+#>              Coll0611 Coll0612 Coll0613 Coll0614 Coll0615 Coll0616 Coll0617
+#>              Coll0618 Coll0619 Coll0620 Coll0621 Coll0622 Coll0623 Coll0624
+#>              Coll0625 Coll0626 Coll0627 Coll0628 Coll0629 Coll0630 Coll0631
+#>              Coll0632 Coll0633 Coll0634 Coll0635 Coll0636 Coll0637 Coll0638
+#>              Coll0639 Coll0640 Coll0641 Coll0642 Coll0643 Coll0644 Coll0645
+#>              Coll0646 Coll0647 Coll0648 Coll0649 Coll0650 Coll0651 Coll0652
+#>              Coll0653 Coll0654 Coll0655 Coll0656 Coll0657 Coll0658
 #>                   Coll0659 Coll0660 Coll0661 Coll0662 Coll0663 Coll0664
 #>              Coll0665 Coll0666 Coll0667 Coll0668 Coll0669 Coll0670 Coll0671
 #>              Coll0672 Coll0673 Coll0674 Coll0675 Coll0676 Coll0677 Coll0678
@@ -1420,20 +1432,20 @@ calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
 #> [1] "R-geno-engine, combined relationship matrix"
 #> 
 #> $metadata$date
-#> [1] "2024-03-04 11:07:40 JST"
+#> [1] "2025-02-25 12:11:10 JST"
 #> 
 #> $metadata$nInds
 #> [1] 1904
 #> 
 #> $metadata$geno_relMatFP
-#> [1] "a9b05abfa32259b91fb4bcddc2aa47dc"
+#> [1] "19e246f0d541dbedf6d1ec8c1f72978b"
 #> 
 #> $metadata$ped_relMatFP
 #> [1] "9d809e52fcf7f9fe62421d80131d8b85"
 #> 
 #> 
 #> $file
-#> [1] "/tmp/Rtmpf5vQTG/file1129641451106.json"
+#> [1] "/tmp/Rtmp2T4b8k/file40c1572a9ee9c.json"
 ```
 
 ### Relationship matrix visualisation
@@ -1456,28 +1468,30 @@ docker run --rm -v "$PWD"/data/results/:/results \
 ```
 
 ``` r
-draw_relHeatmap(relMatFile = 'data/results/pedigreeRelationship.csv',
-                relMatUrl = NULL,
-                interactive = FALSE,
-                outFile = tempfile(fileext = ".png"))
-#> 2024-03-04 11:07:43.731536 - r-draw_relHeatmap(): Get data ...
-#> 2024-03-04 11:07:43.731843 - r-readRelMat(): Read relationship matrix `csv` file ... 
-#> 2024-03-04 11:07:43.736876 - r-readRelMat(): Read relationship matrix `csv` file DONE
-#> 2024-03-04 11:07:43.736974 - r-readRelMat(): Check loaded relationship matrix ...
-#> 2024-03-04 11:07:43.7373 - r-readRelMat(): Check loaded relationship matrix DONE
-#> 2024-03-04 11:07:43.73737 - r-readRelMat(): DONE, return output.
-#> 2024-03-04 11:07:43.737432 - r-draw_relHeatmap(): Get data DONE
-#> 2024-03-04 11:07:43.737497 - r-draw_relHeatmap(): Open connexion to draw the png plot ...
-#> 2024-03-04 11:07:43.73929 - r-draw_relHeatmap(): Open connexion to draw the png plot DONE
-#> 2024-03-04 11:07:43.739461 - r-draw_relHeatmap(): Draw relationship heatmap ...
-#> 2024-03-04 11:07:43.749123 - r-manPlot(): Check parameters ...
-#> 2024-03-04 11:07:43.749696 - r-manPlot(): Check parameters DONE
-#> 2024-03-04 11:07:43.749776 - r-manPlot(): Create static heatmap ...
-#> 2024-03-04 11:07:43.787163 - r-manPlot(): Create static heatmap DONE
-#> 2024-03-04 11:07:43.78731 - r-manPlot(): DONE, return output
-#> 2024-03-04 11:07:43.787379 - r-draw_relHeatmap(): Draw relationship heatmap DONE
-#> 2024-03-04 11:07:43.787441 - r-draw_relHeatmap(): Save results ...
-#> 2024-03-04 11:07:43.954777 - r-draw_relHeatmap(): Save results DONE
+draw_relHeatmap(
+    relMatFile = "data/results/pedigreeRelationship.csv",
+    relMatUrl = NULL,
+    interactive = FALSE,
+    outFile = tempfile(fileext = ".png")
+)
+#> 2025-02-25 12:11:13.261603 - r-draw_relHeatmap(): Get data ...
+#> 2025-02-25 12:11:13.26196 - r-readRelMat(): Read relationship matrix `csv` file ... 
+#> 2025-02-25 12:11:13.262859 - r-readRelMat(): Read relationship matrix `csv` file DONE
+#> 2025-02-25 12:11:13.262962 - r-readRelMat(): Check loaded relationship matrix ...
+#> 2025-02-25 12:11:13.263308 - r-readRelMat(): Check loaded relationship matrix DONE
+#> 2025-02-25 12:11:13.263395 - r-readRelMat(): DONE, return output.
+#> 2025-02-25 12:11:13.263469 - r-draw_relHeatmap(): Get data DONE
+#> 2025-02-25 12:11:13.263539 - r-draw_relHeatmap(): Open connexion to draw the png plot ...
+#> 2025-02-25 12:11:13.265599 - r-draw_relHeatmap(): Open connexion to draw the png plot DONE
+#> 2025-02-25 12:11:13.26579 - r-draw_relHeatmap(): Draw relationship heatmap ...
+#> 2025-02-25 12:11:13.275302 - r-manPlot(): Check parameters ...
+#> 2025-02-25 12:11:13.275787 - r-manPlot(): Check parameters DONE
+#> 2025-02-25 12:11:13.275872 - r-manPlot(): Create static heatmap ...
+#> 2025-02-25 12:11:13.309932 - r-manPlot(): Create static heatmap DONE
+#> 2025-02-25 12:11:13.310092 - r-manPlot(): DONE, return output
+#> 2025-02-25 12:11:13.310171 - r-draw_relHeatmap(): Draw relationship heatmap DONE
+#> 2025-02-25 12:11:13.310252 - r-draw_relHeatmap(): Save results ...
+#> 2025-02-25 12:11:13.470909 - r-draw_relHeatmap(): Save results DONE
 #> NULL
 ```
 
@@ -1514,30 +1528,32 @@ docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
 **Main function**
 
 ``` r
-imgFile <- draw_pedNetwork(pedFile = "data/pedigree/testPedData_char.csv",
-                           pedUrl = NULL,
-                           unknown_string = '',
-                           header = TRUE,
-                           outFile = tempfile(fileext = ".html"))
-#> 2024-03-04 11:07:43.959013 - r-draw_pedNetwork(): Get data ...
-#> 2024-03-04 11:07:43.959258 - r-readPedData: Read pedigree file ...
-#> 2024-03-04 11:07:43.959875 - r-readPedData: Read pedigree file DONE
-#> 2024-03-04 11:07:43.959952 - r-readPedData: Check pedigree file ...
-#> 2024-03-04 11:07:43.96619 - r-readPedData: Check pedigree file DONE
-#> 2024-03-04 11:07:43.966278 - r-readPedData: DONE, return output.
-#> 2024-03-04 11:07:43.966353 - r-draw_pedNetwork(): Get data DONE
-#> 2024-03-04 11:07:43.966417 - r-draw_pedNetwork(): Draw pedigree interactive network ...
-#> 2024-03-04 11:07:43.983666 - r-pedNetwork(): Check parameters ...
-#> 2024-03-04 11:07:43.983812 - r-pedNetwork(): Check inputs ...
-#> 2024-03-04 11:07:43.983891 - r-pedNetwork(): Check inputs DONE
-#> 2024-03-04 11:07:43.983952 - r-pedNetwork(): Create network data ...
-#> 2024-03-04 11:07:43.984792 - r-pedNetwork(): Create network data DONE
-#> 2024-03-04 11:07:43.984867 - r-pedNetwork(): Create network ...
-#> 2024-03-04 11:07:43.99396 - r-pedNetwork(): Create network DONE
-#> 2024-03-04 11:07:43.994056 - r-pedNetwork(): DONE, return output.
-#> 2024-03-04 11:07:43.994125 - r-draw_pedNetwork(): Draw pedigree interactive network DONE
-#> 2024-03-04 11:07:43.9942 - r-draw_pedNetwork(): Save results ...
-#> 2024-03-04 11:07:44.021553 - r-draw_pedNetwork(): Save results DONE
+imgFile <- draw_pedNetwork(
+    pedFile = "data/pedigree/testPedData_char.csv",
+    pedUrl = NULL,
+    unknown_string = "",
+    header = TRUE,
+    outFile = tempfile(fileext = ".html")
+)
+#> 2025-02-25 12:11:13.475983 - r-draw_pedNetwork(): Get data ...
+#> 2025-02-25 12:11:13.476249 - r-readPedData: Read pedigree file ...
+#> 2025-02-25 12:11:13.476824 - r-readPedData: Read pedigree file DONE
+#> 2025-02-25 12:11:13.476916 - r-readPedData: Check pedigree file ...
+#> 2025-02-25 12:11:13.486779 - r-readPedData: Check pedigree file DONE
+#> 2025-02-25 12:11:13.48689 - r-readPedData: DONE, return output.
+#> 2025-02-25 12:11:13.486975 - r-draw_pedNetwork(): Get data DONE
+#> 2025-02-25 12:11:13.487046 - r-draw_pedNetwork(): Draw pedigree interactive network ...
+#> 2025-02-25 12:11:13.503864 - r-pedNetwork(): Check parameters ...
+#> 2025-02-25 12:11:13.504009 - r-pedNetwork(): Check inputs ...
+#> 2025-02-25 12:11:13.504092 - r-pedNetwork(): Check inputs DONE
+#> 2025-02-25 12:11:13.504164 - r-pedNetwork(): Create network data ...
+#> 2025-02-25 12:11:13.505025 - r-pedNetwork(): Create network data DONE
+#> 2025-02-25 12:11:13.505113 - r-pedNetwork(): Create network ...
+#> 2025-02-25 12:11:13.513387 - r-pedNetwork(): Create network DONE
+#> 2025-02-25 12:11:13.513491 - r-pedNetwork(): DONE, return output.
+#> 2025-02-25 12:11:13.513566 - r-draw_pedNetwork(): Draw pedigree interactive network DONE
+#> 2025-02-25 12:11:13.513653 - r-draw_pedNetwork(): Save results ...
+#> 2025-02-25 12:11:13.556702 - r-draw_pedNetwork(): Save results DONE
 ```
 
 </details>
@@ -1642,50 +1658,52 @@ docker run --rm -v "$PWD"/data/:/data \
 **Main function**
 
 ``` r
-crossingSimulation(genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
-                   crossTableFile = 'data/crossingTable/breedGame_crossTable.csv',
-                   SNPcoordFile = 'data/SNPcoordinates/breedingGame_SNPcoord.csv',
-                   nCross = 10,
-                   outFile = tempfile(fileext = ".vcf.gz"))
-#> 2024-03-04 11:07:44.043695 - r-crossingSimulation(): Get data ...
-#> 2024-03-04 11:07:44.064659 - r-readPhasedGeno(): Check file extention ... 
-#> 2024-03-04 11:07:44.064997 - r-readPhasedGeno(): Read geno file ... 
-#> 2024-03-04 11:07:46.625616 - r-readPhasedGeno(): Read phased geno file DONE
-#> 2024-03-04 11:07:46.626061 - r-readPhasedGeno(): Extract SNP information...
-#> 2024-03-04 11:07:46.627621 - r-readPhasedGeno(): Extract SNP information DONE
-#> 2024-03-04 11:07:46.627697 - r-readPhasedGeno(): Check pahsing ...
-#> 2024-03-04 11:07:46.845951 - r-readPhasedGeno(): Check pahsing DONE
-#> 2024-03-04 11:07:46.846128 - r-readPhasedGeno(): Extract haplotypes...
-#> 2024-03-04 11:07:50.253242 - r-readPhasedGeno(): Extract haplotypes DONE
-#> 2024-03-04 11:07:50.253401 - r-readPhasedGeno(): DONE, return output.
-#> 2024-03-04 11:07:50.273762 - r-readSNPcoord(): Read snps coordinates file ...
-#> 2024-03-04 11:07:50.287104 - r-readSNPcoord(): Read snps coordinates file DONE
-#> 2024-03-04 11:07:50.287212 - r-readSNPcoord(): Check snps coordinates file ...
-#> 2024-03-04 11:07:50.299128 - r-readSNPcoord(): Check snps coordinates file DONE
-#> 2024-03-04 11:07:50.312847 - r-readCrossTable: Read crossing table file ...
-#> 2024-03-04 11:07:50.313926 - r-readCrossTable: Read crossing table file DONE
-#> 2024-03-04 11:07:50.314003 - r-readCrossTable: Check crossing table file ...
-#> 2024-03-04 11:07:50.314749 - r-readCrossTable: Generate simulated individuals names...
-#> 2024-03-04 11:07:50.315084 - r-readCrossTable: Generate simulated individuals names DONE
-#> 2024-03-04 11:07:50.31516 - r-crossingSimulation(): Get data DONE
-#> 2024-03-04 11:07:50.31522 - r-crossingSimulation(): Check SNP's coordinates consistency between `.vcf` and SNPcoordinate file ...
-#> 2024-03-04 11:07:50.352706 - r-crossingSimulation(): Check SNP's coordinates consistency between  `.vcf` and SNPcoordinate file DONE
-#> 2024-03-04 11:07:50.352856 - r-crossingSimulation(): Check individuals' names consistency between  `.vcf` and `.csv` file ...
-#> 2024-03-04 11:07:50.36048 - r-crossingSimulation(): Check individuals' names consistency between  `.vcf` and `.csv` file DONE
-#> 2024-03-04 11:07:50.360622 - r-crossingSimulation(): Initialise simulation ...
-#> 2024-03-04 11:07:50.379837 - r-initializeSimulation(): Extract chromosomes information ...
-#> 2024-03-04 11:07:50.385029 - r-initializeSimulation(): Create specie ...
-#> 2024-03-04 11:07:50.388993 - r-initializeSimulation(): Create specie DONE
-#> 2024-03-04 11:07:50.389084 - r-initializeSimulation(): Create snp information ...
-#> 2024-03-04 11:07:50.404275 - r-initializeSimulation(): Create snp information DONE
-#> 2024-03-04 11:07:50.404382 - r-initializeSimulation(): Create parents population ...
-#> 2024-03-04 11:07:52.266401 - r-initializeSimulation(): Create parents population DONE
-#> 2024-03-04 11:07:52.266581 - r-crossingSimulation(): Initialise simulation DONE
-#> 2024-03-04 11:07:52.266649 - r-crossingSimulation(): Crossing simulation ...
-#> 2024-03-04 11:08:35.159658 - r-crossingSimulation(): Crossing simulation DONE
-#> 2024-03-04 11:08:35.159838 - r-crossingSimulation(): Write output file ...
-#> 2024-03-04 11:08:54.797749 - r-crossingSimulation(): Write output file DONE
-#> [1] "/tmp/Rtmpf5vQTG/file112965ca7794c.vcf.gz"
+crossingSimulation(
+    genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
+    crossTableFile = "data/crossingTable/breedGame_crossTable.csv",
+    SNPcoordFile = "data/SNPcoordinates/breedingGame_SNPcoord.csv",
+    nCross = 10,
+    outFile = tempfile(fileext = ".vcf.gz")
+)
+#> 2025-02-25 12:11:13.580644 - r-crossingSimulation(): Get data ...
+#> 2025-02-25 12:11:13.611136 - r-readPhasedGeno(): Check file extention ... 
+#> 2025-02-25 12:11:13.611556 - r-readPhasedGeno(): Read geno file ... 
+#> 2025-02-25 12:11:15.840547 - r-readPhasedGeno(): Read phased geno file DONE
+#> 2025-02-25 12:11:15.841013 - r-readPhasedGeno(): Extract SNP information...
+#> 2025-02-25 12:11:15.84257 - r-readPhasedGeno(): Extract SNP information DONE
+#> 2025-02-25 12:11:15.84266 - r-readPhasedGeno(): Check pahsing ...
+#> 2025-02-25 12:11:16.086843 - r-readPhasedGeno(): Check pahsing DONE
+#> 2025-02-25 12:11:16.087044 - r-readPhasedGeno(): Extract haplotypes...
+#> 2025-02-25 12:11:19.689152 - r-readPhasedGeno(): Extract haplotypes DONE
+#> 2025-02-25 12:11:19.689348 - r-readPhasedGeno(): DONE, return output.
+#> 2025-02-25 12:11:19.713105 - r-readSNPcoord(): Read snps coordinates file ...
+#> 2025-02-25 12:11:19.723026 - r-readSNPcoord(): Read snps coordinates file DONE
+#> 2025-02-25 12:11:19.723175 - r-readSNPcoord(): Check snps coordinates file ...
+#> 2025-02-25 12:11:19.757061 - r-readSNPcoord(): Check snps coordinates file DONE
+#> 2025-02-25 12:11:19.770498 - r-readCrossTable: Read crossing table file ...
+#> 2025-02-25 12:11:19.771354 - r-readCrossTable: Read crossing table file DONE
+#> 2025-02-25 12:11:19.77144 - r-readCrossTable: Check crossing table file ...
+#> 2025-02-25 12:11:19.772169 - r-readCrossTable: Generate simulated individuals names...
+#> 2025-02-25 12:11:19.772525 - r-readCrossTable: Generate simulated individuals names DONE
+#> 2025-02-25 12:11:19.77261 - r-crossingSimulation(): Get data DONE
+#> 2025-02-25 12:11:19.77268 - r-crossingSimulation(): Check SNP's coordinates consistency between `.vcf` and SNPcoordinate file ...
+#> 2025-02-25 12:11:19.80381 - r-crossingSimulation(): Check SNP's coordinates consistency between  `.vcf` and SNPcoordinate file DONE
+#> 2025-02-25 12:11:19.803973 - r-crossingSimulation(): Check individuals' names consistency between  `.vcf` and `.csv` file ...
+#> 2025-02-25 12:11:19.810839 - r-crossingSimulation(): Check individuals' names consistency between  `.vcf` and `.csv` file DONE
+#> 2025-02-25 12:11:19.810948 - r-crossingSimulation(): Initialise simulation ...
+#> 2025-02-25 12:11:19.828976 - r-initializeSimulation(): Extract chromosomes information ...
+#> 2025-02-25 12:11:19.834018 - r-initializeSimulation(): Create specie ...
+#> 2025-02-25 12:11:19.838055 - r-initializeSimulation(): Create specie DONE
+#> 2025-02-25 12:11:19.838156 - r-initializeSimulation(): Create snp information ...
+#> 2025-02-25 12:11:19.853851 - r-initializeSimulation(): Create snp information DONE
+#> 2025-02-25 12:11:19.853995 - r-initializeSimulation(): Create parents population ...
+#> 2025-02-25 12:11:21.895474 - r-initializeSimulation(): Create parents population DONE
+#> 2025-02-25 12:11:21.895677 - r-crossingSimulation(): Initialise simulation DONE
+#> 2025-02-25 12:11:21.895755 - r-crossingSimulation(): Crossing simulation ...
+#> 2025-02-25 12:11:52.878459 - r-crossingSimulation(): Crossing simulation DONE
+#> 2025-02-25 12:11:52.878672 - r-crossingSimulation(): Write output file ...
+#> 2025-02-25 12:12:14.06796 - r-crossingSimulation(): Write output file DONE
+#> [1] "/tmp/Rtmp2T4b8k/file40c152c2396e3.vcf.gz"
 ```
 
 </details>
@@ -1954,7 +1972,7 @@ $$
 \end{align}
 $$
 
-> Note: we can recognise that this is the mean of the genetic value of the 2 parents: $\frac{1}{2} (\sum_j e_j (x_{1jM} + x_{1jP}) + \sum_j e_j (x_{2jM} + x_{2jP}))$
+> Note: we can recognise that this is the mean of the genetic value of the 2 parents: $\frac{1}{2} (\sum_j e_j (x_{1jM} + x_{1jP}) + \sum_j e_j  (x_{2jM} + x_{2jP}))$
 
 $$
 \begin{align}
@@ -2017,60 +2035,60 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ``` r
 calc_progenyBlupEstimation(
-  genoFile = 'data/geno/breedGame_phasedGeno.vcf.gz',
-  crossTableFile = 'data/crossingTable/breedGame_small_crossTable.csv',
-  SNPcoordFile = 'data/SNPcoordinates/breedingGame_SNPcoord.csv',
-  markerEffectsFile = 'data/markerEffects/breedGame_markerEffects.csv',
-  outFile = tempfile(fileext = ".json")
+    genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
+    crossTableFile = "data/crossingTable/breedGame_small_crossTable.csv",
+    SNPcoordFile = "data/SNPcoordinates/breedingGame_SNPcoord.csv",
+    markerEffectsFile = "data/markerEffects/breedGame_markerEffects.csv",
+    outFile = tempfile(fileext = ".json")
 )
-#> 2024-03-04 11:08:54.842538 - r-progenyBlupVarExp(): Get data ...
-#> 2024-03-04 11:08:54.84271 - r-readPhasedGeno(): Check file extention ... 
-#> 2024-03-04 11:08:54.843019 - r-readPhasedGeno(): Read geno file ... 
-#> 2024-03-04 11:08:56.546951 - r-readPhasedGeno(): Read phased geno file DONE
-#> 2024-03-04 11:08:56.547603 - r-readPhasedGeno(): Extract SNP information...
-#> 2024-03-04 11:08:56.549284 - r-readPhasedGeno(): Extract SNP information DONE
-#> 2024-03-04 11:08:56.54937 - r-readPhasedGeno(): Check pahsing ...
-#> 2024-03-04 11:08:56.822275 - r-readPhasedGeno(): Check pahsing DONE
-#> 2024-03-04 11:08:56.822447 - r-readPhasedGeno(): Extract haplotypes...
-#> 2024-03-04 11:09:00.090922 - r-readPhasedGeno(): Extract haplotypes DONE
-#> 2024-03-04 11:09:00.091091 - r-readPhasedGeno(): DONE, return output.
-#> 2024-03-04 11:09:00.091628 - r-readSNPcoord(): Read snps coordinates file ...
-#> 2024-03-04 11:09:00.101091 - r-readSNPcoord(): Read snps coordinates file DONE
-#> 2024-03-04 11:09:00.101176 - r-readSNPcoord(): Check snps coordinates file ...
-#> 2024-03-04 11:09:00.112575 - r-readSNPcoord(): Check snps coordinates file DONE
-#> 2024-03-04 11:09:00.112957 - r-readCrossTable: Read crossing table file ...
-#> 2024-03-04 11:09:00.117645 - r-readCrossTable: Read crossing table file DONE
-#> 2024-03-04 11:09:00.117741 - r-readCrossTable: Check crossing table file ...
-#> 2024-03-04 11:09:00.11797 - r-readCrossTable: Generate simulated individuals names...
-#> 2024-03-04 11:09:00.118061 - r-readCrossTable: Generate simulated individuals names DONE
-#> 2024-03-04 11:09:00.137676 - r-readMarkerEffects_csv(): Read marker effects file ...
-#> 2024-03-04 11:09:00.145284 - r-readMarkerEffects_csv(): Read marker effects file DONE
-#> 2024-03-04 11:09:00.145373 - r-readMarkerEffects_csv(): Check marker effects file ...
-#> 2024-03-04 11:09:00.151071 - r-readMarkerEffects_csv(): Check marker effects file DONE
-#> 2024-03-04 11:09:00.151564 - r-progenyBlupVarExp(): Get data DONE
-#> 2024-03-04 11:09:00.151641 - r-progenyBlupVarExp(): Check individuals' names consistency between  `.vcf` and `.csv` file ...
-#> 2024-03-04 11:09:00.152069 - r-progenyBlupVarExp(): Check individuals' names consistency between  `.vcf` and `.csv` file DONE
-#> 2024-03-04 11:09:00.152133 - r-progenyBlupVarExp(): Check SNP's coordinates consistency between `.vcf` and SNPcoordinate file ...
-#> 2024-03-04 11:09:00.175646 - r-progenyBlupVarExp(): Check SNP's coordinates consistency between  `.vcf` and SNPcoordinate file DONE
-#> 2024-03-04 11:09:00.175744 - r-progenyBlupVarExp(): Check SNPs' ids consistency between SNPcoordinate and markerEffects file ...
-#> 2024-03-04 11:09:00.175994 - r-progenyBlupVarExp(): Check SNPs' ids consistency between SNPcoordinate and markerEffects file DONE
-#> 2024-03-04 11:09:00.362677 - r-progenyBlupVarExp(): BLUP variance and expected value calculation for each crosses ...
-#> 2024-03-04 11:09:00.362854 - r-progenyBlupVarExp(): Calculating cross: 1/10
-#> 2024-03-04 11:09:01.542105 - r-progenyBlupVarExp(): Calculating cross: 2/10
-#> 2024-03-04 11:09:02.382669 - r-progenyBlupVarExp(): Calculating cross: 3/10
-#> 2024-03-04 11:09:03.237386 - r-progenyBlupVarExp(): Calculating cross: 4/10
-#> 2024-03-04 11:09:04.08217 - r-progenyBlupVarExp(): Calculating cross: 5/10
-#> 2024-03-04 11:09:04.91902 - r-progenyBlupVarExp(): Calculating cross: 6/10
-#> 2024-03-04 11:09:05.752794 - r-progenyBlupVarExp(): Calculating cross: 7/10
-#> 2024-03-04 11:09:06.591046 - r-progenyBlupVarExp(): Calculating cross: 8/10
-#> 2024-03-04 11:09:07.429289 - r-progenyBlupVarExp(): Calculating cross: 9/10
-#> 2024-03-04 11:09:08.259246 - r-progenyBlupVarExp(): Calculating cross: 10/10
-#> 2024-03-04 11:09:09.084858 - r-progenyBlupVarExp(): BLUP variance and expected value calculation for each crosses DONE
-#> 2024-03-04 11:09:09.08501 - r-progenyBlupVarExp(): Save results ...
-#> 2024-03-04 11:09:09.085161 - r-save_blupVarExp_as_json(): Check file ...
-#> 2024-03-04 11:09:09.085237 - r-save_blupVarExp_as_json(): Check output file extention ...
-#> 2024-03-04 11:09:09.085381 - r-save_blupVarExp_as_json(): Check output file extention DONE
-#> 2024-03-04 11:09:09.091241 - r-progenyBlupVarExp(): Save results DONE
+#> 2025-02-25 12:12:14.112068 - r-progenyBlupVarExp(): Get data ...
+#> 2025-02-25 12:12:14.112288 - r-readPhasedGeno(): Check file extention ... 
+#> 2025-02-25 12:12:14.112607 - r-readPhasedGeno(): Read geno file ... 
+#> 2025-02-25 12:12:15.740514 - r-readPhasedGeno(): Read phased geno file DONE
+#> 2025-02-25 12:12:15.741502 - r-readPhasedGeno(): Extract SNP information...
+#> 2025-02-25 12:12:15.743458 - r-readPhasedGeno(): Extract SNP information DONE
+#> 2025-02-25 12:12:15.743585 - r-readPhasedGeno(): Check pahsing ...
+#> 2025-02-25 12:12:15.998331 - r-readPhasedGeno(): Check pahsing DONE
+#> 2025-02-25 12:12:15.998548 - r-readPhasedGeno(): Extract haplotypes...
+#> 2025-02-25 12:12:19.313556 - r-readPhasedGeno(): Extract haplotypes DONE
+#> 2025-02-25 12:12:19.313761 - r-readPhasedGeno(): DONE, return output.
+#> 2025-02-25 12:12:19.314293 - r-readSNPcoord(): Read snps coordinates file ...
+#> 2025-02-25 12:12:19.324964 - r-readSNPcoord(): Read snps coordinates file DONE
+#> 2025-02-25 12:12:19.32516 - r-readSNPcoord(): Check snps coordinates file ...
+#> 2025-02-25 12:12:19.338046 - r-readSNPcoord(): Check snps coordinates file DONE
+#> 2025-02-25 12:12:19.338573 - r-readCrossTable: Read crossing table file ...
+#> 2025-02-25 12:12:19.339016 - r-readCrossTable: Read crossing table file DONE
+#> 2025-02-25 12:12:19.339106 - r-readCrossTable: Check crossing table file ...
+#> 2025-02-25 12:12:19.339335 - r-readCrossTable: Generate simulated individuals names...
+#> 2025-02-25 12:12:19.339449 - r-readCrossTable: Generate simulated individuals names DONE
+#> 2025-02-25 12:12:19.363629 - r-readMarkerEffects_csv(): Read marker effects file ...
+#> 2025-02-25 12:12:19.371774 - r-readMarkerEffects_csv(): Read marker effects file DONE
+#> 2025-02-25 12:12:19.371996 - r-readMarkerEffects_csv(): Check marker effects file ...
+#> 2025-02-25 12:12:19.379128 - r-readMarkerEffects_csv(): Check marker effects file DONE
+#> 2025-02-25 12:12:19.379945 - r-progenyBlupVarExp(): Get data DONE
+#> 2025-02-25 12:12:19.380053 - r-progenyBlupVarExp(): Check individuals' names consistency between  `.vcf` and `.csv` file ...
+#> 2025-02-25 12:12:19.38067 - r-progenyBlupVarExp(): Check individuals' names consistency between  `.vcf` and `.csv` file DONE
+#> 2025-02-25 12:12:19.380769 - r-progenyBlupVarExp(): Check SNP's coordinates consistency between `.vcf` and SNPcoordinate file ...
+#> 2025-02-25 12:12:19.385279 - r-progenyBlupVarExp(): Check SNP's coordinates consistency between  `.vcf` and SNPcoordinate file DONE
+#> 2025-02-25 12:12:19.385453 - r-progenyBlupVarExp(): Check SNPs' ids consistency between SNPcoordinate and markerEffects file ...
+#> 2025-02-25 12:12:19.385746 - r-progenyBlupVarExp(): Check SNPs' ids consistency between SNPcoordinate and markerEffects file DONE
+#> 2025-02-25 12:12:19.735958 - r-progenyBlupVarExp(): BLUP variance and expected value calculation for each crosses ...
+#> 2025-02-25 12:12:19.736165 - r-progenyBlupVarExp(): Calculating cross: 1/10
+#> 2025-02-25 12:12:20.963556 - r-progenyBlupVarExp(): Calculating cross: 2/10
+#> 2025-02-25 12:12:22.263535 - r-progenyBlupVarExp(): Calculating cross: 3/10
+#> 2025-02-25 12:12:23.900632 - r-progenyBlupVarExp(): Calculating cross: 4/10
+#> 2025-02-25 12:12:24.770095 - r-progenyBlupVarExp(): Calculating cross: 5/10
+#> 2025-02-25 12:12:25.622577 - r-progenyBlupVarExp(): Calculating cross: 6/10
+#> 2025-02-25 12:12:26.473612 - r-progenyBlupVarExp(): Calculating cross: 7/10
+#> 2025-02-25 12:12:27.322145 - r-progenyBlupVarExp(): Calculating cross: 8/10
+#> 2025-02-25 12:12:28.185898 - r-progenyBlupVarExp(): Calculating cross: 9/10
+#> 2025-02-25 12:12:29.016014 - r-progenyBlupVarExp(): Calculating cross: 10/10
+#> 2025-02-25 12:12:29.855099 - r-progenyBlupVarExp(): BLUP variance and expected value calculation for each crosses DONE
+#> 2025-02-25 12:12:29.855285 - r-progenyBlupVarExp(): Save results ...
+#> 2025-02-25 12:12:29.855452 - r-save_blupVarExp_as_json(): Check file ...
+#> 2025-02-25 12:12:29.855538 - r-save_blupVarExp_as_json(): Check output file extention ...
+#> 2025-02-25 12:12:29.855685 - r-save_blupVarExp_as_json(): Check output file extention DONE
+#> 2025-02-25 12:12:29.861418 - r-progenyBlupVarExp(): Save results DONE
 #> $F2_0001.0001_X_F2_0002.0059
 #> $F2_0001.0001_X_F2_0002.0059$ind1
 #> [1] "F2_0001.0001"
@@ -2327,25 +2345,25 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ``` r
 plot <- draw_progBlupsPlot(
-  progEstimFile = 'data/results/progenyBlupEstimation.json',
-  sorting = 'dec',
-  outFile = tempfile(fileext = ".html")
+    progEstimFile = "data/results/progenyBlupEstimation.json",
+    sorting = "dec",
+    outFile = tempfile(fileext = ".html")
 )
-#> 2024-03-04 11:09:09.110855 - r-draw_progBlupsPlot(): Get data ...
-#> 2024-03-04 11:09:09.125008 - r-readProgBlupEstim(): Read blup esimation file ... 
-#> 2024-03-04 11:09:09.129447 - r-readProgBlupEstim(): Read blup esimation file DONE 
-#> 2024-03-04 11:09:09.129546 - r-readProgBlupEstim(): Convert Json ... 
-#> 2024-03-04 11:09:09.131693 - r-readProgBlupEstim(): Convert Json DONE 
-#> 2024-03-04 11:09:09.131789 - r-readProgBlupEstim(): DONE, return output.
-#> 2024-03-04 11:09:09.131855 - r-draw_progBlupsPlot(): Get data DONE
-#> 2024-03-04 11:09:09.131948 - r-draw_progBlupsPlot(): Draw progenies' blup plot ...
-#> 2024-03-04 11:09:09.158251 - r-plotBlup_1trait(): sort x axis ...
-#> 2024-03-04 11:09:09.158807 - r-plotBlup_1trait(): sort x axis DONE
-#> 2024-03-04 11:09:09.158881 - r-plotBlup_1trait(): draw plot ...
-#> 2024-03-04 11:09:09.159965 - r-plotBlup_1trait(): draw plot DONE
-#> 2024-03-04 11:09:09.160043 - r-draw_progBlupsPlot(): Draw progenies' blup plot DONE
-#> 2024-03-04 11:09:09.160106 - r-draw_progBlupsPlot(): Save results ...
-#> 2024-03-04 11:09:09.237544 - r-draw_progBlupsPlot(): Save results DONE
+#> 2025-02-25 12:12:29.881632 - r-draw_progBlupsPlot(): Get data ...
+#> 2025-02-25 12:12:29.895002 - r-readProgBlupEstim(): Read blup esimation file ... 
+#> 2025-02-25 12:12:29.895262 - r-readProgBlupEstim(): Read blup esimation file DONE 
+#> 2025-02-25 12:12:29.895344 - r-readProgBlupEstim(): Convert Json ... 
+#> 2025-02-25 12:12:29.897336 - r-readProgBlupEstim(): Convert Json DONE 
+#> 2025-02-25 12:12:29.897449 - r-readProgBlupEstim(): DONE, return output.
+#> 2025-02-25 12:12:29.897527 - r-draw_progBlupsPlot(): Get data DONE
+#> 2025-02-25 12:12:29.897627 - r-draw_progBlupsPlot(): Draw progenies' blup plot ...
+#> 2025-02-25 12:12:29.923641 - r-plotBlup_1trait(): sort x axis ...
+#> 2025-02-25 12:12:29.924171 - r-plotBlup_1trait(): sort x axis DONE
+#> 2025-02-25 12:12:29.92427 - r-plotBlup_1trait(): draw plot ...
+#> 2025-02-25 12:12:29.925393 - r-plotBlup_1trait(): draw plot DONE
+#> 2025-02-25 12:12:29.925487 - r-draw_progBlupsPlot(): Draw progenies' blup plot DONE
+#> 2025-02-25 12:12:29.925563 - r-draw_progBlupsPlot(): Save results ...
+#> 2025-02-25 12:12:30.018819 - r-draw_progBlupsPlot(): Save results DONE
 ```
 
 <figure>
@@ -2369,30 +2387,102 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ``` r
 plot <- draw_progBlupsPlot_2traits(
-  progEstimFile = 'data/results/progenyBlupEstimation_2traits.json',
-  x_trait = "trait1",
-  y_trait = "trait2",
-  outFile = tempfile(fileext = ".html")
+    progEstimFile = "data/results/progenyBlupEstimation_2traits.json",
+    x_trait = "trait1",
+    y_trait = "trait2",
+    outFile = tempfile(fileext = ".html")
 )
-#> 2024-03-04 11:09:09.257763 - r-draw_progBlupsPlot_2traits(): Get data ...
-#> 2024-03-04 11:09:09.257934 - r-readProgBlupEstim(): Read blup esimation file ... 
-#> 2024-03-04 11:09:09.258355 - r-readProgBlupEstim(): Read blup esimation file DONE 
-#> 2024-03-04 11:09:09.258427 - r-readProgBlupEstim(): Convert Json ... 
-#> 2024-03-04 11:09:09.2608 - r-readProgBlupEstim(): Convert Json DONE 
-#> 2024-03-04 11:09:09.2609 - r-readProgBlupEstim(): DONE, return output.
-#> 2024-03-04 11:09:09.260967 - r-draw_progBlupsPlot_2traits(): Get data DONE
-#> 2024-03-04 11:09:09.266384 - r-draw_progBlupsPlot_2traits(): Draw progenies' blup plot ...
-#> 2024-03-04 11:09:09.286277 - r-plotBlup_2traits(): draw plot ...
-#> 2024-03-04 11:09:09.299323 - r-plotBlup_2traits(): draw plot DONE
-#> 2024-03-04 11:09:09.299428 - r-draw_progBlupsPlot_2traits(): Draw progenies' blup plot DONE
-#> 2024-03-04 11:09:09.299498 - r-draw_progBlupsPlot_2traits(): Save results ...
-#> 2024-03-04 11:09:09.631046 - r-draw_progBlupsPlot_2traits(): Save results DONE
+#> 2025-02-25 12:12:30.039793 - r-draw_progBlupsPlot_2traits(): Get data ...
+#> 2025-02-25 12:12:30.040094 - r-readProgBlupEstim(): Read blup esimation file ... 
+#> 2025-02-25 12:12:30.04031 - r-readProgBlupEstim(): Read blup esimation file DONE 
+#> 2025-02-25 12:12:30.040388 - r-readProgBlupEstim(): Convert Json ... 
+#> 2025-02-25 12:12:30.042663 - r-readProgBlupEstim(): Convert Json DONE 
+#> 2025-02-25 12:12:30.042776 - r-readProgBlupEstim(): DONE, return output.
+#> 2025-02-25 12:12:30.04285 - r-draw_progBlupsPlot_2traits(): Get data DONE
+#> 2025-02-25 12:12:30.048255 - r-draw_progBlupsPlot_2traits(): Draw progenies' blup plot ...
+#> 2025-02-25 12:12:30.069504 - r-plotBlup_2traits(): draw plot ...
+#> 2025-02-25 12:12:30.084012 - r-plotBlup_2traits(): draw plot DONE
+#> 2025-02-25 12:12:30.084139 - r-draw_progBlupsPlot_2traits(): Draw progenies' blup plot DONE
+#> 2025-02-25 12:12:30.084224 - r-draw_progBlupsPlot_2traits(): Save results ...
+#> 2025-02-25 12:12:30.458283 - r-draw_progBlupsPlot_2traits(): Save results DONE
 ```
 
 <figure>
 <img src="README_files/progBlupPlot-2-traits.png" alt="progBlupPlot-2-traits" />
 <figcaption aria-hidden="true">progBlupPlot-2-traits</figcaption>
 </figure>
+
+</details>
+
+## Genomic selection
+
+<details>
+<summary>
+Click to expand
+</summary>
+
+### Model evaluation
+
+Before training a model is is good practive to evaluate the performance a the model.
+
+This can be done with the following command:
+
+``` sh
+./r-geno-tools-engine.R evaluate-gs-model --genoFile data/genomic_selection/geno_G1.vcf.gz --phenoFile data/genomic_selection/pheno_train.csv --trait pheno --with-dominance true --outFile ./model_evaluation.json
+```
+
+Once the evaluation is done, you can visualize it with:
+
+``` sh
+./r-geno-tools-engine.R plot-gs-model-evaluation --evaluation-file ./model_evaluation.json --outFile evaluation_plot.html
+```
+
+<figure>
+<img src="README_files/gs_evaluation_plot.png" alt="gs_evaluation_plot" />
+<figcaption aria-hidden="true">gs_evaluation_plot</figcaption>
+</figure>
+
+### Model training
+
+A GS model can be build with the command:
+
+``` sh
+./r-geno-tools-engine.R train-gs-model --genoFile data/genomic_selection/geno_G1.vcf.gz --phenoFile data/genomic_selection/pheno_train.csv --trait pheno --with-dominance true --outFile ./estimated_markers_effects.json
+```
+
+This command will create a “marker effects” file that contains the estimated markers effects that can be used to make predicitons.
+
+2 models can be build, one with only additive effects estimation (with `--with-dominance false`) or one with both additive and dominance effects estimations with (with `--with-dominance true`).
+
+### Model predictions
+
+GS prediction can be made from a “marker effects” file and a genotype file with the command:
+
+``` sh
+ ./r-geno-tools-engine.R gs-predictions --genoFile data/genomic_selection/geno_G2.vcf.gz --markerEffectsFile ./estimated_markers_effects.json --outFile predictions.csv
+```
+
+### Generate random marker effects
+
+In order to create data set for testing, a command is available to generate marker effects.
+
+``` sh
+ ./r-geno-tools-engine.R generate-rnd-marker-effects --genoFile data/geno/breedGame_geno.vcf.gz --outFile ./random_marker_effects.json 
+```
+
+This command will also print the distribution of the genetic values of the provided individuals.
+
+The variance of the genetic values can be tuned with the parameters `--rate-add` and `--rate-dom` (that control the variance of the markers effects).
+
+### Generate phenotypes
+
+Once some marker effects have been generated, we can also generate phenotypes with:
+
+``` sh
+ ./r-geno-tools-engine.R simulate-phenotype --genoFile data/geno/breedGame_geno.vcf.gz --markerEffectsFile random_marker_effects.json --heritability 0.6 --outFile ./simulated_phenotypes.json 
+```
+
+This command will also print the distribution of the phenotypic values of the provided individuals, along with: - the standard distribution of the “environmental noise” - the broad sense heritability for the given population
 
 </details>
 

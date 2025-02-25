@@ -309,7 +309,7 @@ readGenoData <- function(file) {
   logger$log("Read geno file ... ")
 
   dta <- gaston::read.vcf(file,
-                          verbose = TRUE,
+                          verbose = FALSE,
                           convert.chr = FALSE)
 
   # impute missing SNP ids

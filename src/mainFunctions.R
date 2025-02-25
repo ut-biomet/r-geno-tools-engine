@@ -1532,3 +1532,249 @@ draw_evaluation_plot <- function(evaluationFile = NULL,
   }
   plot
 }
+
+#' Generate Random Marker Effects
+#'
+#' This function generates additive and dominance marker effects for a set of SNP markers.
+#' The generated effects are saved as a JSON file.
+#'
+#' @param genoFile Character. Path to the genotype data file.
+#' @param outFile Character. Path to the output JSON file where the marker effects will be saved.
+#' @param rate_add Numeric. Rate parameter for the exponential distribution of additive effects. This can be tune to get desired genetic values distribution. (default: 1/0.3).
+#' @param rate_dom Numeric. Rate parameter for the exponential distribution of dominance effects. This can be tune to get desired genetic values distribution. (default: 1/0.3).
+#' @param dominance Logical. Whether to include dominance effects (default: TRUE).
+#' @param prop_snp_with_effect_add Numeric. Proportion of SNPs with additive effects (default: 1).
+#' @param prop_snp_with_effect_dom Numeric. Proportion of SNPs with dominance effects (default: 1).
+#' @param allow_dual_effects Logical. Whether SNPs can have both additive and dominance effects (default: TRUE).
+#' @param rnd_seed Numeric or NULL. Random seed for reproducibility (default: NULL).
+#'
+#' @details
+#' The function reads genotype data, selects a subset of SNPs to have additive and/or dominance
+#' effects based on specified proportions, and assigns effects drawn from an exponential
+#' distribution. The genetic values are computed using additive and dominance genotype matrices.
+#' Summary statistics of genetic values are printed.
+#'
+#' The output JSON file contains:
+#' - `intercept`: Mean genetic value before centering.
+#' - `additive_effects`: Named list of additive effects for each SNP.
+#' - `dominance_effects`: Named list of dominance effects for each SNP.
+#'
+#' @return None. The function writes the marker effects to a JSON file.
+generate_rnd_marker_effects <- function(genoFile,
+                                    outFile = NULL,
+                                    rate_add = 1/0.3,
+                                    rate_dom = 1/0.30,
+                                    dominance = TRUE,
+                                    prop_snp_with_effect_add = 1,
+                                    prop_snp_with_effect_dom = 1,
+                                    allow_dual_effects = TRUE,
+                                    rnd_seed = NULL) {
+  Sys.setenv(RGENO_NO_LOG = TRUE)
+
+  if (!is.null(rnd_seed)) {
+    set.seed(rnd_seed)
+  }
+
+  if (!dominance) {
+    allow_dual_effects <- FALSE
+    prop_snp_with_effect_dom <- 0
+  }
+
+
+  geno <- readGenoData(genoFile)
+  snp_ids <- geno@snps$id
+  n_snp <- length(snp_ids)
+
+  effects <- data.frame(
+    add = rep(0, n_snp),
+    dom = rep(0, n_snp),
+    row.names = snp_ids
+  )
+
+  n_snp_with_effect_add <- floor(n_snp * prop_snp_with_effect_add)
+  n_snp_with_effect_dom <- floor(n_snp * prop_snp_with_effect_dom)
+
+  if (!allow_dual_effects) {
+    if (n_snp_with_effect_add + n_snp_with_effect_dom > n_snp) {
+      stop(paste0("It is not possible to have markers without dual effects with the specied marker proportions:\n",
+                  "\t - Total number of markers = ", n_snp, "\n",
+                  "\t - Expected makrer with additive effects = ", n_snp_with_effect_add, "\n",
+                  "\t - Expected makrer with dominance effects = ", n_snp_with_effect_dom, "\n"))
+    }
+    snp_add <- sample(snp_ids, size = n_snp_with_effect_add)
+    snp_dom <- sample(snp_ids, size = n_snp_with_effect_dom)
+
+  } else {
+      snp_add <- sample(snp_ids, size = n_snp_with_effect_add)
+      not_add_snp <- c(snp_ids[!snp_ids %in%snp_add],
+                       sample(snp_ids, n_snp_with_effect_dom - (n_snp - n_snp_with_effect_add)))
+      snp_dom <- sample(not_add_snp, size = n_snp_with_effect_dom)
+  }
+
+  eff_add <- rexp(n_snp_with_effect_add, rate = rate_add) * sample(c(-1, 1), n_snp_with_effect_add, replace = TRUE)
+  eff_dom <- rexp(n_snp_with_effect_dom, rate = rate_dom) * sample(c(-1, 1), n_snp_with_effect_dom, replace = TRUE)
+
+  effects[snp_add, "add"] <- eff_add
+  effects[snp_dom, "dom"] <- eff_dom
+
+  genetic_values <- data.frame(
+    additive = calc_additive_geno(geno, standardized = F) %*% effects$add,
+    dominance = calc_dominance_geno(geno, standardized = F)  %*% effects$dom
+  )
+
+  genetic_values$total <- genetic_values$additive + genetic_values$dominance
+
+  intercept <- mean(genetic_values$total)
+  genetic_values$total <- genetic_values$total - intercept
+
+  cat("Distribution of the genetic values by effects (without intercept correction):\n")
+  print(summary(genetic_values[, c("additive", "dominance")]))
+  cat("\n")
+  cat("Distribution of the genetic values:\n")
+  cat(paste0(" - Mean: ", signif(round(mean(genetic_values[, c("total")])), 3)), "\n")
+  cat(paste0(" - standard deviation: ", signif(sd(genetic_values[, c("total")]))), "\n")
+  cat(paste0(" - variance: ", signif(var(genetic_values[, c("total")]))), "\n")
+  cat("\n")
+  cat(paste0(" - Minimum: ", signif(min(genetic_values[, c("total")]))), "\n")
+  cat(paste0(" - 1st Quantil (25%): ", signif(quantile(genetic_values[, c("total")], 0.25))), "\n")
+  cat(paste0(" - Median: ", signif(median(genetic_values[, c("total")]))), "\n")
+  cat(paste0(" - 3rd Quantil (75%): ", signif(quantile(genetic_values[, c("total")], 0.75))), "\n")
+  cat(paste0(" - Maximum: ", signif(max(genetic_values[, c("total")]))), "\n")
+
+  effects_as_list <- list()
+  effects_as_list$intercept <- - intercept
+  effects_as_list$additive_effects <- as.list(effects$add)
+  effects_as_list$dominance_effects <- as.list(effects$dom)
+  names(effects_as_list$additive_effects) <- row.names(effects)
+  names(effects_as_list$dominance_effects) <- row.names(effects)
+  effects_as_list <- list(effects_as_list)
+  names(effects_as_list) <- "phenotype"
+
+  if (is.null(outFile)) {
+    return(effects_as_list)
+  }
+  jsonlite::write_json(effects_as_list,
+                       path = outFile,
+                       simplifyVector = TRUE,
+                       pretty = TRUE,
+                       digits = NA,
+                       na = 'string')
+  return(TRUE)
+}
+
+
+
+
+#' Simulate Phenotypic Values from Genotypic Data and Marker Effects
+#'
+#' This function simulates phenotypic values for individuals based on their genotypic data
+#' and predefined marker effects. The phenotype is computed as the sum of genetic values
+#' and normally distributed environmental noise, with noise variance determined by either
+#' heritability or a specified standard deviation.
+#'
+#' @param genoFile Character. Path to the genotype data file.
+#' @param markerEffectsFile Character. Path to the marker effects file (generated by `generate_marker_effects`).
+#' @param outFile Character. Path to the output CSV file where the simulated phenotypic values will be saved.
+#' @param mean Numeric. Mean of the simulated phenotype distribution (default: 0).
+#' @param heritability Numeric or NULL. Desired  broad-sense heritability of the trait (used to compute noise variance).
+#'        Must be specified if `sd_noise` is NULL.
+#' @param sd_noise Numeric or NULL. Standard deviation of environmental noise.
+#'        Must be specified if `heritability` is NULL.
+#' @param trait_name Character. Name of the trait to be simulated (default: "phenotype").
+#' @param rnd_seed Numeric or NULL. Random seed for reproducibility (default: NULL).
+#'
+#' @details
+#' The function reads genotype data and marker effects, then computes genetic values as the
+#' sum of additive and dominance effects. If  broad-sense heritability is provided, the function determines
+#' the appropriate noise standard deviation to achieve the specified  broad-sense heritability.
+#'
+#' The function prints summary statistics of the simulated phenotype distribution.
+#'
+#' The output CSV file contains:
+#' - `ind`: Individual IDs.
+#' - `trait_name`: Simulated phenotypic values.
+simulate_phenotype <- function(genoFile,
+                               markerEffectsFile,
+                               outFile = NULL,
+                               mean = 0,
+                               heritability = NULL,
+                               sd_noise = NULL,
+                               trait_name = "phenotype",
+                               rnd_seed = NULL) {
+
+  Sys.setenv(RGENO_NO_LOG = TRUE)
+
+  if (!is.null(rnd_seed)) {
+    set.seed(rnd_seed)
+  }
+
+  if (is.null(heritability) && is.null(sd_noise)) {
+    stop("You must specify `heritability` xor `sd_noise`.")
+  }
+  if (!is.null(heritability) && !is.null(sd_noise)) {
+    stop("You must not specify both `heritability` and `sd_noise`.")
+  }
+
+  geno <- readGenoData(genoFile)
+  markerEffects <- readMarkerEffects(markerEffectsFile)
+
+  if (!identical(names(markerEffects), c("intercept", "SNPeffects_add", "SNPeffects_dom"))) {
+    stop("Marker effect must be created with `generate_rnd_marker_effects` command.")
+  }
+
+  eff <- merge(markerEffects$SNPeffects_add[, 1, drop = FALSE],
+               markerEffects$SNPeffects_dom[, 1, drop = FALSE],
+               by = "row.names", all = T)
+  row.names(eff) <- eff$Row.names
+  colnames(eff)[c(2,3)] <- c("additive", "dominance")
+  eff <- eff[, c("additive", "dominance")]
+
+  if (!all(row.names(eff) %in% geno@snps$id)) {
+    missing_snp <- row.names(eff)[!row.names(eff) %in% geno@snps$id]
+    engineError("Genotype file is missing some model's markers.",
+      extra = list(
+        code = errorCode("BAD_GENO_MISSING_SNP"),
+        n_missing_snp = length(missing_snp),
+        missing_snp = missing_snp))
+  }
+
+  estim_mark_eff <- list(
+    intercept = markerEffects$intercept[1],
+    eff = eff
+  )
+
+  genetic_values <- predict_gs_model(geno, estim_mark_eff)
+  genetic_variance <- var(genetic_values)
+
+  if (!is.null(heritability)){
+    sd_noise <- sqrt(genetic_variance * ((1 / heritability) - 1))
+  }
+
+  cat(paste0("Heritability: ", genetic_variance / (genetic_variance + sd_noise^2)), "\n")
+  cat(paste0("Noise standard deviation: ", sd_noise), "\n\n")
+
+  noise <- rnorm(nrow(genetic_values), 0, sd_noise)
+  pheno <- genetic_values
+  pheno[, 1] <- mean + pheno[, 1] + noise
+  colnames(pheno) <- trait_name
+
+  cat("Distribution of the phenotypes:\n")
+  cat(paste0(" - Mean: ", signif(round(mean(pheno[, 1])), 3)), "\n")
+  cat(paste0(" - standard deviation: ", signif(sd(pheno[, 1]))), "\n")
+  cat(paste0(" - variance: ", signif(var(pheno[, 1]))), "\n")
+  cat("\n")
+  cat(paste0(" - Minimum: ", signif(min(pheno[, 1]))), "\n")
+  cat(paste0(" - 1st Quantil (25%): ", signif(quantile(pheno[, 1], 0.25))), "\n")
+  cat(paste0(" - Median: ", signif(median(pheno[, 1]))), "\n")
+  cat(paste0(" - 3rd Quantil (75%): ", signif(quantile(pheno[, 1], 0.75))), "\n")
+  cat(paste0(" - Maximum: ", signif(max(pheno[, 1]))), "\n")
+
+  pheno$ind <- row.names(pheno)
+  pheno <- pheno[, c("ind", trait_name)]
+
+  if (is.null(outFile)) {
+    return(pheno)
+  }
+  write.csv(pheno, outFile, row.names = FALSE)
+  return(TRUE)
+}

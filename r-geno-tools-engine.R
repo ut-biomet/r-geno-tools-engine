@@ -687,6 +687,115 @@ withCallingHandlers(
                                        action = 'store_true',
                                        required = FALSE)
 
+
+
+    ## generate_rnd_marker_effects ----
+    generate_rnd_marker_effects_parser = main_subparsers$add_parser(
+      "generate-rnd-marker-effects",
+      help = "Generate random marker effects.",
+      description = "Generates additive and dominance marker effects for a set of SNP markers. The generated effects are saved as a JSON file. The command print the distribution of the genetic values for the given genotype file with the generated marker effects.",
+      formatter_class=formatter_class
+    )
+
+    generate_rnd_marker_effects_parser$add_argument(arg$genoFile$flag,
+                                       help = arg$genoFile$help,
+                                       type = arg$genoFile$type,
+                                       required = TRUE)
+    generate_rnd_marker_effects_parser$add_argument(arg$outFile$flag,
+                                       help = arg$outFile$help,
+                                       type = arg$outFile$type,
+                                       required = TRUE)
+    generate_rnd_marker_effects_parser$add_argument(arg$rate_add$flag,
+                                       help = arg$rate_add$help,
+                                       type = arg$rate_add$type,
+                                       default = arg$rate_add$default,
+                                       required = FALSE)
+    generate_rnd_marker_effects_parser$add_argument(arg$rate_dom$flag,
+                                       help = arg$rate_dom$help,
+                                       type = arg$rate_dom$type,
+                                       default = arg$rate_dom$default,
+                                       required = FALSE)
+    generate_rnd_marker_effects_parser$add_argument(arg$generate_dominance_effects$flag,
+                                       help = arg$generate_dominance_effects$help,
+                                       action = 'store_true')
+    generate_rnd_marker_effects_parser$add_argument(arg$prop_add$flag,
+                                       help = arg$prop_add$help,
+                                       type = arg$prop_add$type,
+                                       default = arg$prop_add$default,
+                                       required = FALSE)
+    generate_rnd_marker_effects_parser$add_argument(arg$prop_dom$flag,
+                                       help = arg$prop_dom$help,
+                                       type = arg$prop_dom$type,
+                                       default = arg$prop_dom$default,
+                                       required = FALSE)
+    generate_rnd_marker_effects_parser$add_argument(arg$no_dual_effects$flag,
+                                       help = arg$no_dual_effects$help,
+                                       action = 'store_true')
+    generate_rnd_marker_effects_parser$add_argument(arg$rng_seed$flag,
+                                                    help = arg$rng_seed$help,
+                                                    type = arg$rng_seed$type,
+                                                    default = arg$rng_seed$default,
+                                                    required = FALSE)
+    generate_rnd_marker_effects_parser$add_argument(arg$json_error$flag,
+                                                    help = arg$json_error$help,
+                                                    default = arg$json_error$default,
+                                                    action = 'store_true',
+                                                    required = FALSE)
+
+    ## simulate_phenotype ----
+    simulate_phenotype_parser = main_subparsers$add_parser(
+      "simulate-phenotype",
+      help = "Simulate Phenotypic Values from Genotypic Data and Marker Effects.",
+      description = "Simulates phenotypic values for individuals based on their genotypic data and marker effects. The generated phenotypic values are saved as a CSV file. The command print the distribution of the phenotypic values for the given genotype file.",
+      formatter_class=formatter_class
+    )
+    simulate_phenotype_parser$add_argument(arg$genoFile$flag,
+                                           help = arg$genoFile$help,
+                                           type = arg$genoFile$type,
+                                           required = TRUE)
+    simulate_phenotype_parser$add_argument(arg$markersEffectsFile_2$flag,
+                                           help = arg$markersEffectsFile_2$help,
+                                           type = arg$markersEffectsFile_2$type,
+                                           required = TRUE)
+    simulate_phenotype_parser$add_argument(arg$outFile$flag,
+                                           help = arg$outFile$help,
+                                           type = arg$outFile$type,
+                                           required = TRUE)
+    simulate_phenotype_parser$add_argument(arg$mean$flag,
+                                           help = arg$mean$help,
+                                           type = arg$mean$type,
+                                           default = arg$mean$default,
+                                           required = FALSE)
+    simulate_phenotype_parser$add_argument(arg$heritability$flag,
+                                           help = arg$heritability$help,
+                                           type = arg$heritability$type,
+                                           default = arg$heritability$default,
+                                           required = FALSE)
+    simulate_phenotype_parser$add_argument(arg$sd_noise$flag,
+                                           help = arg$sd_noise$help,
+                                           type = arg$sd_noise$type,
+                                           default = arg$sd_noise$default,
+                                           required = FALSE)
+    simulate_phenotype_parser$add_argument(arg$trait_name$flag,
+                                           help = arg$trait_name$help,
+                                           type = arg$trait_name$type,
+                                           default = arg$trait_name$default,
+                                           required = FALSE)
+    simulate_phenotype_parser$add_argument(arg$rng_seed$flag,
+                                           help = arg$rng_seed$help,
+                                           type = arg$rng_seed$type,
+                                           default = arg$rng_seed$default,
+                                           required = FALSE)
+    simulate_phenotype_parser$add_argument(arg$json_error$flag,
+                                           help = arg$json_error$help,
+                                           default = arg$json_error$default,
+                                           action = 'store_true',
+                                           required = FALSE)
+
+
+
+
+
     # Parse the command line arguments
     args = main_parser$parse_args()
 
@@ -800,6 +909,7 @@ withCallingHandlers(
                            header = !args$no_header,
                            outFile = args$outFile)
       quit(save = "no", status = 0)
+
     } else if (args$command == 'crossing-simulation') {
       # crossing-simulation ----
       outFile <- crossingSimulation(genoFile = args$genoFile,
@@ -809,6 +919,7 @@ withCallingHandlers(
                                     outFile = args$outFile)
       cat(outFile)
       quit(save = "no", status = 0)
+
     } else if (args$command == 'progeny-blup-calculation') {
       # progeny-blup-calculation ----
       progBlups <- calc_progenyBlupEstimation(
@@ -819,6 +930,7 @@ withCallingHandlers(
         outFile = args$outFile
       )
       quit(save = "no", status = 0)
+
     } else if (args$command == 'progeny-blup-plot') {
       # progeny-blup-plot ----
       if (identical(args$trait, "")) {
@@ -833,6 +945,7 @@ withCallingHandlers(
         outFile = args$outFile
       )
       quit(save = "no", status = 0)
+
     } else if (args$command == 'progeny-blup-plot-2-traits') {
       # progeny-blup-plot-2-traits ----
       if (identical(args$trait, "")) {
@@ -849,6 +962,7 @@ withCallingHandlers(
         outFile = args$outFile
       )
       quit(save = "no", status = 0)
+
     } else if (args$command == 'evaluate-gs-model') {
       # evaluate-gs-model ----
       evaluation <- cross_validation_evaluation_main(genoFile = args$geno,
@@ -860,11 +974,13 @@ withCallingHandlers(
                                                      thresh_maf = 0,
                                                      outFile = args$outFile)
       quit(save = "no", status = 0)
+
     } else if (args$command == 'plot-gs-model-evaluation') {
       # plot-gs-model-evaluation ----
       plot <- draw_evaluation_plot(evaluationFile = args$evaluation_file,
                                    outFile = args$outFile)
       quit(save = "no", status = 0)
+
     } else if (args$command == 'train-gs-model') {
       # train-gs-model ----
       model <- train_gs_model_main(genoFile = args$geno,
@@ -874,13 +990,39 @@ withCallingHandlers(
                                    thresh_maf = 0,
                                    outFile = args$outFile)
       quit(save = "no", status = 0)
+
     } else if (args$command == 'gs-predictions') {
       # gs-predictions ----
       predictions <- predict_gs_model_main(genoFile =  args$geno,
                                            markerEffectsFile = args$markerEffectsFile,
                                            outFile = args$outFile)
       quit(save = "no", status = 0)
+
+    } else if (args$command == 'generate-rnd-marker-effects') {
+      generate_rnd_marker_effects(genoFile = args$genoFile,
+                                  outFile = args$outFile,
+                                  rate_add = args$rate_add,
+                                  rate_dom = args$rate_dom,
+                                  dominance = args$dominance,
+                                  prop_snp_with_effect_add = args$prop_add,
+                                  prop_snp_with_effect_dom = args$prop_dom,
+                                  allow_dual_effects = !args$no_dual_effects,
+                                  rnd_seed = args$rng_seed)
+      quit(save = "no", status = 0)
+
+    } else if (args$command == 'simulate-phenotype') {
+      simulate_phenotype(genoFile = args$genoFile,
+                         markerEffectsFile = args$markerEffectsFile,
+                         outFile = args$outFile,
+                         mean = args$mean,
+                         heritability = args$heritability,
+                         sd_noise = args$sd_noise,
+                         trait_name = args$trait_name,
+                         rnd_seed = args$rng_seed)
+      quit(save = "no", status = 0)
     }
+
+
 
     # Should not arrive here.
     quit(save = "no", status = 1)

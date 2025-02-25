@@ -24,6 +24,9 @@ Logger <- R6::R6Class(
     log = function(...,
                    time = TRUE,
                    context = TRUE) {
+      if (isTRUE(as.logical(Sys.getenv("RGENO_NO_LOG")))) {
+        return(NULL)
+      }
       if (time) {
         time <- as.character(Sys.time())
       } else {
