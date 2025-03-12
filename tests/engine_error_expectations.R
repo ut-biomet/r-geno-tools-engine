@@ -43,6 +43,7 @@ expect_engineError <- function(code) {
     "BAD_CROSSTABLE_MISSING_VALUES" = c("expected", "provided", "n_missing"),
     "BAD_CROSSTABLE_UNAVAILABLE_INDS" = c("n_unavailable_ind", "unavailable_inds"),
     "BAD_GENOTYPE_UNPHASED" = c(),
+    "BAD_GENOTYPE_DUPLICATED_SNP_IDS" = c("dup_snp_chrom", "dup_snp_pos", "dup_snp_ids"),
     "BAD_GENO_ALL_MONOMORPHIC_SNP" = c(),
     "BAD_GENO_PHENO_NO_COMMON_INDS" = c(),
     "BAD_GWAS_FILE" = c(),

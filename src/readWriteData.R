@@ -292,7 +292,23 @@ downloadProgBlupEstim <- function(url) {
 }
 
 
-
+#' Impute SNP IDs from CHROM and POS
+#'
+#' @param geno `gaston::bed.matrix`
+#' @param list_to_impute list of bools indicating the IDs to impute
+#'
+#' @return list of imputed SNPs IDs
+impute_snp_ids <- function(geno, list_to_impute) {
+  if (!any(list_to_impute)) {
+    return(geno@snps$id)
+  }
+  geno@snps$id[list_to_impute] <- paste0(
+    geno@snps$chr[list_to_impute],
+    '@',
+    geno@snps$pos[list_to_impute])
+  geno@snps$id[is.na(geno@snps$chr[list_to_impute]) | is.na(geno@snps$pos[list_to_impute])] <- NA
+  return(geno@snps$id)
+}
 
 #' Read geno data from a file
 #'
@@ -311,14 +327,27 @@ readGenoData <- function(file) {
   dta <- gaston::read.vcf(file,
                           verbose = FALSE,
                           convert.chr = FALSE)
+  originals_snp_ids <- dta@snps$id
 
   # impute missing SNP ids
   missingIDlines <- is.na(dta@snps$id)
-  dta@snps$id[missingIDlines] <- paste0(
-    dta@snps$chr[missingIDlines],
-    '@',
-    dta@snps$pos[missingIDlines])
-  dta@snps$id[is.na(dta@snps$chr[missingIDlines]) | is.na(dta@snps$pos[missingIDlines])] <- NA
+  dta@snps$id <- impute_snp_ids(dta, missingIDlines)
+
+  # impute duplicate SNP ids
+  dup_ids <- duplicated(dta@snps$id) | duplicated(dta@snps$id, fromLast = TRUE)
+  dta@snps$id <- impute_snp_ids(dta, dup_ids)
+
+  dup_ids <- duplicated(dta@snps$id) | duplicated(dta@snps$id, fromLast = TRUE)
+  if (any(dup_ids)) {
+    errMsg <- "Genotype data have some duplicated SNPs IDs even after their imputation based on `CHROM@POS`.
+    Be sure your data have unique CHRO and POS for all markers."
+    engineError(errMsg, extra = list(
+      code = errorCode("BAD_GENOTYPE_DUPLICATED_SNP_IDS"),
+      dup_snp_chrom = dta@snps$chr[dup_ids],
+      dup_snp_pos = dta@snps$pos[dup_ids],
+      dup_snp_ids = originals_snp_ids[dup_ids]
+    ))
+  }
 
   logger$log("Read geno file DONE ")
   logger$log("DONE, return output.")

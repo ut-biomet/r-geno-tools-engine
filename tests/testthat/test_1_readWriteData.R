@@ -44,6 +44,12 @@ capture_output({
     })
   })
 
+  test_that(paste("Duplicated IDs"), {
+    expect_engineError({
+      dta <- readGenoData("../data/breedGame_phasedGeno_duplicated_ids.vcf.gz")
+    })
+  })
+
 
   # readPhenoData ----
   test_that("readPhenoData", {
