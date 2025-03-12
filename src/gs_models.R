@@ -136,6 +136,9 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
   stopifnot(all(!is.na(pheno[,1])))
   stopifnot(all(geno@snps$callrate == 1))
 
+  # remove monomorphic markers
+  geno <- gaston::select.snps(geno, maf != 0)
+
   relationship_matrices <- list()
 
   additive_std <- calc_additive_rel_mat(geno, standardized = TRUE)
