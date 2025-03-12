@@ -47,10 +47,14 @@ for (cmd in cmds) {
   test_that(paste('help:', cmd), {
     expect_no_warning({
       x <- system(paste(rGenoCommand, cmd),
-                  intern = FALSE,
-                  ignore.stdout = TRUE)
+                  intern = TRUE)
     })
-    expect_equal(x, 0)
+    expect_false(isTRUE(all.equal(length(x), 0)))
+
+    # all commands must have --json-error
+    if (cmd != " --help") {
+      expect_true(any(grepl("--json-errors", x)))
+    }
   })
 }
 
