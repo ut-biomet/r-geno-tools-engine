@@ -300,6 +300,21 @@ capture.output({
     expect_true(file.info(tmpF)$size > 0)
 
     expect_no_error({
+      tmpF <- tempfile(fileext = ".html")
+      p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
+                              gwasUrl = NULL,
+                              adj_method = "bonferroni",
+                              thresh_p = 0.05,
+                              chr = "1",
+                              filter_pAdj = 1,
+                              filter_nPoints = Inf,
+                              filter_quant = 1,
+                              outFile = tmpF)
+    })
+    expect_true(file.exists(tmpF))
+    expect_true(file.info(tmpF)$size > 0)
+
+    expect_no_error({
       tmpF <- tempfile(fileext = ".png")
       p <- draw_manhattanPlot(gwasFile = "../../data/results/gwasResult.json",
                               gwasUrl = NULL,

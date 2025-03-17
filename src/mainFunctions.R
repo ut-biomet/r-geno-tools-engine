@@ -194,7 +194,7 @@ draw_manhattanPlot <- function(gwasFile = NULL,
   }
   logger$log("Get data DONE")
 
-  check_chr(chr, unique(gwas$chr))
+  check_chr(chr, unique(gwas$gwas$chr))
 
   if (!interactive && !is.null(outFile)) {
     logger$log("Open connexion to draw the png plot ...")
