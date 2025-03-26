@@ -20,8 +20,10 @@ capture.output({
                              trait = "pheno"),
     duplicated_snp_ids = list(geno = "../data/geno_G1_duplicated_ids.vcf.gz",
                               pheno = "../../data/genomic_selection/pheno_train.csv",
-                              trait = "pheno"
-      )
+                              trait = "pheno"),
+    unused_trait_badly_formatted = list(geno = "../data/geno_G1_duplicated_ids.vcf.gz",
+                                        pheno = "../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
+                                        trait = "pheno")
   )
 
   for (test in names(tests_cases)) {
@@ -167,26 +169,27 @@ capture.output({
   # run GWAS ----
   files <- list(
     test_01 = list(geno =  "../../data/geno/testMarkerData01.vcf.gz" ,
-                   pheno = "../../data/pheno/testPhenoData01.csv"),
+                   pheno = "../../data/pheno/testPhenoData01.csv",
+                   trait = "Flowering.time.at.Arkansas"),
     test_singleTrait = list(geno = "../data/Result_genos_hd_subset-initialColl.vcf.gz",
-                            pheno = "../data/resistance_initColl.csv"),
+                            pheno = "../data/resistance_initColl.csv",
+                            trait = "resist"),
     missingSNPid = list(geno = "../data/Result_genos_hd_subset-initialColl_missingId.vcf.gz",
-                        pheno = "../data/resistance_initColl.csv")
+                        pheno = "../data/resistance_initColl.csv",
+                        trait = "resist"),
+    unused_trait_badly_formatted = list(geno = "../data/geno_G1_duplicated_ids.vcf.gz",
+                                        pheno = "../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
+                                        trait = "pheno")
   )
   for (test in names(files)) {
 
     test_that(paste0("Run GWAS", test), {
-      if (test == 'test_01') {
-        trait <- "Flowering.time.at.Arkansas"
-      } else {
-        trait <- "resist"
-      }
       expect_no_error({
         gwas_results <- run_gwas(genoFile = files[[test]]$geno,
                                  phenoFile = files[[test]]$pheno,
                                  genoUrl = NULL,
                                  phenoUrl = NULL,
-                                 trait = trait,
+                                 trait = files[[test]]$trait,
                                  test = "score",
                                  fixed = 0,
                                  response = "quantitative",
