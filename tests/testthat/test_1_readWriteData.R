@@ -80,6 +80,30 @@ capture_output({
   })
 
 
+  test_that("readPhenoData accept subset of trait", {
+      expect_no_error({
+        pDta <- readPhenoData("../../data/pheno/testPhenoData01.csv",
+                              traits = "Flowering.time.at.Arkansas")
+      })
+
+      expect_no_error({
+        pDta <- readPhenoData("../../data/pheno/testPhenoData01.csv",
+                              traits = c("Flowering.time.at.Arkansas",
+                                         "Year06Flowering.time.at.Arkansas"))
+      })
+
+      expect_no_error({
+        pDta <- readPhenoData("../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
+                              traits = "pheno")
+      })
+
+      expect_error({
+        pDta <- readPhenoData("../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
+                              traits = NULL)
+      })
+  })
+
+
   # downloadPhenoData ----
   test_that("downloadPhenoData", {
     files <- c("../../data/pheno/testPhenoData01.csv",

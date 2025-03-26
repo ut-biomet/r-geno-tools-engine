@@ -58,11 +58,13 @@ downloadPhasedGeno <- function(url) {
 #' Download phenotypic data
 #'
 #' @param url url of the phenotypic data file (csv file)
+#' @param traits vector of traits to load (use NULL to load all traits) default NULL
+#' @param ... Further arguments to be passed to `read.csv`
 #'
 #' @details The individuals' names must be on the first column. No duplication
 #' is allowed.
 #' @return `data.frame`
-downloadPhenoData <- function(url){
+downloadPhenoData <- function(url, traits = NULL, ...){
   logger <- Logger$new("r-downloadPhenoData()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(pattern = "pheno",
@@ -74,7 +76,7 @@ downloadPhenoData <- function(url){
   download.file(url, localFile, quiet = TRUE)
   logger$log("Download phenotypic file DONE")
   logger$log("Read phenotypic file ...")
-  dta <- readPhenoData(localFile)
+  dta <- readPhenoData(localFile, traits = traits, ...)
   logger$log("Read phenotypic file DONE")
 
   logger$log("DONE, return output.")
@@ -446,11 +448,12 @@ readPhasedGeno <- function(file) {
 #' @param file file path
 #' @param ind.names [default 1] a single number giving the column of the table
 #'  which contains the individuals' names.
+#' @param traits vector of traits to load (use NULL to load all traits) default NULL
 #' @param ... Further arguments to be passed to `read.csv`
 #'
 #' @details Any duplication in the phenotypic file is forbidden.
 #' @return `data.frame`
-readPhenoData <- function(file, ind.names = 1, ...) {
+readPhenoData <- function(file, ind.names = 1, traits = NULL,...) {
   logger <- Logger$new("r-readPhenoData()")
 
   check_inputFile(file)
@@ -479,6 +482,11 @@ readPhenoData <- function(file, ind.names = 1, ...) {
   row.names(dta) <- dta[, ind.names]
   dta <- dta[, -ind.names, drop = FALSE]
   logger$log("Set pheno data's row names DONE")
+
+  if (!is.null(traits)) {
+    sapply(traits, function(t){check_trait(t, colnames(dta))})
+    dta <- dta[, traits, drop = FALSE]
+  }
 
 
   logger$log("Check data consistency ...")
@@ -513,16 +521,18 @@ readPhenoData <- function(file, ind.names = 1, ...) {
 #'
 #' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
 #' @param phenoFile path of the phenotypic data file (`csv` file)
+#' @param traits vector of traits to load (use NULL to load all traits) default NULL
+#' @param ... Further arguments to be passed to `read.csv` for reading phenotype data
 #'
 #' @return List
-readData <- function(genoFile, phenoFile){
+readData <- function(genoFile, phenoFile, traits = NULL, ...){
   logger <- Logger$new("r-readData()")
   logger$log("get geno data ...")
   mDta <- readGenoData(genoFile)
   logger$log("get geno data DONE")
 
   logger$log("get pheno data ...")
-  pDta <- readPhenoData(phenoFile)
+  pDta <- readPhenoData(phenoFile, traits = traits, ...)
   logger$log("get pheno data DONE")
 
   logger$log("prepare data ...")

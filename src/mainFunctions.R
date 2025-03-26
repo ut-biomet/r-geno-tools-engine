@@ -57,7 +57,8 @@ run_gwas <- function(genoFile = NULL,
   if (!is.null(genoFile) && !is.null(phenoFile)
       && is.null(genoUrl) && is.null(phenoUrl)) {
     data <- readData(genoFile = genoFile,
-                     phenoFile = phenoFile)
+                     phenoFile = phenoFile,
+                     traits = trait)
   } else if (!is.null(genoUrl) && !is.null(phenoUrl)
             && is.null(genoFile) && is.null(phenoFile)) {
     data <- downloadData(genoUrl = genoUrl,
@@ -1279,7 +1280,8 @@ train_gs_model_main <- function(genoFile = NULL,
   if (!is.null(genoFile) && !is.null(phenoFile)
       && is.null(genoUrl) && is.null(phenoUrl)) {
     data <- readData(genoFile = genoFile,
-                     phenoFile = phenoFile)
+                     phenoFile = phenoFile,
+                     traits = trait)
   } else if (!is.null(genoUrl) && !is.null(phenoUrl)
             && is.null(genoFile) && is.null(phenoFile)) {
     data <- downloadData(genoUrl = genoUrl,
@@ -1455,7 +1457,8 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
   if (!is.null(genoFile) && !is.null(phenoFile)
       && is.null(genoUrl) && is.null(phenoUrl)) {
     data <- readData(genoFile = genoFile,
-                     phenoFile = phenoFile)
+                     phenoFile = phenoFile,
+                     traits = trait)
   } else if (!is.null(genoUrl) && !is.null(phenoUrl)
             && is.null(genoFile) && is.null(phenoFile)) {
     data <- downloadData(genoUrl = genoUrl,
