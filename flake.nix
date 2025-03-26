@@ -81,6 +81,8 @@
           languageserver
           styler
         ];
+        R-with-packages = pkgs.rWrapper.override { packages = R-packages; };
+        Rstudio-with-packages = pkgs.rstudioWrapper.override { packages = R-packages; };
       in
       rec {
         packages.r-geno-tools-engine = pkgs.callPackage ./nix_pkgs/default.nix { inherit pkgs; };
@@ -94,7 +96,7 @@
           nativeBuildInputs = [ pkgs.bashInteractive ];
           buildInputs =
             [
-              (pkgs.rWrapper.override { packages = R-packages; })
+              R-with-packages
 
               pkgs.pandoc
               pkgs.python3
@@ -103,7 +105,7 @@
               }))
             ]
             ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
-              (pkgs.rstudioWrapper.override { packages = R-packages; })
+              Rstudio-with-packages
             ];
         };
 
