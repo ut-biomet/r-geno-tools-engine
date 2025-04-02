@@ -331,6 +331,19 @@ readGenoData <- function(file) {
                           convert.chr = FALSE)
   originals_snp_ids <- dta@snps$id
 
+  # check for duplicated individuals
+  dup_inds <- duplicated(dta@ped$id)
+  if (any(dup_inds)) {
+    dup_inds_ids <- dta@ped$id[dup_inds]
+    n_dup_inds <- length(dup_inds_ids)
+    errMsg <- paste0("Genotype file have ", n_dup_inds, " duplicated individual(s).")
+    engineError(errMsg, extra = list(
+      code = errorCode("BAD_GENOTYPE_DUPLICATED_IND_IDS"),
+      n_dup_inds = n_dup_inds,
+      dup_inds_ids = dup_inds_ids
+    ))
+  }
+
   # impute missing SNP ids
   missingIDlines <- is.na(dta@snps$id)
   dta@snps$id <- impute_snp_ids(dta, missingIDlines)
