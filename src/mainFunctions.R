@@ -1298,11 +1298,37 @@ train_gs_model_main <- function(genoFile = NULL,
 
   logger$log("Filter SNP and missing values...")
   data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
+  if (nrow(data$genoData@snps) == 0) {
+    msg = paste0(
+      "No marker remaining after filtering for maf > thresh_maf (=",
+      thresh_maf,
+      ")"
+    )
+    engineError(msg, extra = list(
+      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
+      filter = paste0("minor allele frequency > thresh_maf (= ", thresh_maf, ")")
+    ))
+  }
+
   # remove markers with missing values
   data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
+  if (nrow(data$genoData@snps) == 0) {
+    msg = paste0("No marker remaining after filtering for missing values")
+    engineError(msg, extra = list(
+      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
+      filter = paste0("missing values")
+    ))
+  }
 
   data$phenoData <- data$phenoData[, trait, drop = FALSE]
   data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]),, drop = FALSE]
+  if (nrow(data$phenoData) == 0) {
+    msg = paste0("No individuals remaining in phenotype file after filtering for missing values")
+    engineError(msg, extra = list(
+      code = errorCode("PHENOTYPE_NO_IND_AFTER_FILTERING"),
+      filter = paste0("missing values")
+    ))
+  }
   data$genoData <- gaston::select.inds(data$genoData, id %in% rownames(data$phenoData))
   data$phenoData <- data$phenoData[data$genoData@ped$id,,drop = F]
   logger$log("Filter SNP and missing values DONE")
@@ -1475,11 +1501,36 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
 
   logger$log("Filter SNP and missing values...")
   data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
-  # remove markers with missing values
+  if (nrow(data$genoData@snps) == 0) {
+    msg = paste0(
+      "No marker remaining after filtering for maf > thresh_maf (=",
+      thresh_maf,
+      ")"
+    )
+    engineError(msg, extra = list(
+      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
+      filter = paste0("minor allele frequency > thresh_maf (= ", thresh_maf, ")")
+    ))
+  }
+
   data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
+  if (nrow(data$genoData@snps) == 0) {
+    msg = paste0("No marker remaining after filtering for missing values")
+    engineError(msg, extra = list(
+      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
+      filter = paste0("missing values")
+    ))
+  }
 
   data$phenoData <- data$phenoData[, trait, drop = FALSE]
   data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]),, drop = FALSE]
+  if (nrow(data$phenoData) == 0) {
+    msg = paste0("No individuals remaining in phenotype file after filtering for missing values")
+    engineError(msg, extra = list(
+      code = errorCode("PHENOTYPE_NO_IND_AFTER_FILTERING"),
+      filter = paste0("missing values")
+    ))
+  }
   data$genoData <- gaston::select.inds(data$genoData, id %in% rownames(data$phenoData))
   data$phenoData <- data$phenoData[data$genoData@ped$id,,drop = F]
   logger$log("Filter SNP and missing values DONE")

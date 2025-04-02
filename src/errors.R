@@ -181,7 +181,10 @@ errorCode <- function(code) {
     "BAD_FILE_FORMAT",
     "MULTIPLE_INPUTFILE",
     "MULTIPLE_OUTFILE",
-    "NO_OUTPUT_DIR"
+    "NO_OUTPUT_DIR",
+
+    "PHENOTYPE_NO_IND_AFTER_FILTERING",
+    "GENOTYPE_NO_MARKERS_AFTER_FILTERING"
 
   )
   names(codes) <- codes
