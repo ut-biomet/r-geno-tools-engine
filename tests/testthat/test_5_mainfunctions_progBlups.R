@@ -49,6 +49,13 @@ capture.output({
       SNPcoordFile = "../data/SNPcoord_more_SNP_than_model.csv",
       markerEffectsFile = "../../data/markerEffects/breedGame_markerEffects_2traits.json",
       outFile = tempfile(fileext = ".json")
+    ),
+    model_with_different_snp_per_trait = list(
+      genoFile = "../../data/geno/breedGame_phasedGeno.vcf.gz",
+      crossTableFile = "../../data/crossingTable/breedGame_small_crossTable.csv",
+      SNPcoordFile = "../../data/SNPcoordinates/breedingGame_SNPcoord.csv",
+      markerEffectsFile = "../data/breedGame_markerEffects_2traits_with_different_snp_set.json",
+      outFile = tempfile(fileext = ".json")
     )
   )
 

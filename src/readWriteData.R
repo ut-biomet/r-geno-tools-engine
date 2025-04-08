@@ -1213,9 +1213,18 @@ readMarkerEffects_json <- function(file) {
   if (all(names(rawMarkerEffects_list) %in% expectedFields_old_version)) {
     # old format with 1 unnamed trait
     rawMarkerEffects_list <- list(unknownTrait = rawMarkerEffects_list)
+
   }
 
-  # new file named trait(s)
+
+  all_markers <- c()
+  for (rawMarkerEff in rawMarkerEffects_list) {
+    all_markers <- unique(c(all_markers,
+                            names(rawMarkerEff$coefficients),
+                            names(rawMarkerEff$additive_effects),
+                            names(rawMarkerEff$dominance_effects)))
+  }
+
 
   markerEffects <- list(
     intercept = c(),
@@ -1248,17 +1257,38 @@ readMarkerEffects_json <- function(file) {
       mark_eff$dominance_effects <- NULL
     }
 
+
+    mark_eff$additive_effects <- lapply(mark_eff$additive_effects, function(x){
+      if (is.null(x)) {
+        return(NA)
+      }
+      return(x)
+    })
+    additive_effects <- unlist(mark_eff$additive_effects)
     current_trait_add_effects <- data.frame(
       additive_effects = as.numeric(unlist(mark_eff$additive_effects)),
       SNPid = names(mark_eff$additive_effects)
     )
 
+    mark_eff$dominance_effects <- lapply(mark_eff$dominance_effects, function(x){
+      if (is.null(x)) {
+        return(NA)
+      }
+      return(x)
+    })
     dominance_effects <- unlist(mark_eff$dominance_effects)
     dominance_effects[dominance_effects == "NA"] <- NA
     current_trait_dom_effects <- data.frame(
       dominance_effects = as.numeric(dominance_effects),
       SNPid = as.character(names(mark_eff$dominance_effects))
     )
+
+    missing_markers <- all_markers[!all_markers %in% current_trait_add_effects$SNPid]
+    current_missing_effects <- data.frame(
+      additive_effects = rep(0, length(missing_markers)),
+      SNPid = missing_markers
+    )
+    current_trait_add_effects <- rbind(current_trait_add_effects, current_missing_effects)
 
     colnames(current_trait_add_effects)[1] <- trait
     markerEffects$SNPeffects_add <- merge(
@@ -1267,6 +1297,11 @@ readMarkerEffects_json <- function(file) {
       by = "SNPid",
       all = TRUE
     )
+
+    if (nrow(current_trait_dom_effects) != 0) {
+      colnames(current_missing_effects)[1] <- "dominance_effects"
+      current_trait_dom_effects <- rbind(current_trait_dom_effects, current_missing_effects)
+    }
 
     colnames(current_trait_dom_effects)[1] <- trait
     markerEffects$SNPeffects_dom <- merge(

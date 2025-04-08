@@ -12,7 +12,9 @@
         "intercept": 42,
         "coefficients": {
             "snp00007": 0.234,
-            "snp00009": -0.987
+            "snp00009": -0.987,
+            "snp00020": null,
+            "snp00029": null
         }
     }
 }
