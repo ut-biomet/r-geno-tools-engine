@@ -119,8 +119,10 @@ calcProgenyBlupVariance <- function(SNPcoord, markerEffects, geneticCovar) {
 calcProgenyBlupExpected <- function(SNPcoord, haplo, p1.id, p2.id, markerEffects) {
   blupExp <- lapply(names(markerEffects$intercept), function(trait){
     markEff <- markerEffects$SNPeffects[, trait, drop = FALSE]
+    markEff <- markEff[!is.na(markEff[,1]), , drop = FALSE]
     blupExp <- lapply(unique(SNPcoord$chr), function(chr){
       subsetSNPcoord <- SNPcoord[SNPcoord$chr == chr,]
+      subsetSNPcoord <- subsetSNPcoord[subsetSNPcoord$SNPid %in% row.names(markEff),]
       SNPs <- subsetSNPcoord$SNPid
       haplo_p1 <- haplo[SNPs, p1.id]
       haplo_p2 <- haplo[SNPs, p2.id]

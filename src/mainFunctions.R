@@ -1010,10 +1010,10 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 
   logger$log("Check SNPs' ids consistency between",
              "SNPcoordinate and markerEffects file ...")
-  if (!all(SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects))) {
+  if (!all(row.names(markerEffects$SNPeffects) %in% SNPcoord$SNPid)) {
     missingSNP <- which(!SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects))
     msg <- paste('The SNPs coordinate file miss', length(missingSNP),
-                 'SNPs when compared with the provided marker effects.',)
+                 'SNPs when compared with the provided marker effects.')
     engineError(msg,
       extra = list(
         "code" = errorCode("SNP_COORD_MISSING_SNP"),
@@ -1023,6 +1023,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
         "reference" = "marker effects"
     ))
   }
+  SNPcoord <- SNPcoord[SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects), ]
   logger$log("Check SNPs' ids consistency between",
              "SNPcoordinate and markerEffects file DONE")
 
