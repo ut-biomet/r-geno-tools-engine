@@ -43,6 +43,13 @@ capture.output({
       markerEffectsFile = "../../data/markerEffects/breedGame_markerEffects_2traits.json",
       outFile = tempfile(fileext = ".json")
     ),
+    moreSNP_in_SNPcoord_than_model = list(
+      genoFile = "../data/geno_more_SNP_than_model.vcf.gz",
+      crossTableFile = "../../data/crossingTable/breedGame_small_crossTable.csv",
+      SNPcoordFile = "../data/SNPcoord_more_SNP_than_model.csv",
+      markerEffectsFile = "../../data/markerEffects/breedGame_markerEffects_2traits.json",
+      outFile = tempfile(fileext = ".json")
+    )
   )
 
   for (i in seq_along(progBlupDataList)) {
