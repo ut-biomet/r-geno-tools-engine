@@ -62,6 +62,7 @@ expect_engineError <- function(code) {
     "BAD_PHENOTYPE_DUPLICATES" = c("n_duplicates", "duplicates"),
     "BAD_PHENO_DATA_CLASS" = c("columnWithWrongTypes", "detectedClass"),
     "BAD_SNPCOORD_DUPLICATED_ID" = c("n_duplicated_ids", "duplicated_ids"),
+    "BAD_SNPCOORD_EMPTY" = c("expected", "provided"),
     "BAD_SNPCOORD_MISSING_LINK_MAP_POS_COLUMN" = c("expected", "provided"),
     "BAD_SNPCOORD_MISSING_SNPID_COLUMNS" = c(),
     "BAD_SNPCOORD_MISSING_VALUE" = c("columns", "expected", "provided"),

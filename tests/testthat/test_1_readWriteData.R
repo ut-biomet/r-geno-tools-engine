@@ -6,9 +6,10 @@
 
 
 capture_output({
-
-  genoFiles <- c("../data/small-vcf-file.vcf",
-                 "../../data/geno/testMarkerData01.vcf.gz")
+  genoFiles <- c(
+    "../data/small-vcf-file.vcf",
+    "../../data/geno/testMarkerData01.vcf.gz"
+  )
 
   for (file in genoFiles) {
     # readGenoData ----
@@ -33,7 +34,6 @@ capture_output({
         gDta <- downloadGenoData(file)
       })
       expect_true(class(gDta) == "bed.matrix")
-
     })
   }
 
@@ -53,9 +53,11 @@ capture_output({
 
   # readPhenoData ----
   test_that("readPhenoData", {
-    files <- c("../../data/pheno/testPhenoData01.csv",
-               "../data/resistance_initColl.csv",
-               "../data/pheno_OK_numeric_as_character.csv")
+    files <- c(
+      "../../data/pheno/testPhenoData01.csv",
+      "../data/resistance_initColl.csv",
+      "../data/pheno_OK_numeric_as_character.csv"
+    )
 
     for (file in files) {
       expect_no_error({
@@ -76,38 +78,45 @@ capture_output({
     err <- expect_engineError({
       dta <- readPhenoData("../data/pheno_inconsistent_both_numeric_and_character_values.csv")
     })
-
   })
 
 
   test_that("readPhenoData accept subset of trait", {
-      expect_no_error({
-        pDta <- readPhenoData("../../data/pheno/testPhenoData01.csv",
-                              traits = "Flowering.time.at.Arkansas")
-      })
+    expect_no_error({
+      pDta <- readPhenoData("../../data/pheno/testPhenoData01.csv",
+        traits = "Flowering.time.at.Arkansas"
+      )
+    })
 
-      expect_no_error({
-        pDta <- readPhenoData("../../data/pheno/testPhenoData01.csv",
-                              traits = c("Flowering.time.at.Arkansas",
-                                         "Year06Flowering.time.at.Arkansas"))
-      })
+    expect_no_error({
+      pDta <- readPhenoData("../../data/pheno/testPhenoData01.csv",
+        traits = c(
+          "Flowering.time.at.Arkansas",
+          "Year06Flowering.time.at.Arkansas"
+        )
+      )
+    })
 
-      expect_no_error({
-        pDta <- readPhenoData("../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
-                              traits = "pheno")
-      })
+    expect_no_error({
+      pDta <- readPhenoData("../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
+        traits = "pheno"
+      )
+    })
 
-      expect_error({
-        pDta <- readPhenoData("../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
-                              traits = NULL)
-      })
+    expect_error({
+      pDta <- readPhenoData("../../data/genomic_selection/pheno_train_with_pheno2_trait_badly_formated.csv",
+        traits = NULL
+      )
+    })
   })
 
 
   # downloadPhenoData ----
   test_that("downloadPhenoData", {
-    files <- c("../../data/pheno/testPhenoData01.csv",
-               "../data/resistance_initColl.csv")
+    files <- c(
+      "../../data/pheno/testPhenoData01.csv",
+      "../data/resistance_initColl.csv"
+    )
     files <- normalizePath(files)
     files <- paste0("file://", files)
     for (file in files) {
@@ -185,19 +194,21 @@ capture_output({
         gwas <- readGWAS(file)
       })
       expect_true(class(gwas) == "list")
-      expect_true(all.equal(names(gwas),  c("gwas", "metadata")))
+      expect_true(all.equal(names(gwas), c("gwas", "metadata")))
       expect_true(class(gwas$gwas) == "data.frame")
       expect_true(class(gwas$metadata) == "list")
       expect_true(
-        all.equal(names(gwas$metadata), c("genoFP",
-                                          "phenoFP",
-                                          "trait",
-                                          "test",
-                                          "fixed",
-                                          "response",
-                                          "thresh_maf",
-                                          "thresh_callrate",
-                                          "date"))
+        all.equal(names(gwas$metadata), c(
+          "genoFP",
+          "phenoFP",
+          "trait",
+          "test",
+          "fixed",
+          "response",
+          "thresh_maf",
+          "thresh_callrate",
+          "date"
+        ))
       )
     }
 
@@ -221,31 +232,36 @@ capture_output({
       expect_true(class(gwas$gwas) == "data.frame")
       expect_true(class(gwas$metadata) == "list")
       expect_true(
-        all.equal(names(gwas$metadata), c("genoFP",
-                                          "phenoFP",
-                                          "trait",
-                                          "test",
-                                          "fixed",
-                                          "response",
-                                          "thresh_maf",
-                                          "thresh_callrate",
-                                          "date"))
+        all.equal(names(gwas$metadata), c(
+          "genoFP",
+          "phenoFP",
+          "trait",
+          "test",
+          "fixed",
+          "response",
+          "thresh_maf",
+          "thresh_callrate",
+          "date"
+        ))
       )
     }
   })
 
   # saveGWAS ----
   test_that("saveGWAS", {
-    file <- c(g = "../../data/geno/testMarkerData01.vcf.gz",
-              p = "../../data/pheno/testPhenoData01.csv")
+    file <- c(
+      g = "../../data/geno/testMarkerData01.vcf.gz",
+      p = "../../data/pheno/testPhenoData01.csv"
+    )
     dta <- readData(file["g"], file["p"])
     resGwas <- gwas(dta,
-                    trait = "Flowering.time.at.Arkansas",
-                    test = "score",
-                    fixed = 0,
-                    response = "quantitative",
-                    thresh_maf = 0.05,
-                    thresh_callrate = 0.95)
+      trait = "Flowering.time.at.Arkansas",
+      test = "score",
+      fixed = 0,
+      response = "quantitative",
+      thresh_maf = 0.05,
+      thresh_callrate = 0.95
+    )
     # this function is also tested in tests/testthat/test_2_gwas.R
     resfile <- tempfile()
     outfile <- saveGWAS(gwasRes = resGwas, metadata = "test", file = resfile)
@@ -268,9 +284,11 @@ capture_output({
 
 
   # readPedData ----
-  pedFiles <- c('../../data/pedigree/testPedData_char.csv',
-                '../../data/pedigree/testPedData_num.csv',
-                '../../data/pedigree/testPedData_missFounder.csv')
+  pedFiles <- c(
+    "../../data/pedigree/testPedData_char.csv",
+    "../../data/pedigree/testPedData_num.csv",
+    "../../data/pedigree/testPedData_missFounder.csv"
+  )
   for (file in pedFiles) {
     test_that(paste("readPedData", basename(file)), {
       if (grepl("missFounder", file)) {
@@ -285,51 +303,47 @@ capture_output({
       expect_true(class(ped) == "list")
       expect_true(identical(names(ped), c("data", "graph")))
       expect_true(is.data.frame(ped$data))
-      expect_true(identical(colnames(ped$data), c('ind', 'parent1', 'parent2')))
+      expect_true(identical(colnames(ped$data), c("ind", "parent1", "parent2")))
       expect_true(is.character(ped$data$ind))
       expect_true(is.character(ped$data$parent1))
       expect_true(is.character(ped$data$parent2))
-      expect_true(identical(class(ped$graph), 'igraph'))
-
+      expect_true(identical(class(ped$graph), "igraph"))
     })
   }
   # error
   test_that(paste("readPedData-error"), {
-
-
-
     err <- expect_engineError({
-      ped <- readPedData('doNotExist')
+      ped <- readPedData("doNotExist")
     })
 
     err <- expect_engineError({
-      ped <- readPedData('../data/pedigree_bad_2columns.csv')
+      ped <- readPedData("../data/pedigree_bad_2columns.csv")
     })
 
     err <- expect_engineError({
-      ped <- readPedData('../data/pedigree_bad_4columns.csv')
+      ped <- readPedData("../data/pedigree_bad_4columns.csv")
     })
 
     err <- expect_engineError({
-      ped <- readPedData('../data/pedigree_empty.csv')
+      ped <- readPedData("../data/pedigree_empty.csv")
     })
 
     err <- expect_engineError({
-      ped <- readPedData('../data/pedigree_NA.csv')
+      ped <- readPedData("../data/pedigree_NA.csv")
     })
 
     err <- expect_engineError({
-      ped <- readPedData('../data/pedigree_duplicated.csv')
+      ped <- readPedData("../data/pedigree_duplicated.csv")
     })
 
     err <- expect_engineError({
-      ped <- readPedData('../data/pedigree_circleGenealogy.csv')
+      ped <- readPedData("../data/pedigree_circleGenealogy.csv")
     })
   })
 
   # downloadPedData ----
   for (file in pedFiles) {
-    test_that(paste("downloadPedData",  basename(file)), {
+    test_that(paste("downloadPedData", basename(file)), {
       file <- normalizePath(file)
       file <- paste0("file://", file)
       if (grepl("missFounder", file)) {
@@ -345,8 +359,8 @@ capture_output({
       expect_true(class(ped) == "list")
       expect_true(identical(names(ped), c("data", "graph")))
       expect_true(is.data.frame(ped$data))
-      expect_true(identical(colnames(ped$data), c('ind', 'parent1', 'parent2')))
-      expect_true(identical(class(ped$graph), 'igraph'))
+      expect_true(identical(colnames(ped$data), c("ind", "parent1", "parent2")))
+      expect_true(identical(class(ped$graph), "igraph"))
     })
   }
 
@@ -354,23 +368,23 @@ capture_output({
 
   # saveRelMat ----
   for (file in pedFiles) {
-    for (format in c('csv', 'json', 'notGood')) {
+    for (format in c("csv", "json", "notGood")) {
       test_that(paste("saveRelMat in", format, basename(file)), {
-        if (format %in% c('csv', 'json')) {
+        if (format %in% c("csv", "json")) {
           suppressWarnings({
             relMat <- pedRelMat(readPedData(file))
           })
           resfile <- tempfile()
           expect_no_error({
             outfile <- saveRelMat(relMat,
-                                  metadata = list(info = 'test'),
-                                  file = resfile,
-                                  format = format)
+              metadata = list(info = "test"),
+              file = resfile,
+              format = format
+            )
           })
           expect_true(identical(outfile, resfile))
           relMat2 <- readRelMat(file = outfile, format = format)
           expect_true(identical(relMat2, relMat))
-
         } else {
           # error
           suppressWarnings({
@@ -380,9 +394,10 @@ capture_output({
 
           err <- expect_engineError({
             outfile <- saveRelMat(relMat,
-                                  metadata = list(info = 'test'),
-                                  file = resfile,
-                                  format = format)
+              metadata = list(info = "test"),
+              file = resfile,
+              format = format
+            )
           })
         }
       })
@@ -394,8 +409,10 @@ capture_output({
 
 
   # readRelMat ----
-  relMatFiles <- c('../../data/results/pedigreeRelationship.csv',
-                   '../../data/results/pedigreeRelationship.json')
+  relMatFiles <- c(
+    "../../data/results/pedigreeRelationship.csv",
+    "../../data/results/pedigreeRelationship.json"
+  )
   for (file in relMatFiles) {
     test_that(paste("readRelMat", basename(file)), {
       expect_no_error({
@@ -410,14 +427,14 @@ capture_output({
   # error
   test_that(paste("readRelMat-error"), {
     err <- expect_engineError({
-      relMat <- readRelMat("doNotExist", format = 'csv')
+      relMat <- readRelMat("doNotExist", format = "csv")
     })
   })
 
 
   # downloadRelMat ----
   for (file in relMatFiles) {
-    test_that(paste("downloadRelMat",  basename(file)), {
+    test_that(paste("downloadRelMat", basename(file)), {
       file <- normalizePath(file)
       file <- paste0("file://", file)
       expect_no_error({
@@ -436,7 +453,7 @@ capture_output({
 
 
   # readPhasedGeno ----
-  phasedGenoFiles <- c('../../data/geno/breedGame_phasedGeno.vcf.gz')
+  phasedGenoFiles <- c("../../data/geno/breedGame_phasedGeno.vcf.gz")
   for (file in phasedGenoFiles) {
     test_that(paste("readPhasedGeno", basename(file)), {
       expect_no_error({
@@ -444,10 +461,10 @@ capture_output({
       })
       g2 <- readGenoData(file)
       expect_is(g, "list")
-      expect_equal(names(g), c('haplotypes', 'SNPcoord'))
+      expect_equal(names(g), c("haplotypes", "SNPcoord"))
 
       # snp coord:
-      expect_is(g$SNPcoord, 'data.frame')
+      expect_is(g$SNPcoord, "data.frame")
       expect_equal(colnames(g$SNPcoord), c("chr", "physPos", "SNPid"))
       expect_true(is.numeric(g$SNPcoord$physPos))
       expect_equal(g$SNPcoord$SNPid, g2@snps$id)
@@ -455,12 +472,14 @@ capture_output({
       expect_equal(g$SNPcoord$chr, g2@snps$chr)
 
       # haplotypes:
-      expect_is(g$haplotypes, 'matrix')
+      expect_is(g$haplotypes, "matrix")
       expect_equal(sort(row.names(g$haplotypes)), sort(g$SNPcoord$SNPid))
-      haploInds <- unique(gsub('_[12]$', '', colnames(g$haplotypes)))
+      haploInds <- unique(gsub("_[12]$", "", colnames(g$haplotypes)))
       expect_equal(sort(haploInds), sort(g2@ped$id))
-      expect_equal(colnames(g$haplotypes), c(paste0(haploInds, '_1'),
-                                             paste0(haploInds, '_2')))
+      expect_equal(colnames(g$haplotypes), c(
+        paste0(haploInds, "_1"),
+        paste0(haploInds, "_2")
+      ))
     })
 
     # downloadPhasedGeno ----
@@ -472,10 +491,10 @@ capture_output({
       })
       g2 <- downloadGenoData(file)
       expect_is(g, "list")
-      expect_equal(names(g), c('haplotypes', 'SNPcoord'))
+      expect_equal(names(g), c("haplotypes", "SNPcoord"))
 
       # snp coord:
-      expect_is(g$SNPcoord, 'data.frame')
+      expect_is(g$SNPcoord, "data.frame")
       expect_equal(colnames(g$SNPcoord), c("chr", "physPos", "SNPid"))
       expect_true(is.numeric(g$SNPcoord$physPos))
       expect_equal(g$SNPcoord$SNPid, g2@snps$id)
@@ -483,23 +502,25 @@ capture_output({
       expect_equal(g$SNPcoord$chr, g2@snps$chr)
 
       # haplotypes:
-      expect_is(g$haplotypes, 'matrix')
+      expect_is(g$haplotypes, "matrix")
       expect_equal(sort(row.names(g$haplotypes)), sort(g$SNPcoord$SNPid))
-      haploInds <- unique(gsub('_[12]$', '', colnames(g$haplotypes)))
+      haploInds <- unique(gsub("_[12]$", "", colnames(g$haplotypes)))
       expect_equal(sort(haploInds), sort(g2@ped$id))
-      expect_equal(colnames(g$haplotypes), c(paste0(haploInds, '_1'),
-                                             paste0(haploInds, '_2')))
+      expect_equal(colnames(g$haplotypes), c(
+        paste0(haploInds, "_1"),
+        paste0(haploInds, "_2")
+      ))
     })
   }
 
-  unPhasedGenoFiles <- c('../../data/geno/breedGame_geno.vcf.gz')
+  unPhasedGenoFiles <- c("../../data/geno/breedGame_geno.vcf.gz")
   test_that(paste("readPhasedGeno unphased geno", basename(file)), {
     err <- expect_engineError({
       readPhasedGeno(unPhasedGenoFiles)
     })
   })
 
-  nonExistentGenoFiles <- c('doNotExist.vcf.gz')
+  nonExistentGenoFiles <- c("doNotExist.vcf.gz")
   test_that(paste("readPhasedGeno missing file", basename(file)), {
     err <- expect_engineError({
       readPhasedGeno(nonExistentGenoFiles)
@@ -507,25 +528,25 @@ capture_output({
   })
 
   # readCrossTable ----
-  crossTableFiles <- c('../../data/crossingTable/breedGame_crossTable.csv')
+  crossTableFiles <- c("../../data/crossingTable/breedGame_crossTable.csv")
   for (file in crossTableFiles) {
-    test_that(paste('readCrossTable', basename(file)), {
+    test_that(paste("readCrossTable", basename(file)), {
       expect_no_error({
         crossTable <- readCrossTable(file)
       })
-      expect_is(crossTable, 'data.frame')
+      expect_is(crossTable, "data.frame")
       expect_equal(colnames(crossTable), c("ind1", "ind2", "names"))
       expect_true(!any(duplicated(crossTable)))
       expect_true(!any(is.na(crossTable)))
     })
     # downloadCrossTable ----
-    test_that(paste('downloadCrossTable', basename(file)), {
+    test_that(paste("downloadCrossTable", basename(file)), {
       file <- normalizePath(file)
       file <- paste0("file://", file)
       expect_no_error({
         crossTable <- downloadCrossTable(file)
       })
-      expect_is(crossTable, 'data.frame')
+      expect_is(crossTable, "data.frame")
       expect_equal(colnames(crossTable), c("ind1", "ind2", "names"))
       expect_true(!any(duplicated(crossTable)))
       expect_true(!any(is.na(crossTable)))
@@ -541,145 +562,161 @@ capture_output({
 
 
   # readSNPcoord ----
-  SNPcoordFiles <- c('../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
-                     '../data/breedingGame_SNPcoord_missingIds.csv',
-                     '../data/breedingGame_SNPcoord_missingPhysPos.csv',
-                     '../data/breedingGame_SNPcoord_missingPhysPos_columns.csv')
+  SNPcoordFiles <- c(
+    "../../data/SNPcoordinates/breedingGame_SNPcoord.csv",
+    "../data/breedingGame_SNPcoord_missingIds.csv",
+    "../data/breedingGame_SNPcoord_missingPhysPos.csv",
+    "../data/breedingGame_SNPcoord_missingPhysPos_columns.csv"
+  )
   for (file in SNPcoordFiles) {
-    test_that(paste('readSNPcoord', basename(file)), {
+    test_that(paste("readSNPcoord", basename(file)), {
       expect_no_error({
         SNPcoord <- readSNPcoord(file)
       })
-      expect_is(SNPcoord, 'data.frame')
-      expect_equal(colnames(SNPcoord),
-                   c("chr", "physPos", "SNPid", "linkMapPos"))
-      expect_true((is.numeric(SNPcoord$physPos[!is.na(SNPcoord$physPos)])
-                   | all(is.na(SNPcoord$physPos))))
+      expect_is(SNPcoord, "data.frame")
+      expect_equal(
+        colnames(SNPcoord),
+        c("chr", "physPos", "SNPid", "linkMapPos")
+      )
+      expect_true((is.numeric(SNPcoord$physPos[!is.na(SNPcoord$physPos)]) |
+        all(is.na(SNPcoord$physPos))))
       expect_true(is.numeric(SNPcoord$linkMapPos))
       expect_true(!any(duplicated(SNPcoord)))
       expect_true(!any(is.na(SNPcoord$linkMapPos)))
       expect_true(!any(is.na(SNPcoord$SNPid)))
 
-      if (grepl(pattern = 'missingIds', file)) {
-        expect_true(all(SNPcoord$SNPid == paste0(SNPcoord$chr,
-                                                 '@',
-                                                 SNPcoord$physPos)))
+      if (grepl(pattern = "missingIds", file)) {
+        expect_true(all(SNPcoord$SNPid == paste0(
+          SNPcoord$chr,
+          "@",
+          SNPcoord$physPos
+        )))
       }
     })
     # downloadSNPcoord ----
-    test_that(paste('downloadSNPcoord', basename(file)), {
+    test_that(paste("downloadSNPcoord", basename(file)), {
       file <- normalizePath(file)
       file <- paste0("file://", file)
       expect_no_error({
         SNPcoord <- downloadSNPcoord(file)
       })
-      expect_is(SNPcoord, 'data.frame')
-      expect_equal(colnames(SNPcoord),
-                   c("chr", "physPos", "SNPid", "linkMapPos"))
-      expect_true((is.numeric(SNPcoord$physPos[!is.na(SNPcoord$physPos)])
-                   | all(is.na(SNPcoord$physPos))))
+      expect_is(SNPcoord, "data.frame")
+      expect_equal(
+        colnames(SNPcoord),
+        c("chr", "physPos", "SNPid", "linkMapPos")
+      )
+      expect_true((is.numeric(SNPcoord$physPos[!is.na(SNPcoord$physPos)]) |
+        all(is.na(SNPcoord$physPos))))
       expect_true(is.numeric(SNPcoord$linkMapPos))
       expect_true(!any(duplicated(SNPcoord)))
       expect_true(!any(is.na(SNPcoord$linkMapPos)))
       expect_true(!any(is.na(SNPcoord$SNPid)))
 
-      if (grepl(pattern = 'missingIds', file)) {
-        expect_true(all(SNPcoord$SNPid == paste0(SNPcoord$chr,
-                                                 '@',
-                                                 SNPcoord$physPos)))
+      if (grepl(pattern = "missingIds", file)) {
+        expect_true(all(SNPcoord$SNPid == paste0(
+          SNPcoord$chr,
+          "@",
+          SNPcoord$physPos
+        )))
       }
     })
   }
 
-  file <- 'doNotExist.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "doNotExist.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_empty.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_empty.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_missing_linkMapPos.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_missing_linkMapPos.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_missing_snpid.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_missing_snpid.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_missing_values_linkMapPos.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_missing_values_linkMapPos.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_missing_values_id.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_missing_values_id.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_duplicated_id_1.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_duplicated_id_1.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_duplicated_id_2.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_duplicated_id_2.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
-  file <- '../data/SNPcoord_linkmappos_not_number.csv'
-  test_that(paste('readSNPcoord', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readSNPcoord(file)
-      })
+  file <- "../data/SNPcoord_linkmappos_not_number.csv"
+  test_that(paste("readSNPcoord", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readSNPcoord(file)
+    })
   })
 
 
   # readMarkerEffects ----
-  markerEffectsFiles <- c('../../data/markerEffects/breedGame_markerEffects.csv',
-                          '../../data/markerEffects/breedGame_markerEffects.json',
-                          '../data/markerEffects_ok.csv',
-                          '../data/markerEffects_ok.json',
-                          '../data/markerEffects_scientificNotation.json',
-                          '../../data/markerEffects/breedGame_markerEffects_1namedTrait.json',
-                          '../../data/markerEffects/breedGame_markerEffects_2traits.json',
-                          '../../data/markerEffects/breedGame_markerEffects_2traits.csv',
-                          '../../data/results/GS_model_additive.json',
-                          '../../data/results/GS_model_dominance.json')
+  markerEffectsFiles <- c(
+    "../../data/markerEffects/breedGame_markerEffects.csv",
+    "../../data/markerEffects/breedGame_markerEffects.json",
+    "../data/markerEffects_ok.csv",
+    "../data/markerEffects_ok.json",
+    "../data/markerEffects_scientificNotation.json",
+    "../../data/markerEffects/breedGame_markerEffects_1namedTrait.json",
+    "../../data/markerEffects/breedGame_markerEffects_2traits.json",
+    "../../data/markerEffects/breedGame_markerEffects_2traits.csv",
+    "../../data/results/GS_model_additive.json",
+    "../../data/results/GS_model_dominance.json"
+  )
 
   for (file in markerEffectsFiles) {
-    test_that(paste('readMarkerEffects', basename(file)), {
+    test_that(paste("readMarkerEffects", basename(file)), {
       expect_no_error({
         markerEff <- readMarkerEffects(file)
       })
-      expect_is(markerEff, 'list')
-      expect_equal(names(markerEff),
-                   c('intercept', 'SNPeffects_add', 'SNPeffects_dom'))
-      if (identical(tools::file_ext(file), 'csv')) {
+      expect_is(markerEff, "list")
+      expect_equal(
+        names(markerEff),
+        c("intercept", "SNPeffects_add", "SNPeffects_dom")
+      )
+      if (identical(tools::file_ext(file), "csv")) {
         csv_snpid <- read.csv(file)$SNPid
         csv_snpid <- csv_snpid[csv_snpid != "--INTERCEPT--"]
-        expect_equal(row.names(markerEff$SNPeffects_add),
-                     csv_snpid)
+        expect_equal(
+          row.names(markerEff$SNPeffects_add),
+          csv_snpid
+        )
       }
       expect_true(is.numeric(markerEff$intercept))
       expect_true(!any(is.na(markerEff$SNPeffects_add)))
@@ -688,20 +725,24 @@ capture_output({
     })
 
     # downloadMarkerEffects ----
-    test_that(paste('downloadMarkerEffects', basename(file)), {
+    test_that(paste("downloadMarkerEffects", basename(file)), {
       d_file <- normalizePath(file)
       d_file <- paste0("file://", d_file)
       expect_no_error({
         markerEff <- downloadMarkerEffects(d_file)
       })
-      expect_is(markerEff, 'list')
-      expect_equal(names(markerEff),
-                   c('intercept', 'SNPeffects_add', 'SNPeffects_dom'))
-      if (identical(tools::file_ext(file), 'csv')) {
+      expect_is(markerEff, "list")
+      expect_equal(
+        names(markerEff),
+        c("intercept", "SNPeffects_add", "SNPeffects_dom")
+      )
+      if (identical(tools::file_ext(file), "csv")) {
         csv_snpid <- read.csv(file)$SNPid
         csv_snpid <- csv_snpid[csv_snpid != "--INTERCEPT--"]
-        expect_equal(row.names(markerEff$SNPeffects_add),
-                     csv_snpid)
+        expect_equal(
+          row.names(markerEff$SNPeffects_add),
+          csv_snpid
+        )
       }
       expect_true(is.numeric(markerEff$intercept))
       expect_true(!any(is.na(markerEff$SNPeffects_add)))
@@ -710,61 +751,67 @@ capture_output({
     })
   }
 
-  file <- 'doNotExist.json'
-  test_that(paste('readMarkerEffects', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readMarkerEffects(file)
-      })
+  file <- "doNotExist.json"
+  test_that(paste("readMarkerEffects", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readMarkerEffects(file)
+    })
   })
 
-  file <- '../data/markerEffects_bad_1st_column.csv'
-  test_that(paste('readMarkerEffects', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readMarkerEffects(file)
-      })
+  file <- "../data/markerEffects_bad_1st_column.csv"
+  test_that(paste("readMarkerEffects", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readMarkerEffects(file)
+    })
   })
 
-  file <- '../data/markerEffects_bad_keys.json'
-  test_that(paste('readMarkerEffects', basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readMarkerEffects(file)
-      })
+  file <- "../data/markerEffects_bad_keys.json"
+  test_that(paste("readMarkerEffects", basename(file)), {
+    err <- expect_engineError({
+      SNPcoord <- readMarkerEffects(file)
+    })
   })
 
-  files <- c('../data/markerEffects_empty.csv',
-             '../data/markerEffects_empty.json')
+  files <- c(
+    "../data/markerEffects_empty.csv",
+    "../data/markerEffects_empty.json"
+  )
   for (file in files) {
-    test_that(paste('readMarkerEffects', basename(file)), {
+    test_that(paste("readMarkerEffects", basename(file)), {
       err <- expect_engineError({
         SNPcoord <- readMarkerEffects(file)
       })
     })
   }
 
-  files <- c('../data/markerEffects_missing_values.csv',
-             '../data/markerEffects_missing_values.json')
+  files <- c(
+    "../data/markerEffects_missing_values.csv",
+    "../data/markerEffects_missing_values.json"
+  )
   for (file in files) {
-    test_that(paste('readMarkerEffects', basename(file)), {
+    test_that(paste("readMarkerEffects", basename(file)), {
       err <- expect_engineError({
         SNPcoord <- readMarkerEffects(file)
       })
     })
   }
 
-  files <- c('../data/markerEffects_duplicated_id.csv',
-             '../data/markerEffects_duplicated_id.json')
+  files <- c(
+    "../data/markerEffects_duplicated_id.csv",
+    "../data/markerEffects_duplicated_id.json"
+  )
   for (file in files) {
-    test_that(paste('readMarkerEffects', basename(file)), {
+    test_that(paste("readMarkerEffects", basename(file)), {
       err <- expect_engineError({
         SNPcoord <- readMarkerEffects(file)
       })
     })
   }
 
-  test_that('readMarkerEffects identical output for csv, json', {
+  test_that("readMarkerEffects identical output for csv, json", {
     expect_equal(
-      readMarkerEffects('../data/markerEffects_ok.csv'),
-      readMarkerEffects('../data/markerEffects_ok.json')
+      readMarkerEffects("../data/markerEffects_ok.csv"),
+      readMarkerEffects("../data/markerEffects_ok.json")
     )
   })
 
@@ -774,17 +821,19 @@ capture_output({
 
 
   # readProgEstim ----
-  progEstimFiles <- c('../../data/results/progenyBlupEstimation.json',
-                      '../data/progenyBlupEstimation_oldVersion.json')
+  progEstimFiles <- c(
+    "../../data/results/progenyBlupEstimation.json",
+    "../data/progenyBlupEstimation_oldVersion.json"
+  )
   for (file in progEstimFiles) {
-    test_that(paste('readProgEstim', basename(file)), {
+    test_that(paste("readProgEstim", basename(file)), {
       expect_no_error({
         projBlups <- readProgBlupEstim(file)
       })
     })
 
     # readProgEstim ----
-    test_that(paste('readProgEstim', basename(file)), {
+    test_that(paste("readProgEstim", basename(file)), {
       d_file <- normalizePath(file)
       d_file <- paste0("file://", d_file)
       expect_no_error({
@@ -794,14 +843,14 @@ capture_output({
   }
 
   # save_dataFrame_as_json ----
-  test_that('save_dataFrame_as_json', {
-      projBlups <- data.frame(
-        ind1 = paste0('ind', 1:10),
-        ind2 = paste0('ind', 11:20),
-        blup_var = abs(rnorm(10)),
-        blup_exp = rnorm(10)
-      )
-      resfile <- tempfile(fileext = ".json")
+  test_that("save_dataFrame_as_json", {
+    projBlups <- data.frame(
+      ind1 = paste0("ind", 1:10),
+      ind2 = paste0("ind", 11:20),
+      blup_var = abs(rnorm(10)),
+      blup_exp = rnorm(10)
+    )
+    resfile <- tempfile(fileext = ".json")
     expect_no_error({
       outfile <- save_dataFrame_as_json(projBlups, resfile)
     })
@@ -811,19 +860,19 @@ capture_output({
 
 
   # save_plotly ----
-  test_that('save_plotly', {
-
+  test_that("save_plotly", {
     resfile <- tempfile(fileext = ".html")
-    plot <- plotly::plot_ly(type = "scatter",
-                            mode = "markers",
-                            data = iris,
-                            x = ~Sepal.Length,
-                            y = ~Sepal.Width,
-                            color = ~Species ,
-                            hoverinfo = "text",
-                            text = apply(iris, 1, function(l) {
-                              paste(names(l), ":", l, collapse = "\n")
-                            })
+    plot <- plotly::plot_ly(
+      type = "scatter",
+      mode = "markers",
+      data = iris,
+      x = ~Sepal.Length,
+      y = ~Sepal.Width,
+      color = ~Species,
+      hoverinfo = "text",
+      text = apply(iris, 1, function(l) {
+        paste(names(l), ":", l, collapse = "\n")
+      })
     )
     expect_no_error({
       outfile <- save_plotly(plot, resfile)
@@ -836,20 +885,21 @@ capture_output({
 
 
   # save_GS_model ----
-  test_that('save_GS_model', {
-
-    data <- readData(genoFile = "../../data/genomic_selection/geno_G1.vcf.gz",
-                     phenoFile = "../../data/genomic_selection/pheno_train.csv")
+  test_that("save_GS_model", {
+    data <- readData(
+      genoFile = "../../data/genomic_selection/geno_G1.vcf.gz",
+      phenoFile = "../../data/genomic_selection/pheno_train.csv"
+    )
     model_add <- train_gs_model(data$pheno, data$geno, with_dominance = FALSE)
     model_dom <- train_gs_model(data$pheno, data$geno, with_dominance = TRUE)
 
     for (model in list(model_add, model_dom)) {
-    resfile <- tempfile(fileext = ".json")
-    expect_no_error({
-      outfile <- save_GS_model(model_add, "pheno", resfile)
-    })
-    expect_true(file.exists(resfile))
-    expect_true(file.info(resfile)$size > 0)
+      resfile <- tempfile(fileext = ".json")
+      expect_no_error({
+        outfile <- save_GS_model(model_add, "pheno", resfile)
+      })
+      expect_true(file.exists(resfile))
+      expect_true(file.info(resfile)$size > 0)
     }
   })
 
@@ -857,33 +907,37 @@ capture_output({
 
   # extract_additive_effects ----
 
-  markerEffectsFiles <- c('../../data/markerEffects/breedGame_markerEffects.csv',
-                          '../../data/markerEffects/breedGame_markerEffects.json',
-                          '../data/markerEffects_ok.csv',
-                          '../data/markerEffects_ok.json',
-                          '../data/markerEffects_scientificNotation.json',
-                          '../../data/markerEffects/breedGame_markerEffects_1namedTrait.json',
-                          '../../data/markerEffects/breedGame_markerEffects_2traits.json',
-                          '../../data/markerEffects/breedGame_markerEffects_2traits.csv',
-                          '../../data/results/GS_model_additive.json')
+  markerEffectsFiles <- c(
+    "../../data/markerEffects/breedGame_markerEffects.csv",
+    "../../data/markerEffects/breedGame_markerEffects.json",
+    "../data/markerEffects_ok.csv",
+    "../data/markerEffects_ok.json",
+    "../data/markerEffects_scientificNotation.json",
+    "../../data/markerEffects/breedGame_markerEffects_1namedTrait.json",
+    "../../data/markerEffects/breedGame_markerEffects_2traits.json",
+    "../../data/markerEffects/breedGame_markerEffects_2traits.csv",
+    "../../data/results/GS_model_additive.json"
+  )
   for (file in markerEffectsFiles) {
-    test_that(paste('readMarkerEffects', basename(file)), {
+    test_that(paste("readMarkerEffects", basename(file)), {
       markerEff <- readMarkerEffects(file)
       expect_no_error({
         markerEff <- extract_additive_effects(markerEff)
       })
-      expect_is(markerEff, 'list')
-      expect_equal(names(markerEff),
-                   c('intercept', 'SNPeffects'))
+      expect_is(markerEff, "list")
+      expect_equal(
+        names(markerEff),
+        c("intercept", "SNPeffects")
+      )
       expect_true(is.numeric(markerEff$intercept))
       expect_true(!any(is.na(markerEff$SNPeffects)))
       expect_identical(names(markerEff$intercept), colnames(markerEff$SNPeffects))
     })
   }
 
-  markerEffectsFiles_dominance <- c('../../data/results/GS_model_dominance.json')
+  markerEffectsFiles_dominance <- c("../../data/results/GS_model_dominance.json")
   for (file in markerEffectsFiles_dominance) {
-    test_that(paste('readMarkerEffects', basename(file)), {
+    test_that(paste("readMarkerEffects", basename(file)), {
       markerEff <- readMarkerEffects(file)
       expect_no_error({
         expect_engineError({

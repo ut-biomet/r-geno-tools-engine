@@ -886,7 +886,7 @@ readSNPcoord <- function(file) {
   if (nrow(SNPcoord) == 0) {
     bad_argument("nrow(SNPcoord)", must_be = "greater than 0" , not = nrow(SNPcoord),
       extra = list(
-        code = errorCode("BAD_CROSSTABLE_EMPTY")
+        code = errorCode("BAD_SNPCOORD_EMPTY")
       )
     )
   }
@@ -1194,10 +1194,10 @@ readMarkerEffects_csv <- function(file) {
 #'   }
 #' }
 #'
-#' @return list of 2 elements:
-#' `intercept`: the value of the intercept,
-#' `effects`: data.frame of 1 columns named `SNPeffects` with the marker ids as
-#' row names.
+#' @return list of 3 elements:
+#'  - `intercept`: named (with trait names) vector
+#'  - `SNPeffects_add`: data.frame of the additive effects, with traits names as columns names and SNPids as row names
+#'  - `SNPeffects_dom`: data.frame of the dominance effects, with traits names as columns names and SNPids as row names
 readMarkerEffects_json <- function(file) {
   logger <- Logger$new("r-readMarkerEffects_json()")
 

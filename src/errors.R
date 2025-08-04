@@ -24,10 +24,11 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
   error_locations <- rev(error_locations)
   error_locations <- paste(error_locations, collapse = " -> ")
 
-  message <- paste0("Error in ", last_location, ": ", message,"\nAdditional information:\n",
-                    paste0("- ", unlist(lapply(names(extra), function(field) {
-                      paste(field, ":", paste(as.character(extra[[field]]), collapse = ", "), collapse = "\n")
-                    })), collapse = "\n")
+  message <- paste0(
+    "Error in ", last_location, ": ", message, "\nAdditional information:\n",
+    paste0("- ", unlist(lapply(names(extra), function(field) {
+      paste(field, ":", paste(as.character(extra[[field]]), collapse = ", "), collapse = "\n")
+    })), collapse = "\n")
   )
 
   if ("code" %in% names(extra)) {
@@ -40,8 +41,10 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
       message = message,
       extra = c(
         extra,
-        list("error_location" = last_location,
-             "trace" = error_locations)
+        list(
+          "error_location" = last_location,
+          "trace" = error_locations
+        )
       ),
       call = NULL
     ),
@@ -68,19 +71,19 @@ engineError <- function(message, extra = list(), n_skip_caller = 1) {
 #' @param n_skip_caller (int, default 2) see `engineError`
 #'
 #' @examples
-#' x = "a"
+#' x <- "a"
 #' bad_argument("x", must_be = 42, not = x)
 #' # will stop with the error msg: "`x` must be 42 not `a`"
 #' bad_argument("x", must_be = "numeric", not = x, "type")
 #' # will stop with the error msg: "`x` must be numeric not `character`"
-bad_argument = function(arg, must_be, not = NULL, errType = "value", class = "engineError", extra = NULL, n_skip_caller = 2) {
+bad_argument <- function(arg, must_be, not = NULL, errType = "value", class = "engineError", extra = NULL, n_skip_caller = 2) {
   must_be_msg <- must_be
   if (length(must_be) > 1) {
     must_be_msg <- paste0("`", paste(must_be, collapse = ", "), "`")
   }
 
   if (errType == "type") {
-    not = typeof(not)
+    not <- typeof(not)
   }
 
   not_msg <- ""
@@ -88,13 +91,17 @@ bad_argument = function(arg, must_be, not = NULL, errType = "value", class = "en
     if (length(not) >= 1) {
       not <- paste0("`", paste(not, collapse = ", "), "`")
     }
-    not_msg = paste0(" not ", not)
+    not_msg <- paste0(" not ", not)
   }
 
   msg <- paste0(arg, " must be ", must_be_msg, not_msg)
-  extra <- c(list("expected" = must_be,
-                  "provided" = not),
-             extra)
+  extra <- c(
+    list(
+      "expected" = must_be,
+      "provided" = not
+    ),
+    extra
+  )
   if (identical(class, "engineError")) {
     engineError(msg, extra = extra, n_skip_caller = n_skip_caller)
   }
@@ -125,44 +132,34 @@ errorCode <- function(code) {
     "BAD_ARG_THRESH_MAF_FILTER_OUT_ALL_MARKERS",
     "BAD_ARG_THRESH_P",
     "BAD_ARG_TRAIT",
-
     "BAD_CROSSTABLE_COLUMNS",
     "BAD_CROSSTABLE_EMPTY",
     "BAD_CROSSTABLE_EMPTY",
     "BAD_CROSSTABLE_MISSING_VALUES",
     "BAD_CROSSTABLE_UNAVAILABLE_INDS",
-
     "BAD_GENOTYPE_UNPHASED",
     "BAD_GENOTYPE_DUPLICATED_SNP_IDS",
     "BAD_GENOTYPE_DUPLICATED_IND_IDS",
     "BAD_GENO_ALL_MONOMORPHIC_SNP",
     "BAD_GENO_MISSING_SNP",
-
     "BAD_PHENOTYPE_DUPLICATES",
     "BAD_PHENO_DATA_CLASS",
-
     "BAD_GENO_PHENO_NO_COMMON_INDS",
-
     "BAD_GWAS_FILE",
     "BAD_PROGENY_BLUP_FILE",
-
     "BAD_MARKER_EFFECTS_1ST_COLUMN",
     "BAD_MARKER_EFFECTS_DUPLICATED_ID",
     "BAD_MARKER_EFFECTS_FORMAT_EMPTY",
     "BAD_MARKER_EFFECTS_MISSING_VALUES",
     "BAD_MARKER_EFFECTS_JSON_KEYS",
-
     "BAD_OUTPUT_FILE_FORMAT",
-
     "BAD_PEDIGREE_FORMAT_EMPTY",
     "BAD_PEDIGREE_FORMAT_INCONSISTENT_GENEALOGY",
     "BAD_PEDIGREE_FORMAT_INCONSISTENT_ID",
     "BAD_PEDIGREE_FORMAT_MISSING_IND_ID",
     "BAD_PEDIGREE_FORMAT_N_COLUMNS",
-
-
-
     "BAD_SNPCOORD_DUPLICATED_ID",
+    "BAD_SNPCOORD_EMPTY",
     "BAD_SNPCOORD_MISSING_LINK_MAP_POS_COLUMN",
     "BAD_SNPCOORD_MISSING_SNPID_COLUMNS",
     "BAD_SNPCOORD_MISSING_VALUE",
@@ -170,12 +167,9 @@ errorCode <- function(code) {
     "BAD_SNPCOORD_INCONSISTENT_SNP_ORDER",
     "BAD_SNPCOORD_SNP_LINKMAP_POSITION_NOT_NUMERIC",
     "BAD_SNPCOORD_PHYSICAL_POS_VCF_MISSMATCH",
-
     "INCONSISTENT_RELATIONSHIP_MATRICES",
-
     "DOMINANCE_MODEL_NOT_APPLICABLE",
     "DOMINANCE_MODEL_FOR_BLUP_ESTIMATION",
-
     "FILE_EXIST",
     "FILE_NOT_FOUND",
     "INPUT_FILE_NOT_PROVIDED",
@@ -183,10 +177,8 @@ errorCode <- function(code) {
     "MULTIPLE_INPUTFILE",
     "MULTIPLE_OUTFILE",
     "NO_OUTPUT_DIR",
-
     "PHENOTYPE_NO_IND_AFTER_FILTERING",
     "GENOTYPE_NO_MARKERS_AFTER_FILTERING"
-
   )
   names(codes) <- codes
 
