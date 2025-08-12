@@ -13,9 +13,11 @@
 downloadGenoData <- function(url) {
   logger <- Logger$new("r-downloadGenoData()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "geno",
-                        tmpdir = tempdir(),
-                        fileext = ".vcf.gz")
+  localFile <- tempfile(
+    pattern = "geno",
+    tmpdir = tempdir(),
+    fileext = ".vcf.gz"
+  )
   logger$log("Download geno file ...")
 
   # download data file:
@@ -39,9 +41,11 @@ downloadGenoData <- function(url) {
 downloadPhasedGeno <- function(url) {
   logger <- Logger$new("r-downloadPhasedGeno()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "geno",
-                        tmpdir = tempdir(),
-                        fileext = ".vcf.gz")
+  localFile <- tempfile(
+    pattern = "geno",
+    tmpdir = tempdir(),
+    fileext = ".vcf.gz"
+  )
   logger$log("Download geno file ...")
 
   # download data file:
@@ -64,12 +68,14 @@ downloadPhasedGeno <- function(url) {
 #' @details The individuals' names must be on the first column. No duplication
 #' is allowed.
 #' @return `data.frame`
-downloadPhenoData <- function(url, traits = NULL, ...){
+downloadPhenoData <- function(url, traits = NULL, ...) {
   logger <- Logger$new("r-downloadPhenoData()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "pheno",
-                        tmpdir = tempdir(),
-                        fileext = ".csv")
+  localFile <- tempfile(
+    pattern = "pheno",
+    tmpdir = tempdir(),
+    fileext = ".csv"
+  )
 
   # download data file:
   logger$log("Download phenotypic file ... ")
@@ -91,7 +97,7 @@ downloadPhenoData <- function(url, traits = NULL, ...){
 #' @param phenoUrl url of the phenotypic data file (csv file)
 #'
 #' @return List
-downloadData <- function(genoUrl, phenoUrl){
+downloadData <- function(genoUrl, phenoUrl) {
   logger <- Logger$new("r-downloadData()")
   logger$log("get geno data ...")
   mDta <- downloadGenoData(genoUrl)
@@ -116,12 +122,14 @@ downloadData <- function(genoUrl, phenoUrl){
 #' @param url url of the result data file (json file)
 #'
 #' @return `data.frame`
-downloadGWAS <- function(url){
+downloadGWAS <- function(url) {
   logger <- Logger$new("r-downloadGWAS()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedResult",
-                        tmpdir = tempdir(),
-                        fileext = ".json")
+  localFile <- tempfile(
+    pattern = "downloadedResult",
+    tmpdir = tempdir(),
+    fileext = ".json"
+  )
   logger$log("Download result file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -148,9 +156,11 @@ downloadGWAS <- function(url){
 downloadPedData <- function(url, unknown_string = "", header = TRUE) {
   logger <- Logger$new("r-downloadPedData()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedResult",
-                        tmpdir = tempdir(),
-                        fileext = ".csv")
+  localFile <- tempfile(
+    pattern = "downloadedResult",
+    tmpdir = tempdir(),
+    fileext = ".csv"
+  )
   logger$log("Download result file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -173,9 +183,11 @@ downloadPedData <- function(url, unknown_string = "", header = TRUE) {
 downloadRelMat <- function(url, format = tools::file_ext(url)) {
   logger <- Logger$new("r-downloadRelMat()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedResult",
-                        tmpdir = tempdir(),
-                        fileext = paste0(".", format))
+  localFile <- tempfile(
+    pattern = "downloadedResult",
+    tmpdir = tempdir(),
+    fileext = paste0(".", format)
+  )
   logger$log("Download result file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -200,9 +212,11 @@ downloadRelMat <- function(url, format = tools::file_ext(url)) {
 downloadCrossTable <- function(url, header = TRUE) {
   logger <- Logger$new("r-downloadCrossTable()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedResult",
-                        tmpdir = tempdir(),
-                        fileext = ".csv")
+  localFile <- tempfile(
+    pattern = "downloadedResult",
+    tmpdir = tempdir(),
+    fileext = ".csv"
+  )
   logger$log("Download result file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -231,9 +245,11 @@ downloadCrossTable <- function(url, header = TRUE) {
 downloadSNPcoord <- function(url) {
   logger <- Logger$new("r-downloadSNPcoord()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "downloadedResult",
-                        tmpdir = tempdir(),
-                        fileext = ".csv")
+  localFile <- tempfile(
+    pattern = "downloadedResult",
+    tmpdir = tempdir(),
+    fileext = ".csv"
+  )
   logger$log("Download result file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -255,9 +271,11 @@ downloadSNPcoord <- function(url) {
 downloadMarkerEffects <- function(url) {
   logger <- Logger$new("r-downloadMarkerEffects()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "markerEffects",
-                        tmpdir = tempdir(),
-                        fileext = paste0('.', tools::file_ext(url)))
+  localFile <- tempfile(
+    pattern = "markerEffects",
+    tmpdir = tempdir(),
+    fileext = paste0(".", tools::file_ext(url))
+  )
   logger$log("Download marker effects file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -279,9 +297,11 @@ downloadMarkerEffects <- function(url) {
 downloadProgBlupEstim <- function(url) {
   logger <- Logger$new("r-downloadProgBlupEstim()")
   logger$log("Create local temp file ... ")
-  localFile <- tempfile(pattern = "progBlupEstim",
-                        tmpdir = tempdir(),
-                        fileext = ".json")
+  localFile <- tempfile(
+    pattern = "progBlupEstim",
+    tmpdir = tempdir(),
+    fileext = ".json"
+  )
   logger$log("Download progenies' blup estimations file ... ")
   download.file(url, localFile, quiet = TRUE)
 
@@ -306,8 +326,9 @@ impute_snp_ids <- function(geno, list_to_impute) {
   }
   geno@snps$id[list_to_impute] <- paste0(
     geno@snps$chr[list_to_impute],
-    '@',
-    geno@snps$pos[list_to_impute])
+    "@",
+    geno@snps$pos[list_to_impute]
+  )
   geno@snps$id[is.na(geno@snps$chr[list_to_impute]) | is.na(geno@snps$pos[list_to_impute])] <- NA
   return(geno@snps$id)
 }
@@ -327,8 +348,9 @@ readGenoData <- function(file) {
   logger$log("Read geno file ... ")
 
   dta <- gaston::read.vcf(file,
-                          verbose = FALSE,
-                          convert.chr = FALSE)
+    verbose = FALSE,
+    convert.chr = FALSE
+  )
   originals_snp_ids <- dta@snps$id
 
   # check for duplicated individuals
@@ -388,19 +410,22 @@ readPhasedGeno <- function(file) {
   logger$log("Read phased geno file DONE")
 
   # impute missing SNP ids
-  missingIDlines <- is.na(vcf@fix[,'ID'])
-  vcf@fix[missingIDlines, 'ID'] <- paste0(
-    vcf@fix[missingIDlines, 'CHROM'],
-    '@',
-    vcf@fix[missingIDlines, 'POS'])
-  vcf@fix[is.na(vcf@fix[missingIDlines,'CHROM']) | is.na(vcf@fix[missingIDlines,'POS'])
-          ,'ID'] <- NA
+  missingIDlines <- is.na(vcf@fix[, "ID"])
+  vcf@fix[missingIDlines, "ID"] <- paste0(
+    vcf@fix[missingIDlines, "CHROM"],
+    "@",
+    vcf@fix[missingIDlines, "POS"]
+  )
+  vcf@fix[
+    is.na(vcf@fix[missingIDlines, "CHROM"]) | is.na(vcf@fix[missingIDlines, "POS"]),
+    "ID"
+  ] <- NA
 
 
   # get SNP information
   logger$log("Extract SNP information...")
   fixVcf <- as.data.frame(vcfR::getFIX(vcf), stringsAsFactors = FALSE)
-  SNPcoord <- fixVcf[,c("CHROM", "POS", "ID")]
+  SNPcoord <- fixVcf[, c("CHROM", "POS", "ID")]
   colnames(SNPcoord) <- c("chr", "physPos", "SNPid")
   SNPcoord$physPos <- as.integer(SNPcoord$physPos)
   logger$log("Extract SNP information DONE")
@@ -410,13 +435,13 @@ readPhasedGeno <- function(file) {
 
   # Check if genotypes are phased
   logger$log("Check pahsing ...")
-  if (all(vcf@gt[,"FORMAT"] == "GT")) {
+  if (all(vcf@gt[, "FORMAT"] == "GT")) {
     # quick return if FORMAT == GT
     gt <- vcf@gt
     gt <- gt[, colnames(gt) != "FORMAT"]
-    row.names(gt) <- vcf@fix[,"ID"]
+    row.names(gt) <- vcf@fix[, "ID"]
   } else {
-    gt <- vcfR::extract.gt(vcf, element = 'GT')
+    gt <- vcfR::extract.gt(vcf, element = "GT")
   }
   if (!all(grepl("|", gt, fixed = TRUE))) {
     errMsg <- "VCF file should be phased for all variant and all individuals, (`|` separator for GT field)."
@@ -439,19 +464,22 @@ readPhasedGeno <- function(file) {
   # values of gt are mixed so we need to reorder:
   gt <- c(gt[seq(1, length(gt), 2)], gt[seq(2, length(gt), 2)])
   gt <- matrix(gt,
-               nrow = length(markersNames),
-               byrow = FALSE)
+    nrow = length(markersNames),
+    byrow = FALSE
+  )
   rownames(gt) <- markersNames
   colnames(gt) <- paste(rep(indNames, 2),
-                        rep(1:2, each = length(indNames)),
-                        sep = "_")
+    rep(1:2, each = length(indNames)),
+    sep = "_"
+  )
   logger$log("Extract haplotypes DONE")
 
   logger$log("DONE, return output.")
 
-  list(haplotypes = gt,
-       SNPcoord = SNPcoord)
-
+  list(
+    haplotypes = gt,
+    SNPcoord = SNPcoord
+  )
 }
 
 
@@ -466,7 +494,7 @@ readPhasedGeno <- function(file) {
 #'
 #' @details Any duplication in the phenotypic file is forbidden.
 #' @return `data.frame`
-readPhenoData <- function(file, ind.names = 1, traits = NULL,...) {
+readPhenoData <- function(file, ind.names = 1, traits = NULL, ...) {
   logger <- Logger$new("r-readPhenoData()")
 
   check_inputFile(file)
@@ -479,9 +507,11 @@ readPhenoData <- function(file, ind.names = 1, traits = NULL,...) {
   inds <- dta[, ind.names]
   if (any(duplicated(inds))) {
     duplicates_ind <- inds[duplicated(inds)]
-    engineError(paste(
-      "Duplicated individuals found in the phenotypic file. ",
-      "Individuals must apprear only once in the phenotypic file."),
+    engineError(
+      paste(
+        "Duplicated individuals found in the phenotypic file. ",
+        "Individuals must apprear only once in the phenotypic file."
+      ),
       extra = list(
         code = errorCode("BAD_PHENOTYPE_DUPLICATES"),
         n_duplicates = length(duplicates_ind),
@@ -497,7 +527,9 @@ readPhenoData <- function(file, ind.names = 1, traits = NULL,...) {
   logger$log("Set pheno data's row names DONE")
 
   if (!is.null(traits)) {
-    sapply(traits, function(t){check_trait(t, colnames(dta))})
+    sapply(traits, function(t) {
+      check_trait(t, colnames(dta))
+    })
     dta <- dta[, traits, drop = FALSE]
   }
 
@@ -538,7 +570,7 @@ readPhenoData <- function(file, ind.names = 1, traits = NULL,...) {
 #' @param ... Further arguments to be passed to `read.csv` for reading phenotype data
 #'
 #' @return List
-readData <- function(genoFile, phenoFile, traits = NULL, ...){
+readData <- function(genoFile, phenoFile, traits = NULL, ...) {
   logger <- Logger$new("r-readData()")
   logger$log("get geno data ...")
   mDta <- readGenoData(genoFile)
@@ -582,22 +614,23 @@ readData <- function(genoFile, phenoFile, traits = NULL, ...){
 #'
 #' @return List of 2: `data` pedigree data, `graph` "igraph" object of the pedigree graph.
 readPedData <- function(file, unknown_string = "", header = TRUE) {
-  logger <- Logger$new('r-readPedData')
+  logger <- Logger$new("r-readPedData")
 
 
   check_inputFile(file, "csv")
 
-  logger$log('Read pedigree file ...')
+  logger$log("Read pedigree file ...")
   ped <- read.csv(file,
-                  na.strings = unknown_string,
-                  header = header,
-                  stringsAsFactors = FALSE,
-                  comment.char = '#')
+    na.strings = unknown_string,
+    header = header,
+    stringsAsFactors = FALSE,
+    comment.char = "#"
+  )
   ped <- data.frame(lapply(ped, as.character))
-  logger$log('Read pedigree file DONE')
+  logger$log("Read pedigree file DONE")
 
 
-  logger$log('Check pedigree file ...')
+  logger$log("Check pedigree file ...")
   # file dimention
   if (ncol(ped) != 3) {
     engineError(
@@ -619,12 +652,12 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
   }
 
   # NA in first colunm
-  if (any(is.na(ped[,1]))) {
+  if (any(is.na(ped[, 1]))) {
     engineError(
       "Bad pedigree format, some individual ID are missing.",
       extra = list(
         code = errorCode("BAD_PEDIGREE_FORMAT_MISSING_IND_ID"),
-        n_missing = sum(is.na(ped[,1]))
+        n_missing = sum(is.na(ped[, 1]))
       )
     )
   }
@@ -632,10 +665,12 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
   # duplicated rows
   dupRows <- duplicated(ped)
   if (any(dupRows)) {
-    warning(sum(dupRows),
-            ' duplicated line(s) found in the pedigree file.',
-            ' They will be removed.')
-    ped <- ped[!dupRows,]
+    warning(
+      sum(dupRows),
+      " duplicated line(s) found in the pedigree file.",
+      " They will be removed."
+    )
+    ped <- ped[!dupRows, ]
   }
 
   # inconsistent entries
@@ -645,7 +680,7 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
       "Bad pedigree format, inconsistencies detected, some individuals are specifyed several times with different paternal and maternal information.",
       extra = list(
         code = errorCode("BAD_PEDIGREE_FORMAT_INCONSISTENT_ID"),
-        n_inconsistent = sum(incEnt)/2,
+        n_inconsistent = sum(incEnt) / 2,
         affected_lines = which(incEnt)
       )
     )
@@ -656,19 +691,23 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
   missInd_3 <- na.omit(ped[!ped[, 3] %in% ped[, 1], 3])
   missInd <- unique(c(missInd_2, missInd_3))
   if (length(missInd) != 0) {
-    warning(length(missInd), ' unspecified individual(s) found',
-            ' in column 2 and/or 3: ',
-            ifelse(length(missInd) >= 5,
-                   paste(paste0('"', missInd[1:5], '"', collapse = " ,"), "..."),
-                   paste(paste0('"', missInd, '"', collapse = " ,"), ".")),
-            " These individuals are added in the pedigree with unknown parents."
+    warning(
+      length(missInd), " unspecified individual(s) found",
+      " in column 2 and/or 3: ",
+      ifelse(length(missInd) >= 5,
+        paste(paste0('"', missInd[1:5], '"', collapse = " ,"), "..."),
+        paste(paste0('"', missInd, '"', collapse = " ,"), ".")
+      ),
+      " These individuals are added in the pedigree with unknown parents."
     )
 
     missInd_df <- data.frame(missInd, NA, NA,
-                             stringsAsFactors = FALSE)
+      stringsAsFactors = FALSE
+    )
     ped <- rbind(setNames(missInd_df, colnames(ped)),
-                 ped,
-                 stringsAsFactors = FALSE)
+      ped,
+      stringsAsFactors = FALSE
+    )
 
     # Unique founder individual.
     # If there is only one founder corresponding to the only missing
@@ -676,20 +715,24 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
     # the case only if `unknown_string` is miss-specified and all the
     # the founder individuals are defined in the pedigree. This explains the
     # recommendation about specifying all the founders in the pedigree.)
-    founders <- ped[is.na(ped[,2]) & is.na(ped[,3]), 1]
+    founders <- ped[is.na(ped[, 2]) & is.na(ped[, 3]), 1]
     if (length(founders) == 1 && length(missInd) == 1) {
       if (identical(founders, missInd)) {
-        warning('This individual is the only founder found in your pedigree. ',
-                'Please be sure you have specified the id of unknown parrent ',
-                'correctly.')
+        warning(
+          "This individual is the only founder found in your pedigree. ",
+          "Please be sure you have specified the id of unknown parrent ",
+          "correctly."
+        )
       }
     }
   }
 
   # inconsistent genealogy (may be long for big pedigree file)
   # check that individual are not a parent of their parents.
-  edges <- c(as.vector(t(na.omit(ped[,c(2,1)]))),
-             as.vector(t(na.omit(ped[,c(3,1)]))))
+  edges <- c(
+    as.vector(t(na.omit(ped[, c(2, 1)]))),
+    as.vector(t(na.omit(ped[, c(3, 1)])))
+  )
   g <- igraph::make_graph(edges, directed = TRUE)
 
   cycle <- list()
@@ -697,9 +740,11 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
     i <- igraph::V(g)[i]
     parents <- igraph::neighbors(g, i, mode = "in")
     for (p in parents) {
-      paths <- igraph::all_simple_paths(g, i, p, 'out')
+      paths <- igraph::all_simple_paths(g, i, p, "out")
       if (length(paths) != 0) {
-        cycle <- append(cycle, lapply(paths, function(p){names(sort(p))}))
+        cycle <- append(cycle, lapply(paths, function(p) {
+          names(sort(p))
+        }))
       }
     }
   }
@@ -714,12 +759,12 @@ readPedData <- function(file, unknown_string = "", header = TRUE) {
       )
     )
   }
-  logger$log('Check pedigree file DONE')
+  logger$log("Check pedigree file DONE")
 
 
   logger$log("DONE, return output.")
   # rename colunms
-  colnames(ped) <- c('ind', 'parent1', 'parent2')
+  colnames(ped) <- c("ind", "parent1", "parent2")
 
   return(list(
     data = ped,
@@ -743,17 +788,19 @@ readRelMat <- function(file, format = tools::file_ext(file)) {
 
   check_inputFile(file, c("csv", "json", ""))
 
-  if (format == 'csv') {
+  if (format == "csv") {
     logger$log("Read relationship matrix `csv` file ... ")
-    relMat <- read.csv(file = file,
-                       header = TRUE,
-                       check.names = FALSE,
-                       row.names = 1,
-                       comment.char = "#")
+    relMat <- read.csv(
+      file = file,
+      header = TRUE,
+      check.names = FALSE,
+      row.names = 1,
+      comment.char = "#"
+    )
     relMat <- as.matrix(relMat)
     logger$log("Read relationship matrix `csv` file DONE")
   }
-  if (format == 'json') {
+  if (format == "json") {
     logger$log("Read relationship matrix `json` file ... ")
     relMatRaw <- jsonlite::fromJSON(readLines(file))
     relMat <- as.matrix(relMatRaw$relMat)
@@ -780,24 +827,25 @@ readRelMat <- function(file, format = tools::file_ext(file)) {
 #'
 #' @return data.frame with the crossing table information.
 readCrossTable <- function(file, header = TRUE) {
-  logger <- Logger$new('r-readCrossTable')
+  logger <- Logger$new("r-readCrossTable")
 
   check_inputFile(file, "csv")
 
-  logger$log('Read crossing table file ...')
+  logger$log("Read crossing table file ...")
   crossTable <- read.csv(file,
-                  header = header,
-                  na.strings = "",
-                  stringsAsFactors = FALSE)
-  logger$log('Read crossing table file DONE')
+    header = header,
+    na.strings = "",
+    stringsAsFactors = FALSE
+  )
+  logger$log("Read crossing table file DONE")
 
 
-  logger$log('Check crossing table file ...')
+  logger$log("Check crossing table file ...")
   # file dimension
   if (!ncol(crossTable) %in% c(2, 3)) {
     bad_argument(
-      'number of columns of the crossing table',
-      must_be = "2 or 3" ,
+      "number of columns of the crossing table",
+      must_be = "2 or 3",
       not = ncol(crossTable),
       extra = list(
         code = errorCode("BAD_CROSSTABLE_COLUMNS"),
@@ -816,7 +864,7 @@ readCrossTable <- function(file, header = TRUE) {
   # missing values
   if (any(is.na(crossTable))) {
     bad_argument(
-      'crossing table',
+      "crossing table",
       must_be = "complete, (missing values detected)",
       extra = list(
         code = errorCode("BAD_CROSSTABLE_MISSING_VALUES"),
@@ -826,24 +874,26 @@ readCrossTable <- function(file, header = TRUE) {
   }
 
   # duplicated rows
-  dupRows <- duplicated(crossTable[, c(1,2)])
+  dupRows <- duplicated(crossTable[, c(1, 2)])
   if (any(dupRows)) {
-    warning(sum(dupRows),
-            ' duplicated patental pair(s) found in the crossing table file.',
-            ' They will be removed.')
-    crossTable <- crossTable[!dupRows,]
+    warning(
+      sum(dupRows),
+      " duplicated patental pair(s) found in the crossing table file.",
+      " They will be removed."
+    )
+    crossTable <- crossTable[!dupRows, ]
   }
 
   # rename columns
-  colnames(crossTable)[c(1,2)] <- c('ind1', 'ind2')
+  colnames(crossTable)[c(1, 2)] <- c("ind1", "ind2")
   if (ncol(crossTable) == 3) {
-    colnames(crossTable)[3] <- 'names'
+    colnames(crossTable)[3] <- "names"
   }
 
   # Get simulated individuals names if not specified
   if (is.null(crossTable$names)) {
     logger$log("Generate simulated individuals names...")
-    crossTable$names <- paste0(crossTable$ind1, '_X_', crossTable$ind2)
+    crossTable$names <- paste0(crossTable$ind1, "_X_", crossTable$ind2)
     logger$log("Generate simulated individuals names DONE")
   }
 
@@ -869,36 +919,38 @@ readCrossTable <- function(file, header = TRUE) {
 #'
 #' @return data.frame of 4 columns: 'chr', 'linkMapPos', 'SNPid'
 readSNPcoord <- function(file) {
-  logger <- Logger$new('r-readSNPcoord()')
+  logger <- Logger$new("r-readSNPcoord()")
 
 
   check_inputFile(file, "csv")
 
-  logger$log('Read snps coordinates file ...')
+  logger$log("Read snps coordinates file ...")
   SNPcoord <- read.csv(file,
-                       header = TRUE,
-                       stringsAsFactors = FALSE,
-                       na.strings = c(""))
-  logger$log('Read snps coordinates file DONE')
+    header = TRUE,
+    stringsAsFactors = FALSE,
+    na.strings = c("")
+  )
+  logger$log("Read snps coordinates file DONE")
 
 
-  logger$log('Check snps coordinates file ...')
+  logger$log("Check snps coordinates file ...")
   if (nrow(SNPcoord) == 0) {
-    bad_argument("nrow(SNPcoord)", must_be = "greater than 0" , not = nrow(SNPcoord),
+    bad_argument("nrow(SNPcoord)",
+      must_be = "greater than 0", not = nrow(SNPcoord),
       extra = list(
         code = errorCode("BAD_SNPCOORD_EMPTY")
       )
     )
   }
 
-  refColNames <- sort(c('chr', 'physPos', 'SNPid', 'linkMapPos'))
+  refColNames <- sort(c("chr", "physPos", "SNPid", "linkMapPos"))
   missingVar <- !refColNames %in% colnames(SNPcoord)
   names(missingVar) <- refColNames
 
-  if (missingVar['linkMapPos']) {
+  if (missingVar["linkMapPos"]) {
     # linkMapPos is mandatory
     bad_argument(
-      'colnames(SNPcoord)',
+      "colnames(SNPcoord)",
       must_be = "containing `linkMapPos` (the linkage map position in Morgan)",
       extra = list(
         code = errorCode("BAD_SNPCOORD_MISSING_LINK_MAP_POS_COLUMN")
@@ -907,18 +959,21 @@ readSNPcoord <- function(file) {
   }
   # check linkMapPos are numeric
   if (!is.numeric(SNPcoord$linkMapPos)) {
-    numeric_linkMapPos <- suppressWarnings({as.numeric(SNPcoord$linkMapPos)})
+    numeric_linkMapPos <- suppressWarnings({
+      as.numeric(SNPcoord$linkMapPos)
+    })
     not_numeric_linkMapPos <- which(is.na(numeric_linkMapPos))
     not_numeric_linkMapPos_ids <- SNPcoord$SNPid[not_numeric_linkMapPos]
-    engineError(paste0(
-      'SNPs coordinates file must have numeric linkage map positions. ',
-      'Positions of ',
-      length(not_numeric_linkMapPos_ids),
-      ' SNPs have NOT been detected as numeric on a total of ',
-      nrow(SNPcoord),
-      '. The ids of those SNPs are: `',
-      paste(not_numeric_linkMapPos_ids, collapse = "`, `"),
-      '`'
+    engineError(
+      paste0(
+        "SNPs coordinates file must have numeric linkage map positions. ",
+        "Positions of ",
+        length(not_numeric_linkMapPos_ids),
+        " SNPs have NOT been detected as numeric on a total of ",
+        nrow(SNPcoord),
+        ". The ids of those SNPs are: `",
+        paste(not_numeric_linkMapPos_ids, collapse = "`, `"),
+        "`"
       ),
       extra = list(
         code = errorCode("BAD_SNPCOORD_SNP_LINKMAP_POSITION_NOT_NUMERIC"),
@@ -929,12 +984,14 @@ readSNPcoord <- function(file) {
     )
   }
 
-  if (missingVar['SNPid'] & (missingVar['chr'] || missingVar['physPos'])) {
+  if (missingVar["SNPid"] & (missingVar["chr"] || missingVar["physPos"])) {
     # we need either SNPid or (chr and physPos)
-    engineError(paste(
-      'snps coordinates file should have a header specifying either ',
-      '`SNPid` (id of the markers) and/or both `chr` and `physPos` ',
-      '(chromosome and physical position).'),
+    engineError(
+      paste(
+        "snps coordinates file should have a header specifying either ",
+        "`SNPid` (id of the markers) and/or both `chr` and `physPos` ",
+        "(chromosome and physical position)."
+      ),
       extra = list(
         code = errorCode("BAD_SNPCOORD_MISSING_SNPID_COLUMNS")
       )
@@ -949,7 +1006,7 @@ readSNPcoord <- function(file) {
   if (any(is.na(SNPcoord$linkMapPos))) {
     # no missing values for linkMapPos
     bad_argument(
-      'SNPcoord$linkMapPos',
+      "SNPcoord$linkMapPos",
       must_be = "complete (no missing values)",
       extra = list(
         code = errorCode("BAD_SNPCOORD_MISSING_VALUE"),
@@ -960,7 +1017,7 @@ readSNPcoord <- function(file) {
   if (any(is.na(SNPcoord$SNPid) & (is.na(SNPcoord$chr) | is.na(SNPcoord$physPos)))) {
     # no missing values SNPid or (chr and physPos)
     bad_argument(
-      'SNPcoord$SNPid or (SNPcoord$chr and SNPcoord$physPos)',
+      "SNPcoord$SNPid or (SNPcoord$chr and SNPcoord$physPos)",
       must_be = "complete (no missing values)",
       extra = list(
         code = errorCode("BAD_SNPCOORD_MISSING_VALUE"),
@@ -973,18 +1030,20 @@ readSNPcoord <- function(file) {
   missingIDlines <- is.na(SNPcoord$SNPid)
   SNPcoord$SNPid[missingIDlines] <- paste0(
     SNPcoord$chr[missingIDlines],
-    '@',
+    "@",
     SNPcoord$physPos[missingIDlines]
-    )
+  )
 
 
   # remove duplicated rows
   dupRows <- duplicated(SNPcoord)
   if (any(dupRows)) {
-    warning(sum(dupRows),
-            'duplicated rows found in the snps coordinates file. ',
-            'They will be removed.')
-    SNPcoord <- SNPcoord[!dupRows,]
+    warning(
+      sum(dupRows),
+      "duplicated rows found in the snps coordinates file. ",
+      "They will be removed."
+    )
+    SNPcoord <- SNPcoord[!dupRows, ]
   }
 
   # check unicity of SNPids
@@ -999,7 +1058,7 @@ readSNPcoord <- function(file) {
       )
     )
   }
-  logger$log('Check snps coordinates file DONE')
+  logger$log("Check snps coordinates file DONE")
 
   return(SNPcoord)
 }
@@ -1022,9 +1081,10 @@ readGWAS <- function(file) {
   gwasRes <- jsonlite::fromJSON(gwasRes)
   logger$log("Convert Json to data.frame DONE ")
   if (class(gwasRes) != "list" || !identical(names(gwasRes), c("gwas", "metadata")) ||
-      class(gwasRes$gwas) != "data.frame") {
+    class(gwasRes$gwas) != "data.frame") {
     engineError("Provided GWAS results file does not seem to be generated by r-geno-tools-Engine.",
-                extra = list(code = errorCode("BAD_GWAS_FILE")))
+      extra = list(code = errorCode("BAD_GWAS_FILE"))
+    )
   }
   logger$log("DONE, return output.")
   gwasRes
@@ -1064,8 +1124,8 @@ readGWAS <- function(file) {
 readMarkerEffects <- function(file) {
   check_inputFile(file, c("csv", "json"))
 
-  ext = tools::file_ext(file)
-  if (identical(ext, 'csv')) {
+  ext <- tools::file_ext(file)
+  if (identical(ext, "csv")) {
     markerEffects <- readMarkerEffects_csv(file)
   } else {
     markerEffects <- readMarkerEffects_json(file)
@@ -1083,7 +1143,7 @@ readMarkerEffects <- function(file) {
   # missing values
   if (any(is.na(markerEffects$SNPeffects_add))) {
     engineError(
-      'Marker effects should not have any missing values',
+      "Marker effects should not have any missing values",
       extra = list(
         code = errorCode("BAD_MARKER_EFFECTS_MISSING_VALUES")
       )
@@ -1130,16 +1190,18 @@ readMarkerEffects <- function(file) {
 readMarkerEffects_csv <- function(file) {
   logger <- Logger$new("r-readMarkerEffects_csv()")
 
-  logger$log('Read marker effects file ...')
+  logger$log("Read marker effects file ...")
   markerEffects <- read.csv(file,
-                            header = TRUE,
-                            stringsAsFactors = FALSE)
-  logger$log('Read marker effects file DONE')
+    header = TRUE,
+    stringsAsFactors = FALSE
+  )
+  logger$log("Read marker effects file DONE")
 
 
-  logger$log('Check marker effects file ...')
+  logger$log("Check marker effects file ...")
   if (!identical(colnames(markerEffects)[1], "SNPid")) {
-    bad_argument('First column of marker effects', must_be = "SNPid", not = colnames(markerEffects)[1],
+    bad_argument("First column of marker effects",
+      must_be = "SNPid", not = colnames(markerEffects)[1],
       extra = list(
         code = errorCode("BAD_MARKER_EFFECTS_1ST_COLUMN")
       )
@@ -1150,29 +1212,31 @@ readMarkerEffects_csv <- function(file) {
   # duplicated rows
   dupRows <- duplicated(markerEffects)
   if (any(dupRows)) {
-    warning(sum(dupRows),
-            'duplicated rows found in the marker effects file. ',
-            'They will be removed.')
-    markerEffects <- markerEffects[!dupRows,]
+    warning(
+      sum(dupRows),
+      "duplicated rows found in the marker effects file. ",
+      "They will be removed."
+    )
+    markerEffects <- markerEffects[!dupRows, ]
   }
 
-  logger$log('Check marker effects file DONE')
+  logger$log("Check marker effects file DONE")
 
   # read intercept
-  interceptId <- which(markerEffects$SNPid == '--INTERCEPT--')
+  interceptId <- which(markerEffects$SNPid == "--INTERCEPT--")
   if (identical(interceptId, integer(0))) {
     intercept <- rep(0, ncol(markerEffects) - 1)
     names(intercept) <- colnames(markerEffects)[-1]
   } else {
     intercept <- as.numeric(markerEffects[interceptId, -1])
     names(intercept) <- colnames(markerEffects)[-1]
-    markerEffects <- markerEffects[-interceptId,]
+    markerEffects <- markerEffects[-interceptId, ]
   }
 
   return(list(
     intercept = intercept,
     SNPeffects_add = markerEffects,
-    SNPeffects_dom = markerEffects[FALSE,]
+    SNPeffects_dom = markerEffects[FALSE, ]
   ))
 }
 
@@ -1202,27 +1266,29 @@ readMarkerEffects_json <- function(file) {
   logger <- Logger$new("r-readMarkerEffects_json()")
 
 
-  logger$log('Read marker effects file ...')
+  logger$log("Read marker effects file ...")
   rawMarkerEffects_list <- jsonlite::fromJSON(file,
-                                              simplifyVector = FALSE)
-  logger$log('Read marker effects file DONE')
+    simplifyVector = FALSE
+  )
+  logger$log("Read marker effects file DONE")
 
-  expectedFields_old_version <- c('intercept', 'coefficients')
-  expectedFields_new_version <- c('intercept', 'additive_effects', 'dominance_effects')
+  expectedFields_old_version <- c("intercept", "coefficients")
+  expectedFields_new_version <- c("intercept", "additive_effects", "dominance_effects")
 
   if (all(names(rawMarkerEffects_list) %in% expectedFields_old_version)) {
     # old format with 1 unnamed trait
     rawMarkerEffects_list <- list(unknownTrait = rawMarkerEffects_list)
-
   }
 
 
   all_markers <- c()
   for (rawMarkerEff in rawMarkerEffects_list) {
-    all_markers <- unique(c(all_markers,
-                            names(rawMarkerEff$coefficients),
-                            names(rawMarkerEff$additive_effects),
-                            names(rawMarkerEff$dominance_effects)))
+    all_markers <- unique(c(
+      all_markers,
+      names(rawMarkerEff$coefficients),
+      names(rawMarkerEff$additive_effects),
+      names(rawMarkerEff$dominance_effects)
+    ))
   }
 
 
@@ -1235,8 +1301,8 @@ readMarkerEffects_json <- function(file) {
   for (trait in names(rawMarkerEffects_list)) {
     mark_eff <- rawMarkerEffects_list[[trait]]
 
-    if ((!all(names(mark_eff) %in% expectedFields_old_version))
-        && (!all(names(mark_eff) %in% expectedFields_new_version))) {
+    if ((!all(names(mark_eff) %in% expectedFields_old_version)) &&
+      (!all(names(mark_eff) %in% expectedFields_new_version))) {
       engineError(
         "Marker effects: bad json's keys",
         extra = list(
@@ -1247,8 +1313,10 @@ readMarkerEffects_json <- function(file) {
       )
     }
 
-    markerEffects$intercept <- c(markerEffects$intercept,
-                                 unlist(mark_eff$intercept))
+    markerEffects$intercept <- c(
+      markerEffects$intercept,
+      unlist(mark_eff$intercept)
+    )
     names(markerEffects$intercept)[length(markerEffects$intercept)] <- trait
 
     if (all(names(mark_eff) %in% expectedFields_old_version)) {
@@ -1258,7 +1326,7 @@ readMarkerEffects_json <- function(file) {
     }
 
 
-    mark_eff$additive_effects <- lapply(mark_eff$additive_effects, function(x){
+    mark_eff$additive_effects <- lapply(mark_eff$additive_effects, function(x) {
       if (is.null(x)) {
         return(NA)
       }
@@ -1270,7 +1338,7 @@ readMarkerEffects_json <- function(file) {
       SNPid = names(mark_eff$additive_effects)
     )
 
-    mark_eff$dominance_effects <- lapply(mark_eff$dominance_effects, function(x){
+    mark_eff$dominance_effects <- lapply(mark_eff$dominance_effects, function(x) {
       if (is.null(x)) {
         return(NA)
       }
@@ -1344,7 +1412,7 @@ readProgBlupEstim <- function(file) {
       )
     }
 
-    projBlups_list <- apply(projBlups_list, 1, function(line){
+    projBlups_list <- apply(projBlups_list, 1, function(line) {
       list(
         ind1 = line["ind1"],
         ind2 = line["ind2"],
@@ -1361,18 +1429,20 @@ readProgBlupEstim <- function(file) {
     error_msg <- "Error: provided file do not seems to be generated by r-geno-tools-Engine."
     if (!is.list(projBlups)) {
       bad_argument(projBlups,
-                   must_be = "a list",
-                   not = projBlups,
-                   extra = list(code = errorCode("BAD_PROGENY_BLUP_FILE")))
-        }
+        must_be = "a list",
+        not = projBlups,
+        extra = list(code = errorCode("BAD_PROGENY_BLUP_FILE"))
+      )
+    }
     expected_names <- c("ind1", "ind2", "blup_exp", "blup_var", "cov")
     if (!identical(names(projBlups), expected_names)) {
       bad_argument(
         "names(projBlups)",
         must_be = expected_names,
         not = names(projBlups),
-        extra = list(code = errorCode("BAD_PROGENY_BLUP_FILE")))
-   }
+        extra = list(code = errorCode("BAD_PROGENY_BLUP_FILE"))
+      )
+    }
     TRUE
   })
   logger$log("DONE, return output.")
@@ -1396,35 +1466,40 @@ saveGWAS <- function(gwasRes, metadata, dir = NULL, file = NULL) {
   logger <- Logger$new("r-saveGWAS()")
   if (is.null(file)) {
     if (is.null(dir)) {
-       dir <- tempdir()
+      dir <- tempdir()
     }
-    logger$log('Check dir ...')
+    logger$log("Check dir ...")
     if (!dir.exists(dir)) {
       logger$log('Error: "dir" directory should exists')
       engineError('Error: "dir" directory should exists',
-                  extra = list(code = errorCode("NO_OUTPUT_DIR"), dir = dir))
+        extra = list(code = errorCode("NO_OUTPUT_DIR"), dir = dir)
+      )
     }
-    logger$log('Check dir DONE')
+    logger$log("Check dir DONE")
     file <- tempfile(fileext = ".json", tmpdir = dir)
-
   } else {
-    logger$log('Check file ...')
+    logger$log("Check file ...")
     if (file.exists(file)) {
       logger$log('Warning: output "file" already exists. This file will be overwritten.')
     } else {
       file.create(file)
     }
-    logger$log('Check file DONE')
+    logger$log("Check file DONE")
   }
 
-  gwasList <- list(gwas = gwasRes,
-                   metadata = metadata)
-  writeLines(jsonlite::toJSON(gwasList,
-                              complex = "list",
-                              pretty = T,
-                              digits = NA,
-                              na = 'string'),
-             con = file)
+  gwasList <- list(
+    gwas = gwasRes,
+    metadata = metadata
+  )
+  writeLines(
+    jsonlite::toJSON(gwasList,
+      complex = "list",
+      pretty = T,
+      digits = NA,
+      na = "string"
+    ),
+    con = file
+  )
   return(file)
 }
 
@@ -1451,86 +1526,101 @@ saveRelMat <- function(relMat,
                        metadata = NULL,
                        dir = NULL,
                        file = NULL,
-                       format = tools::file_ext(file)){
-
+                       format = tools::file_ext(file)) {
   logger <- Logger$new("r-saveRelMat()")
 
-  logger$log('Check relationship matrix ...')
+  logger$log("Check relationship matrix ...")
   checkRelMat(relMat)
-  logger$log('Check relationship matrix DONE')
+  logger$log("Check relationship matrix DONE")
 
   if (is.null(file)) {
     if (is.null(dir)) {
       dir <- tempdir()
     }
     if (!dir.exists(dir)) {
-      logger$log('Check dir ...')
+      logger$log("Check dir ...")
       engineError('Error: "dir" directory does not exist', extra = list())
-      logger$log('Check dir DONE')
+      logger$log("Check dir DONE")
     }
     if (length(format) == 0) {
       format <- "csv"
     }
     file <- tempfile(fileext = paste0(".", format), tmpdir = dir)
   } else {
-    logger$log('Check file ...')
+    logger$log("Check file ...")
     if (length(file) != 1) {
-      logger$log('Error: only one file name should be provided')
-      engineError('Only one output file name should be provided', extra = list())
+      logger$log("Error: only one file name should be provided")
+      engineError("Only one output file name should be provided", extra = list())
     }
     if (file.exists(file)) {
       logger$log('Warning: "file" directory already exists. This file will be overwritten.')
     } else {
       file.create(file)
     }
-    logger$log('Check file DONE')
+    logger$log("Check file DONE")
   }
 
-  logger$log('Check file format ...')
+  logger$log("Check file format ...")
   formatErr <- FALSE
   if (length(format) != 1) {
     formatErr <- TRUE
-  } else if (!format %in% c('csv', 'json')) {
+  } else if (!format %in% c("csv", "json")) {
     formatErr <- TRUE
   }
   if (formatErr) {
     engineError('File format misspecified. It should be either "csv" or "json"',
-                extra = list(code = errorCode("BAD_OUTPUT_FILE_FORMAT"),
-                             expected = c('csv', 'json'),
-                             provided = format))
+      extra = list(
+        code = errorCode("BAD_OUTPUT_FILE_FORMAT"),
+        expected = c("csv", "json"),
+        provided = format
+      )
+    )
   }
-  logger$log('Check file format DONE')
+  logger$log("Check file format DONE")
 
 
   if (format == "csv") {
-    logger$log('Write relationship matrix in `.csv` file ...')
+    logger$log("Write relationship matrix in `.csv` file ...")
     if (!is.null(metadata)) {
       metadata <- lapply(metadata, as.character)
-      writeLines(paste0("#", names(metadata), "=", unlist(metadata),
-                        collapse = "\n"),
-                 con = file)
+      writeLines(
+        paste0("#", names(metadata), "=", unlist(metadata),
+          collapse = "\n"
+        ),
+        con = file
+      )
     }
-    supThisWarning({
-      write.table(x = relMat,
-                  file = file,
-                  sep = ",",
-                  row.names = TRUE,
-                  col.names = TRUE,
-                  append = !is.null(metadata))
-    }, "appending column names to file")
-    logger$log('Write relationship matrix in `.csv` file DONE')
+    supThisWarning(
+      {
+        write.table(
+          x = relMat,
+          file = file,
+          sep = ",",
+          row.names = TRUE,
+          col.names = TRUE,
+          append = !is.null(metadata)
+        )
+      },
+      "appending column names to file"
+    )
+    logger$log("Write relationship matrix in `.csv` file DONE")
   }
   if (format == "json") {
-    logger$log('Write relationship matrix in `.json` file ...')
-    relMatList <- list(relMat = as.data.frame(relMat),
-                       metadata = metadata)
-    writeLines(jsonlite::toJSON(relMatList,
-                                dataframe = "rows",
-                                pretty = T,
-                                digits = NA,
-                                na = 'string'),
-               con = file)
-    logger$log('Write relationship matrix in `.json` file DONE')
+    logger$log("Write relationship matrix in `.json` file ...")
+    relMatList <- list(
+      relMat = as.data.frame(relMat),
+      metadata = metadata
+    )
+    writeLines(
+      jsonlite::toJSON(relMatList,
+        dataframe = "rows",
+        pretty = T,
+        digits = NA,
+        na = "string"
+      ),
+      con = file
+    )
+    logger$log("Write relationship matrix in `.json` file DONE")
   }
 
   return(file)
@@ -1547,9 +1637,10 @@ prepareData <- function(gDta, pDta) {
   logger <- Logger$new("r-prepareData()")
   # Remove from geno data individuals that are not in phenotypic data-set
   logger$log("Remove from geno data individuals that are not in phenotypic data-set ...")
-  if (!any(rownames(pDta) %in% gDta@ped$id )) {
+  if (!any(rownames(pDta) %in% gDta@ped$id)) {
     engineError("No common individuals found between genotypes and phenotypes data.",
-                extra = list(code = errorCode("BAD_GENO_PHENO_NO_COMMON_INDS")))
+      extra = list(code = errorCode("BAD_GENO_PHENO_NO_COMMON_INDS"))
+    )
   }
   gDta <- gaston::select.inds(gDta, id %in% rownames(pDta))
   logger$log("Remove from geno data individuals that are not in phenotypic data-set DONE")
@@ -1558,7 +1649,7 @@ prepareData <- function(gDta, pDta) {
   # filter out ind without genotypes from the pheno data
   # and reorder phenotypic data with id in bed matrix
   logger$log("reorder matrix ...")
-  pDta <- pDta[gDta@ped$id,,drop = F]
+  pDta <- pDta[gDta@ped$id, , drop = F]
   logger$log("reorder matrix DONE")
 
 
@@ -1566,7 +1657,8 @@ prepareData <- function(gDta, pDta) {
   logger$log("remove monomorphic markers ...")
   if (!any(gDta@snps$maf > 0)) {
     engineError("All SNP are monomorphic.",
-                extra = list(code = errorCode("BAD_GENO_ALL_MONOMORPHIC_SNP")))
+      extra = list(code = errorCode("BAD_GENO_ALL_MONOMORPHIC_SNP"))
+    )
   }
   gDta <- gaston::select.snps(gDta, maf > 0)
   logger$log("remove monomorphic markers DONE")
@@ -1584,15 +1676,14 @@ prepareData <- function(gDta, pDta) {
 #' @param pop simulated population (`breedSimulatR`'s population)
 #' @param SNPcoord snp coordinate of the genotypes. (data.frame with `chr`, `physPos`, and `SNPid` columns)
 #'
-saveVcf <- function(file, pop, SNPcoord){
-
+saveVcf <- function(file, pop, SNPcoord) {
   # Fixed region
   data <- SNPcoord[, c("chr", "physPos", "SNPid")]
-  data$physPos[is.na(data$physPos)] <- '.'
+  data$physPos[is.na(data$physPos)] <- "."
 
   colnames(data) <- c("#CHROM", "POS", "ID")
-  data <- data[order(data$POS),]
-  data <- data[order(data$`#CHROM`),]
+  data <- data[order(data$POS), ]
+  data <- data[order(data$`#CHROM`), ]
 
   data$REF <- "."
   data$ALT <- "."
@@ -1602,33 +1693,38 @@ saveVcf <- function(file, pop, SNPcoord){
 
   # Genotype region
   data$FORMAT <- "GT"
-  gt <- vapply(pop$inds, function(ind){
+  gt <- vapply(pop$inds, function(ind) {
     hap <- do.call(cbind, ind$haplo$values)
-    x <- paste(hap[1,], hap[2,], sep = "|")
+    x <- paste(hap[1, ], hap[2, ], sep = "|")
     names(x) <- colnames(hap)
     x
-  }, vector(mode = "character",
-            length = length(pop$inds[[1]]$haplo$allelDose)))
-  gt <- as.data.frame(gt[data$ID,])
+  }, vector(
+    mode = "character",
+    length = length(pop$inds[[1]]$haplo$allelDose)
+  ))
+  gt <- as.data.frame(gt[data$ID, ])
   data <- cbind(data, gt)
 
   # Meta region
   meta <- paste("##fileformat=VCFv4.3",
-                "##source=\"R-Geno-tool-engine\", data in this file are simulated.",
-                "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
-                sep = "\n")
+    "##source=\"R-Geno-tool-engine\", data in this file are simulated.",
+    "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+    sep = "\n"
+  )
 
   # write file
   f <- gzfile(file, "w")
   writeLines(text = meta, con = f)
   close(f)
-  data.table::fwrite(x = data,
-                     file = file,
-                     append = TRUE,
-                     sep = "\t",
-                     quote = FALSE,
-                     row.names = FALSE,
-                     col.names = TRUE)
+  data.table::fwrite(
+    x = data,
+    file = file,
+    append = TRUE,
+    sep = "\t",
+    quote = FALSE,
+    row.names = FALSE,
+    col.names = TRUE
+  )
 }
 
 
@@ -1642,36 +1738,39 @@ saveVcf <- function(file, pop, SNPcoord){
 #' will be overwritten.
 #'
 #' @return path of the created file
-save_dataFrame_as_json <- function(df, file){
+save_dataFrame_as_json <- function(df, file) {
   logger <- Logger$new("r-save_dataFrame_as_json()")
 
-    logger$log('Check file ...')
-    if (length(file) != 1) {
-      logger$log('Error: only one file name should be provided')
-      bad_argument('length(file)', must_be = 1, not = length(file))
-    }
+  logger$log("Check file ...")
+  if (length(file) != 1) {
+    logger$log("Error: only one file name should be provided")
+    bad_argument("length(file)", must_be = 1, not = length(file))
+  }
 
-    logger$log("Check output file extention ...")
-    ext <- tools::file_ext(file)
-    if (ext != "json") {
-      bad_argument('The output file extention', must_be = "json" , not = ext)
-    }
-    logger$log("Check output file extention DONE")
+  logger$log("Check output file extention ...")
+  ext <- tools::file_ext(file)
+  if (ext != "json") {
+    bad_argument("The output file extention", must_be = "json", not = ext)
+  }
+  logger$log("Check output file extention DONE")
 
-    if (file.exists(file)) {
-      logger$log('Warning: "file" directory already exists. This file will be overwritten.')
-    } else {
-      file.create(file)
-    }
-    logger$log('Check file DONE')
+  if (file.exists(file)) {
+    logger$log('Warning: "file" directory already exists. This file will be overwritten.')
+  } else {
+    file.create(file)
+  }
+  logger$log("Check file DONE")
 
-    writeLines(jsonlite::toJSON(df,
-                                dataframe = "rows",
-                                pretty = T,
-                                digits = NA,
-                                na = 'string'),
-               con = file)
-    return(file)
+  writeLines(
+    jsonlite::toJSON(df,
+      dataframe = "rows",
+      pretty = T,
+      digits = NA,
+      na = "string"
+    ),
+    con = file
+  )
+  return(file)
 }
 
 #' Save a R blupVarExp as json file
@@ -1681,28 +1780,29 @@ save_dataFrame_as_json <- function(df, file){
 #' will be overwritten.
 #'
 #' @return path of the created file
-save_blupVarExp_as_json <- function(blupVarExp, file){
+save_blupVarExp_as_json <- function(blupVarExp, file) {
   logger <- Logger$new("r-save_blupVarExp_as_json()")
 
-  logger$log('Check file ...')
+  logger$log("Check file ...")
   if (length(file) != 1) {
-    logger$log('Error: only one file name should be provided')
-    bad_argument('length(file)', must_be = "1", not = length(file))
+    logger$log("Error: only one file name should be provided")
+    bad_argument("length(file)", must_be = "1", not = length(file))
   }
 
   logger$log("Check output file extention ...")
   ext <- tools::file_ext(file)
   if (ext != "json") {
-    engineError('The output file must end by `.json`', extra = list())
+    engineError("The output file must end by `.json`", extra = list())
   }
   logger$log("Check output file extention DONE")
 
   jsonlite::write_json(blupVarExp,
-                       path = file,
-                       dataframe = "rows",
-                       pretty = T,
-                       digits = NA,
-                       na = 'string')
+    path = file,
+    dataframe = "rows",
+    pretty = T,
+    digits = NA,
+    na = "string"
+  )
 }
 
 #' Save a plotly graph
@@ -1712,7 +1812,7 @@ save_blupVarExp_as_json <- function(blupVarExp, file){
 #' will be overwritten.
 #'
 #' @return path of the created file
-save_plotly <- function(plot, file){
+save_plotly <- function(plot, file) {
   htmlwidgets::saveWidget(widget = plot, file = file, selfcontained = TRUE)
 }
 
@@ -1726,19 +1826,18 @@ save_plotly <- function(plot, file){
 #'
 #' @return path of the created file
 save_GS_model <- function(model, trait_name, file) {
-
   logger <- Logger$new("r-save_GS_model()")
 
-  logger$log('Check file ...')
+  logger$log("Check file ...")
   if (length(file) != 1) {
-    logger$log('Error: only one file name should be provided')
-    bad_argument('length(file)', must_be = "1", not = length(file))
+    logger$log("Error: only one file name should be provided")
+    bad_argument("length(file)", must_be = "1", not = length(file))
   }
 
   logger$log("Check output file extention ...")
   ext <- tools::file_ext(file)
   if (ext != "json") {
-    engineError('The output file must end by `.json`', extra = list())
+    engineError("The output file must end by `.json`", extra = list())
   }
   logger$log("Check output file extention DONE")
 
@@ -1752,11 +1851,12 @@ save_GS_model <- function(model, trait_name, file) {
   names(model_as_list) <- trait_name
 
   jsonlite::write_json(model_as_list,
-                       path = file,
-                       simplifyVector = T,
-                       pretty = T,
-                       digits = NA,
-                       na = 'string')
+    path = file,
+    simplifyVector = T,
+    pretty = T,
+    digits = NA,
+    na = "string"
+  )
 }
 
 #' Format `markerEffects` to be used by `calcProgenyBlupCovariance` function.
@@ -1768,10 +1868,11 @@ save_GS_model <- function(model, trait_name, file) {
 #' `SNPeffects`: data.frame of the additive effects, 1 columns per phenotype with
 #' the marker ids as row names.
 extract_additive_effects <- function(markerEffects) {
-  if (nrow(markerEffects$SNPeffects_dom) != 0
-      && !all(is.na(markerEffects$SNPeffects_dom[,1]))) {
+  if (nrow(markerEffects$SNPeffects_dom) != 0 &&
+    !all(is.na(markerEffects$SNPeffects_dom[, 1]))) {
     engineError("Model with dominance can not be used, only purely additive model.",
-                extra = list(code = errorCode("DOMINANCE_MODEL_FOR_BLUP_ESTIMATION")))
+      extra = list(code = errorCode("DOMINANCE_MODEL_FOR_BLUP_ESTIMATION"))
+    )
   }
   markerEffects <- markerEffects[c("intercept", "SNPeffects_add")]
   names(markerEffects)[2] <- "SNPeffects"
@@ -1787,30 +1888,30 @@ extract_additive_effects <- function(markerEffects) {
 #' If the file already exists, it will be overwritten.
 save_GS_evaluation <- function(evaluation,
                                trait_name,
-                               file){
-
+                               file) {
   logger <- Logger$new("r-save_GS_evaluation()")
 
-  logger$log('Check file ...')
+  logger$log("Check file ...")
   if (length(file) != 1) {
-    logger$log('Error: only one file name should be provided')
-    bad_argument('length(file)', must_be = "1", not = length(file))
+    logger$log("Error: only one file name should be provided")
+    bad_argument("length(file)", must_be = "1", not = length(file))
   }
 
   logger$log("Check output file extention ...")
   ext <- tools::file_ext(file)
   if (ext != "json") {
-    engineError('The output file must end by `.json`', extra = list())
+    engineError("The output file must end by `.json`", extra = list())
   }
   logger$log("Check output file extention DONE")
 
   evaluation$trait <- trait_name
   jsonlite::write_json(evaluation,
-                       path = file,
-                       simplifyVector = T,
-                       pretty = T,
-                       digits = NA,
-                       na = 'string')
+    path = file,
+    simplifyVector = T,
+    pretty = T,
+    digits = NA,
+    na = "string"
+  )
   file
 }
 
@@ -1819,12 +1920,12 @@ save_GS_evaluation <- function(evaluation,
 #' @param file path of the evaluation result file generated by
 #' `save_GS_evaluation` function
 read_GS_evaluation <- function(file) {
-
   logger <- Logger$new("r-read_GS_evaluation()")
 
-  logger$log('Read model-evaluation file ...')
+  logger$log("Read model-evaluation file ...")
   evaluation <- jsonlite::fromJSON(file,
-                                   simplifyVector = TRUE)
-  logger$log('Read model-evaluation file DONE')
+    simplifyVector = TRUE
+  )
+  logger$log("Read model-evaluation file DONE")
   return(evaluation)
 }
