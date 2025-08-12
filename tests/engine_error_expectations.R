@@ -60,7 +60,7 @@ expect_engineError <- function(code) {
     "BAD_PEDIGREE_FORMAT_MISSING_IND_ID" = c("n_missing"),
     "BAD_PEDIGREE_FORMAT_N_COLUMNS" = c("expected", "provided"),
     "BAD_PHENOTYPE_DUPLICATES" = c("n_duplicates", "duplicates"),
-    "BAD_PHENO_DATA_CLASS" = c("columnWithWrongTypes", "detectedClass"),
+    "BAD_PHENO_DATA_CLASS" = c("columns", "individuals"),
     "BAD_SNPCOORD_DUPLICATED_ID" = c("n_duplicated_ids", "duplicated_ids"),
     "BAD_SNPCOORD_EMPTY" = c("expected", "provided"),
     "BAD_SNPCOORD_MISSING_LINK_MAP_POS_COLUMN" = c("expected", "provided"),

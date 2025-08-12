@@ -78,6 +78,26 @@ capture_output({
     err <- expect_engineError({
       dta <- readPhenoData("../data/pheno_inconsistent_both_numeric_and_character_values.csv")
     })
+    expect_true(setequal(err$extra$columns, c(
+      "Flowering.time.at.Arkansas",
+      "toto"
+    )))
+    expect_true(setequal(err$extra$individuals, c(
+      "NSFTV1@86f75d2b.0",
+      "NSFTV3@5ef1be74.0",
+      "NSFTV4@81d03b86.0",
+      "NSFTV5@5533f406.0",
+      "NSFTV6@0d125c0e.0",
+      "NSFTV7@e37be9e5.0"
+    )))
+
+    err <- expect_engineError({
+      dta <- readPhenoData("../data/pheno_inconsistent_both_numeric_and_character_values.csv",
+        traits = "Flowering.time.at.Arkansas"
+      )
+    })
+    expect_equal(err$extra$columns, "Flowering.time.at.Arkansas")
+    expect_equal(err$extra$individuals, "NSFTV4@81d03b86.0")
   })
 
 

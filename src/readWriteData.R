@@ -538,19 +538,52 @@ readPhenoData <- function(file, ind.names = 1, traits = NULL, ...) {
 
   accetpedColumnType <- c("numeric", "integer", "logical")
   columnTypes <- sapply(dta, class)
-  if (!all(columnTypes %in% accetpedColumnType)) {
-    columnWithWrongTypes <- names(columnTypes)[!columnTypes %in% accetpedColumnType]
+  columnWithWrongTypes <- names(columnTypes)[!columnTypes %in% accetpedColumnType]
+  extra_error_info <- list(columns = c(), inds = c())
+  for (col_wrong_type in columnWithWrongTypes) {
+    previous_na_lines <- which(is.na(dta[, col_wrong_type]))
+
+    # this is based on `base::suppressWarnings`
+    withCallingHandlers(
+      {
+        dta[, col_wrong_type] <- as.numeric(dta[, col_wrong_type])
+      },
+      warning = function(warn) {
+        catchedWarn <- "NAs introduced by coercion"
+        if (identical(warn$message, catchedWarn)) {
+          tryInvokeRestart("muffleWarning")
+        }
+      }
+    )
+
+    introduced_na_lines <- setdiff(
+      which(is.na(dta[, col_wrong_type])),
+      previous_na_lines
+    )
+    if (length(introduced_na_lines) != 0) {
+      extra_error_info$columns <- c(extra_error_info$columns, col_wrong_type)
+      extra_error_info$inds <- c(
+        extra_error_info$inds,
+        row.names(dta)[introduced_na_lines]
+      )
+    }
+  }
+
+  if (length(extra_error_info$columns) != 0) {
+    extra_error_info$inds <- unique(extra_error_info$inds)
     engineError(
-      paste0('Some phenotype data are not detected as any of the accepted types: "',
-             paste0(accetpedColumnType, collapse = '", "'),
-             '". Affected columns are: "',
-             paste0(columnWithWrongTypes, collapse = '", "'),
-             '". Please check your data.'
-             ),
+      paste0(
+        'Some phenotype data are not detected as any of the accepted types: "',
+        paste0(accetpedColumnType, collapse = '", "'),
+        '". Affected columns are: ',
+        paste0(extra_error_info$columns, collapse = ", "),
+        ". Affected individuals are: ",
+        paste0(extra_error_info$inds, collapse = ", "), "."
+      ),
       extra = list(
         code = errorCode("BAD_PHENO_DATA_CLASS"),
-        columnWithWrongTypes = columnWithWrongTypes,
-        detectedClass = columnTypes[columnWithWrongTypes]
+        columns = extra_error_info$columns,
+        individuals = extra_error_info$inds
       )
     )
   }
