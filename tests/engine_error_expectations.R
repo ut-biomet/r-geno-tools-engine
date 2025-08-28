@@ -79,7 +79,13 @@ expect_engineError <- function(code) {
     "BAD_FILE_FORMAT" = c("expected", "provided", "file"),
     "MULTIPLE_INPUTFILE" = c("expected", "provided"),
     "MULTIPLE_OUTFILE" = c("expected", "provided"),
-    "NO_OUTPUT_DIR" = c("dir")
+    "NO_OUTPUT_DIR" = c("dir"),
+    "PROJ_BLUP_SNP_COORD_MISSING_SNP" = c(
+      "n_missing_SNP",
+      "n_expected_SNP",
+      "missing_SNP",
+      "reference"
+    )
   )
 
   if (!error$extra$code %in% names(expected_fields)) {

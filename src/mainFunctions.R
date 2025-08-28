@@ -1016,7 +1016,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
                  'SNPs when compared with the provided marker effects.')
     engineError(msg,
       extra = list(
-        "code" = errorCode("SNP_COORD_MISSING_SNP"),
+        "code" = errorCode("PROJ_BLUP_SNP_COORD_MISSING_SNP"),
         "n_missing_SNP" = length(missingSNP),
         "n_expected_SNP" = nrow(markerEffects$SNPeffects),
         "missing_SNP" = missingSNP,
