@@ -59,8 +59,8 @@
             src = pkgs.fetchFromGitHub {
               owner = "ut-biomet";
               repo = "breedSimulatR";
-              rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
-              sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
+              rev = "d5f485f2c8154a4a0af661e176fbaf09376f4c01";
+              sha256 = "sha256-PBgDW3ZopeDkaMXDyT+CeGEixEuhGJrSGb2eLOJ1O2U=";
             };
             propagatedBuildInputs = with pkgs.rPackages; [
               data_table
@@ -94,19 +94,18 @@
           R_LIBS_USER = "''"; # to no use users' installed R packages
           R_PROFILE_USER = "''"; # to disable`.Rprofile` files (eg. when the project already use `renv`)
           nativeBuildInputs = [ pkgs.bashInteractive ];
-          buildInputs =
-            [
-              R-with-packages
+          buildInputs = [
+            R-with-packages
 
-              pkgs.pandoc
-              pkgs.python3
-              ((pkgs.callPackage ./nix_pkgs/default.nix { inherit pkgs; }).overrideAttrs (oldAttrs: {
-                doCheck = false;
-              }))
-            ]
-            ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
-              Rstudio-with-packages
-            ];
+            pkgs.pandoc
+            pkgs.python3
+            ((pkgs.callPackage ./nix_pkgs/default.nix { inherit pkgs; }).overrideAttrs (oldAttrs: {
+              doCheck = false;
+            }))
+          ]
+          ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
+            Rstudio-with-packages
+          ];
         };
 
         apps = {

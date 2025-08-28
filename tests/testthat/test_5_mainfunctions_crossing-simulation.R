@@ -118,7 +118,7 @@ capture.output({
 
   inconsistentSNPFile <- "../data/inconsistent_SNPcoord_2.csv"
   test_that("crossingSimulation inconsistent SNPs", {
-    err <- expect_engineError({
+    err <- expect_warning({
       createdFile <- crossingSimulation(
         genoFile = phasedGenoFile,
         crossTableFile = crossTableFile,

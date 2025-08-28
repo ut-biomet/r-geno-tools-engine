@@ -145,11 +145,7 @@ checkAndFilterSNPcoord <- function(user_SNPcoord, vcf_SNPcoord) {
   }))
 
   if (length(inconsistent_order_chr) != 0) {
-    engineError("SNP's position order should be similar when sorted by physical position and by linkage map position",
-                extra = list(
-                  "code" = errorCode("BAD_SNPCOORD_INCONSISTENT_SNP_ORDER"),
-                  "affected_chr" = inconsistent_order_chr
-                ))
+    warning("SNP's position order are not similar when sorted by physical position and by linkage map position")
   }
 
   row.names(user_SNPcoord) <- NULL

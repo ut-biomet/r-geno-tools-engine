@@ -45,8 +45,8 @@ let
       src = pkgs.fetchFromGitHub {
         owner = "ut-biomet";
         repo = "breedSimulatR";
-        rev = "21fc8eb7f2e83f685a3eb99ca4bc611dee652ddd";
-        sha256 = "sha256-JZvjTqlj4LK3tvLrrb2oVBgwTKU0Nntur6He2tQveCc=";
+        rev = "d5f485f2c8154a4a0af661e176fbaf09376f4c01";
+        sha256 = "sha256-PBgDW3ZopeDkaMXDyT+CeGEixEuhGJrSGb2eLOJ1O2U=";
       };
       propagatedBuildInputs = with pkgs.rPackages; [
         data_table
@@ -71,7 +71,7 @@ let
 in
 pkgs.stdenv.mkDerivation (finalAttrs: rec {
   pname = "r-geno-tools-engine";
-  version = "v1.2.3";
+  version = "v1.2.7";
 
   src = pkgs.lib.sources.cleanSource ../.;
 
