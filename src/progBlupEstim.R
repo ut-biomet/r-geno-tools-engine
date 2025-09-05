@@ -169,9 +169,10 @@ calcProgenyBlupCovariance <- function(SNPcoord,
   CovG1G2 <- matrix(nrow = length(EG), ncol = length(EG))
   colnames(CovG1G2) <- names(markerEffects$intercept)
   rownames(CovG1G2) <- names(markerEffects$intercept)
-  for (t1 in names(markerEffects$intercept)) {
-    for (t2 in names(markerEffects$intercept)) {
-
+  for (i in seq(1, length(markerEffects$intercept))) {
+    t1 <- names(markerEffects$intercept)[i]
+    for (j in seq(i, length(markerEffects$intercept))) {
+      t2 <- names(markerEffects$intercept)[j]
       cov <- lapply(unique(SNPcoord$chr), function(chr){
 
         subsetSNPcoord <- SNPcoord[SNPcoord$chr == chr,]
@@ -216,6 +217,7 @@ calcProgenyBlupCovariance <- function(SNPcoord,
         cov <- 0
       }
       CovG1G2[t1, t2] <- sum(unlist(cov))
+      CovG1G2[t2, t1] <- sum(unlist(cov))
     }
   }
   CovG1G2
