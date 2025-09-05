@@ -209,7 +209,9 @@ predict_gs_model <- function(geno, estim_mark_eff) {
   additive_gv <- calc_additive_geno(geno, standardized = FALSE) %*% estim_mark_eff$eff$additive
 
   dominance_gv = 0
-  if (!all(is.na(estim_mark_eff$eff$dominance))) {
+  dominance_model <- (any(!is.na(estim_mark_eff$eff$dominance))
+                      & any(estim_mark_eff$eff$dominance != 0, na.rm = TRUE))
+  if (dominance_model) {
     dominance_gv <- calc_dominance_geno(geno, standardized = FALSE) %*% estim_mark_eff$eff$dominance
   }
 

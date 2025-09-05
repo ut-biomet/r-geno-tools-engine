@@ -805,14 +805,49 @@ capture_output({
   }
 
   files <- c(
-    "../data/markerEffects_missing_values.csv",
+    "../data/markerEffects_missing_values.csv"
+  )
+  for (file in files) {
+    test_that(paste("readMarkerEffects", basename(file)), {
+      expect_no_error({
+        markerEffects <- readMarkerEffects(file)
+      })
+      raw <- read.csv(file)
+      raw <- raw[-1,]
+      row.names(raw) <- raw$SNPid
+      raw <- raw[, -1, drop = FALSE]
+      na_indices <- which(is.na(raw), arr.ind = TRUE)
+      na_row_names <- row.names(raw)[na_indices[,"row"]]
+      na_col_names <- colnames(raw)[na_indices[,"col"]]
+
+      expect_true(all(
+        mapply(function(row, col) {markerEffects$SNPeffects_add[row, col]},
+               na_row_names,
+               na_col_names) == 0))
+    })
+  }
+
+  files <- c(
     "../data/markerEffects_missing_values.json"
   )
   for (file in files) {
     test_that(paste("readMarkerEffects", basename(file)), {
-      err <- expect_engineError({
-        SNPcoord <- readMarkerEffects(file)
+      expect_no_error({
+        markerEffects <- readMarkerEffects(file)
       })
+
+      raw <- jsonlite::fromJSON(file,
+                                simplifyVector = FALSE
+      )
+      missing_indices <- lapply(raw, function(raw_markEff_per_trait){
+        missing_values <- lapply(raw_markEff_per_trait$coefficients, is.null)
+        names(raw_markEff_per_trait$coefficients)[unlist(missing_values)]
+      })
+      for (trait in names(missing_indices)) {
+        expect_true(all(
+          markerEffects$SNPeffects_add[missing_indices[[trait]], trait] == 0
+        ))
+      }
     })
   }
 
@@ -835,9 +870,30 @@ capture_output({
     )
   })
 
+  test_that("readMarkerEffects use values = 0 missing effects (especially for dominance)", {
+    markEffFile <- "../../data/results/GS_model_additive.json"
+    markEffs <- readMarkerEffects(markEffFile)
+    expect_true(all(markEffs$SNPeffects_dom == 0))
+  })
 
+  test_that("readMarkerEffects on multi-traits with different set of SNPs", {
+    markEffFile <- "../data/markerEffects_2_traits_no_dom_different_set_of_snp.json"
+    raw_json_dta <- jsonlite::fromJSON(markEffFile,
+                                       simplifyVector = FALSE)
+    SNP_trait_1 <- union(names(raw_json_dta[[1]]$additive_effects),
+                         names(raw_json_dta[[1]]$dominance_effects))
+    SNP_trait_2 <- union(names(raw_json_dta[[2]]$additive_effects),
+                         names(raw_json_dta[[2]]$dominance_effects))
+    exclusively_trait_1_SNP <- setdiff(SNP_trait_1, SNP_trait_2)
+    exclusively_trait_2_SNP <- setdiff(SNP_trait_2, SNP_trait_1)
 
+    markEffs <- readMarkerEffects(markEffFile)
 
+    expect_true(all(markEffs$SNPeffects_add[exclusively_trait_2_SNP, "trait1"] == 0))
+    expect_true(all(markEffs$SNPeffects_add[exclusively_trait_1_SNP, "trait2"] == 0))
+    expect_true(all(markEffs$SNPeffects_dom[exclusively_trait_2_SNP, "trait1"] == 0))
+    expect_true(all(markEffs$SNPeffects_dom[exclusively_trait_1_SNP, "trait2"] == 0))
+  })
 
 
   # readProgEstim ----
@@ -959,10 +1015,8 @@ capture_output({
   for (file in markerEffectsFiles_dominance) {
     test_that(paste("readMarkerEffects", basename(file)), {
       markerEff <- readMarkerEffects(file)
-      expect_no_error({
-        expect_engineError({
-          markerEff <- extract_additive_effects(markerEff)
-        })
+      expect_engineError({
+        markerEff <- extract_additive_effects(markerEff)
       })
     })
   }
