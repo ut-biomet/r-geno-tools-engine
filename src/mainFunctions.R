@@ -1011,7 +1011,9 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   logger$log("Check SNPs' ids consistency between",
              "SNPcoordinate and markerEffects file ...")
   if (!all(row.names(markerEffects$SNPeffects) %in% SNPcoord$SNPid)) {
-    missingSNP <- which(!SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects))
+    missingSNP <- row.names(markerEffects$SNPeffects)[
+      which(!row.names(markerEffects$SNPeffects) %in% SNPcoord$SNPid)
+    ]
     msg <- paste('The SNPs coordinate file miss', length(missingSNP),
                  'SNPs when compared with the provided marker effects.')
     engineError(msg,
