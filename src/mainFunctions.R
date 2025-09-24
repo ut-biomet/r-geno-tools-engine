@@ -41,8 +41,7 @@ run_gwas <- function(genoFile = NULL,
                      response = "quantitative",
                      thresh_maf,
                      thresh_callrate,
-                     outFile = tempfile(fileext = ".json")){
-
+                     outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-run_gwas()")
 
   check_test(test)
@@ -54,19 +53,26 @@ run_gwas <- function(genoFile = NULL,
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(genoFile) && !is.null(phenoFile)
-      && is.null(genoUrl) && is.null(phenoUrl)) {
-    data <- readData(genoFile = genoFile,
-                     phenoFile = phenoFile,
-                     traits = trait)
-  } else if (!is.null(genoUrl) && !is.null(phenoUrl)
-            && is.null(genoFile) && is.null(phenoFile)) {
-    data <- downloadData(genoUrl = genoUrl,
-                         phenoUrl = phenoUrl)
+  if (!is.null(genoFile) && !is.null(phenoFile) &&
+    is.null(genoUrl) && is.null(phenoUrl)) {
+    data <- readData(
+      genoFile = genoFile,
+      phenoFile = phenoFile,
+      traits = trait
+    )
+  } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
+    is.null(genoFile) && is.null(phenoFile)) {
+    data <- downloadData(
+      genoUrl = genoUrl,
+      phenoUrl = phenoUrl
+    )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -77,25 +83,28 @@ run_gwas <- function(genoFile = NULL,
 
 
   logger$log("GWAS analysis ...")
-  gwasRes <- gwas(data = data,
-                  trait = trait,
-                  test = test,
-                  fixed = fixed,
-                  response = response,
-                  thresh_maf = thresh_maf,
-                  thresh_callrate = thresh_callrate)
+  gwasRes <- gwas(
+    data = data,
+    trait = trait,
+    test = test,
+    fixed = fixed,
+    response = response,
+    thresh_maf = thresh_maf,
+    thresh_callrate = thresh_callrate
+  )
   logger$log("GWAS analysis DONE")
 
   logger$log("Save metadata ...")
-  metadata <- list(genoFP = digest::digest(data$genoData),
-                   phenoFP = digest::digest(data$phenoData),
-                   trait = trait,
-                   test = test,
-                   fixed = fixed,
-                   response = response,
-                   thresh_maf = thresh_maf,
-                   thresh_callrate = thresh_callrate,
-                   date = Sys.time()
+  metadata <- list(
+    genoFP = digest::digest(data$genoData),
+    phenoFP = digest::digest(data$phenoData),
+    trait = trait,
+    test = test,
+    fixed = fixed,
+    response = response,
+    thresh_maf = thresh_maf,
+    thresh_callrate = thresh_callrate,
+    date = Sys.time()
   )
   logger$log("Save metadata DONE")
 
@@ -175,23 +184,26 @@ draw_manhattanPlot <- function(gwasFile = NULL,
     ext <- tools::file_ext(outFile)
     if (ext == "") {
       if (interactive) {
-        outFile <- paste0(outFile, '.html')
+        outFile <- paste0(outFile, ".html")
       } else {
-        outFile <- paste0(outFile, '.png')
+        outFile <- paste0(outFile, ".png")
       }
     }
   }
 
 
   logger$log("Get data ...")
-  if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
+  if (!is.null(gwasFile) && is.null(gwasUrl)) {
     gwas <- readGWAS(gwasFile)
   } else if (!is.null(gwasUrl) && is.null(gwasFile)) {
     gwas <- downloadGWAS(gwasUrl)
   } else {
     engineError("Either `gwasFile` or `gwasUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "GWAS"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "GWAS"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -199,28 +211,34 @@ draw_manhattanPlot <- function(gwasFile = NULL,
 
   if (!interactive && !is.null(outFile)) {
     logger$log("Open connexion to draw the png plot ...")
-    png(filename = outFile,
-        width = 40,
-        height = 30,
-        units = 'cm',
-        res = 177,
-        pointsize = 18,
-        type = "cairo")
+    png(
+      filename = outFile,
+      width = 40,
+      height = 30,
+      units = "cm",
+      res = 177,
+      pointsize = 18,
+      type = "cairo"
+    )
     logger$log("Open connexion to draw the png plot DONE")
   }
 
   logger$log("Draw Manhattan Plot ...")
-  p <- manPlot(gwas = gwas$gwas,
-               adj_method = adj_method,
-               thresh_p = thresh_p,
-               chr = chr,
-               interactive = interactive,
-               title = paste(gwas$metadata$trait,
-                             adj_method,
-                             thresh_p, sep = " - "),
-               filter_pAdj = filter_pAdj,
-               filter_quant = filter_quant,
-               filter_nPoints = filter_nPoints)
+  p <- manPlot(
+    gwas = gwas$gwas,
+    adj_method = adj_method,
+    thresh_p = thresh_p,
+    chr = chr,
+    interactive = interactive,
+    title = paste(gwas$metadata$trait,
+      adj_method,
+      thresh_p,
+      sep = " - "
+    ),
+    filter_pAdj = filter_pAdj,
+    filter_quant = filter_quant,
+    filter_nPoints = filter_nPoints
+  )
   logger$log("Draw Manhattan Plot DONE")
 
   if (!is.null(outFile)) {
@@ -260,7 +278,7 @@ run_resAdjustment <- function(gwasFile = NULL,
                               filter_pAdj = 1,
                               filter_nPoints = Inf,
                               filter_quant = 1,
-                              outFile = tempfile(fileext = ".json")){
+                              outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-run_resAdjustment()")
 
   check_adj_method(adj_method)
@@ -277,14 +295,17 @@ run_resAdjustment <- function(gwasFile = NULL,
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(gwasFile) &&  is.null(gwasUrl)) {
+  if (!is.null(gwasFile) && is.null(gwasUrl)) {
     gwas <- readGWAS(gwasFile)
   } else if (!is.null(gwasUrl) && is.null(gwasFile)) {
     gwas <- downloadGWAS(gwasUrl)
   } else {
     engineError("Either `gwasFile` or `gwasUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "GWAS"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "GWAS"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -295,10 +316,12 @@ run_resAdjustment <- function(gwasFile = NULL,
   logger$log("Adjust p-values DONE")
 
   # filter results
-  gwas$gwas <- filterGWAS(gwas = gwas$gwas,
-                          filter_pAdj = filter_pAdj,
-                          filter_nPoints = filter_nPoints,
-                          filter_quant = filter_quant)
+  gwas$gwas <- filterGWAS(
+    gwas = gwas$gwas,
+    filter_pAdj = filter_pAdj,
+    filter_nPoints = filter_nPoints,
+    filter_quant = filter_quant
+  )
 
   metadata <- gwas$metadata
   metadata$adj_method <- adj_method
@@ -347,27 +370,32 @@ draw_ldPlot <- function(genoFile = NULL,
   if (!is.null(outFile)) {
     ext <- tools::file_ext(outFile)
     if (ext == "") {
-        outFile <- paste0(outFile, '.png')
+      outFile <- paste0(outFile, ".png")
     }
   }
 
   logger$log("Get data ...")
-  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+  if (!is.null(genoFile) && is.null(genoUrl)) {
     geno <- readGenoData(genoFile)
   } else if (!is.null(genoUrl) && is.null(genoFile)) {
     geno <- downloadGenoData(genoUrl)
   } else {
     engineError("Either `genoFile` or `genoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
   logger$log("Get data DONE")
 
   logger$log("Draw LD Plot ...")
-  imgFile <- LDplot(geno = geno,
-                    from = from,
-                    to = to,
-                    file = outFile)
+  imgFile <- LDplot(
+    geno = geno,
+    from = from,
+    to = to,
+    file = outFile
+  )
   logger$log("Draw LD Plot DONE")
 
   imgFile
@@ -408,18 +436,25 @@ calc_pedRelMat <- function(pedFile = NULL,
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(pedFile) &&  is.null(pedUrl)) {
-    ped <- readPedData(file = pedFile,
-                       unknown_string = unknown_string,
-                       header = header)
+  if (!is.null(pedFile) && is.null(pedUrl)) {
+    ped <- readPedData(
+      file = pedFile,
+      unknown_string = unknown_string,
+      header = header
+    )
   } else if (!is.null(pedUrl) && is.null(pedFile)) {
-    ped <- downloadPedData(url = pedUrl,
-                           unknown_string = unknown_string,
-                           header = header)
+    ped <- downloadPedData(
+      url = pedUrl,
+      unknown_string = unknown_string,
+      header = header
+    )
   } else {
     engineError("Either `pedFile` or `pedUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "pedigree"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "pedigree"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -428,10 +463,12 @@ calc_pedRelMat <- function(pedFile = NULL,
   relMat <- pedRelMat(ped = ped)
   logger$log("Calcualte pedigree relationship matrix DONE")
   logger$log("Get metadata ...")
-  metadata <- list(info = "R-geno-engine, Pedigree relationship matrix",
-                   date = Sys.time(),
-                   nInds = ncol(relMat),
-                   pedFP = digest::digest(ped$data))
+  metadata <- list(
+    info = "R-geno-engine, Pedigree relationship matrix",
+    date = Sys.time(),
+    nInds = ncol(relMat),
+    pedFP = digest::digest(ped$data)
+  )
   logger$log("Get metadata DONE")
 
   if (!is.null(outFile)) {
@@ -479,24 +516,29 @@ calc_genoRelMat <- function(genoFile = NULL,
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+  if (!is.null(genoFile) && is.null(genoUrl)) {
     geno <- readGenoData(genoFile)
   } else if (!is.null(genoUrl) && is.null(genoFile)) {
     geno <- downloadGenoData(genoUrl)
   } else {
     engineError("Either `genoFile` or `genoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
 
   logger$log("Calcualte genomic relationship matrix ...")
   relMat <- calc_additive_rel_mat(geno = geno, standardized = TRUE)$rel_mat
   logger$log("Calcualte genomic relationship matrix DONE")
   logger$log("Get metadata ...")
-  metadata <- list(info = "R-geno-engine, genomic relationship matrix",
-                   date = Sys.time(),
-                   nInds = ncol(relMat),
-                   genoFP = digest::digest(geno))
+  metadata <- list(
+    info = "R-geno-engine, genomic relationship matrix",
+    date = Sys.time(),
+    nInds = ncol(relMat),
+    genoFP = digest::digest(geno)
+  )
   logger$log("Get metadata DONE")
 
   if (!is.null(outFile)) {
@@ -559,59 +601,74 @@ calc_genoRelMat <- function(genoFile = NULL,
 calc_combinedRelMat <- function(pedRelMatFile = NULL,
                                 pedRelMatUrl = NULL,
                                 genoRelMatFile = NULL,
-                                genoRelMatUrl  = NULL,
+                                genoRelMatUrl = NULL,
                                 method = "Legarra",
                                 tau = NULL,
                                 omega = NULL,
                                 outFile = tempfile(fileext = ".csv"),
                                 outFormat = tools::file_ext(outFile)) {
-
   logger <- Logger$new("r-calc_combinedRelMat()")
 
   check_method(method, tau, omega)
-  if (method == "Martini") {check_tau_omega(tau, omega)}
+  if (method == "Martini") {
+    check_tau_omega(tau, omega)
+  }
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(pedRelMatFile) &&  is.null(pedRelMatUrl)) {
+  if (!is.null(pedRelMatFile) && is.null(pedRelMatUrl)) {
     ped_rm <- readRelMat(pedRelMatFile)
   } else if (!is.null(pedRelMatUrl) && is.null(pedRelMatFile)) {
     ped_rm <- downloadRelMat(pedRelMatUrl)
   } else {
     engineError("Either `pedRelMatFile` or `pedRelMatUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "pedigree relationship matrix"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "pedigree relationship matrix"
+      )
+    )
   }
-  if (!is.null(genoRelMatFile) &&  is.null(genoRelMatUrl)) {
+  if (!is.null(genoRelMatFile) && is.null(genoRelMatUrl)) {
     geno_rm <- readRelMat(genoRelMatFile)
   } else if (!is.null(genoRelMatUrl) && is.null(genoRelMatFile)) {
     geno_rm <- downloadRelMat(genoRelMatUrl)
   } else {
     engineError("Either `genoRelMatFile` or `genoRelMatUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genomic relationship matrix"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genomic relationship matrix"
+      )
+    )
   }
   logger$log("Get data DONE")
 
   if (!any(rownames(geno_rm) %in% rownames(ped_rm))) {
-    engineError(paste('No common individuals between genomic',
-                      'and pedigree relationship matrices.'),
-                extra = list(code = errorCode("INCONSISTENT_RELATIONSHIP_MATRICES")))
+    engineError(
+      paste(
+        "No common individuals between genomic",
+        "and pedigree relationship matrices."
+      ),
+      extra = list(code = errorCode("INCONSISTENT_RELATIONSHIP_MATRICES"))
+    )
   }
 
   logger$log("Calcualte combined relationship matrix ...")
-  relMat <- combinedRelMat(ped_rm = ped_rm,
-                           geno_rm = geno_rm,
-                           method = method,
-                           tau = tau,
-                           omega = omega)
+  relMat <- combinedRelMat(
+    ped_rm = ped_rm,
+    geno_rm = geno_rm,
+    method = method,
+    tau = tau,
+    omega = omega
+  )
   logger$log("Calcualte combined relationship matrix DONE")
   logger$log("Get metadata ...")
-  metadata <- list(info = "R-geno-engine, combined relationship matrix",
-                   date = Sys.time(),
-                   nInds = ncol(relMat),
-                   geno_relMatFP = digest::digest(geno_rm),
-                   ped_relMatFP = digest::digest(ped_rm))
+  metadata <- list(
+    info = "R-geno-engine, combined relationship matrix",
+    date = Sys.time(),
+    nInds = ncol(relMat),
+    geno_relMatFP = digest::digest(geno_rm),
+    ped_relMatFP = digest::digest(ped_rm)
+  )
   logger$log("Get metadata DONE")
 
   if (!is.null(outFile)) {
@@ -657,16 +714,16 @@ draw_relHeatmap <- function(relMatFile = NULL,
     ext <- tools::file_ext(outFile)
     if (ext == "") {
       if (interactive) {
-        outFile <- paste0(outFile, '.html')
+        outFile <- paste0(outFile, ".html")
       } else {
-        outFile <- paste0(outFile, '.png')
+        outFile <- paste0(outFile, ".png")
       }
     }
   }
 
 
   logger$log("Get data ...")
-  if (!is.null(relMatFile) &&  is.null(relMatUrl)) {
+  if (!is.null(relMatFile) && is.null(relMatUrl)) {
     if (is.null(format)) {
       format <- tools::file_ext(relMatFile)
     }
@@ -678,27 +735,34 @@ draw_relHeatmap <- function(relMatFile = NULL,
     relMat <- downloadRelMat(url = relMatUrl, format = format)
   } else {
     engineError("Either `relMatFile` or `relMatFile` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "relationship matrix"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "relationship matrix"
+      )
+    )
   }
   logger$log("Get data DONE")
 
 
   if (!interactive && !is.null(outFile)) {
     logger$log("Open connexion to draw the png plot ...")
-    png(filename = outFile,
-        width = 40,
-        height = 30,
-        units = 'cm',
-        res = 177,
-        pointsize = 18,
-        type = "cairo")
+    png(
+      filename = outFile,
+      width = 40,
+      height = 30,
+      units = "cm",
+      res = 177,
+      pointsize = 18,
+      type = "cairo"
+    )
     logger$log("Open connexion to draw the png plot DONE")
   }
 
   logger$log("Draw relationship heatmap ...")
-  p <- relMatHeatmap(relMat = relMat,
-                     interactive = interactive)
+  p <- relMatHeatmap(
+    relMat = relMat,
+    interactive = interactive
+  )
   logger$log("Draw relationship heatmap DONE")
 
   if (!is.null(outFile)) {
@@ -742,18 +806,25 @@ draw_pedNetwork <- function(pedFile = NULL,
   logger <- Logger$new("r-draw_pedNetwork()")
 
   logger$log("Get data ...")
-  if (!is.null(pedFile) &&  is.null(pedUrl)) {
-    ped <- readPedData(file = pedFile,
-                       unknown_string = unknown_string,
-                       header = header)
+  if (!is.null(pedFile) && is.null(pedUrl)) {
+    ped <- readPedData(
+      file = pedFile,
+      unknown_string = unknown_string,
+      header = header
+    )
   } else if (!is.null(pedUrl) && is.null(pedFile)) {
-    ped <- downloadPedData(url = pedUrl,
-                           unknown_string = unknown_string,
-                           header = header)
+    ped <- downloadPedData(
+      url = pedUrl,
+      unknown_string = unknown_string,
+      header = header
+    )
   } else {
     engineError("Either `pedFile` or `pedUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "pedigree"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "pedigree"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -763,7 +834,7 @@ draw_pedNetwork <- function(pedFile = NULL,
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-      save_plotly(p, outFile)
+    save_plotly(p, outFile)
     logger$log("Save results DONE")
   }
   p
@@ -821,71 +892,93 @@ crossingSimulation <- function(genoFile = NULL,
 
   # load input data
   logger$log("Get data ...")
-  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+  if (!is.null(genoFile) && is.null(genoUrl)) {
     g <- readPhasedGeno(genoFile)
   } else if (is.null(genoFile) && !is.null(genoUrl)) {
     g <- downloadPhasedGeno(genoUrl)
   } else {
     engineError("Either `genoFile` or `genoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
-
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
 
-  if (!is.null(SNPcoordFile) &&  is.null(SNPcoordUrl)) {
+  if (!is.null(SNPcoordFile) && is.null(SNPcoordUrl)) {
     SNPcoord <- readSNPcoord(SNPcoordFile)
   } else if (is.null(SNPcoordFile) && !is.null(SNPcoordUrl)) {
     SNPcoord <- downloadSNPcoord(SNPcoordUrl)
   } else {
     engineError("Either `SNPcoordFile` or `SNPcoordUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "SNP coordinates"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "SNP coordinates"
+      )
+    )
   }
 
-  if (!is.null(crossTableFile) &&  is.null(crossTableUrl)) {
+  if (!is.null(crossTableFile) && is.null(crossTableUrl)) {
     crossTable <- readCrossTable(crossTableFile)
   } else if (is.null(crossTableFile) && !is.null(crossTableUrl)) {
     crossTable <- downloadCrossTable(crossTableUrl)
   } else {
     engineError("Either `crossTableFile` or `crossTableUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "crossing table"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "crossing table"
+      )
+    )
   }
   crossTable$n <- nCross
   logger$log("Get data DONE")
 
   # check input data
-  logger$log("Check SNP's coordinates consistency between",
-             "`.vcf` and SNPcoordinate file ...")
+  logger$log(
+    "Check SNP's coordinates consistency between",
+    "`.vcf` and SNPcoordinate file ..."
+  )
   SNPcoord <- checkAndFilterSNPcoord(SNPcoord, g$SNPcoord)
   g$SNPcoord <- NULL # release some memory
-  logger$log("Check SNP's coordinates consistency between",
-             " `.vcf` and SNPcoordinate file DONE")
+  logger$log(
+    "Check SNP's coordinates consistency between",
+    " `.vcf` and SNPcoordinate file DONE"
+  )
 
-  logger$log("Check individuals' names consistency between",
-             " `.vcf` and `.csv` file ...")
+  logger$log(
+    "Check individuals' names consistency between",
+    " `.vcf` and `.csv` file ..."
+  )
   checkIndNamesConsistency(crossTable, g$haplotypes)
-  logger$log("Check individuals' names consistency between",
-             " `.vcf` and `.csv` file DONE")
+  logger$log(
+    "Check individuals' names consistency between",
+    " `.vcf` and `.csv` file DONE"
+  )
 
 
 
   # Initialise sumulation population
   logger$log("Initialise simulation ...")
-  parentPopulation <- initializeSimulation(haplotypes = g$haplotypes,
-                                           SNPcoord = SNPcoord)
+  parentPopulation <- initializeSimulation(
+    haplotypes = g$haplotypes,
+    SNPcoord = SNPcoord
+  )
   logger$log("Initialise simulation DONE")
 
   # Simulate crosses
   logger$log("Crossing simulation ...")
-  simulatedIndividuals <- breedSimulatR::makeCrosses(crosses = crossTable,
-                                                     pop = parentPopulation)
+  simulatedIndividuals <- breedSimulatR::makeCrosses(
+    crosses = crossTable,
+    pop = parentPopulation
+  )
   logger$log("Crossing simulation DONE")
 
   # write results
   logger$log("Write output file ...")
-  simulatedPop <- breedSimulatR::population$new(inds = simulatedIndividuals,
-                                                verbose = FALSE)
+  simulatedPop <- breedSimulatR::population$new(
+    inds = simulatedIndividuals,
+    verbose = FALSE
+  )
 
   if (file.exists(outFile)) {
     file.remove(outFile)
@@ -947,45 +1040,56 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 
   # load input data
   logger$log("Get data ...")
-  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+  if (!is.null(genoFile) && is.null(genoUrl)) {
     g <- readPhasedGeno(genoFile)
   } else if (is.null(genoFile) && !is.null(genoUrl)) {
     g <- downloadPhasedGeno(genoUrl)
   } else {
     engineError("Either `genoFile` or `genoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
 
-  if (!is.null(SNPcoordFile) &&  is.null(SNPcoordUrl)) {
+  if (!is.null(SNPcoordFile) && is.null(SNPcoordUrl)) {
     SNPcoord <- readSNPcoord(SNPcoordFile)
   } else if (is.null(SNPcoordFile) && !is.null(SNPcoordUrl)) {
     SNPcoord <- downloadSNPcoord(SNPcoordUrl)
   } else {
     engineError("Either `SNPcoordFile` or `SNPcoordUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "SNP coordinates"))
-
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "SNP coordinates"
+      )
+    )
   }
 
-  if (!is.null(crossTableFile) &&  is.null(crossTableUrl)) {
+  if (!is.null(crossTableFile) && is.null(crossTableUrl)) {
     crossTable <- readCrossTable(crossTableFile)
   } else if (is.null(crossTableFile) && !is.null(crossTableUrl)) {
     crossTable <- downloadCrossTable(crossTableUrl)
   } else {
     engineError("Either `crossTableFile` or `crossTableUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "crossing table"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "crossing table"
+      )
+    )
   }
 
-  if (!is.null(markerEffectsFile) &&  is.null(markerEffectsUrl)) {
+  if (!is.null(markerEffectsFile) && is.null(markerEffectsUrl)) {
     markerEffects <- readMarkerEffects(markerEffectsFile)
   } else if (is.null(markerEffectsFile) && !is.null(markerEffectsUrl)) {
     markerEffects <- downloadMarkerEffects(markerEffectsUrl)
   } else {
     engineError("Either `markerEffectsFile` or `markerEffectsUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "markers effects"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "markers effects"
+      )
+    )
   }
 
   markerEffects <- extract_additive_effects(markerEffects)
@@ -995,27 +1099,39 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   logger$log("Get data DONE")
 
   # check input data
-  logger$log("Check individuals' names consistency between",
-             " `.vcf` and `.csv` file ...")
+  logger$log(
+    "Check individuals' names consistency between",
+    " `.vcf` and `.csv` file ..."
+  )
   checkIndNamesConsistency(crossTable, g$haplotypes)
-  logger$log("Check individuals' names consistency between",
-             " `.vcf` and `.csv` file DONE")
+  logger$log(
+    "Check individuals' names consistency between",
+    " `.vcf` and `.csv` file DONE"
+  )
 
-  logger$log("Check SNP's coordinates consistency between",
-             "`.vcf` and SNPcoordinate file ...")
+  logger$log(
+    "Check SNP's coordinates consistency between",
+    "`.vcf` and SNPcoordinate file ..."
+  )
   SNPcoord <- checkAndFilterSNPcoord(SNPcoord, g$SNPcoord)
   g$SNPcoord <- NULL # release some memory
-  logger$log("Check SNP's coordinates consistency between",
-             " `.vcf` and SNPcoordinate file DONE")
+  logger$log(
+    "Check SNP's coordinates consistency between",
+    " `.vcf` and SNPcoordinate file DONE"
+  )
 
-  logger$log("Check SNPs' ids consistency between",
-             "SNPcoordinate and markerEffects file ...")
+  logger$log(
+    "Check SNPs' ids consistency between",
+    "SNPcoordinate and markerEffects file ..."
+  )
   if (!all(row.names(markerEffects$SNPeffects) %in% SNPcoord$SNPid)) {
     missingSNP <- row.names(markerEffects$SNPeffects)[
       which(!row.names(markerEffects$SNPeffects) %in% SNPcoord$SNPid)
     ]
-    msg <- paste('The SNPs coordinate file miss', length(missingSNP),
-                 'SNPs when compared with the provided marker effects.')
+    msg <- paste(
+      "The SNPs coordinate file miss", length(missingSNP),
+      "SNPs when compared with the provided marker effects."
+    )
     engineError(msg,
       extra = list(
         "code" = errorCode("PROJ_BLUP_SNP_COORD_MISSING_SNP"),
@@ -1023,11 +1139,14 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
         "n_expected_SNP" = nrow(markerEffects$SNPeffects),
         "missing_SNP" = missingSNP,
         "reference" = "marker effects"
-    ))
+      )
+    )
   }
   SNPcoord <- SNPcoord[SNPcoord$SNPid %in% row.names(markerEffects$SNPeffects), ]
-  logger$log("Check SNPs' ids consistency between",
-             "SNPcoordinate and markerEffects file DONE")
+  logger$log(
+    "Check SNPs' ids consistency between",
+    "SNPcoordinate and markerEffects file DONE"
+  )
 
 
   # calculate recombination rate
@@ -1035,7 +1154,7 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 
   # initialize results
   nCrosses <- nrow(crossTable)
-  blupVarExp <- vector(mode = 'list', length = nCrosses)
+  blupVarExp <- vector(mode = "list", length = nCrosses)
   names(blupVarExp) <- crossTable$names
 
   # calculation for each couple
@@ -1045,18 +1164,22 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
     p1.id <- which(grepl(crossTable$ind1[i], colnames(g$haplotypes)))
     p2.id <- which(grepl(crossTable$ind2[i], colnames(g$haplotypes)))
 
-    blupExp <- calcProgenyBlupExpected(SNPcoord,
-                                       g$haplotypes,
-                                       p1.id,
-                                       p2.id,
-                                       markerEffects)
-    blupCovar <- calcProgenyBlupCovariance(SNPcoord = SNPcoord,
-                                           r = r,
-                                           haplo = g$haplotypes,
-                                           p1.id = p1.id,
-                                           p2.id = p2.id,
-                                           markerEffects = markerEffects,
-                                           blupExpectedValues = blupExp)
+    blupExp <- calcProgenyBlupExpected(
+      SNPcoord,
+      g$haplotypes,
+      p1.id,
+      p2.id,
+      markerEffects
+    )
+    blupCovar <- calcProgenyBlupCovariance(
+      SNPcoord = SNPcoord,
+      r = r,
+      haplo = g$haplotypes,
+      p1.id = p1.id,
+      p2.id = p2.id,
+      markerEffects = markerEffects,
+      blupExpectedValues = blupExp
+    )
     blupVar <- diag(blupCovar)
 
     blupVarExp[[i]]$ind1 <- crossTable$ind1[i]
@@ -1079,7 +1202,6 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
   }
 
   return(blupVarExp)
-
 }
 
 
@@ -1108,9 +1230,9 @@ calc_progenyBlupEstimation <- function(genoFile = NULL,
 #' @return plotly graph
 draw_progBlupsPlot <- function(progEstimFile = NULL,
                                progEstimUrl = NULL,
-                               errorBarInterval= 0.95,
+                               errorBarInterval = 0.95,
                                y_axisName = "Genetic values",
-                               sorting = 'alpha',
+                               sorting = "alpha",
                                trait = NULL,
                                outFile = tempfile(fileext = ".html")) {
   logger <- Logger$new("r-draw_progBlupsPlot()")
@@ -1121,22 +1243,25 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
   ext <- tools::file_ext(outFile)
   if (ext == "") {
     if (interactive) {
-      outFile <- paste0(outFile, '.html')
+      outFile <- paste0(outFile, ".html")
     } else {
-      outFile <- paste0(outFile, '.png')
+      outFile <- paste0(outFile, ".png")
     }
   }
 
 
   logger$log("Get data ...")
-  if (!is.null(progEstimFile) &&  is.null(progEstimUrl)) {
+  if (!is.null(progEstimFile) && is.null(progEstimUrl)) {
     progBlup <- readProgBlupEstim(progEstimFile)
   } else if (!is.null(progEstimUrl) && is.null(progEstimFile)) {
     progBlup <- downloadProgBlupEstim(progEstimUrl)
   } else {
     engineError("Either `progEstimFile` or `progEstimUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "progeny BLUP estimations"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "progeny BLUP estimations"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -1152,15 +1277,17 @@ draw_progBlupsPlot <- function(progEstimFile = NULL,
 
 
   logger$log("Draw progenies' blup plot ...")
-  p <- plotBlup_1trait(progBlup, sorting = sorting,
-                       y_axisName = y_axisName,
-                       errorBarInterval = errorBarInterval,
-                       trait = trait)
+  p <- plotBlup_1trait(progBlup,
+    sorting = sorting,
+    y_axisName = y_axisName,
+    errorBarInterval = errorBarInterval,
+    trait = trait
+  )
   logger$log("Draw progenies' blup plot DONE")
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-      save_plotly(p, outFile)
+    save_plotly(p, outFile)
     logger$log("Save results DONE")
   }
   p
@@ -1206,9 +1333,9 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
     ext <- tools::file_ext(outFile)
     if (ext == "") {
       if (interactive) {
-        outFile <- paste0(outFile, '.html')
+        outFile <- paste0(outFile, ".html")
       } else {
-        outFile <- paste0(outFile, '.png')
+        outFile <- paste0(outFile, ".png")
       }
     }
   }
@@ -1220,8 +1347,11 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
     progBlup <- downloadProgBlupEstim(progEstimUrl)
   } else {
     engineError("Either `progEstimFile` or `progEstimUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "progeny BLUP estimations"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "progeny BLUP estimations"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -1232,18 +1362,20 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
   check_trait(y_trait, available_traits)
 
   logger$log("Draw progenies' blup plot ...")
-  p <- plotBlup_2traits(blupDta = progBlup,
-                        x_trait = x_trait,
-                        y_trait = y_trait,
-                        confidenceLevel = confidenceLevel,
-                        x_suffix = x_suffix,
-                        y_suffix = y_suffix,
-                        ellipses_npoints = ellipses_npoints)
+  p <- plotBlup_2traits(
+    blupDta = progBlup,
+    x_trait = x_trait,
+    y_trait = y_trait,
+    confidenceLevel = confidenceLevel,
+    x_suffix = x_suffix,
+    y_suffix = y_suffix,
+    ellipses_npoints = ellipses_npoints
+  )
   logger$log("Draw progenies' blup plot DONE")
 
   if (!is.null(outFile)) {
     logger$log("Save results ...")
-      save_plotly(p, outFile)
+    save_plotly(p, outFile)
     logger$log("Save results DONE")
   }
   p
@@ -1273,26 +1405,31 @@ train_gs_model_main <- function(genoFile = NULL,
                                 trait,
                                 with_dominance,
                                 thresh_maf,
-                                outFile = tempfile(fileext = ".json")
-) {
-
+                                outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-train_gs_model_main()")
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(genoFile) && !is.null(phenoFile)
-      && is.null(genoUrl) && is.null(phenoUrl)) {
-    data <- readData(genoFile = genoFile,
-                     phenoFile = phenoFile,
-                     traits = trait)
-  } else if (!is.null(genoUrl) && !is.null(phenoUrl)
-            && is.null(genoFile) && is.null(phenoFile)) {
-    data <- downloadData(genoUrl = genoUrl,
-                         phenoUrl = phenoUrl)
+  if (!is.null(genoFile) && !is.null(phenoFile) &&
+    is.null(genoUrl) && is.null(phenoUrl)) {
+    data <- readData(
+      genoFile = genoFile,
+      phenoFile = phenoFile,
+      traits = trait
+    )
+  } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
+    is.null(genoFile) && is.null(phenoFile)) {
+    data <- downloadData(
+      genoUrl = genoUrl,
+      phenoUrl = phenoUrl
+    )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -1302,7 +1439,7 @@ train_gs_model_main <- function(genoFile = NULL,
   logger$log("Filter SNP and missing values...")
   data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
   if (nrow(data$genoData@snps) == 0) {
-    msg = paste0(
+    msg <- paste0(
       "No marker remaining after filtering for maf > thresh_maf (=",
       thresh_maf,
       ")"
@@ -1316,7 +1453,7 @@ train_gs_model_main <- function(genoFile = NULL,
   # remove markers with missing values
   data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
   if (nrow(data$genoData@snps) == 0) {
-    msg = paste0("No marker remaining after filtering for missing values")
+    msg <- paste0("No marker remaining after filtering for missing values")
     engineError(msg, extra = list(
       code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
       filter = paste0("missing values")
@@ -1324,23 +1461,24 @@ train_gs_model_main <- function(genoFile = NULL,
   }
 
   data$phenoData <- data$phenoData[, trait, drop = FALSE]
-  data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]),, drop = FALSE]
+  data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]), , drop = FALSE]
   if (nrow(data$phenoData) == 0) {
-    msg = paste0("No individuals remaining in phenotype file after filtering for missing values")
+    msg <- paste0("No individuals remaining in phenotype file after filtering for missing values")
     engineError(msg, extra = list(
       code = errorCode("PHENOTYPE_NO_IND_AFTER_FILTERING"),
       filter = paste0("missing values")
     ))
   }
   data$genoData <- gaston::select.inds(data$genoData, id %in% rownames(data$phenoData))
-  data$phenoData <- data$phenoData[data$genoData@ped$id,,drop = F]
+  data$phenoData <- data$phenoData[data$genoData@ped$id, , drop = F]
   logger$log("Filter SNP and missing values DONE")
 
 
   logger$log("Model training...")
   model <- train_gs_model(data$phenoData[, trait, drop = FALSE],
-                          data$genoData,
-                          with_dominance = with_dominance)
+    data$genoData,
+    with_dominance = with_dominance
+  )
   logger$log("Model training DONE")
 
 
@@ -1356,7 +1494,6 @@ train_gs_model_main <- function(genoFile = NULL,
     "model" = model,
     "file" = file
   ))
-
 }
 
 
@@ -1374,48 +1511,56 @@ predict_gs_model_main <- function(genoFile = NULL,
                                   markerEffectsFile = NULL,
                                   markerEffectsUrl = NULL,
                                   outFile = tempfile(fileext = ".csv")) {
-
   logger <- Logger$new("r-predict_gs_model_main()")
 
   check_outFile(outFile, expected_ext = ".csv", accept_null = TRUE)
 
   # load input data
   logger$log("Get data ...")
-  if (!is.null(genoFile) &&  is.null(genoUrl)) {
+  if (!is.null(genoFile) && is.null(genoUrl)) {
     g <- readGenoData(genoFile)
   } else if (is.null(genoFile) && !is.null(genoUrl)) {
     g <- downloadGenoData(genoUrl)
   } else {
     engineError("Either `genoFile` or `genoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
 
-  if (!is.null(markerEffectsFile) &&  is.null(markerEffectsUrl)) {
+  if (!is.null(markerEffectsFile) && is.null(markerEffectsUrl)) {
     markerEffects <- readMarkerEffects(markerEffectsFile)
   } else if (is.null(markerEffectsFile) && !is.null(markerEffectsUrl)) {
     markerEffects <- downloadMarkerEffects(markerEffectsUrl)
   } else {
     engineError("Either `markerEffectsFile` or `markerEffectsUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "markers effects"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "markers effects"
+      )
+    )
   }
 
-  predictions_list <- lapply(names(markerEffects$intercept), function(trait){
+  predictions_list <- lapply(names(markerEffects$intercept), function(trait) {
     eff <- merge(markerEffects$SNPeffects_add[, trait, drop = FALSE],
-                 markerEffects$SNPeffects_dom[, trait, drop = FALSE],
-                 by = "row.names", all = T)
+      markerEffects$SNPeffects_dom[, trait, drop = FALSE],
+      by = "row.names", all = T
+    )
     row.names(eff) <- eff$Row.names
-    colnames(eff)[c(2,3)] <- c("additive", "dominance")
+    colnames(eff)[c(2, 3)] <- c("additive", "dominance")
     eff <- eff[, c("additive", "dominance")]
 
     if (!all(row.names(eff) %in% g@snps$id)) {
       missing_snp <- row.names(eff)[!row.names(eff) %in% g@snps$id]
       engineError("Genotype file is missing some model's markers.",
-                  extra = list(
-                    code = errorCode("BAD_GENO_MISSING_SNP"),
-                    n_missing_snp = length(missing_snp),
-                    missing_snp = missing_snp))
+        extra = list(
+          code = errorCode("BAD_GENO_MISSING_SNP"),
+          n_missing_snp = length(missing_snp),
+          missing_snp = missing_snp
+        )
+      )
     }
 
     estim_mark_eff <- list(
@@ -1436,8 +1581,9 @@ predict_gs_model_main <- function(genoFile = NULL,
   if (!is.null(outFile)) {
     logger$log("Save results ...")
     write.csv(predictions,
-              file = outFile,
-              row.names = FALSE)
+      file = outFile,
+      row.names = FALSE
+    )
     file <- outFile
     logger$log("Save results DONE")
   } else {
@@ -1476,26 +1622,31 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
                                              n_repetitions = 5,
                                              with_dominance,
                                              thresh_maf,
-                                             outFile = tempfile(fileext = ".json")){
-
-
+                                             outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-cross_validation_evaluation_main()")
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
-  if (!is.null(genoFile) && !is.null(phenoFile)
-      && is.null(genoUrl) && is.null(phenoUrl)) {
-    data <- readData(genoFile = genoFile,
-                     phenoFile = phenoFile,
-                     traits = trait)
-  } else if (!is.null(genoUrl) && !is.null(phenoUrl)
-            && is.null(genoFile) && is.null(phenoFile)) {
-    data <- downloadData(genoUrl = genoUrl,
-                         phenoUrl = phenoUrl)
+  if (!is.null(genoFile) && !is.null(phenoFile) &&
+    is.null(genoUrl) && is.null(phenoUrl)) {
+    data <- readData(
+      genoFile = genoFile,
+      phenoFile = phenoFile,
+      traits = trait
+    )
+  } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
+    is.null(genoFile) && is.null(phenoFile)) {
+    data <- downloadData(
+      genoUrl = genoUrl,
+      phenoUrl = phenoUrl
+    )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
-                extra = list(code = errorCode("INPUT_FILE_NOT_PROVIDED"),
-                             input_file = "genotype"))
+      extra = list(
+        code = errorCode("INPUT_FILE_NOT_PROVIDED"),
+        input_file = "genotype"
+      )
+    )
   }
   logger$log("Get data DONE")
 
@@ -1505,7 +1656,7 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
   logger$log("Filter SNP and missing values...")
   data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
   if (nrow(data$genoData@snps) == 0) {
-    msg = paste0(
+    msg <- paste0(
       "No marker remaining after filtering for maf > thresh_maf (=",
       thresh_maf,
       ")"
@@ -1518,7 +1669,7 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
 
   data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
   if (nrow(data$genoData@snps) == 0) {
-    msg = paste0("No marker remaining after filtering for missing values")
+    msg <- paste0("No marker remaining after filtering for missing values")
     engineError(msg, extra = list(
       code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
       filter = paste0("missing values")
@@ -1526,26 +1677,28 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
   }
 
   data$phenoData <- data$phenoData[, trait, drop = FALSE]
-  data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]),, drop = FALSE]
+  data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]), , drop = FALSE]
   if (nrow(data$phenoData) == 0) {
-    msg = paste0("No individuals remaining in phenotype file after filtering for missing values")
+    msg <- paste0("No individuals remaining in phenotype file after filtering for missing values")
     engineError(msg, extra = list(
       code = errorCode("PHENOTYPE_NO_IND_AFTER_FILTERING"),
       filter = paste0("missing values")
     ))
   }
   data$genoData <- gaston::select.inds(data$genoData, id %in% rownames(data$phenoData))
-  data$phenoData <- data$phenoData[data$genoData@ped$id,,drop = F]
+  data$phenoData <- data$phenoData[data$genoData@ped$id, , drop = F]
   logger$log("Filter SNP and missing values DONE")
 
 
 
   logger$log("Model cross-validation...")
-  evaluation <- cross_validation_evaluation(pheno = data$phenoData[, trait, drop = FALSE],
-                                            geno = data$genoData,
-                                            with_dominance = with_dominance,
-                                            n_folds = n_folds,
-                                            n_repetitions = n_repetitions)
+  evaluation <- cross_validation_evaluation(
+    pheno = data$phenoData[, trait, drop = FALSE],
+    geno = data$genoData,
+    with_dominance = with_dominance,
+    n_folds = n_folds,
+    n_repetitions = n_repetitions
+  )
   logger$log("Model cross-validation DONE")
 
 
@@ -1571,8 +1724,7 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
 #' output will not be written in any file. By default write in an temporary
 #' file.
 draw_evaluation_plot <- function(evaluationFile = NULL,
-                                 outFile = tempfile(fileext = ".html") ) {
-
+                                 outFile = tempfile(fileext = ".html")) {
   logger <- Logger$new("r-draw_evaluation_plot()")
   check_outFile(outFile, expected_exts = ".html", accept_null = TRUE)
 
@@ -1618,14 +1770,14 @@ draw_evaluation_plot <- function(evaluationFile = NULL,
 #'
 #' @return None. The function writes the marker effects to a JSON file.
 generate_rnd_marker_effects <- function(genoFile,
-                                    outFile = NULL,
-                                    rate_add = 1/0.3,
-                                    rate_dom = 1/0.30,
-                                    dominance = TRUE,
-                                    prop_snp_with_effect_add = 1,
-                                    prop_snp_with_effect_dom = 1,
-                                    allow_dual_effects = TRUE,
-                                    rnd_seed = NULL) {
+                                        outFile = NULL,
+                                        rate_add = 1 / 0.3,
+                                        rate_dom = 1 / 0.30,
+                                        dominance = TRUE,
+                                        prop_snp_with_effect_add = 1,
+                                        prop_snp_with_effect_dom = 1,
+                                        allow_dual_effects = TRUE,
+                                        rnd_seed = NULL) {
   Sys.setenv(RGENO_NO_LOG = TRUE)
 
   if (!is.null(rnd_seed)) {
@@ -1653,19 +1805,22 @@ generate_rnd_marker_effects <- function(genoFile,
 
   if (!allow_dual_effects) {
     if (n_snp_with_effect_add + n_snp_with_effect_dom > n_snp) {
-      stop(paste0("It is not possible to have markers without dual effects with the specied marker proportions:\n",
-                  "\t - Total number of markers = ", n_snp, "\n",
-                  "\t - Expected makrer with additive effects = ", n_snp_with_effect_add, "\n",
-                  "\t - Expected makrer with dominance effects = ", n_snp_with_effect_dom, "\n"))
+      stop(paste0(
+        "It is not possible to have markers without dual effects with the specied marker proportions:\n",
+        "\t - Total number of markers = ", n_snp, "\n",
+        "\t - Expected makrer with additive effects = ", n_snp_with_effect_add, "\n",
+        "\t - Expected makrer with dominance effects = ", n_snp_with_effect_dom, "\n"
+      ))
     }
     snp_add <- sample(snp_ids, size = n_snp_with_effect_add)
     snp_dom <- sample(snp_ids, size = n_snp_with_effect_dom)
-
   } else {
-      snp_add <- sample(snp_ids, size = n_snp_with_effect_add)
-      not_add_snp <- c(snp_ids[!snp_ids %in%snp_add],
-                       sample(snp_ids, n_snp_with_effect_dom - (n_snp - n_snp_with_effect_add)))
-      snp_dom <- sample(not_add_snp, size = n_snp_with_effect_dom)
+    snp_add <- sample(snp_ids, size = n_snp_with_effect_add)
+    not_add_snp <- c(
+      snp_ids[!snp_ids %in% snp_add],
+      sample(snp_ids, n_snp_with_effect_dom - (n_snp - n_snp_with_effect_add))
+    )
+    snp_dom <- sample(not_add_snp, size = n_snp_with_effect_dom)
   }
 
   eff_add <- rexp(n_snp_with_effect_add, rate = rate_add) * sample(c(-1, 1), n_snp_with_effect_add, replace = TRUE)
@@ -1676,7 +1831,7 @@ generate_rnd_marker_effects <- function(genoFile,
 
   genetic_values <- data.frame(
     additive = calc_additive_geno(geno, standardized = F) %*% effects$add,
-    dominance = calc_dominance_geno(geno, standardized = F)  %*% effects$dom
+    dominance = calc_dominance_geno(geno, standardized = F) %*% effects$dom
   )
 
   genetic_values$total <- genetic_values$additive + genetic_values$dominance
@@ -1699,7 +1854,7 @@ generate_rnd_marker_effects <- function(genoFile,
   cat(paste0(" - Maximum: ", signif(max(genetic_values[, c("total")]))), "\n")
 
   effects_as_list <- list()
-  effects_as_list$intercept <- - intercept
+  effects_as_list$intercept <- -intercept
   effects_as_list$additive_effects <- as.list(effects$add)
   effects_as_list$dominance_effects <- as.list(effects$dom)
   names(effects_as_list$additive_effects) <- row.names(effects)
@@ -1711,11 +1866,12 @@ generate_rnd_marker_effects <- function(genoFile,
     return(effects_as_list)
   }
   jsonlite::write_json(effects_as_list,
-                       path = outFile,
-                       simplifyVector = TRUE,
-                       pretty = TRUE,
-                       digits = NA,
-                       na = 'string')
+    path = outFile,
+    simplifyVector = TRUE,
+    pretty = TRUE,
+    digits = NA,
+    na = "string"
+  )
   return(TRUE)
 }
 
@@ -1758,7 +1914,6 @@ simulate_phenotype <- function(genoFile,
                                sd_noise = NULL,
                                trait_name = "phenotype",
                                rnd_seed = NULL) {
-
   Sys.setenv(RGENO_NO_LOG = TRUE)
 
   if (!is.null(rnd_seed)) {
@@ -1780,10 +1935,11 @@ simulate_phenotype <- function(genoFile,
   }
 
   eff <- merge(markerEffects$SNPeffects_add[, 1, drop = FALSE],
-               markerEffects$SNPeffects_dom[, 1, drop = FALSE],
-               by = "row.names", all = T)
+    markerEffects$SNPeffects_dom[, 1, drop = FALSE],
+    by = "row.names", all = T
+  )
   row.names(eff) <- eff$Row.names
-  colnames(eff)[c(2,3)] <- c("additive", "dominance")
+  colnames(eff)[c(2, 3)] <- c("additive", "dominance")
   eff <- eff[, c("additive", "dominance")]
 
   if (!all(row.names(eff) %in% geno@snps$id)) {
@@ -1792,7 +1948,9 @@ simulate_phenotype <- function(genoFile,
       extra = list(
         code = errorCode("BAD_GENO_MISSING_SNP"),
         n_missing_snp = length(missing_snp),
-        missing_snp = missing_snp))
+        missing_snp = missing_snp
+      )
+    )
   }
 
   estim_mark_eff <- list(
@@ -1803,7 +1961,7 @@ simulate_phenotype <- function(genoFile,
   genetic_values <- predict_gs_model(geno, estim_mark_eff)
   genetic_variance <- var(genetic_values)
 
-  if (!is.null(heritability)){
+  if (!is.null(heritability)) {
     sd_noise <- sqrt(genetic_variance * ((1 / heritability) - 1))
   }
 

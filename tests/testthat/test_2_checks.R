@@ -53,8 +53,10 @@ capture_output({
     })
   }
 
-  SNPcoordFiles <- c("../data/breedingGame_SNPcoord_missingPhysPos.csv",
-                     "../data/breedingGame_SNPcoord_missingPhysPos_columns.csv")
+  SNPcoordFiles <- c(
+    "../data/breedingGame_SNPcoord_missingPhysPos.csv",
+    "../data/breedingGame_SNPcoord_missingPhysPos_columns.csv"
+  )
   for (SNPcoordFile in SNPcoordFiles) {
     test_that(paste("checkAndFilterSNPcoord special cases -", SNPcoordFile), {
       SNPcoord <- readSNPcoord(SNPcoordFile)

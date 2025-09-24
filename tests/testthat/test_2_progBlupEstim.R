@@ -10,16 +10,16 @@
 capture_output({
   file_list <- list(
     oneTrait = list(
-      genoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
-      SNPcoordFile = '../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
-      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
-      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects.json'
+      genoFile = "../../data/geno/breedGame_phasedGeno.vcf.gz",
+      SNPcoordFile = "../../data/SNPcoordinates/breedingGame_SNPcoord.csv",
+      crossTableFile = "../../data/crossingTable/breedGame_small_crossTable.csv",
+      markerEffectsFile = "../../data/markerEffects/breedGame_markerEffects.json"
     ),
     twoTraits = list(
-      genoFile = '../../data/geno/breedGame_phasedGeno.vcf.gz',
-      SNPcoordFile = '../../data/SNPcoordinates/breedingGame_SNPcoord.csv',
-      crossTableFile = '../../data/crossingTable/breedGame_small_crossTable.csv',
-      markerEffectsFile = '../../data/markerEffects/breedGame_markerEffects_2traits.json'
+      genoFile = "../../data/geno/breedGame_phasedGeno.vcf.gz",
+      SNPcoordFile = "../../data/SNPcoordinates/breedingGame_SNPcoord.csv",
+      crossTableFile = "../../data/crossingTable/breedGame_small_crossTable.csv",
+      markerEffectsFile = "../../data/markerEffects/breedGame_markerEffects_2traits.json"
     )
   )
 
@@ -39,20 +39,24 @@ capture_output({
         p1.id <- which(grepl(crossTable$ind1[i], colnames(g$haplotypes)))
         p2.id <- which(grepl(crossTable$ind2[i], colnames(g$haplotypes)))
         expect_no_error({
-          blupExp <- calcProgenyBlupExpected(SNPcoord,
-                                             g$haplotypes,
-                                             p1.id,
-                                             p2.id,
-                                             markerEffects)
+          blupExp <- calcProgenyBlupExpected(
+            SNPcoord,
+            g$haplotypes,
+            p1.id,
+            p2.id,
+            markerEffects
+          )
         })
         expect_no_error({
-          blupCovar <- calcProgenyBlupCovariance(SNPcoord = SNPcoord,
-                                                 r = r,
-                                                 haplo = g$haplotypes,
-                                                 p1.id = p1.id,
-                                                 p2.id = p2.id,
-                                                 markerEffects = markerEffects,
-                                                 blupExpectedValues = blupExp)
+          blupCovar <- calcProgenyBlupCovariance(
+            SNPcoord = SNPcoord,
+            r = r,
+            haplo = g$haplotypes,
+            p1.id = p1.id,
+            p2.id = p2.id,
+            markerEffects = markerEffects,
+            blupExpectedValues = blupExp
+          )
         })
         expect_no_error({
           geneticCovar <- calcProgenyGenetCovar(SNPcoord, r, g$haplotypes, p1.id, p2.id)

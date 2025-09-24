@@ -27,7 +27,7 @@ list.files("geno")
 ```
 
 ```{r}
-cat(paste(readLines("geno/testMarkerData01.vcf", n=20), collapse = "\n"))
+cat(paste(readLines("geno/testMarkerData01.vcf", n = 20), collapse = "\n"))
 ```
 
 
@@ -40,7 +40,7 @@ list.files("pheno")
 ```
 
 ```{r}
-cat(paste(readLines("pheno/testPhenoData01.csv", n=10), collapse = "\n"))
+cat(paste(readLines("pheno/testPhenoData01.csv", n = 10), collapse = "\n"))
 ```
 
 
@@ -54,7 +54,7 @@ mythology. It is the same pedigree in 3 versions:
 - Pedigree with missing founders
 
 ```{r}
-cat(paste(readLines("pedigree/testPedData_char.csv", n=10), collapse = "\n"))
+cat(paste(readLines("pedigree/testPedData_char.csv", n = 10), collapse = "\n"))
 ```
 
 ## `results/`
@@ -72,14 +72,14 @@ list.files("results")
 ```
 
 ```{r}
-cat(paste(readLines("results/gwasResult.json", n=30), collapse = "\n"))
+cat(paste(readLines("results/gwasResult.json", n = 30), collapse = "\n"))
 ```
 
 ```{r}
-cat(paste(readLines("results/pedigreeRelationship.csv", n=30), collapse = "\n"))
+cat(paste(readLines("results/pedigreeRelationship.csv", n = 30), collapse = "\n"))
 ```
 ```{r}
-cat(paste(readLines("results/pedigreeRelationship.json", n=30), collapse = "\n"))
+cat(paste(readLines("results/pedigreeRelationship.json", n = 30), collapse = "\n"))
 ```
 
 # Reference

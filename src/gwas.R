@@ -48,7 +48,7 @@ gwas <- function(data,
   logger$log("remove individuals with missing phenotypic values ...")
   bm <- gaston::select.inds(bm, !is.na(pheno))
   if (nrow(bm) == 0) {
-    warning('Filtering process removed all the individuals.')
+    warning("Filtering process removed all the individuals.")
     empty <- TRUE
   }
   logger$log("remove samples with missing phenotypic values DONE")
@@ -61,26 +61,34 @@ gwas <- function(data,
   bm <- gaston::select.snps(bm, maf > thresh_maf)
   bm <- gaston::select.snps(bm, callrate > thresh_callrate)
   if (ncol(bm) == 0) {
-    warning('Filtering process removed all the SNPs.')
+    warning("Filtering process removed all the SNPs.")
     empty <- TRUE
   }
   logger$log("filter SNPs DONE")
 
   ### FAST RETURN ----
   if (empty) {
-    resCols <- list("score" = c("chr", "pos", "id", "A1", "A2",
-                                "freqA2", "score", "p"),
-                    "wald" = c("chr", "pos", "id", "A1", "A2",
-                               "freqA2", "h2", "beta", "sd","p"),
-                    "lrt" = c("chr", "pos", "id", "A1", "A2",
-                              "freqA2", "h2", "LRT", "p"))
+    resCols <- list(
+      "score" = c(
+        "chr", "pos", "id", "A1", "A2",
+        "freqA2", "score", "p"
+      ),
+      "wald" = c(
+        "chr", "pos", "id", "A1", "A2",
+        "freqA2", "h2", "beta", "sd", "p"
+      ),
+      "lrt" = c(
+        "chr", "pos", "id", "A1", "A2",
+        "freqA2", "h2", "LRT", "p"
+      )
+    )
     logger$log("DONE, return output.")
     gwa <- data.frame(matrix(ncol = length(resCols[[test]]), nrow = 0))
     colnames(gwa) <- resCols[[test]]
     # need to add one line with NA, in order to let `saveGWAS` and `readGWAS`
     # save and read the object as a data.frame. If not, readGWAS will consider
     # an empty list instead
-    gwa[1,] <- NA
+    gwa[1, ] <- NA
     return(gwa)
   }
 
@@ -116,7 +124,6 @@ gwas <- function(data,
   logger$log("DONE, return output.")
 
   return(gwa)
-
 }
 
 
@@ -130,7 +137,7 @@ gwas <- function(data,
 #'
 #' @details The method "hommel" is not implemented because it is too long to calculate.
 #' @return list of two elements: "p_adj" vector of adjusted p values, "thresh_adj" the adjusted threshold (if thresh_p is preovided, NULL if not)
-adjustPval <- function(p, adj_method, thresh_p = NULL){
+adjustPval <- function(p, adj_method, thresh_p = NULL) {
   logger <- Logger$new("r-adjustPval()")
 
   # check adjMethod
@@ -143,33 +150,35 @@ adjustPval <- function(p, adj_method, thresh_p = NULL){
     # The `p.adjust` function will proceed to the calculation even if the p-values
     # are invalid. To avoid unexpected behaviour, I'd prefer this function
     # to crash in such case.
-    bad_argument('p', must_be = "between 0 and 1", class = NULL)
+    bad_argument("p", must_be = "between 0 and 1", class = NULL)
   }
   logger$log("Check p values DONE")
 
   # P-Values adjustment
   logger$log("Adjust p-values ...")
   p_adj <- p.adjust(p,
-                    method = adj_method,
-                    n = length(p))
+    method = adj_method,
+    n = length(p)
+  )
   logger$log("Adjust p-values DONE")
 
   if (!is.null(thresh_p)) {
     if (!adj_method == "none") {
-    # get adjusted threshold
-    logger$log("Adjust threshold ...")
-    thresh_adj <- uniroot(
-      function(log10p){
-        # accuracy is bad if we don't transform with log10
-        x <- 10^(log10p)
-        p.adjust(c(x, p),
-                 method = adj_method,
-                 n = length(p) + 1)[1] - thresh_p
-      },
-      c(log10(2e-12), log10(1))
-    )
-    thresh_adj <- 10^(thresh_adj$root)
-    logger$log("Adjust threshold DONE")
+      # get adjusted threshold
+      logger$log("Adjust threshold ...")
+      thresh_adj <- uniroot(
+        function(log10p) {
+          # accuracy is bad if we don't transform with log10
+          x <- 10^(log10p)
+          p.adjust(c(x, p),
+            method = adj_method,
+            n = length(p) + 1
+          )[1] - thresh_p
+        },
+        c(log10(2e-12), log10(1))
+      )
+      thresh_adj <- 10^(thresh_adj$root)
+      logger$log("Adjust threshold DONE")
     } else {
       thresh_adj <- thresh_p
     }
@@ -178,6 +187,8 @@ adjustPval <- function(p, adj_method, thresh_p = NULL){
   }
   logger$log("DONE, return output")
 
-  list("p_adj" = p_adj,
-       "thresh_adj" = thresh_adj)
+  list(
+    "p_adj" = p_adj,
+    "thresh_adj" = thresh_adj
+  )
 }

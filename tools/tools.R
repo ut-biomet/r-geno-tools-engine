@@ -12,7 +12,7 @@
 #' @return NULL
 #' @details Write engine's functions documentation in a README.md file located in `docDir`.
 writeDoc <- function(srcDir = "./src",
-                     docDir = "./doc"){
+                     docDir = "./doc") {
   stopifnot(dir.exists(srcDir))
   stopifnot(dir.exists(docDir))
   tmpDir <- file.path(docDir, ".tmp")
@@ -24,31 +24,35 @@ writeDoc <- function(srcDir = "./src",
 
   sourcefiles <- list.files(srcDir, pattern = ".R$", full.names = TRUE)
   for (sourcefile in sourcefiles) {
-    source_env = roxygen2::env_file(sourcefile)
+    source_env <- roxygen2::env_file(sourcefile)
     source(sourcefile, local = source_env, keep.source = TRUE)
-    rd_blocks = roxygen2::parse_file(sourcefile, env = source_env)
-    help_topics = roxygen2::roclet_process(roxygen2::rd_roclet(),
-                                           rd_blocks,
-                                           env = source_env,
-                                           # env = NULL,
-                                           dirname(sourcefile))
-    rd_code = lapply(help_topics, format)
+    rd_blocks <- roxygen2::parse_file(sourcefile, env = source_env)
+    help_topics <- roxygen2::roclet_process(roxygen2::rd_roclet(),
+      rd_blocks,
+      env = source_env,
+      # env = NULL,
+      dirname(sourcefile)
+    )
+    rd_code <- lapply(help_topics, format)
 
     for (funName in names(rd_code)) {
       writeLines(rd_code[[funName]],
-                 con = file.path(tmpDir, funName))
+        con = file.path(tmpDir, funName)
+      )
       Rd2md::Rd2markdown(file.path(tmpDir, funName), outFile, append = TRUE)
       file.remove(file.path(tmpDir, funName))
     }
 
     # log functions with missing doc:
     definedFunctions <- names(source_env)
-    definedFunctions <- definedFunctions[definedFunctions != '.packageName']
+    definedFunctions <- definedFunctions[definedFunctions != ".packageName"]
     documentedFunctions <- tools::file_path_sans_ext(names(rd_code))
     missIds <- which(!definedFunctions %in% documentedFunctions)
     if (any(missIds)) {
-    message("Missing roxygen doc in file ", sourcefile, ":\n\t`",
-            paste(definedFunctions[missIds], collapse = '`, `'), "`")
+      message(
+        "Missing roxygen doc in file ", sourcefile, ":\n\t`",
+        paste(definedFunctions[missIds], collapse = "`, `"), "`"
+      )
     }
   }
   unlink(tmpDir, recursive = TRUE)
@@ -63,107 +67,130 @@ writeDoc <- function(srcDir = "./src",
 #' @return NULL
 #' @details Use predefined input/output files
 createResultExample <- function() {
-
   invisible(
-    sapply(FUN = source,
-      X = list.files("./src", pattern = ".R$", full.names = TRUE))
+    sapply(
+      FUN = source,
+      X = list.files("./src", pattern = ".R$", full.names = TRUE)
+    )
   )
   set.seed(42)
 
   # create gwas results ----
-  cat('create gwas results ----\n')
-  genoFile <- 'data/geno/testMarkerData01.vcf'
-  phenoFile <- 'data/pheno/testPhenoData01.csv'
+  cat("create gwas results ----\n")
+  genoFile <- "data/geno/testMarkerData01.vcf"
+  phenoFile <- "data/pheno/testPhenoData01.csv"
 
   gwas <- run_gwas(genoFile,
-                   phenoFile,
-                   trait = "Flowering.time.at.Arkansas",
-                   test = 'score',
-                   thresh_maf = 0.05,
-                   thresh_callrate = 0.5,
-                   outFile = 'data/results/gwasResult.json')
+    phenoFile,
+    trait = "Flowering.time.at.Arkansas",
+    test = "score",
+    thresh_maf = 0.05,
+    thresh_callrate = 0.5,
+    outFile = "data/results/gwasResult.json"
+  )
 
   # create adjusted results ----
-  cat('create adjusted results ----\n')
+  cat("create adjusted results ----\n")
   gwasFile <- gwas$file
 
   gwas <- run_resAdjustment(gwasFile,
-                            adj_method = "bonferroni",
-                            outFile = 'data/results/ajdResults.json')
+    adj_method = "bonferroni",
+    outFile = "data/results/ajdResults.json"
+  )
 
   # create Manhattan plot  ----
-  cat('create Manhattan plot  ----\n')
+  cat("create Manhattan plot  ----\n")
   gwasFile <- gwas$file
 
   draw_manhattanPlot(gwasFile,
-                     adj_method = 'bonferroni',
-                     thresh_p = 0.05,
-                     interactive = TRUE,
-                     outFile = 'data/results/manplot.html')
+    adj_method = "bonferroni",
+    thresh_p = 0.05,
+    interactive = TRUE,
+    outFile = "data/results/manplot.html"
+  )
   draw_manhattanPlot(gwasFile,
-                     adj_method = 'bonferroni',
-                     thresh_p = 0.05,
-                     interactive = FALSE,
-                     outFile = 'data/results/manplot.png')
+    adj_method = "bonferroni",
+    thresh_p = 0.05,
+    interactive = FALSE,
+    outFile = "data/results/manplot.png"
+  )
 
 
   # create LdPlot ----
-  cat('create LdPlot ----\n')
+  cat("create LdPlot ----\n")
   draw_ldPlot(genoFile,
-              from = 42,
-              to = 62,
-              outFile = 'data/results/ldplot.png')
+    from = 42,
+    to = 62,
+    outFile = "data/results/ldplot.png"
+  )
 
   # create pedigree network ----
-  cat('create pedigree network ----\n')
-  pedFile <- 'data/pedigree/testPedData_char.csv'
+  cat("create pedigree network ----\n")
+  pedFile <- "data/pedigree/testPedData_char.csv"
 
   draw_pedNetwork(pedFile,
-                  outFile = 'data/results/pedigreeNetwork.html')
+    outFile = "data/results/pedigreeNetwork.html"
+  )
 
   # create pedigree relationship ----
-  cat('create pedigree relationship ----\n')
+  cat("create pedigree relationship ----\n")
   calc_pedRelMat(pedFile,
-                 outFile = 'data/results/pedigreeRelationship.csv')
+    outFile = "data/results/pedigreeRelationship.csv"
+  )
   calc_pedRelMat(pedFile,
-                 outFile = 'data/results/pedigreeRelationship.json')
+    outFile = "data/results/pedigreeRelationship.json"
+  )
 
-  calc_pedRelMat(pedFile = 'data/pedigree/breedGame_pedigree.csv',
-                 outFile = 'data/results/breedGame_pedRelMat.csv')
-  calc_pedRelMat(pedFile = 'data/pedigree/breedGame_pedigree.csv',
-                 outFile = 'data/results/breedGame_pedRelMat.json')
+  calc_pedRelMat(
+    pedFile = "data/pedigree/breedGame_pedigree.csv",
+    outFile = "data/results/breedGame_pedRelMat.csv"
+  )
+  calc_pedRelMat(
+    pedFile = "data/pedigree/breedGame_pedigree.csv",
+    outFile = "data/results/breedGame_pedRelMat.json"
+  )
 
   # create genomic relationship ----
-  cat('create genomic relationship ----\n')
-  calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
-                  outFile = 'data/results/breedGame_genoRelMat.csv')
-  calc_genoRelMat(genoFile = 'data/geno/breedGame_geno.vcf.gz',
-                  outFile = 'data/results/breedGame_genoRelMat.json')
+  cat("create genomic relationship ----\n")
+  calc_genoRelMat(
+    genoFile = "data/geno/breedGame_geno.vcf.gz",
+    outFile = "data/results/breedGame_genoRelMat.csv"
+  )
+  calc_genoRelMat(
+    genoFile = "data/geno/breedGame_geno.vcf.gz",
+    outFile = "data/results/breedGame_genoRelMat.json"
+  )
 
   # create combined relationship ----
-  cat('create combined relationship ----\n')
-  calc_combinedRelMat(pedRelMatFile = 'data/results/breedGame_pedRelMat.csv',
-                      genoRelMatFile = 'data/results/breedGame_genoRelMat.csv',
-                      method = 'Legarra',
-                      outFile = 'data/results/breedGame_combinedRelMat.csv')
+  cat("create combined relationship ----\n")
+  calc_combinedRelMat(
+    pedRelMatFile = "data/results/breedGame_pedRelMat.csv",
+    genoRelMatFile = "data/results/breedGame_genoRelMat.csv",
+    method = "Legarra",
+    outFile = "data/results/breedGame_combinedRelMat.csv"
+  )
 
   # create relationship heatmap ----
-  cat('create relationship heatmap ----\n')
-  draw_relHeatmap(relMatFile = 'data/results/pedigreeRelationship.csv',
-                  interactive = TRUE,
-                  outFile = 'data/results/relationshipHeatmap.html')
-  draw_relHeatmap(relMatFile = 'data/results/pedigreeRelationship.csv',
-                  interactive = FALSE,
-                  outFile = 'data/results/relationshipHeatmap.png')
+  cat("create relationship heatmap ----\n")
+  draw_relHeatmap(
+    relMatFile = "data/results/pedigreeRelationship.csv",
+    interactive = TRUE,
+    outFile = "data/results/relationshipHeatmap.html"
+  )
+  draw_relHeatmap(
+    relMatFile = "data/results/pedigreeRelationship.csv",
+    interactive = FALSE,
+    outFile = "data/results/relationshipHeatmap.png"
+  )
 
 
   # create progeny blup estimation results ----
-  cat('create progeny blup estimation results ----\n')
-  genoFile <- 'data/geno/breedGame_phasedGeno.vcf.gz'
-  crossTableFile <- 'data/crossingTable/breedGame_small_crossTable.csv'
-  SNPcoordFile <- 'data/SNPcoordinates/breedingGame_SNPcoord.csv'
-  markerEffectsFile <- 'data/markerEffects/breedGame_markerEffects.csv'
-  outFile <- 'data/results/progenyBlupEstimation.json'
+  cat("create progeny blup estimation results ----\n")
+  genoFile <- "data/geno/breedGame_phasedGeno.vcf.gz"
+  crossTableFile <- "data/crossingTable/breedGame_small_crossTable.csv"
+  SNPcoordFile <- "data/SNPcoordinates/breedingGame_SNPcoord.csv"
+  markerEffectsFile <- "data/markerEffects/breedGame_markerEffects.csv"
+  outFile <- "data/results/progenyBlupEstimation.json"
 
   calc_progenyBlupEstimation(
     genoFile = genoFile,
@@ -173,16 +200,18 @@ createResultExample <- function() {
     outFile = outFile
   )
 
-  outFile_plot <- 'data/results/progenyBlupEstimation_plot.html'
-  draw_progBlupsPlot(progEstimFile = outFile,
-                     errorBarInterval= 0.95,
-                     y_axisName = "Genetic values",
-                     sorting = 'alpha',
-                     trait = "trait1",
-                     outFile = outFile_plot)
+  outFile_plot <- "data/results/progenyBlupEstimation_plot.html"
+  draw_progBlupsPlot(
+    progEstimFile = outFile,
+    errorBarInterval = 0.95,
+    y_axisName = "Genetic values",
+    sorting = "alpha",
+    trait = "trait1",
+    outFile = outFile_plot
+  )
 
-  markerEffectsFile <- 'data/markerEffects/breedGame_markerEffects_2traits.json'
-  outFile <- 'data/results/progenyBlupEstimation_2traits.json'
+  markerEffectsFile <- "data/markerEffects/breedGame_markerEffects_2traits.json"
+  outFile <- "data/results/progenyBlupEstimation_2traits.json"
   calc_progenyBlupEstimation(
     genoFile = genoFile,
     crossTableFile = crossTableFile,
@@ -192,85 +221,104 @@ createResultExample <- function() {
   )
 
 
-  outFile_plot <- 'data/results/progenyBlupEstimation_plot_2traits.html'
-  draw_progBlupsPlot_2traits(progEstimFile = outFile,
-                             x_trait = 'trait1',
-                             y_trait = 'trait2',
-                             confidenceLevel = 0.95,
-                             x_suffix = "",
-                             y_suffix = "",
-                             ellipses_npoints = 100,
-                             outFile = outFile_plot)
+  outFile_plot <- "data/results/progenyBlupEstimation_plot_2traits.html"
+  draw_progBlupsPlot_2traits(
+    progEstimFile = outFile,
+    x_trait = "trait1",
+    y_trait = "trait2",
+    confidenceLevel = 0.95,
+    x_suffix = "",
+    y_suffix = "",
+    ellipses_npoints = 100,
+    outFile = outFile_plot
+  )
 
   # train_gs_model_main ----
-  outFile <- 'data/results/GS_model_additive.json'
-  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
-                      phenoFile = "data/genomic_selection/pheno_train.csv",
-                      trait = "pheno",
-                      with_dominance = FALSE,
-                      thresh_maf = 0,
-                      outFile = outFile)
+  outFile <- "data/results/GS_model_additive.json"
+  train_gs_model_main(
+    genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+    phenoFile = "data/genomic_selection/pheno_train.csv",
+    trait = "pheno",
+    with_dominance = FALSE,
+    thresh_maf = 0,
+    outFile = outFile
+  )
 
-  outFile <- 'data/results/GS_model_dominance.json'
-  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
-                      phenoFile = "data/genomic_selection/pheno_train.csv",
-                      trait = "pheno",
-                      with_dominance = TRUE,
-                      thresh_maf = 0,
-                      outFile = outFile)
+  outFile <- "data/results/GS_model_dominance.json"
+  train_gs_model_main(
+    genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+    phenoFile = "data/genomic_selection/pheno_train.csv",
+    trait = "pheno",
+    with_dominance = TRUE,
+    thresh_maf = 0,
+    outFile = outFile
+  )
 
 
   # gs evaluation ----
-  outFile <- 'data/results/GS_model_evaluation.json'
-  cross_validation_evaluation_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
-                                   phenoFile = "data/genomic_selection/pheno_train.csv",
-                                   trait = "pheno",
-                                   n_folds = 10,
-                                   n_repetitions = 5,
-                                   with_dominance = FALSE,
-                                   thresh_maf = 0,
-                                   outFile = outFile)
+  outFile <- "data/results/GS_model_evaluation.json"
+  cross_validation_evaluation_main(
+    genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+    phenoFile = "data/genomic_selection/pheno_train.csv",
+    trait = "pheno",
+    n_folds = 10,
+    n_repetitions = 5,
+    with_dominance = FALSE,
+    thresh_maf = 0,
+    outFile = outFile
+  )
 
   # gs evaluation plot ----
-  outFile <- 'data/results/GS_model_evaluation_plot.html'
-  draw_evaluation_plot(evaluationFile = 'data/results/GS_model_evaluation.json',
-                       outFile = outFile)
+  outFile <- "data/results/GS_model_evaluation_plot.html"
+  draw_evaluation_plot(
+    evaluationFile = "data/results/GS_model_evaluation.json",
+    outFile = outFile
+  )
 
   # train_gs_model_main ----
-  outFile <- 'data/results/GS_model_additive.json'
-  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
-                      phenoFile = "data/genomic_selection/pheno_train.csv",
-                      trait = "pheno",
-                      with_dominance = FALSE,
-                      thresh_maf = 0,
-                      outFile = outFile)
+  outFile <- "data/results/GS_model_additive.json"
+  train_gs_model_main(
+    genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+    phenoFile = "data/genomic_selection/pheno_train.csv",
+    trait = "pheno",
+    with_dominance = FALSE,
+    thresh_maf = 0,
+    outFile = outFile
+  )
 
-  outFile <- 'data/results/GS_model_dominance.json'
-  train_gs_model_main(genoFile = "data/genomic_selection/geno_G1.vcf.gz",
-                      phenoFile = "data/genomic_selection/pheno_train.csv",
-                      trait = "pheno",
-                      with_dominance = TRUE,
-                      thresh_maf = 0,
-                      outFile = outFile)
+  outFile <- "data/results/GS_model_dominance.json"
+  train_gs_model_main(
+    genoFile = "data/genomic_selection/geno_G1.vcf.gz",
+    phenoFile = "data/genomic_selection/pheno_train.csv",
+    trait = "pheno",
+    with_dominance = TRUE,
+    thresh_maf = 0,
+    outFile = outFile
+  )
 
 
   # predict_gs_model_main ----
-  outFile <- 'data/results/GS_model_prediction_1trait.csv'
-  predictions <- predict_gs_model_main(genoFile = "data/genomic_selection/geno_G2.vcf.gz",
-                                       genoUrl = NULL,
-                                       markerEffectsFile = "data/results/GS_model_dominance.json",
-                                       markerEffectsUrl = NULL,
-                                       outFile = outFile)
-  outFile <- 'data/results/GS_model_prediction_2traits.csv'
-  predictions <- predict_gs_model_main(genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
-                                       genoUrl = NULL,
-                                       markerEffectsFile = "data/markerEffects/breedGame_markerEffects_2traits.json",
-                                       markerEffectsUrl = NULL,
-                                       outFile = outFile)
+  outFile <- "data/results/GS_model_prediction_1trait.csv"
+  predictions <- predict_gs_model_main(
+    genoFile = "data/genomic_selection/geno_G2.vcf.gz",
+    genoUrl = NULL,
+    markerEffectsFile = "data/results/GS_model_dominance.json",
+    markerEffectsUrl = NULL,
+    outFile = outFile
+  )
+  outFile <- "data/results/GS_model_prediction_2traits.csv"
+  predictions <- predict_gs_model_main(
+    genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
+    genoUrl = NULL,
+    markerEffectsFile = "data/markerEffects/breedGame_markerEffects_2traits.json",
+    markerEffectsUrl = NULL,
+    outFile = outFile
+  )
 
   # clear folder
-  unlink(list.dirs('data/results', recursive = FALSE),
-         recursive = TRUE)
+  unlink(list.dirs("data/results", recursive = FALSE),
+    recursive = TRUE
+  )
 
 
   NULL

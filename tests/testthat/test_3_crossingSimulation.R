@@ -7,12 +7,11 @@
 
 
 capture_output({
-
   # initializeSimulation ----
-  phasedGenoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
-  SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
+  phasedGenoFile <- "../../data/geno/breedGame_phasedGeno.vcf.gz"
+  SNPcoordFile <- "../../data/SNPcoordinates/breedingGame_SNPcoord.csv"
 
-  test_that('initializeSimulation', {
+  test_that("initializeSimulation", {
     g <- readPhasedGeno(phasedGenoFile)
     SNPcoord <- checkAndFilterSNPcoord(readSNPcoord(SNPcoordFile), g$SNPcoord)
 
@@ -20,15 +19,15 @@ capture_output({
       parent_pop <- initializeSimulation(g$haplotypes, SNPcoord)
     })
     expect_is(parent_pop, "population")
-    expect_equal(parent_pop$nInd, ncol(g$haplotypes)/2)
+    expect_equal(parent_pop$nInd, ncol(g$haplotypes) / 2)
 
     # chromosome information
     chrInfo_max <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
-    chrInfo_max <- chrInfo_max[, c('name', 'physPos', 'linkMapPos')]
-    colnames(chrInfo_max) <- c('name', 'max_physPos', 'max_linkMapPos')
+    chrInfo_max <- chrInfo_max[, c("name", "physPos", "linkMapPos")]
+    colnames(chrInfo_max) <- c("name", "max_physPos", "max_linkMapPos")
     chrInfo_min <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = min)
-    chrInfo_min <- chrInfo_min[, c('name', 'physPos', 'linkMapPos')]
-    colnames(chrInfo_min) <- c('name', 'min_physPos', 'min_linkMapPos')
+    chrInfo_min <- chrInfo_min[, c("name", "physPos", "linkMapPos")]
+    colnames(chrInfo_min) <- c("name", "min_physPos", "min_linkMapPos")
     chrInfo <- dplyr::left_join(chrInfo_min, chrInfo_max)
     chrInfo$chrLength <- chrInfo$max_linkMapPos - chrInfo$min_linkMapPos
 
@@ -41,22 +40,23 @@ capture_output({
 
     # SNP coordinates:
     simulInit_SNPcoord <- parent_pop$inds[[1]]$haplo$SNPinfo$SNPcoord
-    simulInit_SNPcoord <- simulInit_SNPcoord[order(simulInit_SNPcoord$SNPid),]
+    simulInit_SNPcoord <- simulInit_SNPcoord[order(simulInit_SNPcoord$SNPid), ]
 
     # transform SNP linkage map position to start at 0 (simple translation)
     for (chr in unique(SNPcoord$chr)) {
       selLines <- SNPcoord$chr == chr # (selected)lines of the current chromosome
-      minLMPos <- min(SNPcoord[selLines, 'linkMapPos'])
-      SNPcoord[selLines, 'linkMapPos'] <- SNPcoord$linkMapPos[selLines] - minLMPos
+      minLMPos <- min(SNPcoord[selLines, "linkMapPos"])
+      SNPcoord[selLines, "linkMapPos"] <- SNPcoord$linkMapPos[selLines] - minLMPos
     }
 
     expect_equal(sort(simulInit_SNPcoord$SNPid), sort(SNPcoord$SNPid))
-    expect_equal(simulInit_SNPcoord$linkMapPos,
-                 SNPcoord[order(SNPcoord$SNPid), 'linkMapPos'] * 10^2)
-    expect_equal(simulInit_SNPcoord$chr,
-                 SNPcoord[order(SNPcoord$SNPid), 'chr'])
-    })
-
-
-
+    expect_equal(
+      simulInit_SNPcoord$linkMapPos,
+      SNPcoord[order(SNPcoord$SNPid), "linkMapPos"] * 10^2
+    )
+    expect_equal(
+      simulInit_SNPcoord$chr,
+      SNPcoord[order(SNPcoord$SNPid), "chr"]
+    )
+  })
 })

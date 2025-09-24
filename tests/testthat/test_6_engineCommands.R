@@ -9,45 +9,54 @@
 
 
 if (!nzchar(Sys.getenv("RGENOROOT"))) {
-  Sys.setenv(RGENOROOT = normalizePath('../..'))
+  Sys.setenv(RGENOROOT = normalizePath("../.."))
 }
 if (!nzchar(Sys.getenv("ROOT_DATA_FILES"))) {
   Sys.setenv(ROOT_DATA_FILES = Sys.getenv("RGENOROOT"))
 }
 
 # clean testOutput dir
-f <- list.files(paste0(Sys.getenv("ROOT_DATA_FILES"),
-                       "/tests/testthat/testOutput"),
-                full.names = TRUE,
-                include.dirs = TRUE)
+f <- list.files(
+  paste0(
+    Sys.getenv("ROOT_DATA_FILES"),
+    "/tests/testthat/testOutput"
+  ),
+  full.names = TRUE,
+  include.dirs = TRUE
+)
 invisible(lapply(f, unlink, recursive = TRUE))
 
 
-rGenoCommand <- paste0(Sys.getenv("RGENOROOT"),
-                       "/r-geno-tools-engine.R")
+rGenoCommand <- paste0(
+  Sys.getenv("RGENOROOT"),
+  "/r-geno-tools-engine.R"
+)
 
 # help ----
-test_that('engine help', {
+test_that("engine help", {
   expect_no_warning({
     x <- system(rGenoCommand,
-                intern = FALSE,
-                ignore.stdout = TRUE)
+      intern = FALSE,
+      ignore.stdout = TRUE
+    )
   })
   expect_equal(x, 0)
 })
 
 # all commands help ----
 x <- system(rGenoCommand,
-            intern = TRUE)
-x <- x[which(grepl('Available commands', x)) + 1]
-x <- gsub('[^\\w,\\-]', '', x, perl = TRUE)
-cmds <- c('', strsplit(x, split = ',')[[1]])
-cmds <- paste(cmds, '--help')
+  intern = TRUE
+)
+x <- x[which(grepl("Available commands", x)) + 1]
+x <- gsub("[^\\w,\\-]", "", x, perl = TRUE)
+cmds <- c("", strsplit(x, split = ",")[[1]])
+cmds <- paste(cmds, "--help")
 for (cmd in cmds) {
-  test_that(paste('help:', cmd), {
+  test_that(paste("help:", cmd), {
     expect_no_warning({
       x <- system(paste(rGenoCommand, cmd),
-                  intern = TRUE)
+        intern = TRUE
+      )
     })
     expect_false(isTRUE(all.equal(length(x), 0)))
 
@@ -59,16 +68,18 @@ for (cmd in cmds) {
 }
 
 # gwas ----
-test_that('gwas', {
-  cmd <- paste(rGenoCommand, 'gwas',
-               '--genoFile "$ROOT_DATA_FILES/data/geno/testMarkerData01.vcf.gz"',
-               '--phenoFile "$ROOT_DATA_FILES/data/pheno/testPhenoData01.csv"',
-               '--trait "Flowering.time.at.Arkansas"',
-               '--test "score"',
-               '--response "quantitative"',
-               '--thresh-maf 0.05',
-               '--thresh-callrate 0.95',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"')
+test_that("gwas", {
+  cmd <- paste(
+    rGenoCommand, "gwas",
+    '--genoFile "$ROOT_DATA_FILES/data/geno/testMarkerData01.vcf.gz"',
+    '--phenoFile "$ROOT_DATA_FILES/data/pheno/testPhenoData01.csv"',
+    '--trait "Flowering.time.at.Arkansas"',
+    '--test "score"',
+    '--response "quantitative"',
+    "--thresh-maf 0.05",
+    "--thresh-callrate 0.95",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -76,17 +87,19 @@ test_that('gwas', {
   expect_equal(x, 0)
 })
 
-test_that('gwas', {
-  cmd <- paste(rGenoCommand, 'gwas',
-               '--genoFile "$ROOT_DATA_FILES/data/geno/testMarkerData01.vcf.gz"',
-               '--phenoFile "$ROOT_DATA_FILES/data/pheno/testPhenoData01.csv"',
-               '--trait "Flowering.time.at.Arkansas"',
-               '--test "wald"',
-               '--fixed 0',
-               '--response "quantitative"',
-               '--thresh-maf 0.05',
-               '--thresh-callrate 0.95',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_wald.json"')
+test_that("gwas", {
+  cmd <- paste(
+    rGenoCommand, "gwas",
+    '--genoFile "$ROOT_DATA_FILES/data/geno/testMarkerData01.vcf.gz"',
+    '--phenoFile "$ROOT_DATA_FILES/data/pheno/testPhenoData01.csv"',
+    '--trait "Flowering.time.at.Arkansas"',
+    '--test "wald"',
+    "--fixed 0",
+    '--response "quantitative"',
+    "--thresh-maf 0.05",
+    "--thresh-callrate 0.95",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_wald.json"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -96,15 +109,16 @@ test_that('gwas', {
 
 
 # gwas-manplot ----
-test_that('gwas-manplot', {
-
+test_that("gwas-manplot", {
   # html
-  cmd <- paste(rGenoCommand, 'gwas-manplot',
-               '--gwasFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"',
-               '--adj-method "bonferroni"',
-               '--thresh-p 0.05',
-               '--filter-nPoints 3000',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/manPlot.html"')
+  cmd <- paste(
+    rGenoCommand, "gwas-manplot",
+    '--gwasFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"',
+    '--adj-method "bonferroni"',
+    "--thresh-p 0.05",
+    "--filter-nPoints 3000",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/manPlot.html"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -112,13 +126,15 @@ test_that('gwas-manplot', {
   expect_equal(x, 0)
 
   # png
-  cmd <- paste(rGenoCommand, 'gwas-manplot',
-               '--gwasFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"',
-               '--adj-method "bonferroni"',
-               '--thresh-p 0.05',
-               '--filter-nPoints 3000',
-               '--no-interactive',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/manPlot.png"')
+  cmd <- paste(
+    rGenoCommand, "gwas-manplot",
+    '--gwasFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"',
+    '--adj-method "bonferroni"',
+    "--thresh-p 0.05",
+    "--filter-nPoints 3000",
+    "--no-interactive",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/manPlot.png"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -130,13 +146,14 @@ test_that('gwas-manplot', {
 
 
 # gwas-adjResults ----
-test_that('gwas-adjResults', {
-
-  cmd <- paste(rGenoCommand, 'gwas-adjresults',
-               '--gwasFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"',
-               '--adj-method "bonferroni"',
-               '--filter-nPoints 3000',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_adj.json"')
+test_that("gwas-adjResults", {
+  cmd <- paste(
+    rGenoCommand, "gwas-adjresults",
+    '--gwasFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_score.json"',
+    '--adj-method "bonferroni"',
+    "--filter-nPoints 3000",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/gwasRes_adj.json"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -148,13 +165,14 @@ test_that('gwas-adjResults', {
 
 
 # ldplot ----
-test_that('ldplot', {
-
-  cmd <- paste(rGenoCommand, 'ldplot',
-               '--genoFile "$ROOT_DATA_FILES/data/geno/testMarkerData01.vcf.gz"',
-               '--from 42',
-               '--to 62',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/ldplot.png"')
+test_that("ldplot", {
+  cmd <- paste(
+    rGenoCommand, "ldplot",
+    '--genoFile "$ROOT_DATA_FILES/data/geno/testMarkerData01.vcf.gz"',
+    "--from 42",
+    "--to 62",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/ldplot.png"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -165,11 +183,12 @@ test_that('ldplot', {
 
 
 # relmat-ped ----
-test_that('relmat-ped', {
-
-  cmd <- paste(rGenoCommand, 'relmat-ped',
-               '--pedFile "$ROOT_DATA_FILES/data/pedigree/testPedData_char.csv"',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedRelMat.json"')
+test_that("relmat-ped", {
+  cmd <- paste(
+    rGenoCommand, "relmat-ped",
+    '--pedFile "$ROOT_DATA_FILES/data/pedigree/testPedData_char.csv"',
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedRelMat.json"'
+  )
 
 
   expect_no_warning({
@@ -179,11 +198,12 @@ test_that('relmat-ped', {
 })
 
 # relmat-geno ----
-test_that('relmat-geno', {
-
-  cmd <- paste(rGenoCommand, 'relmat-geno',
-               '--genoFile "$ROOT_DATA_FILES/data/geno/breedGame_geno.vcf.gz"',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/genoRelMat.json"')
+test_that("relmat-geno", {
+  cmd <- paste(
+    rGenoCommand, "relmat-geno",
+    '--genoFile "$ROOT_DATA_FILES/data/geno/breedGame_geno.vcf.gz"',
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/genoRelMat.json"'
+  )
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
   })
@@ -191,16 +211,17 @@ test_that('relmat-geno', {
 })
 
 # relmat-combined ----
-test_that('relmat-combined', {
-
-  cmd <- paste(rGenoCommand, 'relmat-combined',
-               '--ped-relmatFile $ROOT_DATA_FILES/data/results/breedGame_pedRelMat.csv',
-               '--geno-relmatFile $ROOT_DATA_FILES/data/results/breedGame_genoRelMat.csv',
-               # '--combine-method Legarra',
-               '--combine-method Martini',
-               '--tau 1.3',
-               '--omega 0.7',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/combinedRelMat.json"')
+test_that("relmat-combined", {
+  cmd <- paste(
+    rGenoCommand, "relmat-combined",
+    "--ped-relmatFile $ROOT_DATA_FILES/data/results/breedGame_pedRelMat.csv",
+    "--geno-relmatFile $ROOT_DATA_FILES/data/results/breedGame_genoRelMat.csv",
+    # '--combine-method Legarra',
+    "--combine-method Martini",
+    "--tau 1.3",
+    "--omega 0.7",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/combinedRelMat.json"'
+  )
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
   })
@@ -211,12 +232,13 @@ test_that('relmat-combined', {
 
 
 # relmat-heatmap ----
-test_that('relmat-heatmap', {
-
-  cmd <- paste(rGenoCommand, 'relmat-heatmap',
-               '--relmatFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedRelMat.json"',
-               '--no-interactive',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/relMat.png"')
+test_that("relmat-heatmap", {
+  cmd <- paste(
+    rGenoCommand, "relmat-heatmap",
+    '--relmatFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedRelMat.json"',
+    "--no-interactive",
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/relMat.png"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE)
@@ -227,11 +249,12 @@ test_that('relmat-heatmap', {
 
 
 # pedNetwork ----
-test_that('pedNetwork', {
-
-  cmd <- paste(rGenoCommand, 'pedNetwork',
-               '--pedFile "$ROOT_DATA_FILES/data/pedigree/testPedData_char.csv"',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedNet.html"')
+test_that("pedNetwork", {
+  cmd <- paste(
+    rGenoCommand, "pedNetwork",
+    '--pedFile "$ROOT_DATA_FILES/data/pedigree/testPedData_char.csv"',
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedNet.html"'
+  )
 
 
   expect_no_warning({
@@ -243,10 +266,9 @@ test_that('pedNetwork', {
 
 
 # crossing-simulation ----
-test_that('crossing-simulation', {
-
+test_that("crossing-simulation", {
   cmd <- paste(
-    rGenoCommand, 'crossing-simulation',
+    rGenoCommand, "crossing-simulation",
     '--genoFile "$ROOT_DATA_FILES/data/geno/breedGame_phasedGeno.vcf.gz"',
     '--crossTableFile "$ROOT_DATA_FILES/data/crossingTable/breedGame_small_crossTable.csv"',
     '--SNPcoordFile "$ROOT_DATA_FILES/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
@@ -260,9 +282,9 @@ test_that('crossing-simulation', {
 })
 
 # progeny-blup-calculation ----
-test_that('progeny-blup-calculation', {
+test_that("progeny-blup-calculation", {
   cmd <- paste(
-    rGenoCommand, 'progeny-blup-calculation',
+    rGenoCommand, "progeny-blup-calculation",
     '--genoFile "$ROOT_DATA_FILES/data/geno/breedGame_phasedGeno.vcf.gz"',
     '--crossTableFile "$ROOT_DATA_FILES/data/crossingTable/breedGame_small_crossTable.csv"',
     '--SNPcoordFile "$ROOT_DATA_FILES/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
@@ -276,9 +298,9 @@ test_that('progeny-blup-calculation', {
   expect_equal(x, 0)
 })
 
-test_that('progeny-blup-calculation (multi-trait marker effect)', {
+test_that("progeny-blup-calculation (multi-trait marker effect)", {
   cmd <- paste(
-    rGenoCommand, 'progeny-blup-calculation',
+    rGenoCommand, "progeny-blup-calculation",
     '--genoFile "$ROOT_DATA_FILES/data/geno/breedGame_phasedGeno.vcf.gz"',
     '--crossTableFile "$ROOT_DATA_FILES/data/crossingTable/breedGame_small_crossTable.csv"',
     '--SNPcoordFile "$ROOT_DATA_FILES/data/SNPcoordinates/breedingGame_SNPcoord.csv"',
@@ -294,12 +316,12 @@ test_that('progeny-blup-calculation (multi-trait marker effect)', {
 
 
 # progeny-blup-plot ----
-test_that('progeny-blup-plot', {
+test_that("progeny-blup-plot", {
   cmd <- paste(
-    rGenoCommand, 'progeny-blup-plot',
+    rGenoCommand, "progeny-blup-plot",
     '--progeniesBlupFile "$ROOT_DATA_FILES/tests/testthat/testOutput/progBlups.json"',
     '--y-axis-name "Phenotypic trait"',
-    '--error-bar-interval 0.95',
+    "--error-bar-interval 0.95",
     '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/blupPlot_1trait.html"'
   )
 
@@ -309,12 +331,12 @@ test_that('progeny-blup-plot', {
   expect_equal(x, 0)
 })
 
-test_that('progeny-blup-plot (multi-trait file)', {
+test_that("progeny-blup-plot (multi-trait file)", {
   cmd <- paste(
-    rGenoCommand, 'progeny-blup-plot',
+    rGenoCommand, "progeny-blup-plot",
     '--progeniesBlupFile "$ROOT_DATA_FILES/tests/testthat/testOutput/progBlups_2traits.json"',
     '--y-axis-name "Phenotypic trait"',
-    '--error-bar-interval 0.95',
+    "--error-bar-interval 0.95",
     '--trait "trait1"',
     '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/blupPlot_1trait_with_multi-trait-input.html"'
   )
@@ -325,13 +347,13 @@ test_that('progeny-blup-plot (multi-trait file)', {
   expect_equal(x, 0)
 })
 
-test_that('progeny-blup-plot-2-traits', {
+test_that("progeny-blup-plot-2-traits", {
   cmd <- paste(
-    rGenoCommand, 'progeny-blup-plot-2-traits',
+    rGenoCommand, "progeny-blup-plot-2-traits",
     '--progeniesBlupFile "$ROOT_DATA_FILES/tests/testthat/testOutput/progBlups_2traits.json"',
     '--x-trait "trait1"',
     '--y-trait "trait2"',
-    '--confidence-level 0.95',
+    "--confidence-level 0.95",
     '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/blupPlot_2traits.html"'
   )
 
@@ -343,14 +365,14 @@ test_that('progeny-blup-plot-2-traits', {
 
 
 # evaluate-gs-model ----
-test_that('evaluate-gs-model', {
+test_that("evaluate-gs-model", {
   cmd <- paste(
-    rGenoCommand, 'evaluate-gs-model',
-    '--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz',
-    '--phenoFile $ROOT_DATA_FILES/data/genomic_selection/pheno_train.csv',
-    '--trait pheno',
-    '--with-dominance true',
-    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_evaluation.json'
+    rGenoCommand, "evaluate-gs-model",
+    "--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz",
+    "--phenoFile $ROOT_DATA_FILES/data/genomic_selection/pheno_train.csv",
+    "--trait pheno",
+    "--with-dominance true",
+    "--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_evaluation.json"
   )
 
   expect_no_warning({
@@ -360,11 +382,11 @@ test_that('evaluate-gs-model', {
 })
 
 # plot-gs-model-evaluation ----
-test_that('plot-gs-model-evaluation', {
+test_that("plot-gs-model-evaluation", {
   cmd <- paste(
-    rGenoCommand, 'plot-gs-model-evaluation',
-    '--evaluation-file $ROOT_DATA_FILES/tests/testthat/testOutput/gs_evaluation.json',
-    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/eval_plot.html'
+    rGenoCommand, "plot-gs-model-evaluation",
+    "--evaluation-file $ROOT_DATA_FILES/tests/testthat/testOutput/gs_evaluation.json",
+    "--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/eval_plot.html"
   )
 
   expect_no_warning({
@@ -374,14 +396,14 @@ test_that('plot-gs-model-evaluation', {
 })
 
 # train-gs-model ----
-test_that('train-gs-model', {
+test_that("train-gs-model", {
   cmd <- paste(
-    rGenoCommand, 'train-gs-model',
-    '--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz',
-    '--phenoFile $ROOT_DATA_FILES/data/genomic_selection/pheno_train.csv',
-    '--trait pheno',
-    '--with-dominance true',
-    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_model.json'
+    rGenoCommand, "train-gs-model",
+    "--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz",
+    "--phenoFile $ROOT_DATA_FILES/data/genomic_selection/pheno_train.csv",
+    "--trait pheno",
+    "--with-dominance true",
+    "--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_model.json"
   )
 
   expect_no_warning({
@@ -391,12 +413,12 @@ test_that('train-gs-model', {
 })
 
 # gs-predictions ----
-test_that('gs-predictions', {
+test_that("gs-predictions", {
   cmd <- paste(
-    rGenoCommand, 'gs-predictions',
-    '--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz',
-    '--markerEffectsFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_model.json',
-    '--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_prediction.csv'
+    rGenoCommand, "gs-predictions",
+    "--genoFile $ROOT_DATA_FILES/data/genomic_selection/geno_G1.vcf.gz",
+    "--markerEffectsFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_model.json",
+    "--outFile $ROOT_DATA_FILES/tests/testthat/testOutput/gs_prediction.csv"
   )
 
   expect_no_warning({
@@ -406,11 +428,12 @@ test_that('gs-predictions', {
 })
 
 # expected Errors ----
-test_that('Expected error RAW', {
-
-  cmd <- paste(rGenoCommand, 'pedNetwork',
-               '--pedFile "/doNotExist"',
-               '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedNet.html"')
+test_that("Expected error RAW", {
+  cmd <- paste(
+    rGenoCommand, "pedNetwork",
+    '--pedFile "/doNotExist"',
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedNet.html"'
+  )
 
   expect_no_warning({
     x <- system(cmd, intern = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
@@ -419,11 +442,13 @@ test_that('Expected error RAW', {
 })
 
 
-test_that('Expected error JSON', {
-  args <- paste('pedNetwork',
-                '--pedFile "/doNotExist"',
-                '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedNet.html"',
-                '--json-errors')
+test_that("Expected error JSON", {
+  args <- paste(
+    "pedNetwork",
+    '--pedFile "/doNotExist"',
+    '--outFile "$ROOT_DATA_FILES/tests/testthat/testOutput/pedNet.html"',
+    "--json-errors"
+  )
 
   tmp_stderr <- tempfile(fileext = ".json")
   tmp_stdout <- tempfile(fileext = ".log")

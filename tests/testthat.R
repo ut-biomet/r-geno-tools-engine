@@ -17,9 +17,10 @@ UNTESTED_ERROR_CODES <- NULL
 #           stop_on_warning = FALSE)
 
 # test_file("tests/testthat/test_1_readWriteData.R",
-#           reporter = StopReporter$new(),
-#           stop_on_failure = TRUE,
-#           stop_on_warning = FALSE)
+#   reporter = StopReporter$new(),
+#   stop_on_failure = TRUE,
+#   stop_on_warning = FALSE
+# )
 
 # test_file("tests/testthat/test_2_gwas.R",
 #           reporter = StopReporter$new(),

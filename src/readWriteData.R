@@ -1258,10 +1258,13 @@ readMarkerEffects_csv <- function(file) {
     intercept = intercept,
     SNPeffects_add = markerEffects,
     SNPeffects_dom = as.data.frame(matrix(0,
-                                          nrow = nrow(markerEffects),
-                                          ncol = ncol(markerEffects),
-                                          dimnames = list(row.names(markerEffects),
-                                                          colnames(markerEffects))))
+      nrow = nrow(markerEffects),
+      ncol = ncol(markerEffects),
+      dimnames = list(
+        row.names(markerEffects),
+        colnames(markerEffects)
+      )
+    ))
   )
 
   return(markerEffects)
@@ -1308,7 +1311,6 @@ readMarkerEffects_json <- function(file) {
 
   all_markers <- c()
   for (rawMarkerEff in rawMarkerEffects_list) {
-
     lapply(list(
       names(rawMarkerEff$coefficients),
       names(rawMarkerEff$additive_effects),
@@ -1324,7 +1326,8 @@ readMarkerEffects_json <- function(file) {
             duplicated_ids = snps[duplicatedIds]
           )
         )
-      }})
+      }
+    })
 
     all_markers <- unique(c(
       all_markers,
@@ -1339,17 +1342,23 @@ readMarkerEffects_json <- function(file) {
   markerEffects <- list(
     intercept = c(),
     SNPeffects_add = as.data.frame(matrix(0,
-                                          nrow = length(all_markers),
-                                          ncol = length(traits),
-                                          dimnames = list(all_markers, traits))),
+      nrow = length(all_markers),
+      ncol = length(traits),
+      dimnames = list(all_markers, traits)
+    )),
     SNPeffects_dom = as.data.frame(matrix(0,
-                                          nrow = length(all_markers),
-                                          ncol = length(traits),
-                                          dimnames = list(all_markers, traits)))
+      nrow = length(all_markers),
+      ncol = length(traits),
+      dimnames = list(all_markers, traits)
+    ))
   )
 
-  markerEffects$intercept <- sapply(rawMarkerEffects_list,
-                                    function(mark_eff){unlist(mark_eff$intercept)})
+  markerEffects$intercept <- sapply(
+    rawMarkerEffects_list,
+    function(mark_eff) {
+      unlist(mark_eff$intercept)
+    }
+  )
 
   for (trait in traits) {
     mark_eff <- rawMarkerEffects_list[[trait]]

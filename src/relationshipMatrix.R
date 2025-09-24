@@ -14,7 +14,7 @@ pedRelMat <- function(ped) {
   logger <- Logger$new("r-pedRelMat()")
 
   ### Check input ----
-  logger$log('Check inputs ...')
+  logger$log("Check inputs ...")
   if (!is.list(ped)) {
     bad_argument(ped, must_be = "a list", not = ped, "type")
   }
@@ -25,20 +25,20 @@ pedRelMat <- function(ped) {
   if (!is.data.frame(ped$data)) {
     bad_argument("ped$data", must_be = "a data.frame", not = ped$data, "type")
   }
-  expected_columns <- c('ind', 'parent1', 'parent2')
+  expected_columns <- c("ind", "parent1", "parent2")
   if (!identical(colnames(ped$data), expected_columns)) {
     bad_argument("colnames(ped$data)", must_be = expected_columns, not = colnames(ped$data))
   }
-  logger$log('Check inputs DONE')
+  logger$log("Check inputs DONE")
 
 
   ### Create the look-up table ----
   ### this table is the same than the pedigree table with id given to the
   ### individuals according to their generation.
-  logger$log('Create look-up table ...')
+  logger$log("Create look-up table ...")
 
   lut <- as.data.frame(matrix(rep(NA, 3 * nrow(ped$data)), ncol = 3))
-  colnames(lut) <- c('id', 'parent1', 'parent2')
+  colnames(lut) <- c("id", "parent1", "parent2")
 
   # initialize id of unknown parents
   lut$parent1[is.na(ped$data$parent1)] <- 0
@@ -70,13 +70,13 @@ pedRelMat <- function(ped) {
     }
   }
   lut$name <- ped$data$ind
-  lut <- lut[order(lut$id),] # re-order the table
-  logger$log('Create look-up table DONE')
+  lut <- lut[order(lut$id), ] # re-order the table
+  logger$log("Create look-up table DONE")
 
 
 
   ### Calculate relationship matrix
-  logger$log('Calculate relationship matrix ...')
+  logger$log("Calculate relationship matrix ...")
   relMat <- matrix(NA, nrow = nrow(ped$data), ncol = nrow(ped$data))
   for (i in seq(nrow(lut))) {
     # l <- which(lut$id == i) # l is always = to i because lut is ordered.
@@ -115,7 +115,7 @@ pedRelMat <- function(ped) {
   # reset initial order
   relMat <- relMat[ped$data$ind, ped$data$ind]
 
-  logger$log('Calculate relationship matrix DONE')
+  logger$log("Calculate relationship matrix DONE")
 
   ### output ----
   logger$log("DONE, return output.")
@@ -185,20 +185,20 @@ calc_additive_rel_mat <- function(geno, standardized = TRUE) {
 #' genetic matrix, with p the allele frequency (cf. `?gaston::DM`)
 #'
 #' @return matrix
-calc_dominance_geno <- function(geno, standardized = TRUE){
+calc_dominance_geno <- function(geno, standardized = TRUE) {
   gaston::standardize(geno) <- "none"
 
   if (standardized) {
     D <- apply(gaston::as.matrix(geno), MARGIN = 2, function(x) {
-      af <- sum(x, na.rm = TRUE) / (2*length(x))
-      i <- af/(1 - af)
+      af <- sum(x, na.rm = TRUE) / (2 * length(x))
+      i <- af / (1 - af)
       j <- -1
-      k <- (1 - af)/af
+      k <- (1 - af) / af
 
       (
         i * as.numeric(x == 0)
-        + j * as.numeric(x == 1)
-        + k * as.numeric(x == 2)
+          + j * as.numeric(x == 1)
+          + k * as.numeric(x == 2)
       )
     })
     colnames(D) <- geno@snps$id
@@ -252,18 +252,17 @@ calc_dominance_rel_mat <- function(geno, standardized = TRUE) {
 #' @author Hiroyoshi Iwata, Julien Diot
 combinedRelMat <- function(ped_rm,
                            geno_rm,
-                           method = 'Legarra',
+                           method = "Legarra",
                            tau = NULL,
                            omega = NULL) {
-
   logger <- Logger$new("r-combineRelMat()")
 
   ### Check input ----
-  logger$log('Check inputs ...')
+  logger$log("Check inputs ...")
   checkRelMat(ped_rm)
   checkRelMat(geno_rm)
 
-  if (method == 'Legarra') {
+  if (method == "Legarra") {
     tau <- 1
     omega <- 1
   }
@@ -272,19 +271,21 @@ combinedRelMat <- function(ped_rm,
   if (length(additionalInds) != 0) {
     warning(paste(
       length(additionalInds),
-      'individuals of the genomic relationship matrix',
-      'are not in the pedigree relationship matrix:',
-      paste(additionalInds, collapse = ', '),
-      '\nThe combined relationship matrix will only include individuals of the',
-      'pedigree relationship matrix.'
+      "individuals of the genomic relationship matrix",
+      "are not in the pedigree relationship matrix:",
+      paste(additionalInds, collapse = ", "),
+      "\nThe combined relationship matrix will only include individuals of the",
+      "pedigree relationship matrix."
     ))
-    geno_rm <- geno_rm[row.names(geno_rm) %in% colnames(ped_rm),
-                       colnames(geno_rm) %in% colnames(ped_rm)]
+    geno_rm <- geno_rm[
+      row.names(geno_rm) %in% colnames(ped_rm),
+      colnames(geno_rm) %in% colnames(ped_rm)
+    ]
   }
-  logger$log('Check inputs DONE')
+  logger$log("Check inputs DONE")
 
   # calculate genetic relationship matrix
-  logger$log('Calculate combined relationship matrix ...')
+  logger$log("Calculate combined relationship matrix ...")
 
   # the following is an alternative to `AGHmatrix` by Iwata-sensei
   A.name <- rownames(ped_rm)
@@ -315,7 +316,7 @@ combinedRelMat <- function(ped_rm,
   # `hrm` is not exactly symetric due to computer precision
   hrm <- (hrm + t(hrm)) / 2 # make hrm symetric by taking the mean value
 
-  logger$log('Calculate combined relationship matrix DONE')
+  logger$log("Calculate combined relationship matrix DONE")
 
   ### output ----
   logger$log("DONE, return output.")

@@ -813,17 +813,22 @@ capture_output({
         markerEffects <- readMarkerEffects(file)
       })
       raw <- read.csv(file)
-      raw <- raw[-1,]
+      raw <- raw[-1, ]
       row.names(raw) <- raw$SNPid
       raw <- raw[, -1, drop = FALSE]
       na_indices <- which(is.na(raw), arr.ind = TRUE)
-      na_row_names <- row.names(raw)[na_indices[,"row"]]
-      na_col_names <- colnames(raw)[na_indices[,"col"]]
+      na_row_names <- row.names(raw)[na_indices[, "row"]]
+      na_col_names <- colnames(raw)[na_indices[, "col"]]
 
       expect_true(all(
-        mapply(function(row, col) {markerEffects$SNPeffects_add[row, col]},
-               na_row_names,
-               na_col_names) == 0))
+        mapply(
+          function(row, col) {
+            markerEffects$SNPeffects_add[row, col]
+          },
+          na_row_names,
+          na_col_names
+        ) == 0
+      ))
     })
   }
 
@@ -837,9 +842,9 @@ capture_output({
       })
 
       raw <- jsonlite::fromJSON(file,
-                                simplifyVector = FALSE
+        simplifyVector = FALSE
       )
-      missing_indices <- lapply(raw, function(raw_markEff_per_trait){
+      missing_indices <- lapply(raw, function(raw_markEff_per_trait) {
         missing_values <- lapply(raw_markEff_per_trait$coefficients, is.null)
         names(raw_markEff_per_trait$coefficients)[unlist(missing_values)]
       })
@@ -879,11 +884,16 @@ capture_output({
   test_that("readMarkerEffects on multi-traits with different set of SNPs", {
     markEffFile <- "../data/markerEffects_2_traits_no_dom_different_set_of_snp.json"
     raw_json_dta <- jsonlite::fromJSON(markEffFile,
-                                       simplifyVector = FALSE)
-    SNP_trait_1 <- union(names(raw_json_dta[[1]]$additive_effects),
-                         names(raw_json_dta[[1]]$dominance_effects))
-    SNP_trait_2 <- union(names(raw_json_dta[[2]]$additive_effects),
-                         names(raw_json_dta[[2]]$dominance_effects))
+      simplifyVector = FALSE
+    )
+    SNP_trait_1 <- union(
+      names(raw_json_dta[[1]]$additive_effects),
+      names(raw_json_dta[[1]]$dominance_effects)
+    )
+    SNP_trait_2 <- union(
+      names(raw_json_dta[[2]]$additive_effects),
+      names(raw_json_dta[[2]]$dominance_effects)
+    )
     exclusively_trait_1_SNP <- setdiff(SNP_trait_1, SNP_trait_2)
     exclusively_trait_2_SNP <- setdiff(SNP_trait_2, SNP_trait_1)
 

@@ -11,8 +11,8 @@ output:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-    collapse = TRUE,
-    comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 options(max.print = 50)
 dir.create("readmeTemp")
@@ -219,8 +219,8 @@ You can generate this markdown documentation using the function `writeDoc` (defi
 
 ```{r eval=FALSE}
 writeDoc(
-    srcDir = "src",
-    docDir = "doc"
+  srcDir = "src",
+  docDir = "doc"
 )
 ```
 
@@ -346,27 +346,27 @@ For a usage as R library one can use those functions.
 
 ```{r include=FALSE}
 invisible(
-    sapply(
-        FUN = source,
-        X = list.files("src", pattern = ".R$", full.names = T)
-    )
+  sapply(
+    FUN = source,
+    X = list.files("src", pattern = ".R$", full.names = T)
+  )
 )
 ```
 
 
 ```{r runGWAS}
 gwas_results <- run_gwas(
-    genoFile = "data/geno/testMarkerData01.vcf.gz",
-    phenoFile = "data/pheno/testPhenoData01.csv",
-    genoUrl = NULL,
-    phenoUrl = NULL,
-    trait = "Flowering.time.at.Arkansas",
-    test = "score",
-    fixed = 0,
-    response = "quantitative",
-    thresh_maf = 0.05,
-    thresh_callrate = 0.95,
-    outFile = tempfile(fileext = ".json")
+  genoFile = "data/geno/testMarkerData01.vcf.gz",
+  phenoFile = "data/pheno/testPhenoData01.csv",
+  genoUrl = NULL,
+  phenoUrl = NULL,
+  trait = "Flowering.time.at.Arkansas",
+  test = "score",
+  fixed = 0,
+  response = "quantitative",
+  thresh_maf = 0.05,
+  thresh_callrate = 0.95,
+  outFile = tempfile(fileext = ".json")
 )
 gwas_results$file
 substr(gwas_results$gwasRes, start = 1, stop = 500)
@@ -374,25 +374,25 @@ substr(gwas_results$gwasRes, start = 1, stop = 500)
 
 ```{r draw_manhattanPlot}
 p <- draw_manhattanPlot(
-    gwasFile = gwas_results$file,
-    gwasUrl = NULL,
-    adj_method = "bonferroni",
-    thresh_p = 0.05,
-    chr = NA,
-    interactive = TRUE,
-    # filter_pAdj = 1,
-    # filter_nPoints = Inf,
-    filter_quant = 0.1,
-    outFile = tempfile(fileext = ".html")
+  gwasFile = gwas_results$file,
+  gwasUrl = NULL,
+  adj_method = "bonferroni",
+  thresh_p = 0.05,
+  chr = NA,
+  interactive = TRUE,
+  # filter_pAdj = 1,
+  # filter_nPoints = Inf,
+  filter_quant = 0.1,
+  outFile = tempfile(fileext = ".html")
 )
 ```
 
 ```{r adj_pvals}
 gwas_adj <- run_resAdjustment(
-    gwasFile = gwas_results$file,
-    gwasUrl = NULL,
-    adj_method = "bonferroni",
-    outFile = tempfile(fileext = ".json")
+  gwasFile = gwas_results$file,
+  gwasUrl = NULL,
+  adj_method = "bonferroni",
+  outFile = tempfile(fileext = ".json")
 )
 substr(gwas_adj$gwasAdjusted, start = 1, stop = 500)
 ```
@@ -424,11 +424,11 @@ docker run --rm -v "$PWD"/data/geno/:/geno \
 
 ```{r draw_ldPlot}
 imgFile <- draw_ldPlot(
-    genoFile = "data/geno/testMarkerData01.vcf.gz",
-    genoUrl = NULL,
-    from = 42,
-    to = 62,
-    outFile = tempfile(fileext = ".png")
+  genoFile = "data/geno/testMarkerData01.vcf.gz",
+  genoUrl = NULL,
+  from = 42,
+  to = 62,
+  outFile = tempfile(fileext = ".png")
 )
 ```
 
@@ -457,11 +457,11 @@ docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
 
 ```{r pedRelMat}
 calc_pedRelMat(
-    pedFile = "data/pedigree/testPedData_char.csv",
-    pedUrl = NULL,
-    header = TRUE,
-    unknown_string = "",
-    outFile = tempfile(fileext = ".json")
+  pedFile = "data/pedigree/testPedData_char.csv",
+  pedUrl = NULL,
+  header = TRUE,
+  unknown_string = "",
+  outFile = tempfile(fileext = ".json")
 )
 ```
 
@@ -482,9 +482,9 @@ docker run --rm -v "$PWD"/data/geno/:/geno \
 
 ```{r genoRelMat}
 calc_genoRelMat(
-    genoFile = "data/geno/breedGame_geno.vcf.gz",
-    genoUrl = NULL,
-    outFile = tempfile(fileext = ".json")
+  genoFile = "data/geno/breedGame_geno.vcf.gz",
+  genoUrl = NULL,
+  outFile = tempfile(fileext = ".json")
 )
 ```
 
@@ -515,12 +515,12 @@ docker run --rm -v "$PWD"/data/results/:/results \
 
 ```{r combinedRelMat}
 calc_combinedRelMat(
-    pedRelMatFile = "data/results/breedGame_pedRelMat.csv",
-    genoRelMatFile = "data/results/breedGame_genoRelMat.csv",
-    method = "Martini",
-    tau = 1,
-    omega = 0.5,
-    outFile = tempfile(fileext = ".json")
+  pedRelMatFile = "data/results/breedGame_pedRelMat.csv",
+  genoRelMatFile = "data/results/breedGame_genoRelMat.csv",
+  method = "Martini",
+  tau = 1,
+  omega = 0.5,
+  outFile = tempfile(fileext = ".json")
 )
 ```
 
@@ -545,10 +545,10 @@ docker run --rm -v "$PWD"/data/results/:/results \
 
 ```{r relMat-heatmap}
 draw_relHeatmap(
-    relMatFile = "data/results/pedigreeRelationship.csv",
-    relMatUrl = NULL,
-    interactive = FALSE,
-    outFile = tempfile(fileext = ".png")
+  relMatFile = "data/results/pedigreeRelationship.csv",
+  relMatUrl = NULL,
+  interactive = FALSE,
+  outFile = tempfile(fileext = ".png")
 )
 ```
 
@@ -581,11 +581,11 @@ docker run --rm -v "$PWD"/data/pedigree/:/pedigree \
 
 ```{r draw_pedNet}
 imgFile <- draw_pedNetwork(
-    pedFile = "data/pedigree/testPedData_char.csv",
-    pedUrl = NULL,
-    unknown_string = "",
-    header = TRUE,
-    outFile = tempfile(fileext = ".html")
+  pedFile = "data/pedigree/testPedData_char.csv",
+  pedUrl = NULL,
+  unknown_string = "",
+  header = TRUE,
+  outFile = tempfile(fileext = ".html")
 )
 ```
 
@@ -721,11 +721,11 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ```{r crossing-sim}
 crossingSimulation(
-    genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
-    crossTableFile = "data/crossingTable/breedGame_crossTable.csv",
-    SNPcoordFile = "data/SNPcoordinates/breedingGame_SNPcoord.csv",
-    nCross = 10,
-    outFile = tempfile(fileext = ".vcf.gz")
+  genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
+  crossTableFile = "data/crossingTable/breedGame_crossTable.csv",
+  SNPcoordFile = "data/SNPcoordinates/breedingGame_SNPcoord.csv",
+  nCross = 10,
+  outFile = tempfile(fileext = ".vcf.gz")
 )
 ```
 
@@ -1076,11 +1076,11 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ```{r progeny-blup-calculation}
 calc_progenyBlupEstimation(
-    genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
-    crossTableFile = "data/crossingTable/breedGame_small_crossTable.csv",
-    SNPcoordFile = "data/SNPcoordinates/breedingGame_SNPcoord.csv",
-    markerEffectsFile = "data/markerEffects/breedGame_markerEffects.csv",
-    outFile = tempfile(fileext = ".json")
+  genoFile = "data/geno/breedGame_phasedGeno.vcf.gz",
+  crossTableFile = "data/crossingTable/breedGame_small_crossTable.csv",
+  SNPcoordFile = "data/SNPcoordinates/breedingGame_SNPcoord.csv",
+  markerEffectsFile = "data/markerEffects/breedGame_markerEffects.csv",
+  outFile = tempfile(fileext = ".json")
 )
 ```
 
@@ -1101,9 +1101,9 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ```{r progeny-blup-plot}
 plot <- draw_progBlupsPlot(
-    progEstimFile = "data/results/progenyBlupEstimation.json",
-    sorting = "dec",
-    outFile = tempfile(fileext = ".html")
+  progEstimFile = "data/results/progenyBlupEstimation.json",
+  sorting = "dec",
+  outFile = tempfile(fileext = ".html")
 )
 ```
 
@@ -1126,10 +1126,10 @@ docker run --rm -v "$PWD"/data/:/data \
 
 ```{r progeny-blup-plot-2-traits}
 plot <- draw_progBlupsPlot_2traits(
-    progEstimFile = "data/results/progenyBlupEstimation_2traits.json",
-    x_trait = "trait1",
-    y_trait = "trait2",
-    outFile = tempfile(fileext = ".html")
+  progEstimFile = "data/results/progenyBlupEstimation_2traits.json",
+  x_trait = "trait1",
+  y_trait = "trait2",
+  outFile = tempfile(fileext = ".html")
 )
 ```
 

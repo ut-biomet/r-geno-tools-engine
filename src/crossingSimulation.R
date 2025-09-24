@@ -26,50 +26,60 @@ initializeSimulation <- function(haplotypes,
   # transform SNP linkage map position to start at 0 (simple translation)
   for (chr in unique(SNPcoord$chr)) {
     selLines <- SNPcoord$chr == chr # (selected)lines of the current chromosome
-    minLMPos <- min(SNPcoord[selLines, 'linkMapPos'])
-    SNPcoord[selLines, 'linkMapPos'] <- SNPcoord$linkMapPos[selLines] - minLMPos
+    minLMPos <- min(SNPcoord[selLines, "linkMapPos"])
+    SNPcoord[selLines, "linkMapPos"] <- SNPcoord$linkMapPos[selLines] - minLMPos
   }
 
   # get chr size with max SNP coordinates for each chromosome
   SNPcoord$physPos <- seq(nrow(SNPcoord)) # dummy data
   logger$log("Extract chromosomes information ...")
   chrInfo <- aggregate(SNPcoord, by = list(name = SNPcoord$chr), FUN = max)
-  chrInfo <- chrInfo[, c('name', 'physPos', 'linkMapPos')]
-  colnames(chrInfo) <- c('name', 'max_physPos', 'max_linkMapPos')
+  chrInfo <- chrInfo[, c("name", "physPos", "linkMapPos")]
+  colnames(chrInfo) <- c("name", "max_physPos", "max_linkMapPos")
 
   # create specie object
-  logger$log('Create specie ...')
-  specie <- breedSimulatR::specie$new(nChr = nrow(chrInfo),
-                                      chrNames = chrInfo$name,
-                                      lchr = nrow(SNPcoord), # dummy data
-                                      lchrCm = chrInfo$max_linkMapPos * 10^2,
-                                      verbose = FALSE)
-  logger$log('Create specie DONE')
+  logger$log("Create specie ...")
+  specie <- breedSimulatR::specie$new(
+    nChr = nrow(chrInfo),
+    chrNames = chrInfo$name,
+    lchr = nrow(SNPcoord), # dummy data
+    lchrCm = chrInfo$max_linkMapPos * 10^2,
+    verbose = FALSE
+  )
+  logger$log("Create specie DONE")
 
   # create snp information object
-  logger$log('Create snp information ...')
+  logger$log("Create snp information ...")
   SNPcoord$linkMapPos <- SNPcoord$linkMapPos * 10^2 # must be in centi-morgan
-  snpInfo <- breedSimulatR::SNPinfo$new(SNPcoord = SNPcoord,
-                                        specie = specie)
-  logger$log('Create snp information DONE')
+  snpInfo <- breedSimulatR::SNPinfo$new(
+    SNPcoord = SNPcoord,
+    specie = specie
+  )
+  logger$log("Create snp information DONE")
 
   # create population object
-  logger$log('Create parents population ...')
-  listInds <- vector(mode = "list", length = ncol(haplotypes)/2)
-  indNames <- gsub('_[12]$', '', colnames(haplotypes)[1:(ncol(haplotypes)/2)])
+  logger$log("Create parents population ...")
+  listInds <- vector(mode = "list", length = ncol(haplotypes) / 2)
+  indNames <- gsub("_[12]$", "", colnames(haplotypes)[1:(ncol(haplotypes) / 2)])
   names(listInds) <- indNames
 
   for (indName in indNames) {
-    haplo <- t(haplotypes[, paste(indName, c(1,2), sep = "_")])
-    haplo <- breedSimulatR::haplotype$new(SNPinfo = snpInfo,
-                                          haplo = haplo)
-    listInds[[indName]] <- breedSimulatR::individual$new(name = indName,
-                                                         specie = specie,
-                                                         haplo = haplo,
-                                                         verbose = FALSE)
+    haplo <- t(haplotypes[, paste(indName, c(1, 2), sep = "_")])
+    haplo <- breedSimulatR::haplotype$new(
+      SNPinfo = snpInfo,
+      haplo = haplo
+    )
+    listInds[[indName]] <- breedSimulatR::individual$new(
+      name = indName,
+      specie = specie,
+      haplo = haplo,
+      verbose = FALSE
+    )
   }
-  pop <- breedSimulatR::population$new(name = "", inds = listInds,
-                                       verbose = FALSE)
-  logger$log('Create parents population DONE')
+  pop <- breedSimulatR::population$new(
+    name = "", inds = listInds,
+    verbose = FALSE
+  )
+  logger$log("Create parents population DONE")
   return(pop)
 }

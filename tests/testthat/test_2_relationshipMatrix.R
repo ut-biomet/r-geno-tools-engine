@@ -20,11 +20,12 @@ expect_correct_relmat <- function(relationship_matrix, individuals_names) {
 }
 
 capture_output({
-
   # pedRelMat -----
-  pedFiles <- c('../../data/pedigree/testPedData_char.csv',
-                '../../data/pedigree/testPedData_num.csv',
-                '../../data/pedigree/testPedData_missFounder.csv')
+  pedFiles <- c(
+    "../../data/pedigree/testPedData_char.csv",
+    "../../data/pedigree/testPedData_num.csv",
+    "../../data/pedigree/testPedData_missFounder.csv"
+  )
   for (file in pedFiles) {
     test_that(paste("pedRelMat", basename(file)), {
       suppressWarnings({
@@ -36,7 +37,7 @@ capture_output({
       expect_correct_relmat(relMat, ped$data$ind)
     })
 
-    test_that(paste("pedRelMat vs AGHmatrix", basename(file)),{
+    test_that(paste("pedRelMat vs AGHmatrix", basename(file)), {
       skip_if_not_installed("AGHmatrix")
       suppressWarnings({
         ped <- readPedData(file)
@@ -51,7 +52,7 @@ capture_output({
 
 
   # genoRelMat ----
-  genoFiles <- c('../../data/geno/breedGame_geno.vcf.gz')
+  genoFiles <- c("../../data/geno/breedGame_geno.vcf.gz")
   for (file in genoFiles) {
     test_that(paste("calc_additive_rel_mat", basename(file)), {
       geno <- readGenoData(file)
@@ -136,47 +137,50 @@ capture_output({
         expect_true(is.numeric(dom_geno))
       }
       expect_failure(expect_identical(dom_geno_std, dom_geno_not_std))
-
     })
   }
 
 
   test_that(paste("calc_dominance_geno missing values", basename(file)), {
-      n = 1000
-      p = 3
-      geno <- matrix(sample(c(0, 1, 2), size = n*p, replace = TRUE),
-                     ncol = p)
-      geno[1, 1] <- NA
-      geno <- gaston::as.bed.matrix(geno)
-      dom_geno_std <- calc_dominance_geno(geno = geno, standardized = TRUE)
-      expect_true(is.na(dom_geno_std[1, 1]))
-      expect_true(!all(is.na(dom_geno_std[, 1])))
+    n <- 1000
+    p <- 3
+    geno <- matrix(sample(c(0, 1, 2), size = n * p, replace = TRUE),
+      ncol = p
+    )
+    geno[1, 1] <- NA
+    geno <- gaston::as.bed.matrix(geno)
+    dom_geno_std <- calc_dominance_geno(geno = geno, standardized = TRUE)
+    expect_true(is.na(dom_geno_std[1, 1]))
+    expect_true(!all(is.na(dom_geno_std[, 1])))
   })
 
 
   # combinedRelMat ----
-  A <- pedRelMat(readPedData('../../data/pedigree/breedGame_pedigree.csv'))
+  A <- pedRelMat(readPedData("../../data/pedigree/breedGame_pedigree.csv"))
   sampledInds <- sample(row.names(A), 100)
   A <- A[sampledInds, sampledInds]
-  geno <- readGenoData('../../data/geno/breedGame_geno.vcf.gz')
+  geno <- readGenoData("../../data/geno/breedGame_geno.vcf.gz")
   geno <- gaston::select.inds(geno, id %in% sampledInds)
   G <- calc_additive_rel_mat(geno = geno, standardized = TRUE)$rel_mat
 
   paramList <- list(
     default = list(ped_rm = A, geno_rm = G),
-    legarra = list(ped_rm = A, geno_rm = G, method = 'Legarra'),
-    martini = list(ped_rm = A, geno_rm = G, method = 'Martini',
-                   tau = 0.5, omega = 0.5),
-    martini_randParams = list(ped_rm = A, geno_rm = G, method = 'Martini',
-                   tau = runif(1, 0, 20), omega = runif(1, -20, 1)),
+    legarra = list(ped_rm = A, geno_rm = G, method = "Legarra"),
+    martini = list(
+      ped_rm = A, geno_rm = G, method = "Martini",
+      tau = 0.5, omega = 0.5
+    ),
+    martini_randParams = list(
+      ped_rm = A, geno_rm = G, method = "Martini",
+      tau = runif(1, 0, 20), omega = runif(1, -20, 1)
+    ),
     warn_missIndInPed = list(ped_rm = A[-(1:10), -(1:10)], geno_rm = G)
   )
 
   for (paramName in names(paramList)) {
-    test_that(paste('combinedRelMat:', paramName), {
-
+    test_that(paste("combinedRelMat:", paramName), {
       params <- paramList[[paramName]]
-      if (grepl('warn_', paramName)) {
+      if (grepl("warn_", paramName)) {
         expect_warning({
           relMat <- do.call(combinedRelMat, params)
         })
@@ -188,8 +192,8 @@ capture_output({
       expect_correct_relmat(relMat, colnames(params$ped_rm))
     })
 
-    if (!grepl('warn_', paramName)) {
-      test_that(paste("combineRelMat vs AGHmatrix:", paramName),{
+    if (!grepl("warn_", paramName)) {
+      test_that(paste("combineRelMat vs AGHmatrix:", paramName), {
         skip_if_not_installed("AGHmatrix")
         params <- paramList[[paramName]]
         suppressWarnings({
@@ -202,8 +206,10 @@ capture_output({
         agh_params$omega <- params$omega
         agh_params$tau <- params$tau
         exp_relMat <- do.call(AGHmatrix::Hmatrix, agh_params)
-        exp_relMat <- exp_relMat[row.names(agh_params$A),
-                                 colnames(agh_params$A)]
+        exp_relMat <- exp_relMat[
+          row.names(agh_params$A),
+          colnames(agh_params$A)
+        ]
 
         expect_identical(colnames(relMat), colnames(exp_relMat))
         expect_identical(row.names(relMat), row.names(exp_relMat))

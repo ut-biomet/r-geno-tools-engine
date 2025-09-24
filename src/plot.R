@@ -28,14 +28,15 @@ manPlot <- function(gwas,
                     filter_nPoints = Inf,
                     filter_quant = 1,
                     interactive = TRUE) {
-
   logger <- Logger$new("r-manPlot()")
 
   logger$log("Remove NAs ...")
   # remove NA lines form data (important for cases where all the data had
   # been removed at the gwas step)
-  allNaLines <- apply(gwas, 1, function(x){all(is.na(x))})
-  gwas <- gwas[!allNaLines,]
+  allNaLines <- apply(gwas, 1, function(x) {
+    all(is.na(x))
+  })
+  gwas <- gwas[!allNaLines, ]
   logger$log("Remove NAs DONE")
 
   # P-Values adjustment ----
@@ -48,14 +49,15 @@ manPlot <- function(gwas,
 
   # filter according to "chr" ----
   if (!is.na(chr)) {
-    gwas <- gwas[as.character(gwas$chr) %in% chr,]
+    gwas <- gwas[as.character(gwas$chr) %in% chr, ]
   }
 
   # plot functions require chr as numeric values:
   chrlabels <- unique(gwas$chr)
   chrlabels <- stringr::str_sort(chrlabels, numeric = TRUE)
   gwas$chr <- as.numeric(factor(gwas$chr,
-                                levels = chrlabels))
+    levels = chrlabels
+  ))
 
   # manage duplicate in SNP's ID ----
   logger$log("Check duplicated SNP ID ...")
@@ -63,11 +65,17 @@ manPlot <- function(gwas,
     warning("Duplicated in SNP's ID detected, replacing SNP ID by: CHR@POS.")
     gwas$id <- paste0(gwas$chr, "@", gwas$pos)
     if (anyDuplicated(gwas$id) != 0) {
-      warning("After eplacing SNP ID by: CHR@POS,",
-              "there is still some duplicates. No SNP will be highlighted.")
+      warning(
+        "After eplacing SNP ID by: CHR@POS,",
+        "there is still some duplicates. No SNP will be highlighted."
+      )
       highlightSinif <- FALSE
-    } else  highlightSinif <- TRUE
-  } else  highlightSinif <- TRUE
+    } else {
+      highlightSinif <- TRUE
+    }
+  } else {
+    highlightSinif <- TRUE
+  }
   logger$log("Check duplicated SNP ID DONE")
 
   # get significant SNP ----
@@ -78,33 +86,40 @@ manPlot <- function(gwas,
       significantSNP <- NULL
     }
     logger$log("Extract significant SNP DONE")
-  } else significantSNP <- NULL
+  } else {
+    significantSNP <- NULL
+  }
 
   # filter results ----
   nTotalSnp <- nrow(gwas)
-  gwas <- filterGWAS(gwas = gwas,
-                     filter_pAdj = filter_pAdj,
-                     filter_nPoints = filter_nPoints,
-                     filter_quant = filter_quant)
+  gwas <- filterGWAS(
+    gwas = gwas,
+    filter_pAdj = filter_pAdj,
+    filter_nPoints = filter_nPoints,
+    filter_quant = filter_quant
+  )
 
   # update plot title to give filtering feed back to the user
   remainPoints <- nrow(gwas)
   if (nTotalSnp != 0) {
-    remainPercent <- round(remainPoints/nTotalSnp, digits = 3) * 100
+    remainPercent <- round(remainPoints / nTotalSnp, digits = 3) * 100
     if (remainPoints != nTotalSnp && remainPercent != 0) {
       title <- paste(title,
-                     paste0(remainPoints, ' points ~', remainPercent, '%)'),
-                     sep = '\n(')
+        paste0(remainPoints, " points ~", remainPercent, "%)"),
+        sep = "\n("
+      )
     } else if (remainPercent == 0) {
       title <- paste(title,
-                     'filtering process removed all the points',
-                     sep = '\n')
+        "filtering process removed all the points",
+        sep = "\n"
+      )
     }
   } else {
-    warning('There is no points to display')
+    warning("There is no points to display")
     title <- paste(title,
-                   'no point to display',
-                   sep = '\n')
+      "no point to display",
+      sep = "\n"
+    )
   }
 
   # Draw plot ----
@@ -112,48 +127,60 @@ manPlot <- function(gwas,
   if (interactive) {
     if (remainPoints == 0) {
       # manhattanly::manhattanly can't handle empty data
-      p <- plotly::plot_ly(type = "scatter",
-                           mode = "lines+markers")
+      p <- plotly::plot_ly(
+        type = "scatter",
+        mode = "lines+markers"
+      )
       p <- plotly::layout(p,
-                          title = title,
-                          xaxis = list(title = 'Chromosome',
-                                       zerolinecolor = '#ffff',
-                                       gridcolor = 'ffff',
-                                       showticklabels=FALSE),
-                          yaxis = list(title = '-log10(p)',
-                                       # zerolinecolor = '#ffff',
-                                       # gridcolor = 'ffff',
-                                       showticklabels=FALSE))
+        title = title,
+        xaxis = list(
+          title = "Chromosome",
+          zerolinecolor = "#ffff",
+          gridcolor = "ffff",
+          showticklabels = FALSE
+        ),
+        yaxis = list(
+          title = "-log10(p)",
+          # zerolinecolor = '#ffff',
+          # gridcolor = 'ffff',
+          showticklabels = FALSE
+        )
+      )
     } else {
       p <- manhattanly::manhattanly(
-        data.frame(CHR = gwas$chr,
-                   BP = gwas$pos,
-                   SNP = gwas$id,
-                   P = gwas$p),
+        data.frame(
+          CHR = gwas$chr,
+          BP = gwas$pos,
+          SNP = gwas$id,
+          P = gwas$p
+        ),
         snp = "SNP",
         labelChr = chrlabels,
         highlight = significantSNP,
         genomewideline = -log10(thresh_pAdj),
         suggestiveline = FALSE,
-        title = title)
+        title = title
+      )
 
       if (!is.na(chr)) {
         p <- plotly::layout(
           p,
-          xaxis = list(title = paste('Chromosome', chr, 'position'))
+          xaxis = list(title = paste("Chromosome", chr, "position"))
         )
       }
     }
   } else {
     if (remainPoints == 0) {
       # qqman::manhattan can't handle empty data
-      plot(1, type = "n",
-           xlab = "Chromosome",
-           ylab = expression(-log[10](italic(p))),
-           xlim = c(0, length(chrlabels)),
-           xaxt = 'n',
-           yaxt = 'n',
-           main = title)
+      plot(1,
+        type = "n",
+        xlab = "Chromosome",
+        ylab = expression(-log[10](italic(p))),
+        xlim = c(0, length(chrlabels)),
+        xaxt = "n",
+        yaxt = "n",
+        main = title
+      )
       p <- NULL
     } else {
       if (length(chrlabels) == 1) {
@@ -161,16 +188,18 @@ manPlot <- function(gwas,
         # in the data and chrlabs is defined
         chrlabels <- NULL
       }
-      qqman::manhattan(x = gwas,
-                       chr = 'chr',
-                       bp = 'pos',
-                       p = 'p',
-                       snp = 'id',
-                       chrlabs = chrlabels,
-                       suggestiveline = FALSE,
-                       genomewideline = -log10(thresh_pAdj),
-                       annotatePval = -log10(thresh_pAdj),
-                       main = title)
+      qqman::manhattan(
+        x = gwas,
+        chr = "chr",
+        bp = "pos",
+        p = "p",
+        snp = "id",
+        chrlabs = chrlabels,
+        suggestiveline = FALSE,
+        genomewideline = -log10(thresh_pAdj),
+        annotatePval = -log10(thresh_pAdj),
+        main = title
+      )
       p <- NULL
     }
   }
@@ -183,7 +212,7 @@ manPlot <- function(gwas,
 
 
 
-#'writeLDplot Compute r2 Linkage Disequilibrium (LD) between given SNPs and return a plot
+#' writeLDplot Compute r2 Linkage Disequilibrium (LD) between given SNPs and return a plot
 #'
 #' @param geno [bed.matrix] geno data return by function `readGenoData` or
 #' `downloadGenoData`.
@@ -216,7 +245,9 @@ LDplot <- function(geno, from, to, file = tempfile(fileext = ".png")) {
   logger$log("DONE, return output")
   if (!is.null(file)) {
     return(file)
-  } else {return(NULL)}
+  } else {
+    return(NULL)
+  }
 }
 
 
@@ -233,40 +264,43 @@ relMatHeatmap <- function(relMat, interactive = TRUE) {
   logger <- Logger$new("r-manPlot()")
 
   # Check parameters ----
-  logger$log('Check parameters ...')
+  logger$log("Check parameters ...")
   if (!is.matrix(relMat)) {
-    bad_argument('relMat', must_be = "a matrix" , not = relMat, "type")
+    bad_argument("relMat", must_be = "a matrix", not = relMat, "type")
   }
   if (!isSymmetric(relMat)) {
-    bad_argument('relMat', must_be = "a symetric matrix")
+    bad_argument("relMat", must_be = "a symetric matrix")
   }
-  logger$log('Check parameters DONE')
+  logger$log("Check parameters DONE")
 
   if (interactive) {
     # Create inreractive heatmap
-    logger$log('Create interactive heatmap ...')
+    logger$log("Create interactive heatmap ...")
     newOrder <- hclust(dist(relMat))$order
-    hm <- plotly::plot_ly(type = "heatmap",
-                  x = colnames(relMat[newOrder, newOrder]),
-                  y = rownames(relMat[newOrder, newOrder]),
-                  z = relMat[newOrder, newOrder],
-                  colors = hcl.colors(12, "YlOrRd", rev = TRUE)
+    hm <- plotly::plot_ly(
+      type = "heatmap",
+      x = colnames(relMat[newOrder, newOrder]),
+      y = rownames(relMat[newOrder, newOrder]),
+      z = relMat[newOrder, newOrder],
+      colors = hcl.colors(12, "YlOrRd", rev = TRUE)
     )
     hm <- plotly::layout(hm,
-                         xaxis = list(
-                           type = "category"
-                         ),
-                         yaxis = list(
-                           type = "category",
-                           autorange = "reversed")
+      xaxis = list(
+        type = "category"
+      ),
+      yaxis = list(
+        type = "category",
+        autorange = "reversed"
+      )
     )
-    logger$log('Create interactive heatmap DONE')
+    logger$log("Create interactive heatmap DONE")
   } else {
-    logger$log('Create static heatmap ...')
+    logger$log("Create static heatmap ...")
     heatmap(relMat,
-            symm = TRUE)
+      symm = TRUE
+    )
     hm <- NULL
-    logger$log('Create static heatmap DONE')
+    logger$log("Create static heatmap DONE")
   }
 
   logger$log("DONE, return output")
@@ -287,71 +321,81 @@ pedNetwork <- function(ped) {
   logger <- Logger$new("r-pedNetwork()")
 
   # Check parameters ----
-  logger$log('Check parameters ...')
+  logger$log("Check parameters ...")
 
   ### Check input ----
-  logger$log('Check inputs ...')
+  logger$log("Check inputs ...")
   if (!is.list(ped)) {
-    bad_argument('ped', must_be = "a list generated by `readPedData` function", not = ped, "type")
+    bad_argument("ped", must_be = "a list generated by `readPedData` function", not = ped, "type")
   }
   expected_ped_names <- c("data", "graph")
   if (!identical(names(ped), expected_ped_names)) {
     bad_argument(
-      'names(ped)',
+      "names(ped)",
       must_be = paste("one of ", paste(expected_ped_names, sep = ", ")),
       not = names(ped)
     )
   }
   if (!is.data.frame(ped$data)) {
-    bad_argument('ped$data', must_be = "a data.frame", not = ped$data, "type")
+    bad_argument("ped$data", must_be = "a data.frame", not = ped$data, "type")
   }
-  expected_ped_colnames <- c('ind', 'parent1', 'parent2')
+  expected_ped_colnames <- c("ind", "parent1", "parent2")
   if (!identical(colnames(ped$data), expected_ped_colnames)) {
     bad_argument(
-      'colnames(ped$data)',
+      "colnames(ped$data)",
       must_be = expected_ped_colnames,
       not = colnames(ped$data)
     )
   }
-  logger$log('Check inputs DONE')
+  logger$log("Check inputs DONE")
 
 
-  logger$log('Create network data ...')
-  data <- data.frame(parent = c(ped$data[, 2], ped$data[, 3]),
-                     ind = rep(ped$data[, 1], 2))
+  logger$log("Create network data ...")
+  data <- data.frame(
+    parent = c(ped$data[, 2], ped$data[, 3]),
+    ind = rep(ped$data[, 1], 2)
+  )
   data$ind <- as.factor(data$ind)
   data$parent <- factor(data$parent, levels = levels(data$ind))
   data <- na.omit(data)
 
 
-  L <- data.frame(s = as.numeric(data$parent) - 1,
-                  t = as.numeric(data$ind) - 1,
-                  v = 1)
-  s <- 's'
-  t <- 't'
-  v <- 'v'
+  L <- data.frame(
+    s = as.numeric(data$parent) - 1,
+    t = as.numeric(data$ind) - 1,
+    v = 1
+  )
+  s <- "s"
+  t <- "t"
+  v <- "v"
 
-  N <- data.frame(name = levels(data$ind),
-                  size = 1,
-                  grp = NA)
-  nid <- 'name'
-  nsize <- 'size'
-  grp <- 'grp'
-  logger$log('Create network data DONE')
+  N <- data.frame(
+    name = levels(data$ind),
+    size = 1,
+    grp = NA
+  )
+  nid <- "name"
+  nsize <- "size"
+  grp <- "grp"
+  logger$log("Create network data DONE")
 
-  logger$log('Create network ...')
+  logger$log("Create network ...")
 
-  supThisWarning({
-    p <- networkD3::forceNetwork(L,N,s,t,v,nid,nsize,grp,
-                                 zoom = TRUE,
-                                 fontSize = 14,
-                                 fontFamily = "sans-serif",
-                                 opacity = 0.9,
-                                 opacityNoHover = 0.8,
-                                 charge = -50,
-                                 arrows = TRUE)
-  }, "It looks like Source/Target is not zero-indexed. This is required in JavaScript and so your plot may not render.")
-  logger$log('Create network DONE')
+  supThisWarning(
+    {
+      p <- networkD3::forceNetwork(L, N, s, t, v, nid, nsize, grp,
+        zoom = TRUE,
+        fontSize = 14,
+        fontFamily = "sans-serif",
+        opacity = 0.9,
+        opacityNoHover = 0.8,
+        charge = -50,
+        arrows = TRUE
+      )
+    },
+    "It looks like Source/Target is not zero-indexed. This is required in JavaScript and so your plot may not render."
+  )
+  logger$log("Create network DONE")
 
   logger$log("DONE, return output.")
   return(p)
@@ -377,13 +421,13 @@ pedNetwork <- function(ped) {
 #' @param trait name of the trait to plot. This should be a name of the blupDta list. (optional if only one trait in `blupDta`, it will be set to the name of this trait)
 #' @return plotly graph
 plotBlup_1trait <- function(blupDta,
-                            sorting = 'alpha',
+                            sorting = "alpha",
                             y_axisName = NULL,
                             errorBarInterval = 0.95,
                             trait) {
   logger <- Logger$new("r-plotBlup_1trait()")
 
-  blupDta <- do.call(rbind, lapply(blupDta, function(blupDta_cross){
+  blupDta <- do.call(rbind, lapply(blupDta, function(blupDta_cross) {
     data.frame(
       ind1 = blupDta_cross$ind1,
       ind2 = blupDta_cross$ind2,
@@ -392,37 +436,39 @@ plotBlup_1trait <- function(blupDta,
     )
   }))
   # get cross' names ----
-  blupDta$cross <- paste0(blupDta$ind1,
-                          '_X_',
-                          blupDta$ind2)
+  blupDta$cross <- paste0(
+    blupDta$ind1,
+    "_X_",
+    blupDta$ind2
+  )
 
 
   # sort x axis values ----
-  logger$log('sort x axis ...')
-  if (sorting == 'asc') {
+  logger$log("sort x axis ...")
+  if (sorting == "asc") {
     blupDta$cross <- reorder(blupDta$cross, blupDta$blup_exp)
-  } else if (sorting == 'dec') {
+  } else if (sorting == "dec") {
     blupDta$cross <- reorder(blupDta$cross, -blupDta$blup_exp)
   }
-  logger$log('sort x axis DONE')
+  logger$log("sort x axis DONE")
 
 
 
   # draw graph ----
-  logger$log('draw plot ...')
+  logger$log("draw plot ...")
 
   # Calculate the length of the error bar.
   # Calculation based on the value of `errorBarInterval`
   # (eg. 0.95 -> 95% of the data are included in this interval centered on the
   # expected value)
-  quantileOfinterest <- (1 - errorBarInterval)/2
+  quantileOfinterest <- (1 - errorBarInterval) / 2
   mean <- blupDta$blup_exp
   sd <- sqrt(blupDta$blup_var)
   quantileMin <- qnorm(quantileOfinterest, mean, sd)
   quantileMax <- qnorm(1 - quantileOfinterest, mean, sd)
-  errorBarHalfLenght <- (quantileMax - quantileMin)/2
-  quantileMinName <- paste0("Quantile ", quantileOfinterest*100,'%')
-  quantileMaxName <- paste0("Quantile ", (1-quantileOfinterest)*100,'%')
+  errorBarHalfLenght <- (quantileMax - quantileMin) / 2
+  quantileMinName <- paste0("Quantile ", quantileOfinterest * 100, "%")
+  quantileMaxName <- paste0("Quantile ", (1 - quantileOfinterest) * 100, "%")
 
   # new values to show
   blupDta[, "Standard deviation"] <- sd
@@ -444,29 +490,33 @@ plotBlup_1trait <- function(blupDta,
     "Variance",
     "Standard deviation",
     quantileMinName,
-    quantileMaxName)
+    quantileMaxName
+  )
 
   blupDta <- blupDta[, tooltipValuesOrder]
 
 
   # plot
-  legend <- paste0('Progenies expected values\n',
-                  '(Error bars represent a ',
-                  errorBarInterval*100,
-                  '% interval)')
+  legend <- paste0(
+    "Progenies expected values\n",
+    "(Error bars represent a ",
+    errorBarInterval * 100,
+    "% interval)"
+  )
   p <- plotly::plot_ly(
-    type = 'scatter',
-    mode = 'markers',
+    type = "scatter",
+    mode = "markers",
     name = legend,
     data = blupDta,
-    x = ~ Cross,
-    y = ~ `Expected value`,
+    x = ~Cross,
+    y = ~`Expected value`,
     error_y = ~ list(
       name = "Error",
       array = errorBarHalfLenght,
-      type = 'data',
-      color = '#000000'),
-    hoverinfo = 'text',
+      type = "data",
+      color = "#000000"
+    ),
+    hoverinfo = "text",
     text = apply(blupDta, 1, function(l) {
       paste(names(l), ":", l, collapse = "\n")
     })
@@ -477,15 +527,14 @@ plotBlup_1trait <- function(blupDta,
   }
 
   p <- plotly::layout(p,
-    showlegend=T,
+    showlegend = T,
     yaxis = list(title = y_axisName),
     xaxis = list(title = "Cross")
   )
-  logger$log('draw plot DONE')
+  logger$log("draw plot DONE")
 
   # return output
   p
-
 }
 
 
@@ -512,25 +561,31 @@ plotBlup_2traits <- function(blupDta,
                              x_suffix = "",
                              y_suffix = "",
                              ellipses_npoints = 100) {
-
   logger <- Logger$new("r-plotBlup_2traits()")
 
   ### Draw plot ----
-  logger$log('draw plot ...')
-  p <- plotly::plot_ly(type = "scatter",
-               mode = "markers",
-               colors = "Set3")
+  logger$log("draw plot ...")
+  p <- plotly::plot_ly(
+    type = "scatter",
+    mode = "markers",
+    colors = "Set3"
+  )
   for (blupDta_cross in blupDta) {
-    cov <- as.matrix(blupDta_cross$cov[c(x_trait, y_trait),
-                                       c(x_trait, y_trait)])
-    center <- c(blupDta_cross$blup_exp[[x_trait]],
-                blupDta_cross$blup_exp[[y_trait]])
+    cov <- as.matrix(blupDta_cross$cov[
+      c(x_trait, y_trait),
+      c(x_trait, y_trait)
+    ])
+    center <- c(
+      blupDta_cross$blup_exp[[x_trait]],
+      blupDta_cross$blup_exp[[y_trait]]
+    )
     cross <- paste0(blupDta_cross$ind1, " X ", blupDta_cross$ind2)
 
     ellipse_dta <- ellipse::ellipse(cov,
-                                    centre = center,
-                                    level = confidenceLevel,
-                                    npoints = ellipses_npoints)
+      centre = center,
+      level = confidenceLevel,
+      npoints = ellipses_npoints
+    )
 
     ellipse_dta <- data.frame(
       x = unlist(ellipse_dta[, 1]),
@@ -570,9 +625,11 @@ plotBlup_2traits <- function(blupDta,
       y = ellipse_dta[, y_trait],
       color = ~cross,
       hoverinfo = "text",
-      text = paste0(100 * confidenceLevel,
-                    "% ellipse\nCross: ",
-                    ellipse_dta$cross)
+      text = paste0(
+        100 * confidenceLevel,
+        "% ellipse\nCross: ",
+        ellipse_dta$cross
+      )
     )
   }
   p <- plotly::layout(
@@ -581,7 +638,7 @@ plotBlup_2traits <- function(blupDta,
     yaxis = list(title = paste(y_trait, y_suffix))
   )
 
-  logger$log('draw plot DONE')
+  logger$log("draw plot DONE")
   p
 }
 
@@ -599,7 +656,6 @@ plotBlup_2traits <- function(blupDta,
 #'
 #' @return plotly graph
 evaluation_plot <- function(evaluation_results) {
-
   pred_dta <- evaluation_results$predictions
 
   n_reps <- length(unique(pred_dta$repetition))
@@ -610,11 +666,11 @@ evaluation_plot <- function(evaluation_results) {
   min_x <- min(pred_dta$actual)
   max_x <- max(pred_dta$actual)
   scatter_plot <- plotly::add_lines(scatter_plot,
-                                    inherit = FALSE,
-                                    x = c(min_x, max_x),
-                                    y = c(min_x, max_x),
-                                    line = list(color = 'red', dash = 'dash'),
-                                    name = "identity line"
+    inherit = FALSE,
+    x = c(min_x, max_x),
+    y = c(min_x, max_x),
+    line = list(color = "red", dash = "dash"),
+    name = "identity line"
   )
 
   scatter_plot <- plotly::add_markers(
@@ -671,43 +727,54 @@ evaluation_plot <- function(evaluation_results) {
         )
       )
     )
-    plotly::layout(box_plot, title = paste0("Cross-Validation Results (",
-                                            n_reps, " repetitions, ", n_folds, " folds)"),
-                   plot_bgcolor = '#e5ecf6'
+    plotly::layout(box_plot,
+      title = paste0(
+        "Cross-Validation Results (",
+        n_reps, " repetitions, ", n_folds, " folds)"
+      ),
+      plot_bgcolor = "#e5ecf6"
     )
   })
 
 
   margin <- c(0.0, 0.0, 0.12, 0.0)
-  heights = rep(1/length(box_plots), length(box_plots))
+  heights <- rep(1 / length(box_plots), length(box_plots))
   # plotly::subplot is a bit "buggy" and because the margins are not applied on
   # the 1st and last plot, those one appears bigger than the others
   # we need to manually tweak the heights of the plots to get equal sizes
   heights[1] <- heights[1] - margin[3]
-  heights <- heights + margin[3]/length(heights)
+  heights <- heights + margin[3] / length(heights)
 
   box_plots <- plotly::subplot(box_plots,
-                               nrows = length(box_plots),
-                               titleY = TRUE,
-                               titleX = TRUE,
-                               heights = heights,
-                               margin = margin)
+    nrows = length(box_plots),
+    titleY = TRUE,
+    titleX = TRUE,
+    heights = heights,
+    margin = margin
+  )
 
-  withCallingHandlers({
-    fig <- plotly::subplot(scatter_plot,
-                           box_plots,
-                           widths = c(0.7, 0.3),
-                           titleY = TRUE,
-                           titleX = TRUE)
-  }, warning = function(warn) {
-    expected_warning <- "minimal value for n is 3, returning requested palette with 3 different levels\n"
-    if (identical(warn$message, expected_warning)) {
-      tryInvokeRestart("muffleWarning")
+  withCallingHandlers(
+    {
+      fig <- plotly::subplot(scatter_plot,
+        box_plots,
+        widths = c(0.7, 0.3),
+        titleY = TRUE,
+        titleX = TRUE
+      )
+    },
+    warning = function(warn) {
+      expected_warning <- "minimal value for n is 3, returning requested palette with 3 different levels\n"
+      if (identical(warn$message, expected_warning)) {
+        tryInvokeRestart("muffleWarning")
+      }
     }
-  })
+  )
   fig <- plotly::layout(fig,
-                 title = paste0("Cross-Validation Results (",
-                                n_reps, " repetitions, ", n_folds, " folds)"),
-                 plot_bgcolor = '#e5ecf6')
+    title = paste0(
+      "Cross-Validation Results (",
+      n_reps, " repetitions, ", n_folds, " folds)"
+    ),
+    plot_bgcolor = "#e5ecf6"
+  )
   return(fig)
 }

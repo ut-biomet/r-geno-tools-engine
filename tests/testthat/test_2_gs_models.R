@@ -1,4 +1,3 @@
-
 # Author: Julien Diot juliendiot@ut-biomet.org
 # 2024 The University of Tokyo
 #
@@ -8,11 +7,8 @@
 library(testthat)
 
 capture_output({
-
-
   test_that("get_model_metrics", {
     for (n in c(1, 2, 10, 100)) {
-
       mock_actual_values <- rnorm(n)
       mock_predicted_values <- mock_actual_values + rnorm(n)
 
@@ -28,7 +24,6 @@ capture_output({
       for (metric in metrics) {
         expect_true(is.numeric(metric))
       }
-
     }
   })
 
@@ -65,9 +60,8 @@ capture_output({
   )
 
   for (data in data_list) {
-
-    n_inds = nrow(data$pheno)
-    n_markers = ncol(data$geno)
+    n_inds <- nrow(data$pheno)
+    n_markers <- ncol(data$geno)
 
     pheno_vector <- data$pheno[, 1]
     rel_mat_add <- calc_additive_rel_mat(data$geno, standardized = TRUE)$rel_mat
@@ -88,7 +82,6 @@ capture_output({
     for (fit_function_name in names(fit_functions)) {
       fit_function <- fit_functions[[fit_function_name]]
       test_that(fit_function_name, {
-
         expect_no_error({
           model_add_only <- fit_function(pheno_vector, K_add_only)
         })
@@ -129,13 +122,15 @@ capture_output({
       expect_true(is.vector(estim_mark_eff))
       expect_true(is.numeric(estim_mark_eff))
       expect_equal(length(estim_mark_eff), n_markers)
-      expect_identical(names(estim_mark_eff),
-                       colnames(gaston::as.matrix(data$geno)))
+      expect_identical(
+        names(estim_mark_eff),
+        colnames(gaston::as.matrix(data$geno))
+      )
     })
 
 
 
-    test_that("train_gs_model",{
+    test_that("train_gs_model", {
       # Check marker effect are for markers encoded in 0, 1, 2 or (dom 0,1,0)
       expect_no_error({
         model_add <- train_gs_model(data$pheno, data$geno, with_dominance = FALSE)
@@ -161,7 +156,6 @@ capture_output({
       }
 
       expect_true(all(is.na(model_add$eff$dominance)))
-
     })
 
 
@@ -172,7 +166,6 @@ capture_output({
       model_dom <- train_gs_model(data$pheno, data$geno, with_dominance = TRUE)
 
       for (model in list(model_add, model_dom)) {
-
         expect_no_error({
           predictions <- predict_gs_model(data$geno, model)
         })
@@ -183,8 +176,10 @@ capture_output({
         expect_false(any(is.na(predictions[, 1])))
       }
 
-      expect_false(isTRUE(all.equal(predict_gs_model(data$geno, model_add),
-                                    predict_gs_model(data$geno, model_dom))))
+      expect_false(isTRUE(all.equal(
+        predict_gs_model(data$geno, model_add),
+        predict_gs_model(data$geno, model_dom)
+      )))
     })
 
 
@@ -213,20 +208,22 @@ capture_output({
             data$geno,
             with_dominance = test_case["with_dominance"],
             n_folds = test_case["n_folds"],
-            n_repetitions = test_case["n_repetitions"])
+            n_repetitions = test_case["n_repetitions"]
+          )
         })
         expect_true(is.list(evaluation))
-        expect_identical(names(evaluation),
-                         c("predictions", "metrics"))
+        expect_identical(
+          names(evaluation),
+          c("predictions", "metrics")
+        )
         expect_true(is.data.frame(evaluation$predictions))
         expect_identical(
-         colnames(evaluation$predictions),
-         c("ind", "actual", "predicted", "fold", "repetition"),
+          colnames(evaluation$predictions),
+          c("ind", "actual", "predicted", "fold", "repetition"),
         )
         expect_equal(
           nrow(evaluation$predictions),
           as.numeric(test_case["n_repetitions"]) * nrow(data$pheno),
-
         )
         expect_false(any(is.na(evaluation$predictions)))
 
@@ -241,7 +238,6 @@ capture_output({
         expect_false(any(is.na(evaluation$metrics)))
       })
     })
-
   }
 
 
@@ -259,19 +255,21 @@ capture_output({
 
     geno_test <- readGenoData("../../data/genomic_selection/geno_G2.vcf.gz")
     geno_test_raw <- calc_additive_geno(geno_test,
-                                        standardized = FALSE)
+      standardized = FALSE
+    )
     geno_test_std <- calc_additive_geno(geno_test,
-                                        standardized = TRUE)
+      standardized = TRUE
+    )
     pheno_test <- readPhenoData("../../data/genomic_selection/pheno_test.csv")
     pheno_test$gv <- pheno_test$gt + 100
 
     pred_with_std_geno <- (
       model$intercept
-      + geno_test_std %*% model$eff$additive
+        + geno_test_std %*% model$eff$additive
     )
     pred_with_raw_geno <- (
       model$intercept
-      + geno_test_raw %*% model$eff$additive
+        + geno_test_raw %*% model$eff$additive
     )
 
     metric_std <- get_model_metrics(pheno_test$gv, pred_with_std_geno)
@@ -282,6 +280,4 @@ capture_output({
     expect_true(metric_raw$corel_spearman > metric_std$corel_spearman)
     expect_true(metric_raw$r2 > metric_std$r2)
   })
-
-
 })

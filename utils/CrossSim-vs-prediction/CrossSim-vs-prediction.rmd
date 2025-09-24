@@ -16,34 +16,35 @@ output:
 
 ```{r setup, include=FALSE}
 knitStartTime <- Sys.time()
-knitr::opts_chunk$set(echo = TRUE,
-                      eval = TRUE,
-                      include = TRUE,
-                      warning = TRUE,
-                      message = TRUE,
-                      cache = FALSE, # save chunks output
-                      results = "hold", # display chunk output in one block
-                      
-                      # df_print paged options
-                      rows.print = 10,
-                      max.print = Inf,
-                      
-                      
-                      # format
-                      tidy = FALSE, # format code with 'tidy_source()'
-                      tidy.opts = list(width.cutoff = 80),
-                      strip.white = TRUE, #remove the white lines in the beginning or end of a source chunk
-                      
-                      fig.align = "center",
-                      fig.width = 9,
-                      fig.height = 5)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  include = TRUE,
+  warning = TRUE,
+  message = TRUE,
+  cache = FALSE, # save chunks output
+  results = "hold", # display chunk output in one block
 
-knitr::opts_knit$set(# root.dir = '/tmp', # change wd of all chunks
-                     progress = TRUE,
-                     verbose = FALSE,
-                     width = 80
-                     )
+  # df_print paged options
+  rows.print = 10,
+  max.print = Inf,
 
+
+  # format
+  tidy = FALSE, # format code with 'tidy_source()'
+  tidy.opts = list(width.cutoff = 80),
+  strip.white = TRUE, # remove the white lines in the beginning or end of a source chunk
+
+  fig.align = "center",
+  fig.width = 9,
+  fig.height = 5
+)
+
+knitr::opts_knit$set( # root.dir = '/tmp', # change wd of all chunks
+  progress = TRUE,
+  verbose = FALSE,
+  width = 80
+)
 ```
 
 ```{css echo=FALSE, eval = TRUE}
@@ -101,10 +102,13 @@ suppressPackageStartupMessages({
   library(dplyr)
 })
 # load engine's functions
-sapply(FUN = source,
-       X = list.files("../../src",
-                      pattern = ".R$",
-                      full.names = T))
+sapply(
+  FUN = source,
+  X = list.files("../../src",
+    pattern = ".R$",
+    full.names = T
+  )
+)
 
 #  R options
 options(max.print = 20)
@@ -115,10 +119,10 @@ options(max.print = 20)
 ## Inputs
 
 ```{r}
-genoFile <- '../../data/geno/breedGame_phasedGeno.vcf.gz'
-crossTableFile <- '../../data/crossingTable/breedGame_small_crossTable.csv'
-SNPcoordFile <- '../../data/SNPcoordinates/breedingGame_SNPcoord.csv'
-markerEffectsFile <- '../../data/markerEffects/breedGame_markerEffects_2traits.json'
+genoFile <- "../../data/geno/breedGame_phasedGeno.vcf.gz"
+crossTableFile <- "../../data/crossingTable/breedGame_small_crossTable.csv"
+SNPcoordFile <- "../../data/SNPcoordinates/breedingGame_SNPcoord.csv"
+markerEffectsFile <- "../../data/markerEffects/breedGame_markerEffects_2traits.json"
 ```
 
 ## blup_estimations
@@ -142,15 +146,16 @@ crossSimOutFile <- crossingSimulation(
   genoFile = genoFile,
   crossTableFile = crossTableFile,
   SNPcoordFile = SNPcoordFile,
-  nCross = 500)
+  nCross = 500
+)
 simulated_genotypes <- gaston::read.vcf(crossSimOutFile)
 simulated_genotypes <- gaston::as.matrix(simulated_genotypes)
 simulated_genotypes <- simulated_genotypes[, row.names(markerEffects$SNPeffects)]
 
 simulation <- data.frame(
-  simBV_1 = as.vector(simulated_genotypes %*% as.matrix(markerEffects$SNPeffects[,1])) + markerEffects$intercept[1],
-  simBV_2 = as.vector(simulated_genotypes %*% as.matrix(markerEffects$SNPeffects[,2])) + markerEffects$intercept[2],
-  Cross = as.factor(sub('-\\d+$', '', row.names(simulated_genotypes)))
+  simBV_1 = as.vector(simulated_genotypes %*% as.matrix(markerEffects$SNPeffects[, 1])) + markerEffects$intercept[1],
+  simBV_2 = as.vector(simulated_genotypes %*% as.matrix(markerEffects$SNPeffects[, 2])) + markerEffects$intercept[2],
+  Cross = as.factor(sub("-\\d+$", "", row.names(simulated_genotypes)))
 )
 colnames(simulation)[1] <- paste0("simBV_", names(markerEffects$intercept)[1])
 colnames(simulation)[2] <- paste0("simBV_", names(markerEffects$intercept)[2])
@@ -166,7 +171,7 @@ simulation_t1 <- simulation[, c(paste0("simBV_", trait), "Cross")]
 colnames(simulation_t1)[1] <- "simBV"
 
 
-blup_estimations_t1 <- do.call(rbind, lapply(blup_estimations, function(blup_estim){
+blup_estimations_t1 <- do.call(rbind, lapply(blup_estimations, function(blup_estim) {
   data.frame(
     ind1 = blup_estim$ind1,
     ind2 = blup_estim$ind2,
@@ -182,25 +187,28 @@ blup_estimations_t1 <- do.call(rbind, lapply(blup_estimations, function(blup_est
 
 ```{r}
 p <- plotBlup_1trait(blup_estimations,
-                     trait = "trait1",
-                     y_axisName = "GV",
-                     errorBarInterval = 0.95)
+  trait = "trait1",
+  y_axisName = "GV",
+  errorBarInterval = 0.95
+)
 
 # add jittered markers of simulated BV
-p <- p %>% add_boxplot(data = simulation_t1,
-                       x = ~Cross,
-                       y = ~simBV,
-                       line = list(color = 'rgba(0,0,0,0)'),
-                       # marker = list(color = 'rgba(31, 119, 180, 0.5)'),
-                       fillcolor = 'rgba(0,0,0,0)',
-                       name = "Simulated individuals' BV",
-                       boxpoints = "all",
-                       pointpos = 0,
-                       jitter = 1,
-                       hoverinfo = 'text',
-                       text = apply(simulation_t1, 1, function(l) {
-                         paste(names(l), ":", l, collapse = "\n")
-                       }))
+p <- p %>% add_boxplot(
+  data = simulation_t1,
+  x = ~Cross,
+  y = ~simBV,
+  line = list(color = "rgba(0,0,0,0)"),
+  # marker = list(color = 'rgba(31, 119, 180, 0.5)'),
+  fillcolor = "rgba(0,0,0,0)",
+  name = "Simulated individuals' BV",
+  boxpoints = "all",
+  pointpos = 0,
+  jitter = 1,
+  hoverinfo = "text",
+  text = apply(simulation_t1, 1, function(l) {
+    paste(names(l), ":", l, collapse = "\n")
+  })
+)
 
 p
 ```
@@ -211,22 +219,30 @@ p
 ```{r}
 alpha <- 0.05
 beta <- 0.95
-pred_vs_sim <- full_join(simulation_t1, blup_estimations_t1, by = "Cross") %>% 
-  filter(Cross != "Coll0659_X_Coll0425") %>% 
+pred_vs_sim <- full_join(simulation_t1, blup_estimations_t1, by = "Cross") %>%
+  filter(Cross != "Coll0659_X_Coll0425") %>%
   group_by(Cross) %>%
-  summarise(obs_mean =  mean(simBV),
-            blup_exp = unique(blup_exp),
-            obs_var = var(simBV),
-            blup_var = unique(blup_var),
-            p.value = t.test(x = simBV, mu = unique(blup_exp))$p.value,
-            delta = power.t.test(n = 100, power = beta, sd = sqrt(unique(blup_var)), sig.level = alpha)$delta)
+  summarise(
+    obs_mean = mean(simBV),
+    blup_exp = unique(blup_exp),
+    obs_var = var(simBV),
+    blup_var = unique(blup_var),
+    p.value = t.test(x = simBV, mu = unique(blup_exp))$p.value,
+    delta = power.t.test(n = 100, power = beta, sd = sqrt(unique(blup_var)), sig.level = alpha)$delta
+  )
 pred_vs_sim$adj.p.val <- p.adjust(pred_vs_sim$p.value, method = "bonferroni")
 pred_vs_sim
 
-idLine <- data.frame(mean = c(min(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) - 1,
-                                max(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) + 1),
-                     var = c(min(c(pred_vs_sim$blup_var, pred_vs_sim$obs_var)) - 1,
-                                max(c(pred_vs_sim$blup_var, pred_vs_sim$obs_var)) + 1))
+idLine <- data.frame(
+  mean = c(
+    min(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) - 1,
+    max(c(pred_vs_sim$blup_exp, pred_vs_sim$obs_mean)) + 1
+  ),
+  var = c(
+    min(c(pred_vs_sim$blup_var, pred_vs_sim$obs_var)) - 1,
+    max(c(pred_vs_sim$blup_var, pred_vs_sim$obs_var)) + 1
+  )
+)
 
 rmse <- sqrt(mean((pred_vs_sim$blup_exp - pred_vs_sim$obs_mean)^2))
 ```
@@ -234,34 +250,39 @@ rmse <- sqrt(mean((pred_vs_sim$blup_exp - pred_vs_sim$obs_mean)^2))
 - RMSE = `r rmse`
 
 ```{r}
-#plot mean
-plot_ly(type = "scatter",
-        mode = "markers",
-        data = pred_vs_sim,
-        x = ~blup_exp,
-        y = ~obs_mean,
-        name = "Observed mean vs prediction",
-        hoverinfo = 'text',
-        text = apply(pred_vs_sim, 1, function(l) {
-          paste(names(l), ":", l, collapse = "\n")
-        })
+# plot mean
+plot_ly(
+  type = "scatter",
+  mode = "markers",
+  data = pred_vs_sim,
+  x = ~blup_exp,
+  y = ~obs_mean,
+  name = "Observed mean vs prediction",
+  hoverinfo = "text",
+  text = apply(pred_vs_sim, 1, function(l) {
+    paste(names(l), ":", l, collapse = "\n")
+  })
 ) %>%
-  add_lines(inherit = FALSE,
-            x = idLine$mean,
-            y = idLine$mean,
-            name = "Identity line")
+  add_lines(
+    inherit = FALSE,
+    x = idLine$mean,
+    y = idLine$mean,
+    name = "Identity line"
+  )
 ```
 
 
 ### Test normality
 
 ```{r}
-pred_vs_sim <- full_join(simulation_t1, blup_estimations_t1, by = "Cross") %>% 
-  filter(Cross != "Coll0659_X_Coll0425") %>% 
+pred_vs_sim <- full_join(simulation_t1, blup_estimations_t1, by = "Cross") %>%
+  filter(Cross != "Coll0659_X_Coll0425") %>%
   group_by(Cross) %>%
-  summarise(obs_var = var(simBV),
-            blup_var = unique(blup_var),
-            p.value = ks.test(simBV, "pnorm", mean = unique(blup_exp), sd=sqrt(unique(blup_var)))$p.value)
+  summarise(
+    obs_var = var(simBV),
+    blup_var = unique(blup_var),
+    p.value = ks.test(simBV, "pnorm", mean = unique(blup_exp), sd = sqrt(unique(blup_var)))$p.value
+  )
 pred_vs_sim$adj.p.val <- p.adjust(pred_vs_sim$p.value, method = "bonferroni")
 pred_vs_sim
 ```
@@ -272,22 +293,25 @@ pred_vs_sim
 
 
 ```{r}
-#plot var
-plot_ly(type = "scatter",
-        mode = "markers",
-        data = pred_vs_sim,
-        x = ~blup_var,
-        y = ~obs_var,
-        name = "Observed variance vs prediction",
-        hoverinfo = 'text',
-        text = apply(pred_vs_sim, 1, function(l) {
-          paste(names(l), ":", l, collapse = "\n")
-        })
+# plot var
+plot_ly(
+  type = "scatter",
+  mode = "markers",
+  data = pred_vs_sim,
+  x = ~blup_var,
+  y = ~obs_var,
+  name = "Observed variance vs prediction",
+  hoverinfo = "text",
+  text = apply(pred_vs_sim, 1, function(l) {
+    paste(names(l), ":", l, collapse = "\n")
+  })
 ) %>%
-  add_lines(inherit = FALSE,
-            x = idLine$var,
-            y = idLine$var,
-            name = "Identity line")
+  add_lines(
+    inherit = FALSE,
+    x = idLine$var,
+    y = idLine$var,
+    name = "Identity line"
+  )
 ```
 
 
@@ -297,43 +321,53 @@ plot_ly(type = "scatter",
 ## simulation VS blup estimations
 
 ```{r}
-p <- plotBlup_2traits(blupDta = blup_estimations,
-                      x_trait = 'trait1',
-                      y_trait = 'trait2',
-                      confidenceLevel = 0.95)
+p <- plotBlup_2traits(
+  blupDta = blup_estimations,
+  x_trait = "trait1",
+  y_trait = "trait2",
+  confidenceLevel = 0.95
+)
 
 # add markers of simulated BV
-p <- p %>% add_markers(inherit = FALSE,
-                       data = simulation,
-                       x = ~simBV_trait1,
-                       y = ~simBV_trait2,
-                       opacity = 0.5,
-                       marker = list(symbol = 2),
-                       color = sub("_X_", " X ", simulation$Cross))
+p <- p %>% add_markers(
+  inherit = FALSE,
+  data = simulation,
+  x = ~simBV_trait1,
+  y = ~simBV_trait2,
+  opacity = 0.5,
+  marker = list(symbol = 2),
+  color = sub("_X_", " X ", simulation$Cross)
+)
 p
 ```
 
 
 ```{r}
-cross_to_keep <- c("F2_0001.0001_X_F2_0002.0059",
-                   "F2_0001.0009_X_F4_0001.0147",
-                   "F4_0001.0092_X_F4_0001.0185")
+cross_to_keep <- c(
+  "F2_0001.0001_X_F2_0002.0059",
+  "F2_0001.0009_X_F4_0001.0147",
+  "F4_0001.0092_X_F4_0001.0185"
+)
 
-p <- plotBlup_2traits(blupDta = blup_estimations[names(blup_estimations) %in% cross_to_keep],
-                      x_trait = 'trait1',
-                      y_trait = 'trait2',
-                      confidenceLevel = 0.95)
+p <- plotBlup_2traits(
+  blupDta = blup_estimations[names(blup_estimations) %in% cross_to_keep],
+  x_trait = "trait1",
+  y_trait = "trait2",
+  confidenceLevel = 0.95
+)
 
 
-simulation_filtered <- simulation[simulation$Cross %in% cross_to_keep,]
+simulation_filtered <- simulation[simulation$Cross %in% cross_to_keep, ]
 # add jittered markers of simulated BV
-p <- p %>% add_markers(inherit = FALSE,
-                       data = simulation_filtered,
-                       x = ~simBV_trait1,
-                       y = ~simBV_trait2,
-                       opacity = 0.5,
-                       marker = list(symbol = 2),
-                       color = sub("_X_", " X ", simulation_filtered$Cross))
+p <- p %>% add_markers(
+  inherit = FALSE,
+  data = simulation_filtered,
+  x = ~simBV_trait1,
+  y = ~simBV_trait2,
+  opacity = 0.5,
+  marker = list(symbol = 2),
+  color = sub("_X_", " X ", simulation_filtered$Cross)
+)
 p
 ```
 
@@ -346,17 +380,17 @@ p
 <!-- Place an empty line before the chunk ! -->
 
 ```{r sessionInfo, echo=FALSE}
-  options(max.print = 10000)
-  cat("Document generated in:\n")
-  print(Sys.time() - knitStartTime)
-  if (Sys.info()["sysname"] == "Linux") {
-    cat("\nCPU: ")
-    cat(unique(system("awk -F': ' '/model name/{print $2}' /proc/cpuinfo", intern = T)))
-    cat("\nMemory total size: ")
-    cat(as.numeric(system("awk '/MemTotal/ {print $2}' /proc/meminfo", intern = T))*10^(-6), "GB")
-  }
-  cat("\n\n\nSession information:\n")
-  print(sessionInfo(), locale = FALSE)
+options(max.print = 10000)
+cat("Document generated in:\n")
+print(Sys.time() - knitStartTime)
+if (Sys.info()["sysname"] == "Linux") {
+  cat("\nCPU: ")
+  cat(unique(system("awk -F': ' '/model name/{print $2}' /proc/cpuinfo", intern = T)))
+  cat("\nMemory total size: ")
+  cat(as.numeric(system("awk '/MemTotal/ {print $2}' /proc/meminfo", intern = T)) * 10^(-6), "GB")
+}
+cat("\n\n\nSession information:\n")
+print(sessionInfo(), locale = FALSE)
 ```
 
 </details>

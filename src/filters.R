@@ -17,7 +17,6 @@ filterGWAS <- function(gwas,
                        filter_pAdj = 1,
                        filter_nPoints = Inf,
                        filter_quant = 1) {
-
   logger <- Logger$new("r-filterGWAS()")
 
 
@@ -27,33 +26,37 @@ filterGWAS <- function(gwas,
   # filter according to a threshold on pAdj
   if (nrow(gwas) != 0 && filter_pAdj != 1) {
     if (is.null(gwas$p_adj)) {
-      warning("gwas's p-values haven't been adjusted. Filtering according to",
-              "p_ajd is not possible")
+      warning(
+        "gwas's p-values haven't been adjusted. Filtering according to",
+        "p_ajd is not possible"
+      )
     } else if (filter_pAdj < 0 || filter_pAdj > 1) {
       bad_argument("filter_pAdj", expected = "between 0  and 1", not = filter_pAdj, "value")
     } else {
-      gwas <- gwas[gwas$p_adj <= filter_pAdj,]
+      gwas <- gwas[gwas$p_adj <= filter_pAdj, ]
       if (nrow(gwas) == 0) {
-        warning('filter_pAdj removed all the points of the graph')
+        warning("filter_pAdj removed all the points of the graph")
       }
     }
   } else {
-    logger$log('skip filter_pAdj')
+    logger$log("skip filter_pAdj")
   }
 
   # filter according to quantile
   if (nrow(gwas) != 0 && filter_quant != 1) {
     if (filter_quant < 0 || filter_quant > 1) {
-      bad_argument('filter_quant', expected = "between 0  and 1", not = filter_quant, "value")
+      bad_argument("filter_quant", expected = "between 0  and 1", not = filter_quant, "value")
     }
-    gwas <- gwas[order(gwas$p),]
-    gwas <- gwas[seq_len(min(nrow(gwas),
-                             floor(nTotalSnp*filter_quant))),]
+    gwas <- gwas[order(gwas$p), ]
+    gwas <- gwas[seq_len(min(
+      nrow(gwas),
+      floor(nTotalSnp * filter_quant)
+    )), ]
     if (nrow(gwas) == 0) {
-      warning('filter_quant removed all the points of the graph')
+      warning("filter_quant removed all the points of the graph")
     }
   } else {
-    logger$log('skip filter_quant')
+    logger$log("skip filter_quant")
   }
 
   # filter according to a fixed number of point
@@ -61,13 +64,13 @@ filterGWAS <- function(gwas,
     if (filter_nPoints < 0) {
       bad_argument("filter_nPoints", expected = "a positive number", not = filter_nPoints, "value")
     }
-    gwas <- gwas[order(gwas$p),]
-    gwas <- gwas[seq_len(min(nrow(gwas), filter_nPoints)),]
+    gwas <- gwas[order(gwas$p), ]
+    gwas <- gwas[seq_len(min(nrow(gwas), filter_nPoints)), ]
     if (nrow(gwas) == 0) {
-      warning('filter_nPoints removed all the points of the graph')
+      warning("filter_nPoints removed all the points of the graph")
     }
   } else {
-    logger$log('skip filter_nPoints')
+    logger$log("skip filter_nPoints")
   }
 
   gwas

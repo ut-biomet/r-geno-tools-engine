@@ -106,9 +106,9 @@ fit_with_rainbowr <- function(pheno, K) {
 #'
 #' @return vector of the estimated markers effects
 calc_mark_eff <- function(geno_mat, rel_mat, blups) {
-  mark_eff <- crossprod(geno_mat/ncol(geno_mat), solve(rel_mat)) %*% blups
+  mark_eff <- crossprod(geno_mat / ncol(geno_mat), solve(rel_mat)) %*% blups
   # mark_eff[is.na(mark_eff)] <- 0
-  return(t(mark_eff)[1,])
+  return(t(mark_eff)[1, ])
 }
 
 
@@ -131,9 +131,8 @@ calc_mark_eff <- function(geno_mat, rel_mat, blups) {
 #' - `eff`: data.frame of 2 columns `additive` and `dominance` with
 #' their corresponding markers effects
 train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
-
   stopifnot(identical(row.names(pheno), geno@ped$id))
-  stopifnot(all(!is.na(pheno[,1])))
+  stopifnot(all(!is.na(pheno[, 1])))
   stopifnot(all(geno@snps$callrate == 1))
 
   # remove monomorphic markers
@@ -155,25 +154,31 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
   model <- fit_with_gaston(pheno[[1]], relationship_matrices)
 
   if (is.nan(model$logL) || is.infinite(model$logL)) {
-    warning("Failed optimisation with gaston for GS model fitting.",
-            "Fallback to optimisation with RAINBOWR.")
+    warning(
+      "Failed optimisation with gaston for GS model fitting.",
+      "Fallback to optimisation with RAINBOWR."
+    )
     model <- fit_with_rainbowr(pheno[[1]], relationship_matrices)
   }
 
-  estim_mark_eff_add_std <- calc_mark_eff(additive_std$geno_mat,
-                                          additive_std$rel_mat,
-                                          model$blups[, 1])
+  estim_mark_eff_add_std <- calc_mark_eff(
+    additive_std$geno_mat,
+    additive_std$rel_mat,
+    model$blups[, 1]
+  )
   # valid only if estim_mark_eff_add_std have been calculated with standardized
   # genetic matrix !!!!
-  estim_mark_eff_add <- estim_mark_eff_add_std / sqrt( 2 * geno@p * (1 - geno@p))
-  intercept_adjustment_add = sum(estim_mark_eff_add * 2 * geno@p)
+  estim_mark_eff_add <- estim_mark_eff_add_std / sqrt(2 * geno@p * (1 - geno@p))
+  intercept_adjustment_add <- sum(estim_mark_eff_add * 2 * geno@p)
 
   estim_mark_eff_dom <- rep(NA, length(estim_mark_eff_add))
   names(estim_mark_eff_dom) <- names(estim_mark_eff_add)
   if (with_dominance) {
-    estim_mark_eff_dom <- calc_mark_eff(dominance_not_std$geno_mat,
-                                        dominance_not_std$rel_mat,
-                                        model$blups[, 2])
+    estim_mark_eff_dom <- calc_mark_eff(
+      dominance_not_std$geno_mat,
+      dominance_not_std$rel_mat,
+      model$blups[, 2]
+    )
   }
 
   eff <- data.frame(
@@ -201,16 +206,15 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
 #'
 #' @return data.frame of one column containing the prediction
 predict_gs_model <- function(geno, estim_mark_eff) {
-
   estimated_markers <- row.names(estim_mark_eff$eff)
   geno <- gaston::select.snps(geno, id %in% estimated_markers)
-  estim_mark_eff$eff <- estim_mark_eff$eff[geno@snps$id,]
+  estim_mark_eff$eff <- estim_mark_eff$eff[geno@snps$id, ]
 
   additive_gv <- calc_additive_geno(geno, standardized = FALSE) %*% estim_mark_eff$eff$additive
 
-  dominance_gv = 0
-  dominance_model <- (any(!is.na(estim_mark_eff$eff$dominance))
-                      & any(estim_mark_eff$eff$dominance != 0, na.rm = TRUE))
+  dominance_gv <- 0
+  dominance_model <- (any(!is.na(estim_mark_eff$eff$dominance)) &
+    any(estim_mark_eff$eff$dominance != 0, na.rm = TRUE))
   if (dominance_model) {
     dominance_gv <- calc_dominance_geno(geno, standardized = FALSE) %*% estim_mark_eff$eff$dominance
   }
@@ -254,17 +258,16 @@ cross_validation_evaluation <- function(pheno,
 
   pheno <- pheno[geno@ped$id, 1, drop = FALSE]
 
-  folds <- caret::createMultiFolds(pheno[,1], k = n_folds, times = n_repetitions)
+  folds <- caret::createMultiFolds(pheno[, 1], k = n_folds, times = n_repetitions)
 
   eval_results <- lapply(names(folds), function(fold_id) {
-
     train_ids <- folds[[fold_id]]
 
     pheno_train <- pheno[train_ids, 1, drop = FALSE]
-    geno_train <- geno[train_ids,]
+    geno_train <- geno[train_ids, ]
 
     pheno_test <- pheno[-train_ids, 1, drop = FALSE]
-    geno_test <- geno[-train_ids,]
+    geno_test <- geno[-train_ids, ]
 
     estim_mark_eff <- train_gs_model(pheno_train, geno_train, with_dominance)
     pheno_pred <- predict_gs_model(geno_test, estim_mark_eff)
@@ -281,8 +284,10 @@ cross_validation_evaluation <- function(pheno,
     )
   })
 
-  predictions <- do.call(rbind, lapply(eval_results, function(fold) {fold$data}))
-  predictions$repetition = sub(".*\\.", "", predictions$fold)
+  predictions <- do.call(rbind, lapply(eval_results, function(fold) {
+    fold$data
+  }))
+  predictions$repetition <- sub(".*\\.", "", predictions$fold)
 
   metrics <- do.call(rbind, lapply(eval_results, function(fold) {
     dta <- as.data.frame(fold$metrics)
@@ -340,7 +345,6 @@ get_model_metrics <- function(actual, predictions) {
 #'
 #' @return `TRUE` or raise an `engineError`
 check_dominance_model_is_applicable <- function(dominance, homozygous_threshold = 0.95) {
-
   if (det(dominance$rel_mat) == 0) {
     # dominance$rel_mat is not invertible
     # Sometime for computing precision reason, `det(dominance$rel_mat)` can be
@@ -378,7 +382,7 @@ check_dominance_model_is_applicable <- function(dominance, homozygous_threshold 
         "%, and", signif(homozygous_snp_proportion * 100, 2), "% of",
         "the markers have a homozygousity proportion higher than",
         homozygous_threshold * 100, "%."
-        ),
+      ),
       extra = list(
         code = errorCode("DOMINANCE_MODEL_NOT_APPLICABLE"),
         n_homozygous_ind = n_homozygous_ind,
