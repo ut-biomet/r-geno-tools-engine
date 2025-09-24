@@ -1,0 +1,32 @@
+{
+  "trait1": {
+    "intercept": [100],
+    "additive_effects": {
+      "snp-01": [0.08],
+      "snp-A": [-0.3],
+      "snp-B": [0.1],
+      "snp-04": [-0.1]
+    },
+    "dominance_effects": {
+      "snp-01": ["NA"],
+      "snp-A": ["NA"],
+      "snp-B": ["NA"],
+      "snp-04": ["NA"]
+    }
+  },
+  "trait2": {
+    "intercept": 42,
+    "additive_effects": {
+      "snp-01": [-0.02],
+      "snp-X": [-0.9],
+      "snp-Y": [0.2],
+      "snp-04": [-0.3]
+    },
+    "dominance_effects": {
+      "snp-01": ["NA"],
+      "snp-X": ["NA"],
+      "snp-Y": ["NA"],
+      "snp-04": ["NA"]
+    }
+  }
+}
