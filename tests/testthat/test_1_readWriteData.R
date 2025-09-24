@@ -841,7 +841,7 @@ capture_output({
         markerEffects <- readMarkerEffects(file)
       })
 
-      raw <- jsonlite::fromJSON(file,
+      raw <- jsonlite::read_json(file,
         simplifyVector = FALSE
       )
       missing_indices <- lapply(raw, function(raw_markEff_per_trait) {
@@ -883,7 +883,7 @@ capture_output({
 
   test_that("readMarkerEffects on multi-traits with different set of SNPs", {
     markEffFile <- "../data/markerEffects_2_traits_no_dom_different_set_of_snp.json"
-    raw_json_dta <- jsonlite::fromJSON(markEffFile,
+    raw_json_dta <- jsonlite::read_json(markEffFile,
       simplifyVector = FALSE
     )
     SNP_trait_1 <- union(

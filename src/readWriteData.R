@@ -1296,7 +1296,7 @@ readMarkerEffects_json <- function(file) {
   logger <- Logger$new("r-readMarkerEffects_json()")
 
   logger$log("Read marker effects file ...")
-  rawMarkerEffects_list <- jsonlite::fromJSON(file,
+  rawMarkerEffects_list <- jsonlite::read_json(file,
     simplifyVector = FALSE
   )
   logger$log("Read marker effects file DONE")
@@ -1933,7 +1933,7 @@ read_GS_evaluation <- function(file) {
   logger <- Logger$new("r-read_GS_evaluation()")
 
   logger$log("Read model-evaluation file ...")
-  evaluation <- jsonlite::fromJSON(file,
+  evaluation <- jsonlite::read_json(file,
     simplifyVector = TRUE
   )
   logger$log("Read model-evaluation file DONE")
