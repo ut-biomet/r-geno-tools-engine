@@ -106,6 +106,9 @@ fit_with_rainbowr <- function(pheno, K) {
 #'
 #' @return vector of the estimated markers effects
 calc_mark_eff <- function(geno_mat, rel_mat, blups) {
+  if (any(duplicated(rel_mat))) {
+    rel_mat <- rel_mat + diag(1e-8, nrow = nrow(rel_mat))
+  }
   mark_eff <- crossprod(geno_mat / ncol(geno_mat), solve(rel_mat)) %*% blups
   # mark_eff[is.na(mark_eff)] <- 0
   return(t(mark_eff)[1, ])
