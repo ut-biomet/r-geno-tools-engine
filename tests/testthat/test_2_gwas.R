@@ -155,11 +155,12 @@ capture.output({
   }
 
   # adjustPval with edge case
-  test_that("adjustPval handle gwas with missing p values", {
+  test_that("adjustPval handle gwas with some missing p values", {
     n_p <- 100
     p <- runif(n_p)
-    p[sample.int(n_p, 5)] <- runif(5, min = 0, max = 0.05)
-    p[sample.int(n_p, 5)] <- NA
+
+    missing_pval_indices <- sample.int(n_p, 5)
+    p[missing_pval_indices] <- NA
     thresh_p <- 0.05
 
     for (adjMeth in c(
@@ -178,6 +179,31 @@ capture.output({
           thresh_p = thresh_p
         )
       })
+      expect_true(all(is.na(adj$p_adj[missing_pval_indices])))
+    }
+  })
+
+  test_that("adjustPval handle gwas with all missing p values", {
+    p <- rep(NA, 100)
+    thresh_p <- 0.05
+
+    for (adjMeth in c(
+      "holm",
+      "hochberg",
+      "bonferroni",
+      "BH",
+      "BY",
+      "fdr",
+      "none"
+    )) {
+      expect_no_error({
+        adj <- adjustPval(
+          p = p,
+          adj_method = adjMeth,
+          thresh_p = thresh_p
+        )
+      })
+      expect_true(all(is.na(adj$p_adj)))
     }
   })
 })

@@ -71,6 +71,53 @@ capture_output({
                 expect_true(is.null(mP))
               }
             })
+
+            test_that(paste(testName, "with some missing p values"), {
+              resGwas$p[c(2, 4, 10)] <- NA
+              expect_no_error({
+                mP <- manPlot(
+                  gwas = resGwas,
+                  adj_method = "bonferroni",
+                  thresh_p = 0.05,
+                  chr = chr,
+                  interactive = interactive,
+                  filter_pAdj = 1,
+                  filter_nPoints = Inf,
+                  filter_quant = 1,
+                  title = "test manPlot"
+                )
+              })
+              if (interactive) {
+                expect_true(all.equal(class(mP), c("plotly", "htmlwidget")))
+              } else {
+                expect_true(is.null(mP))
+              }
+            })
+
+            test_that(paste(testName, "with all missing p values"), {
+              resGwas$p <- NA
+              expect_warning(
+                {
+                  mP <- manPlot(
+                    gwas = resGwas,
+                    adj_method = "bonferroni",
+                    thresh_p = 0.05,
+                    chr = chr,
+                    interactive = interactive,
+                    filter_pAdj = 1,
+                    filter_nPoints = Inf,
+                    filter_quant = 1,
+                    title = "test manPlot"
+                  )
+                },
+                regexp = "There is no points to display"
+              )
+              if (interactive) {
+                expect_true(all.equal(class(mP), c("plotly", "htmlwidget")))
+              } else {
+                expect_true(is.null(mP))
+              }
+            })
           }
         }
       }

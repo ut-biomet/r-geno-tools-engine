@@ -37,6 +37,7 @@ manPlot <- function(gwas,
     all(is.na(x))
   })
   gwas <- gwas[!allNaLines, ]
+  gwas <- gwas[!is.na(gwas$p), ]
   logger$log("Remove NAs DONE")
 
   # P-Values adjustment ----
@@ -81,7 +82,7 @@ manPlot <- function(gwas,
   # get significant SNP ----
   if (highlightSinif) {
     logger$log("Extract significant SNP ...")
-    significantSNP <- gwas[gwas$p_adj <= thresh_p, "id"]
+    significantSNP <- gwas[ifelse(is.na(gwas$p_adj), FALSE, gwas$p_adj <= thresh_p), "id"]
     if (length(significantSNP) == 0) {
       significantSNP <- NULL
     }

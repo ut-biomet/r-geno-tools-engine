@@ -146,7 +146,7 @@ adjustPval <- function(p, adj_method, thresh_p = NULL) {
 
   # check p
   logger$log("Check p values ...")
-  if (any(p < 0) || any(p > 1)) {
+  if (any(p < 0, na.rm = TRUE) || any(p > 1, na.rm = TRUE)) {
     # The `p.adjust` function will proceed to the calculation even if the p-values
     # are invalid. To avoid unexpected behaviour, I'd prefer this function
     # to crash in such case.
