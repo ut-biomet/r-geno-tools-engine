@@ -5,7 +5,7 @@
 # unit test for gwas analysis
 
 capture.output({
-  # Test gwas() with normal parameters
+  # Test gwas() with normal parameters ----
   files <- list(c(
     g = "../../data/geno/testMarkerData01.vcf.gz",
     p = "../../data/pheno/testPhenoData01.csv"
@@ -88,7 +88,7 @@ capture.output({
     }
   }
 
-  # Test adjustPval() with normal parameters
+  # Test adjustPval() with normal parameters ----
   s <- list(c(
     g = "../../data/geno/testMarkerData01.vcf.gz",
     p = "../../data/pheno/testPhenoData01.csv"
@@ -153,4 +153,31 @@ capture.output({
       }
     }
   }
+
+  # adjustPval with edge case
+  test_that("adjustPval handle gwas with missing p values", {
+    n_p <- 100
+    p <- runif(n_p)
+    p[sample.int(n_p, 5)] <- runif(5, min = 0, max = 0.05)
+    p[sample.int(n_p, 5)] <- NA
+    thresh_p <- 0.05
+
+    for (adjMeth in c(
+      "holm",
+      "hochberg",
+      "bonferroni",
+      "BH",
+      "BY",
+      "fdr",
+      "none"
+    )) {
+      expect_no_error({
+        adj <- adjustPval(
+          p = p,
+          adj_method = adjMeth,
+          thresh_p = thresh_p
+        )
+      })
+    }
+  })
 })
