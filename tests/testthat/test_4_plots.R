@@ -26,7 +26,10 @@ capture_output({
     p = "../../data/pheno/testPhenoData01.csv"
   ))
   for (file in files) {
-    dta <- readData(file["g"], file["p"])
+    dta <- readData(file["g"], file["p"],
+      maf_min = 0.05,
+      callrate_min = 0.95
+    )
     for (trait in c("Flowering.time.at.Arkansas", "Awn.presence")) {
       for (test in c("score", "wald", "lrt")) {
         if (length(na.omit(unique(dta$phenoData[, trait]))) > 2) {
@@ -41,9 +44,7 @@ capture_output({
           trait,
           test,
           fixed = 0,
-          response = resp,
-          thresh_maf = 0.05,
-          thresh_callrate = 0.95
+          response = resp
         )
         for (chr in c(NA, sample(unique(resGwas$chr), 2))) {
           for (interactive in c(TRUE, FALSE)) {
@@ -125,16 +126,16 @@ capture_output({
   }
 
   # Test manPlot warnings: ----
-  expect_warning({
-    emptyResGwas <- gwas(dta,
-      trait,
-      test,
-      fixed = 0,
-      response = resp,
-      thresh_maf = 0.5,
-      thresh_callrate = 0.95
-    )
-  })
+  emptyResGwas <- data.frame(
+    chr = character(),
+    pos = integer(),
+    id = character(),
+    A1 = character(),
+    A2 = character(),
+    freqA2 = numeric(),
+    score = numeric(),
+    p = numeric()
+  )
   test_that("manPlot warning, empty data", {
     expect_warning(
       {

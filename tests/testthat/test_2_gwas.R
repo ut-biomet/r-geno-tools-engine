@@ -25,50 +25,43 @@ capture.output({
     )
   )
   for (file in files) {
-    dta <- readData(file["g"], file["p"])
-    for (trait in c("Flowering.time.at.Arkansas", "Awn.presence")) {
-      for (test in c("score", "wald", "lrt")) {
-        if (length(na.omit(unique(dta$phenoData[, trait]))) > 2) {
-          resp <- "quantitative"
-        } else {
-          resp <- "binary"
-          if (test != "score") {
-            next
-          }
+    for (tMaf in seq(0, 0.5, 0.25)) {
+      for (tCall in seq(0, 1, 0.5)) {
+        if (tCall == 1 & tMaf == 0.5) {
+          # no markers matching those filters
+          next
         }
-        if (test %in% c("wald", "lrt")) {
-          fix <- c(0:3)
-        } else {
-          fix <- 0
-        }
-        for (fixed in fix) {
-          for (tMaf in seq(0, 0.5, 0.25)) {
-            for (tCall in seq(0, 1, 0.5)) {
+        dta <- readData(file["g"], file["p"],
+          maf_min = tMaf,
+          callrate_min = tCall,
+        )
+
+        for (trait in c("Flowering.time.at.Arkansas", "Awn.presence")) {
+          for (test in c("score", "wald", "lrt")) {
+            if (length(na.omit(unique(dta$phenoData[, trait]))) > 2) {
+              resp <- "quantitative"
+            } else {
+              resp <- "binary"
+              if (test != "score") {
+                next
+              }
+            }
+            if (test %in% c("wald", "lrt")) {
+              fix <- c(0:3)
+            } else {
+              fix <- 0
+            }
+            for (fixed in fix) {
               testName <- paste("gwas", resp, test, fixed, tMaf, tCall, sep = "-")
               test_that(testName, {
-                if (tMaf >= 0.5 || tCall >= 1) {
-                  expect_warning({
-                    resGwas <- gwas(dta,
-                      trait,
-                      test,
-                      fixed = fixed,
-                      response = resp,
-                      thresh_maf = tMaf,
-                      thresh_callrate = tCall
-                    )
-                  })
-                } else {
-                  expect_no_error({
-                    resGwas <- gwas(dta,
-                      trait,
-                      test,
-                      fixed = fixed,
-                      response = resp,
-                      thresh_maf = tMaf,
-                      thresh_callrate = tCall
-                    )
-                  })
-                }
+                expect_no_error({
+                  resGwas <- gwas(dta,
+                    trait,
+                    test,
+                    fixed = fixed,
+                    response = resp
+                  )
+                })
                 expect_true(class(resGwas) == "data.frame")
                 expect_equal(colnames(resGwas), resCols[[test]])
                 expect_no_error({
@@ -94,7 +87,10 @@ capture.output({
     p = "../../data/pheno/testPhenoData01.csv"
   ))
   for (file in files) {
-    dta <- readData(file["g"], file["p"])
+    dta <- readData(file["g"], file["p"],
+      maf_min = 0.05,
+      callrate_min = 0.95
+    )
     for (trait in c("Flowering.time.at.Arkansas", "Awn.presence")) {
       for (test in c("score", "wald", "lrt")) {
         if (length(na.omit(unique(dta$phenoData[, trait]))) > 2) {
@@ -109,9 +105,7 @@ capture.output({
           trait,
           test,
           fixed = 0,
-          response = resp,
-          thresh_maf = 0.05,
-          thresh_callrate = 0.95
+          response = resp
         )
         for (adjMeth in c(
           "holm",

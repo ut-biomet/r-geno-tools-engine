@@ -85,7 +85,9 @@ expect_engineError <- function(code) {
       "n_expected_SNP",
       "missing_SNP",
       "reference"
-    )
+    ),
+    "SNP_FILTERING_FAILED" = c("last_r2", "last_n_markers"),
+    "GENOTYPE_NO_MARKERS_AFTER_FILTERING" = c("filter")
   )
 
   if (!error$extra$code %in% names(expected_fields)) {

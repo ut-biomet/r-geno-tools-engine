@@ -50,6 +50,8 @@ run_gwas <- function(genoFile = NULL,
     fixed <- 0
   }
   check_response(response)
+  check_thresh_maf(thresh_maf)
+  check_thresh_callrate(thresh_callrate)
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
@@ -58,7 +60,11 @@ run_gwas <- function(genoFile = NULL,
     data <- readData(
       genoFile = genoFile,
       phenoFile = phenoFile,
-      traits = trait
+      traits = trait,
+      maf_min = thresh_maf,
+      maf_neq = thresh_maf,
+      callrate_min = thresh_callrate,
+      callrate_neq = thresh_callrate
     )
   } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
     is.null(genoFile) && is.null(phenoFile)) {
@@ -77,10 +83,6 @@ run_gwas <- function(genoFile = NULL,
   logger$log("Get data DONE")
 
   check_trait(trait, colnames(data$phenoData))
-  check_thresh_maf(thresh_maf, geno = data$genoData)
-  check_thresh_callrate(thresh_callrate, geno = data$genoData)
-
-
 
   logger$log("GWAS analysis ...")
   gwasRes <- gwas(
@@ -88,9 +90,7 @@ run_gwas <- function(genoFile = NULL,
     trait = trait,
     test = test,
     fixed = fixed,
-    response = response,
-    thresh_maf = thresh_maf,
-    thresh_callrate = thresh_callrate
+    response = response
   )
   logger$log("GWAS analysis DONE")
 
@@ -1407,6 +1407,8 @@ train_gs_model_main <- function(genoFile = NULL,
                                 thresh_maf,
                                 outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-train_gs_model_main()")
+
+  check_thresh_maf(thresh_maf)
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
@@ -1415,7 +1417,11 @@ train_gs_model_main <- function(genoFile = NULL,
     data <- readData(
       genoFile = genoFile,
       phenoFile = phenoFile,
-      traits = trait
+      traits = trait,
+      maf_min = thresh_maf,
+      maf_neq = c(thresh_maf, 0), # no monomorphic markers
+      callrate_min = 1,
+      callrate_max = 1
     )
   } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
     is.null(genoFile) && is.null(phenoFile)) {
@@ -1434,32 +1440,6 @@ train_gs_model_main <- function(genoFile = NULL,
   logger$log("Get data DONE")
 
   check_trait(trait, colnames(data$phenoData))
-  check_thresh_maf(thresh_maf, geno = data$genoData)
-
-  logger$log("Filter SNP and missing values...")
-  data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
-  if (nrow(data$genoData@snps) == 0) {
-    msg <- paste0(
-      "No marker remaining after filtering for maf > thresh_maf (=",
-      thresh_maf,
-      ")"
-    )
-    engineError(msg, extra = list(
-      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
-      filter = paste0("minor allele frequency > thresh_maf (= ", thresh_maf, ")")
-    ))
-  }
-
-  # remove markers with missing values
-  data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
-  if (nrow(data$genoData@snps) == 0) {
-    msg <- paste0("No marker remaining after filtering for missing values")
-    engineError(msg, extra = list(
-      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
-      filter = paste0("missing values")
-    ))
-  }
-
   data$phenoData <- data$phenoData[, trait, drop = FALSE]
   data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]), , drop = FALSE]
   if (nrow(data$phenoData) == 0) {
@@ -1624,6 +1604,7 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
                                              thresh_maf,
                                              outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-cross_validation_evaluation_main()")
+  check_thresh_maf(thresh_maf)
   check_outFile(outFile, accept_null = TRUE)
 
   logger$log("Get data ...")
@@ -1632,13 +1613,21 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
     data <- readData(
       genoFile = genoFile,
       phenoFile = phenoFile,
-      traits = trait
+      traits = trait,
+      maf_min = thresh_maf,
+      maf_neq = thresh_maf,
+      callrate_min = 1,
+      callrate_max = 1
     )
   } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
     is.null(genoFile) && is.null(phenoFile)) {
     data <- downloadData(
       genoUrl = genoUrl,
-      phenoUrl = phenoUrl
+      phenoUrl = phenoUrl,
+      maf_min = thresh_maf,
+      maf_neq = thresh_maf,
+      callrate_min = 1,
+      callrate_max = 1
     )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
@@ -1651,31 +1640,6 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
   logger$log("Get data DONE")
 
   check_trait(trait, colnames(data$phenoData))
-  check_thresh_maf(thresh_maf, geno = data$genoData)
-
-  logger$log("Filter SNP and missing values...")
-  data$genoData <- gaston::select.snps(data$genoData, maf > thresh_maf)
-  if (nrow(data$genoData@snps) == 0) {
-    msg <- paste0(
-      "No marker remaining after filtering for maf > thresh_maf (=",
-      thresh_maf,
-      ")"
-    )
-    engineError(msg, extra = list(
-      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
-      filter = paste0("minor allele frequency > thresh_maf (= ", thresh_maf, ")")
-    ))
-  }
-
-  data$genoData <- gaston::select.snps(data$genoData, callrate == 1)
-  if (nrow(data$genoData@snps) == 0) {
-    msg <- paste0("No marker remaining after filtering for missing values")
-    engineError(msg, extra = list(
-      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
-      filter = paste0("missing values")
-    ))
-  }
-
   data$phenoData <- data$phenoData[, trait, drop = FALSE]
   data$phenoData <- data$phenoData[!is.na(data$phenoData[, 1]), , drop = FALSE]
   if (nrow(data$phenoData) == 0) {

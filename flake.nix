@@ -77,6 +77,8 @@
           # developement packages
           testthat
           AGHmatrix
+          microbenchmark
+          devtools
 
           languageserver
           styler

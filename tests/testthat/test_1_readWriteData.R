@@ -23,6 +23,34 @@ capture_output({
       expect_true(class(gDta) == "bed.matrix")
     })
 
+    test_that(paste("readGenoData with filtering", tools::file_ext(file)), {
+      if (!file.exists(file)) {
+        skip(paste("File", file, "not found. Skip test for this file"))
+      }
+      expect_no_error({
+        gDta <- readGenoData(file, maf_min = 0.2)
+      })
+      expect_true(all(gDta@snps$maf >= 0.2))
+      expect_no_error({
+        gDta <- readGenoData(file, maf_max = 0.3)
+      })
+      expect_true(all(gDta@snps$maf <= 0.3))
+
+      expect_no_error({
+        gDta <- readGenoData(file, callrate_min = 0.97)
+      })
+      expect_true(all(gDta@snps$callrate >= 0.97))
+      expect_no_error({
+        gDta <- readGenoData(file, callrate_max = 0.995)
+      })
+      expect_true(all(gDta@snps$maf <= 0.995))
+      expect_no_error({
+        gDta <- readGenoData(file, n_markers = 300, n_markers_tolerance = 0.05)
+      })
+      expect_true(nrow(gDta@snps) >= 300 * (1 - 0.05))
+      expect_true(nrow(gDta@snps) <= 300 * (1 + 0.05))
+    })
+
     # downloadGenoData ----
     test_that(paste("downloadGenoData", tools::file_ext(file)), {
       if (!file.exists(file)) {
@@ -273,14 +301,12 @@ capture_output({
       g = "../../data/geno/testMarkerData01.vcf.gz",
       p = "../../data/pheno/testPhenoData01.csv"
     )
-    dta <- readData(file["g"], file["p"])
+    dta <- readData(file["g"], file["p"], maf_min = 0.05, callrate_min = 0.95)
     resGwas <- gwas(dta,
       trait = "Flowering.time.at.Arkansas",
       test = "score",
       fixed = 0,
-      response = "quantitative",
-      thresh_maf = 0.05,
-      thresh_callrate = 0.95
+      response = "quantitative"
     )
     # this function is also tested in tests/testthat/test_2_gwas.R
     resfile <- tempfile()
@@ -1030,4 +1056,145 @@ capture_output({
       })
     })
   }
+
+  ## filter_markers ----
+  geno <- gaston::read.vcf("../../data/geno/testMarkerData01.vcf.gz")
+
+  test_that("filter_markers filters by minimum MAF", {
+    maf_min <- 0.1
+    skip_if(
+      all(geno@snps$maf >= maf_min),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, maf_min = maf_min)
+    expect_true(all(result@snps$maf >= maf_min))
+  })
+
+  test_that("filter_markers filters by maximum MAF", {
+    maf_max <- 0.4
+    skip_if(
+      all(geno@snps$maf <= maf_max),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, maf_max = maf_max)
+    expect_true(all(result@snps$maf <= maf_max))
+  })
+
+  test_that("filter_markers filters by different MAF", {
+    maf_neq <- 0.5
+    skip_if(
+      all(geno@snps$maf != maf_neq),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, maf_neq = maf_neq)
+    expect_true(all(result@snps$maf != maf_neq))
+
+    maf_neq <- c(0.5, 0.125)
+    skip_if(
+      all(geno@snps$maf != maf_neq[1]) | all(geno@snps$maf != maf_neq[2]),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, maf_neq = maf_neq)
+    expect_true(all(result@snps$maf != maf_neq[1]))
+    expect_true(all(result@snps$maf != maf_neq[2]))
+  })
+
+  test_that("filter_markers filters by minimum callrate", {
+    callrate_min <- 0.993
+    skip_if(
+      all(geno@snps$callrate >= callrate_min),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, callrate_min = callrate_min)
+    expect_true(all(result@snps$callrate >= callrate_min))
+  })
+
+  test_that("filter_markers filters by maximum callrate", {
+    callrate_max <- 0.999
+    skip_if(
+      all(geno@snps$callrate <= callrate_max),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, callrate_max = callrate_max)
+    expect_true(all(result@snps$callrate <= callrate_max))
+  })
+
+  test_that("filter_markers filters by different callrate", {
+    callrate_neq <- 1
+    skip_if(
+      all(geno@snps$callrate != callrate_neq),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, callrate_neq = callrate_neq)
+    expect_true(all(result@snps$callrate != callrate_neq))
+
+    callrate_neq <- c(1, geno@snps$callrate[1])
+    skip_if(
+      all(geno@snps$callrate != callrate_neq[1]) | all(geno@snps$callrate != callrate_neq[2]),
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno, callrate_neq = callrate_neq)
+    expect_true(all(result@snps$callrate != callrate_neq[1]))
+    expect_true(all(result@snps$callrate != callrate_neq[2]))
+  })
+
+  test_that("filter_markers filters by n_markers", {
+    n_markers <- 15000
+    n_markers_tolerance <- 0.05
+    skip_if(
+      nrow(geno@snps) <= n_markers,
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
+    )
+    expect_true(nrow(result@snps) >= n_markers * (1 - n_markers_tolerance))
+    expect_true(nrow(result@snps) <= n_markers * (1 + n_markers_tolerance))
+  })
+
+  test_that("filter_markers filters by n_markers with n_markers total number of markers", {
+    n_markers <- 1000000
+    n_markers_tolerance <- 0.05
+    result <- filter_markers(geno,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
+    )
+    expect_equal(result, geno)
+  })
+
+  test_that("filter_markers filters by n_markers with n_markers ~= number of markers", {
+    n_markers_tolerance <- 0.05
+    n_markers <- round(nrow(geno@snps) * (1 - n_markers_tolerance / 2))
+    skip_if(
+      nrow(geno@snps) <= n_markers,
+      "Geno data already met the filtering conditions"
+    )
+    result <- filter_markers(geno,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
+    )
+    expect_true(nrow(result@snps) >= n_markers * (1 - n_markers_tolerance))
+    expect_true(nrow(result@snps) <= n_markers * (1 + n_markers_tolerance))
+  })
+
+  test_that("filter_markers returns original data when no filters applied", {
+    result <- filter_markers(geno)
+    expect_equal(result, geno)
+  })
+
+  test_that("filter_markers returns original data when filters have no effects", {
+    maf_min <- -1
+    callrate_min <- -1
+    result <- filter_markers(geno, maf_min = maf_min, callrate_min = callrate_min)
+    expect_equal(result, geno)
+  })
+
+  test_that("filter_markers throws error when no marker remains", {
+    maf_min <- 0.51
+    callrate_min <- 1.01
+    expect_engineError(
+      filter_markers(geno, maf_min = maf_min, callrate_min = callrate_min)
+    )
+  })
 })

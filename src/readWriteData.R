@@ -10,7 +10,15 @@
 #' @param url url of the geno data file (.vcf.gz file)
 #'
 #' @return `gaston::bed.matrix`
-downloadGenoData <- function(url) {
+downloadGenoData <- function(url,
+                             maf_min = NULL,
+                             maf_max = NULL,
+                             maf_neq = NULL,
+                             callrate_min = NULL,
+                             callrate_max = NULL,
+                             callrate_neq = NULL,
+                             n_markers = NULL,
+                             n_markers_tolerance = 0.05) {
   logger <- Logger$new("r-downloadGenoData()")
   logger$log("Create local temp file ... ")
   localFile <- tempfile(
@@ -25,7 +33,17 @@ downloadGenoData <- function(url) {
   download.file(url, localFile, quiet = TRUE)
   logger$log("Download genotypic file DONE")
   logger$log("Read genotypic file ...")
-  dta <- readGenoData(localFile)
+  dta <- readGenoData(
+    localFile,
+    maf_min = maf_min,
+    maf_max = maf_max,
+    maf_neq = maf_neq,
+    callrate_min = callrate_min,
+    callrate_max = callrate_max,
+    callrate_neq = callrate_neq,
+    n_markers = n_markers,
+    n_markers_tolerance = n_markers_tolerance
+  )
   logger$log("Read genotypic file DONE")
 
   logger$log("DONE, return output.")
@@ -97,14 +115,34 @@ downloadPhenoData <- function(url, traits = NULL, ...) {
 #' @param phenoUrl url of the phenotypic data file (csv file)
 #'
 #' @return List
-downloadData <- function(genoUrl, phenoUrl) {
+downloadData <- function(genoUrl,
+                         phenoUrl,
+                         trait = NULL,
+                         maf_min = NULL,
+                         maf_max = NULL,
+                         maf_neq = NULL,
+                         callrate_min = NULL,
+                         callrate_max = NULL,
+                         callrate_neq = NULL,
+                         n_markers = NULL,
+                         n_markers_tolerance = 0.05) {
   logger <- Logger$new("r-downloadData()")
   logger$log("get geno data ...")
-  mDta <- downloadGenoData(genoUrl)
+  mDta <- downloadGenoData(
+    genoUrl,
+    maf_min = maf_min,
+    maf_max = maf_max,
+    maf_neq = maf_neq,
+    callrate_min = callrate_min,
+    callrate_max = callrate_max,
+    callrate_neq = callrate_neq,
+    n_markers = n_markers,
+    n_markers_tolerance = n_markers_tolerance
+  )
   logger$log("get geno data DONE")
 
   logger$log("get pheno data ...")
-  pDta <- downloadPhenoData(phenoUrl)
+  pDta <- downloadPhenoData(phenoUrl, traits = trait)
   logger$log("get pheno data DONE")
 
   logger$log("prepare data ...")
@@ -333,12 +371,113 @@ impute_snp_ids <- function(geno, list_to_impute) {
   return(geno@snps$id)
 }
 
+
+#' Wrapper around gaston::LD.thin
+#'
+#' @param geno bed matrix
+#' @param r2_thresh The maximum LD (measured by r2) between SNPs
+#'
+#' @returns filtered bed matrix
+filter_snp_r2 <- function(geno, r2_thresh) {
+  max.dist <- max(geno@snps$pos) - min(geno@snps$pos)
+  geno <- gaston::LD.thin(geno, r2_thresh,
+    max.dist = max.dist,
+    dist.unit = "bases",
+    extract = TRUE,
+    keep = "left"
+  )
+  return(geno)
+}
+
+
+#' Filter bed matrix to keep specified amount of markers
+#'
+#' @param geno bed matrix
+#' @param n_markers amount of marker to keep
+#' @param n_markers_tolerance tolerance regarding the amount of markers default 0.05 -> +/- 5%
+#'
+#' @returns filtered bed matrix
+filter_snp_n_markers <- function(geno, n_markers = NULL, n_markers_tolerance = 0.05) {
+  if (is.null(n_markers)) {
+    return(geno)
+  }
+
+  if (nrow(geno@snps) <= n_markers) {
+    return(geno)
+  }
+
+  n_markers_min <- n_markers * (1 - n_markers_tolerance)
+  n_markers_max <- n_markers * (1 + n_markers_tolerance)
+
+  if (n_markers_min <= nrow(geno@snps) & n_markers_max >= nrow(geno@snps)) {
+    return(geno)
+  }
+
+  # NOTE: from `./data/geno/testMarkerData01.vcf.gz` this starting point under estimate
+  # the number of markers. Relation between r2 and the number of marker looked
+  # kind of "exponential" (ie. a lot of markers are removed for r2 ~= 1 to r2~=0.9
+  # but few markers are remove for r2~=0.2 to r2~=0.1)
+  r2 <- n_markers / nrow(geno@snps)
+
+  r2_min <- 0
+  r2_max <- 1
+
+  # NOTE: To avoid too many iterations in case where filtering with r2 ~= 1/0 doesn't
+  # meet the requested number of markers. We will limit r2 to some "practical"
+  # values.
+  # I don't think this would often happens but saw it with simulated genotype
+  # data: `./data/geno/breedGame_geno.vcf.gz`
+  r2_practical_min <- 0.001
+  r2_practical_max <- 0.999
+  r2 <- min(max(r2, r2_practical_min), r2_practical_max)
+
+  while (r2 < r2_practical_max & r2 > r2_practical_min) {
+    geno_filtered <- filter_snp_r2(geno, r2)
+    n_marker_geno_filtered <- nrow(geno_filtered@snps)
+
+    if (n_marker_geno_filtered > n_markers_max) {
+      r2_max <- r2
+      geno <- geno_filtered # make future filtering faster as fewer LDs will be computed
+    } else if (n_marker_geno_filtered < n_markers_min) {
+      r2_min <- r2
+    } else {
+      return(geno_filtered)
+    }
+    r2 <- (r2_min + r2_max) / 2
+  }
+
+  if (nrow(geno_filtered@snps) < n_markers) {
+    return(geno_filtered)
+  }
+
+  engineError("Marker filtering process failed to return the requested number of markers.",
+    extra = list(
+      code = errorCode("SNP_FILTERING_FAILED"),
+      last_r2 = r2,
+      last_n_markers = nrow(geno_filtered@snps)
+    )
+  )
+}
+
+
+
+
+
 #' Read geno data from a file
 #'
 #' @param file VCF file path (ext `.vcf` or `.vcf.gz`)
+#' @param  n_markers number of marker to keep in the genotype data
 #'
 #' @return `gaston::bed.matrix`
-readGenoData <- function(file) {
+readGenoData <- function(file,
+                         maf_min = NULL,
+                         maf_max = NULL,
+                         maf_neq = NULL,
+                         callrate_min = NULL,
+                         callrate_max = NULL,
+                         callrate_neq = NULL,
+                         n_markers = NULL,
+                         n_markers_tolerance = 0.05) {
   logger <- Logger$new("r-readGenoData()")
   logger$log("Check file extention ... ")
 
@@ -386,10 +525,118 @@ readGenoData <- function(file) {
     ))
   }
 
+  # Filter SNPs
+  dta <- filter_markers(
+    dta,
+    maf_min = maf_min,
+    maf_max = maf_max,
+    maf_neq = maf_neq,
+    callrate_min = callrate_min,
+    callrate_max = callrate_max,
+    callrate_neq = callrate_neq,
+    n_markers = n_markers,
+    n_markers_tolerance = n_markers_tolerance
+  )
+
   logger$log("Read geno file DONE ")
   logger$log("DONE, return output.")
 
   dta
+}
+
+
+#' Filter genoytpes markers
+#'
+#' @param geno bed matrix
+#' @param maf_min minimum maf threshold (included)
+#' @param maf_max maximum maf threshold (included)
+#' @param maf_neq vector fo maf to exclude
+#' @param callrate_min minimum callrate threshold (included)
+#' @param callrate_max maximum callrate threshold (included)
+#' @param callrate_neq vector of callrate to exclude
+#' @param n_markers number of marker to keep
+#' @param n_markers_tolerance tolerance on the number of marker to keep
+#'
+#' @returns filtered bed matrix
+filter_markers <- function(
+    geno,
+    maf_min = NULL,
+    maf_max = NULL,
+    maf_neq = NULL,
+    callrate_min = NULL,
+    callrate_max = NULL,
+    callrate_neq = NULL,
+    n_markers = NULL,
+    n_markers_tolerance = 0.05) {
+  logger <- Logger$new("r-filter_markers()")
+  used_filters <- c()
+
+  logger$log("Filter on MAF...")
+  if (!is.null(maf_neq)) {
+    for (v in maf_neq) {
+      geno <- gaston::select.snps(geno, maf != v)
+      used_filters <- c(
+        used_filters,
+        paste0("minor allele frequency != ", maf_neq)
+      )
+    }
+  }
+  if (!is.null(maf_min)) {
+    geno <- gaston::select.snps(geno, maf >= maf_min)
+    used_filters <- c(
+      used_filters,
+      paste0("minor allele frequency >= ", maf_min)
+    )
+  }
+  if (!is.null(maf_max)) {
+    geno <- gaston::select.snps(geno, maf <= maf_max)
+    used_filters <- c(
+      used_filters,
+      paste0("minor allele frequency <= ", maf_max)
+    )
+  }
+
+  logger$log("Filter on callrate...")
+  if (!is.null(callrate_neq)) {
+    for (v in callrate_neq) {
+      geno <- gaston::select.snps(geno, callrate != v)
+      used_filters <- c(
+        used_filters,
+        paste0("callrate != ", callrate_neq)
+      )
+    }
+  }
+  if (!is.null(callrate_min)) {
+    geno <- gaston::select.snps(geno, callrate >= callrate_min)
+    used_filters <- c(
+      used_filters,
+      paste0("callrate >= ", callrate_min)
+    )
+  }
+  if (!is.null(callrate_max)) {
+    geno <- gaston::select.snps(geno, callrate <= callrate_max)
+    used_filters <- c(
+      used_filters,
+      paste0("callrate <= ", callrate_max)
+    )
+  }
+
+  if (nrow(geno@snps) == 0) {
+    msg <- paste0(
+      "No marker remaining after filtering with: ",
+      paste(used_filters, collapse = "; ")
+    )
+    engineError(msg, extra = list(
+      code = errorCode("GENOTYPE_NO_MARKERS_AFTER_FILTERING"),
+      filter = used_filters
+    ))
+  }
+
+  logger$log("Filter on number of markers...")
+  geno <- filter_snp_n_markers(geno, n_markers, n_markers_tolerance = n_markers_tolerance)
+
+  logger$log("Filter DONE")
+  return(geno)
 }
 
 
@@ -603,10 +850,31 @@ readPhenoData <- function(file, ind.names = 1, traits = NULL, ...) {
 #' @param ... Further arguments to be passed to `read.csv` for reading phenotype data
 #'
 #' @return List
-readData <- function(genoFile, phenoFile, traits = NULL, ...) {
+readData <- function(genoFile,
+                     phenoFile,
+                     traits = NULL,
+                     maf_min = NULL,
+                     maf_max = NULL,
+                     maf_neq = NULL,
+                     callrate_min = NULL,
+                     callrate_max = NULL,
+                     callrate_neq = NULL,
+                     n_markers = NULL,
+                     n_markers_tolerance = 0.05,
+                     ...) {
   logger <- Logger$new("r-readData()")
   logger$log("get geno data ...")
-  mDta <- readGenoData(genoFile)
+  mDta <- readGenoData(
+    genoFile,
+    maf_min = maf_min,
+    maf_max = maf_max,
+    maf_neq = maf_neq,
+    callrate_min = callrate_min,
+    callrate_max = callrate_max,
+    callrate_neq = callrate_neq,
+    n_markers = n_markers,
+    n_markers_tolerance = n_markers_tolerance
+  )
   logger$log("get geno data DONE")
 
   logger$log("get pheno data ...")

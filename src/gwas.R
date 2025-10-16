@@ -19,20 +19,14 @@
 #' @param response Character of length 1, Either "quantitative" or "binary". Is
 #'   the trait a quantitative or a binary phenotype? Default value is
 #'   "quantitative"
-#' @param thresh_maf Threshold for filtering markers. Only markers with minor
-#'   allele frequency > `thresh_maf` will be kept.
-#' @param thresh_callrate Threshold for filtering markers. Only markers with a
-#'   callrate > `thresh_callrate` will be kept.
 #'
-#' @details For the calculation, the genetic relationship matrix need to be calculated. This is done based on the genetic matrix standardized by the the genetic mean "mu" and the genetic variance "sigma", after having filtering according to the `thresh_maf` and `thresh_callrate`.
+#' @details For the calculation, the genetic relationship matrix need to be calculated. This is done based on the genetic matrix standardized by the the genetic mean "mu" and the genetic variance "sigma".
 #' @return `data.frame`
 gwas <- function(data,
                  trait,
                  test,
                  fixed = 0,
-                 response = "quantitative",
-                 thresh_maf,
-                 thresh_callrate) {
+                 response = "quantitative") {
   logger <- Logger$new("r-gwas()")
 
   ### Aggregate data in bed matrix ----
@@ -52,19 +46,6 @@ gwas <- function(data,
     empty <- TRUE
   }
   logger$log("remove samples with missing phenotypic values DONE")
-
-
-  ### FILTER SNPs ----
-  # keep marker with a large enough MAF (>0.05)
-  # and low missing rate (callrate>0.9)
-  logger$log("filter SNPs ...")
-  bm <- gaston::select.snps(bm, maf > thresh_maf)
-  bm <- gaston::select.snps(bm, callrate > thresh_callrate)
-  if (ncol(bm) == 0) {
-    warning("Filtering process removed all the SNPs.")
-    empty <- TRUE
-  }
-  logger$log("filter SNPs DONE")
 
   ### FAST RETURN ----
   if (empty) {
