@@ -380,12 +380,25 @@ impute_snp_ids <- function(geno, list_to_impute) {
 #' @returns filtered bed matrix
 filter_snp_r2 <- function(geno, r2_thresh) {
   max.dist <- max(geno@snps$pos) - min(geno@snps$pos)
-  geno <- gaston::LD.thin(geno, r2_thresh,
-    max.dist = max.dist,
-    dist.unit = "bases",
-    extract = TRUE,
-    keep = "left"
+
+  # this is based on `base::suppressWarnings`
+  withCallingHandlers(
+    {
+      geno <- gaston::LD.thin(geno, r2_thresh,
+        max.dist = max.dist,
+        dist.unit = "bases",
+        extract = TRUE,
+        keep = "left"
+      )
+    },
+    warning = function(warn) {
+      catchedWarn <- "NAs introduced by coercion"
+      if (identical(warn$message, catchedWarn)) {
+        tryInvokeRestart("muffleWarning")
+      }
+    }
   )
+
   return(geno)
 }
 
