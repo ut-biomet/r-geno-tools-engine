@@ -43,6 +43,19 @@ capture.output({
             outFile = tempfile(fileext = ".json")
           )
         })
+        expect_no_error({
+          model <- train_gs_model_main(
+            genoFile = tests_cases[[test]]$geno,
+            phenoFile = tests_cases[[test]]$pheno,
+            genoUrl = NULL,
+            phenoUrl = NULL,
+            trait = tests_cases[[test]]$trait,
+            with_dominance = with_dominance,
+            thresh_maf = 0,
+            n_markers = 2000,
+            outFile = tempfile(fileext = ".json")
+          )
+        })
         expect_equal(1, 1) # testthat v3.2.2 have a bug with `expect_no_error`
         # if it succeed the test is considered as "skipped".
       })
@@ -108,6 +121,21 @@ capture.output({
             n_folds = 10,
             n_repetitions = 5,
             thresh_maf = 0,
+            outFile = tempfile(fileext = ".json")
+          )
+        })
+        expect_no_error({
+          evaluation <- cross_validation_evaluation_main(
+            genoFile = tests_cases[[test]]$geno,
+            phenoFile = tests_cases[[test]]$pheno,
+            genoUrl = NULL,
+            phenoUrl = NULL,
+            trait = tests_cases[[test]]$trait,
+            with_dominance = with_dominance,
+            n_folds = 10,
+            n_repetitions = 5,
+            thresh_maf = 0,
+            n_markers = 2000,
             outFile = tempfile(fileext = ".json")
           )
         })

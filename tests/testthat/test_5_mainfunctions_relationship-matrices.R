@@ -46,6 +46,7 @@ capture.output({
           relMat_results <- calc_genoRelMat(
             genoFile = file,
             genoUrl = NULL,
+            n_markers = 2000,
             outFormat = format
           )
         })

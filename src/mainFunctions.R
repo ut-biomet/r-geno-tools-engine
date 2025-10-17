@@ -27,6 +27,9 @@
 #'   allele frequency > `thresh_maf` will be kept.
 #' @param thresh_callrate Threshold for filtering markers. Only markers with a
 #'   callrate > `thresh_callrate` will be kept.
+#' @param n_markers number of marker to keep from the genoytpe file
+#' @param n_markers_tolerance tolerance on the number of maker to keep
+#' (default: 0.05 -> +/- 5% of n_markers)
 #' @param outFile path of the output file. If `NULL`, the output will not be
 #' written in any file. By default write in an tempoary `.json` file.
 #'
@@ -41,6 +44,8 @@ run_gwas <- function(genoFile = NULL,
                      response = "quantitative",
                      thresh_maf,
                      thresh_callrate,
+                     n_markers = NULL,
+                     n_markers_tolerance = 0.05,
                      outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-run_gwas()")
 
@@ -64,13 +69,22 @@ run_gwas <- function(genoFile = NULL,
       maf_min = thresh_maf,
       maf_neq = thresh_maf,
       callrate_min = thresh_callrate,
-      callrate_neq = thresh_callrate
+      callrate_neq = thresh_callrate,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
     )
   } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
     is.null(genoFile) && is.null(phenoFile)) {
     data <- downloadData(
       genoUrl = genoUrl,
-      phenoUrl = phenoUrl
+      phenoUrl = phenoUrl,
+      traits = trait,
+      maf_min = thresh_maf,
+      maf_neq = thresh_maf,
+      callrate_min = thresh_callrate,
+      callrate_neq = thresh_callrate,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
     )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
@@ -494,6 +508,9 @@ calc_pedRelMat <- function(pedFile = NULL,
 #'
 #' @param genoFile path of the geno data file (`.vcf` or `.vcf.gz` file)
 #' @param genoUrl url of the geno data file (`.vcf` or `.vcf.gz` file)
+#' @param n_markers number of marker to keep from the genoytpe file
+#' @param n_markers_tolerance tolerance on the number of maker to keep
+#' (default: 0.05 -> +/- 5% of n_markers)
 #' @param outFile path of the output file. If `NULL`, the output will not be
 #' written in any file. By default write in an tempoary `.json` file.
 #' @param outFormat Format of the output file, either `csv` or `json`.
@@ -509,6 +526,8 @@ calc_pedRelMat <- function(pedFile = NULL,
 #' of the file containing the results.
 calc_genoRelMat <- function(genoFile = NULL,
                             genoUrl = NULL,
+                            n_markers = NULL,
+                            n_markers_tolerance = 0.05,
                             outFile = tempfile(fileext = ".csv"),
                             outFormat = tools::file_ext(outFile)) {
   logger <- Logger$new("r-calc_genoRelMAt()")
@@ -517,9 +536,15 @@ calc_genoRelMat <- function(genoFile = NULL,
 
   logger$log("Get data ...")
   if (!is.null(genoFile) && is.null(genoUrl)) {
-    geno <- readGenoData(genoFile)
+    geno <- readGenoData(genoFile,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
+    )
   } else if (!is.null(genoUrl) && is.null(genoFile)) {
-    geno <- downloadGenoData(genoUrl)
+    geno <- downloadGenoData(genoUrl,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
+    )
   } else {
     engineError("Either `genoFile` or `genoUrl` should be provided",
       extra = list(
@@ -1396,6 +1421,9 @@ draw_progBlupsPlot_2traits <- function(progEstimFile = NULL,
 #' @param with_dominance should the model include dominance effects
 #' @param thresh_maf threshold to keep only markers with minor allele frequency
 #' greater than `thresh_maf`.
+#' @param n_markers number of marker to keep from the genoytpe file
+#' @param n_markers_tolerance tolerance on the number of maker to keep
+#' (default: 0.05 -> +/- 5% of n_markers)
 #' @param outFile paht of the `.json` file where to save the model's estimated
 #' markers effects.
 train_gs_model_main <- function(genoFile = NULL,
@@ -1405,6 +1433,8 @@ train_gs_model_main <- function(genoFile = NULL,
                                 trait,
                                 with_dominance,
                                 thresh_maf,
+                                n_markers = NULL,
+                                n_markers_tolerance = 0.05,
                                 outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-train_gs_model_main()")
 
@@ -1421,13 +1451,22 @@ train_gs_model_main <- function(genoFile = NULL,
       maf_min = thresh_maf,
       maf_neq = c(thresh_maf, 0), # no monomorphic markers
       callrate_min = 1,
-      callrate_max = 1
+      callrate_max = 1,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
     )
   } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
     is.null(genoFile) && is.null(phenoFile)) {
     data <- downloadData(
       genoUrl = genoUrl,
-      phenoUrl = phenoUrl
+      phenoUrl = phenoUrl,
+      traits = trait,
+      maf_min = thresh_maf,
+      maf_neq = c(thresh_maf, 0), # no monomorphic markers
+      callrate_min = 1,
+      callrate_max = 1,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
     )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",
@@ -1592,6 +1631,9 @@ predict_gs_model_main <- function(genoFile = NULL,
 #' @param with_dominance should the model include dominance effects
 #' @param thresh_maf threshold to keep only markers with minor allele frequency
 #' greater than `thresh_maf`.
+#' @param n_markers number of marker to keep from the genoytpe file
+#' @param n_markers_tolerance tolerance on the number of maker to keep
+#' (default: 0.05 -> +/- 5% of n_markers)
 #' @param outFile paht of the `.json` file where to save the evaluation results
 cross_validation_evaluation_main <- function(genoFile = NULL,
                                              phenoFile = NULL,
@@ -1602,6 +1644,8 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
                                              n_repetitions = 5,
                                              with_dominance,
                                              thresh_maf,
+                                             n_markers = NULL,
+                                             n_markers_tolerance = 0.05,
                                              outFile = tempfile(fileext = ".json")) {
   logger <- Logger$new("r-cross_validation_evaluation_main()")
   check_thresh_maf(thresh_maf)
@@ -1617,7 +1661,9 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
       maf_min = thresh_maf,
       maf_neq = thresh_maf,
       callrate_min = 1,
-      callrate_max = 1
+      callrate_max = 1,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
     )
   } else if (!is.null(genoUrl) && !is.null(phenoUrl) &&
     is.null(genoFile) && is.null(phenoFile)) {
@@ -1627,7 +1673,9 @@ cross_validation_evaluation_main <- function(genoFile = NULL,
       maf_min = thresh_maf,
       maf_neq = thresh_maf,
       callrate_min = 1,
-      callrate_max = 1
+      callrate_max = 1,
+      n_markers = n_markers,
+      n_markers_tolerance = n_markers_tolerance
     )
   } else {
     engineError("Either `genoFile` and `phenoFile` or `genoUrl` and `phenoUrl` should be provided",

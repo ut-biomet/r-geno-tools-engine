@@ -36,6 +36,7 @@ capture.output({
           response = "quantitative",
           thresh_maf = 0.05,
           thresh_callrate = 0.95,
+          n_markers = 2000,
           outFile = tempfile(fileext = ".json")
         )
       })
