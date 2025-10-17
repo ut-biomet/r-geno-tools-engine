@@ -154,6 +154,16 @@ withCallingHandlers(
       type = arg$thresh_callrate$type,
       default = arg$thresh_callrate$default
     )
+    gwas_parser$add_argument(arg$n_markers$flag,
+      help = arg$n_markers$help,
+      type = arg$n_markers$type,
+      default = arg$n_markers$default
+    )
+    gwas_parser$add_argument(arg$n_markers_tolerance$flag,
+      help = arg$n_markers_tolerance$help,
+      type = arg$n_markers_tolerance$type,
+      default = arg$n_markers_tolerance$default
+    )
     gwas_parser$add_argument(arg$json_error$flag,
       help = arg$json_error$help,
       default = arg$json_error$default,
@@ -340,6 +350,16 @@ withCallingHandlers(
       help = arg$genoFile$help,
       type = arg$genoFile$type,
       required = TRUE
+    )
+    genoRelMat_parser$add_argument(arg$n_markers$flag,
+      help = arg$n_markers$help,
+      type = arg$n_markers$type,
+      default = arg$n_markers$default
+    )
+    genoRelMat_parser$add_argument(arg$n_markers_tolerance$flag,
+      help = arg$n_markers_tolerance$help,
+      type = arg$n_markers_tolerance$type,
+      default = arg$n_markers_tolerance$default
     )
     genoRelMat_parser$add_argument(arg$outFile$flag,
       help = arg$outFile$help,
@@ -707,6 +727,16 @@ withCallingHandlers(
       type = arg$n_repetitions$type,
       default = arg$n_repetitions$default
     )
+    gs_model_evaluation_parser$add_argument(arg$n_markers$flag,
+      help = arg$n_markers$help,
+      type = arg$n_markers$type,
+      default = arg$n_markers$default
+    )
+    gs_model_evaluation_parser$add_argument(arg$n_markers_tolerance$flag,
+      help = arg$n_markers_tolerance$help,
+      type = arg$n_markers_tolerance$type,
+      default = arg$n_markers_tolerance$default
+    )
     gs_model_evaluation_parser$add_argument(arg$outFile$flag,
       help = arg$outFile$help,
       type = arg$outFile$type,
@@ -779,6 +809,16 @@ withCallingHandlers(
       help = arg$with_dominance$help,
       type = arg$with_dominance$type,
       required = TRUE
+    )
+    train_gs_model_parser$add_argument(arg$n_markers$flag,
+      help = arg$n_markers$help,
+      type = arg$n_markers$type,
+      default = arg$n_markers$default
+    )
+    train_gs_model_parser$add_argument(arg$n_markers_tolerance$flag,
+      help = arg$n_markers_tolerance$help,
+      type = arg$n_markers_tolerance$type,
+      default = arg$n_markers_tolerance$default
     )
     train_gs_model_parser$add_argument(arg$outFile$flag,
       help = arg$outFile$help,
@@ -992,6 +1032,8 @@ withCallingHandlers(
         response = args$response,
         thresh_maf = args$thresh_maf,
         thresh_callrate = args$thresh_callrate,
+        n_markers = args$n_markers,
+        n_markers_tolerance = args$n_markers_tolerance,
         outFile = args$outFile
       )
       quit(save = "no", status = 0)
@@ -1046,6 +1088,8 @@ withCallingHandlers(
       # relmat-geno ----
       relMat <- calc_genoRelMat(
         genoFile = args$genoFile,
+        n_markers = args$n_markers,
+        n_markers_tolerance = args$n_markers_tolerance,
         outFile = args$outFile
       )
       quit(save = "no", status = 0)
@@ -1138,6 +1182,8 @@ withCallingHandlers(
         n_folds = args$n_folds,
         n_repetitions = args$n_repetitions,
         thresh_maf = 0,
+        n_markers = args$n_markers,
+        n_markers_tolerance = args$n_markers_tolerance,
         outFile = args$outFile
       )
       quit(save = "no", status = 0)
@@ -1156,6 +1202,8 @@ withCallingHandlers(
         trait = args$trait,
         with_dominance = args$with_dominance,
         thresh_maf = 0,
+        n_markers = args$n_markers,
+        n_markers_tolerance = args$n_markers_tolerance,
         outFile = args$outFile
       )
       quit(save = "no", status = 0)

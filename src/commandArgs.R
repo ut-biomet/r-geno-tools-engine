@@ -507,3 +507,24 @@ arg$trait_name$flag <- "--trait-name"
 arg$trait_name$default <- "phenotype"
 arg$trait_name$help <- paste0("Name of the trait (default: ", arg$trait_name$default, ")")
 arg$trait_name$type <- "character"
+
+
+# n_markers ----
+arg$n_markers$flag <- "--n-markers"
+arg$n_markers$default <- NULL
+arg$n_markers$help <- paste0(
+  "Number of genetic markers to keep from the genotype file for the analysis. ",
+  "By default all the markers will be kept."
+)
+arg$n_markers$type <- "integer"
+
+# n_markers_tolerance ----
+arg$n_markers_tolerance$flag <- "--n-markers-tolerance"
+arg$n_markers_tolerance$default <- 0.05
+arg$n_markers_tolerance$help <- paste0(
+  "Tolerance on the number of makers to keep ",
+  "(default: ",
+  arg$n_markers_tolerance$default, " -> +/- ", arg$n_markers_tolerance$default * 100,
+  " percent of --n-markers)"
+)
+arg$n_markers_tolerance$type <- "double"
