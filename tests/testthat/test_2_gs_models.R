@@ -232,9 +232,9 @@ capture_output({
         expect_true(is.data.frame(evaluation$metrics))
         expect_equal(
           nrow(evaluation$metrics),
-          as.numeric(test_case["n_folds"] * test_case["n_repetitions"])
+          as.numeric(test_case["n_repetitions"])
         )
-        expect_true(all(c("fold", "repetition") %in% colnames(evaluation$metrics)))
+        expect_true(all(c("repetition") %in% colnames(evaluation$metrics)))
         expect_false(any(is.na(evaluation$metrics)))
       })
     })

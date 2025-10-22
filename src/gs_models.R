@@ -263,10 +263,9 @@ cross_validation_evaluation <- function(pheno,
   stopifnot(n_folds != 1)
 
   pheno <- pheno[geno@ped$id, 1, drop = FALSE]
-
   folds <- caret::createMultiFolds(pheno[, 1], k = n_folds, times = n_repetitions)
 
-  eval_results <- lapply(names(folds), function(fold_id) {
+  predictions <- lapply(names(folds), function(fold_id) {
     train_ids <- folds[[fold_id]]
 
     pheno_train <- pheno[train_ids, 1, drop = FALSE]
@@ -279,27 +278,24 @@ cross_validation_evaluation <- function(pheno,
     pheno_pred <- predict_gs_model(geno_test, estim_mark_eff)
 
     metrics <- get_model_metrics(pheno_test[[1]], pheno_pred[[1]])
-    list(
-      data = data.frame(
+
+    data.frame(
         ind = row.names(pheno_test),
         actual = pheno_test[[1]],
         predicted = pheno_pred[[1]],
         fold = fold_id
-      ),
-      metrics = metrics
-    )
+      )
   })
 
-  predictions <- do.call(rbind, lapply(eval_results, function(fold) {
-    fold$data
-  }))
+  predictions <- do.call(rbind, predictions)
   predictions$repetition <- sub(".*\\.", "", predictions$fold)
 
-  metrics <- do.call(rbind, lapply(eval_results, function(fold) {
-    dta <- as.data.frame(fold$metrics)
-    dta$fold <- unique(fold$data$fold)
-    dta$repetition <- sub(".*\\.", "", dta$fold)
-    dta
+  metrics <- do.call(rbind, lapply(unique(predictions$repetition), function(rep) {
+    actual <- predictions$actual[predictions$repetition == rep]
+    predicted <- predictions$predicted[predictions$repetition == rep]
+    metrics <- as.data.frame(get_model_metrics(actual, predicted))
+    metrics$repetition <- rep
+    metrics
   }))
 
   list(
