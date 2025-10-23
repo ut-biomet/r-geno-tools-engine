@@ -138,6 +138,12 @@ train_gs_model <- function(pheno, geno, with_dominance = FALSE) {
   stopifnot(all(!is.na(pheno[, 1])))
   stopifnot(all(geno@snps$callrate == 1))
 
+  # monomorphic markers are removed from the main genotype file,
+  # however during cross-validation, because of random sampling,
+  # some markers may appear monomorphic within a given training fold.
+  # So we should filter again.
+  geno <- gaston::select.snps(geno, maf != 0)
+
   relationship_matrices <- list()
 
   additive_std <- calc_additive_rel_mat(geno, standardized = TRUE)
